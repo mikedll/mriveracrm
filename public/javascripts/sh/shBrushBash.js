@@ -30,7 +30,7 @@
 SyntaxHighlighter.brushes.Bash = function()
 {
 	var keywords =	'if fi then elif else for do done until while break continue case function return in eq ne gt lt ge le';
-	var commands = '' // Highlighting commands does more harm than good right now. The highlighter isn't smart
+	var commands = ''; // Highlighting commands does more harm than good right now. The highlighter isn't smart
 		      // enough.
 // 	var commands =  'alias apropos awk bash bc bg builtin bzip2 cal cat cd cfdisk chgrp chmod chown chroot' +
 // 					'cksum clear cmp comm command cp cron crontab csplit cut date dc dd ddrescue declare df ' +
