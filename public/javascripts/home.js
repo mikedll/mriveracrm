@@ -22,17 +22,10 @@ function results_callback(results) {
 }
 
 function initialize() {
-    var feeds = [ new google.feeds.Feed("http://mikedllprobs.blogspot.com/feeds/posts/default")
-// 		  , new google.feeds.Feed("http://awaywithmike.blogspot.com/feeds/posts/default")
-// 		  , new google.feeds.Feed("http://mikedllbio.blogspot.com/feeds/posts/default")
-// 		  , new google.feeds.Feed("http://mikedllcare.blogspot.com/feeds/posts/default")
-// 		  , new google.feeds.Feed("http://mikedll.blogspot.com/feeds/posts/default")
-		  ];
+    var feed = new google.feeds.Feed("http://blog.mikedll.com/feeds/posts/default");
 
-    for( var i = 0, feed; feed = feeds[i]; i++ ) {
-	feed.setNumEntries( 2 );
-	feed.load( results_callback );
-    }
+    feed.setNumEntries( 4 );
+    feed.load( results_callback );
 }
 
 google.setOnLoadCallback(initialize);
