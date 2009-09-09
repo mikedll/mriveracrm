@@ -13,36 +13,37 @@
 type="color" default="#262626">
 <Variable name="textcolor" description="Text Color"
 type="color" default="#000000">
-<Variable name="linkcolor" description="Link Color"
-type="color" default="#58a">
 <Variable name="pagetitlecolor" description="Blog Title Color"
-type="color" default="#666">
+type="color" default="#000000">
 <Variable name="descriptioncolor" description="Blog Description Color"
-type="color" default="#999">
+type="color" default="#000000">
 <Variable name="titlecolor" description="Post Title Color"
-type="color" default="#c60">
+type="color" default="#000000">
 <Variable name="bordercolor" description="Border Color"
-type="color" default="#ccc">
+type="color" default="#000000">
 <Variable name="sidebarcolor" description="Sidebar Title Color"
-type="color" default="#999">
+type="color" default="#000000">
 <Variable name="sidebartextcolor" description="Sidebar Text Color"
-type="color" default="#666">
+type="color" default="#000000">
+<Variable name="linkcolor" description="Link Color"
+type="color" default="#0000ff">
 <Variable name="visitedlinkcolor" description="Visited Link Color"
-type="color" default="#999">
+type="color" default="#551a8b">
+
 <Variable name="bodyfont" description="Text Font"
-type="font" default="normal normal 100% Georgia, Serif">
+type="font" default="normal normal 100% Arial, Helvetica, sans-serif">
 <Variable name="headerfont" description="Sidebar Title Font"
 type="font"
-default="normal normal 78% 'Trebuchet MS',Trebuchet,Arial,Verdana,Sans-serif">
+default="normal normal 78% Arial, Helvetica, sans-serif">
 <Variable name="pagetitlefont" description="Blog Title Font"
 type="font"
-default="normal normal 200% Georgia, Serif">
+default="normal normal 200% Arial, Helvetica, sans-serif">
 <Variable name="descriptionfont" description="Blog Description Font"
 type="font"
-default="normal normal 78% 'Trebuchet MS', Trebuchet, Arial, Verdana, Sans-serif">
+default="normal normal 78% Arial, Helvetica, sans-serif">
 <Variable name="postfooterfont" description="Post Footer Font"
 type="font"
-default="normal normal 78% 'Trebuchet MS', Trebuchet, Arial, Verdana, Sans-serif">
+default="normal normal 78% Arial, Helvetica, sans-serif">
 <Variable name="startSide" description="Start side in blog language"
 type="automatic" default="left">
 <Variable name="endSide" description="End side in blog language"
@@ -52,184 +53,121 @@ type="automatic" default="right">
 body {
   margin:0px; 
   padding:0px;
-
   font-family: Arial, Helvetica, sans-serif;
   font-size: 10pt;
-  background: #262626;
   color: #000000;
+  background: #262626;
 }
 
-body div#outer-wrapper {
+a img {
+  border-width:0;
+}
+
+/* Header
+-----------------------------------------------
+*/
+
+#navbar-iframe {
+  display: none !important;
+}
+
+
+#header-wrapper {
+  margin: 0;
+  padding: 0;
+}
+
+#header h1 {
+  margin:5px 5px 0;
+  padding:15px 20px .25em;
+
+  font: italics normal 12pt ;
+  font-family: Arial,Helvetica,sans-serif;
+  text-align: center;
+}
+
+#header a {
+  color:#000;
+  text-decoration:none;
+}
+
+#header a:hover {
+  color:#000;
+}
+
+/* Outer-Wrapper
+----------------------------------------------- */
+
+#main-wrapper {
   position:absolute;
   left:50%;
-  width:600px;
+  width:710px;
   margin-top: 10px;
-  margin-left: -315px;
+  margin-left: -355px;
   background: #fffff2;
+  font-size: 10pt;
 
   padding:15px;
   z-index: 1;
 }
 
-* html body div#outer-wrapper {
-  width: 630px;
+* html body #main-wrapper {
+  width: 780px;
 }
 
-
-a:link {
-  color:#5588aa;
-  text-decoration:none;
-}
-
-a:visited {
-  color:#999999;
-  text-decoration:none;
-}
-
-a:hover {
-  color:#cc6600;
-  text-decoration:underline;
-}
-
-a img {
-border-width:0;
-}
-/* Header
------------------------------------------------
-*/
-#header-wrapper {
-margin:0 2% 10px;
-border:1px solid #cccccc;
-}
-#header {
-margin: 5px;
-border: 1px solid #cccccc;
-text-align: center;
-color:#666666;
-}
-#header-inner {
-background-position: center;
-margin-left: auto;
-margin-right: auto;
-}
-#header h1 {
-margin:5px 5px 0;
-padding:15px 20px .25em;
-line-height:1.2em;
-text-transform:uppercase;
-letter-spacing:.2em;
-font: normal normal 200% Georgia, Serif;
-}
-#header a {
-color:#666666;
-text-decoration:none;
-}
-#header a:hover {
-color:#666666;
-}
-#header .description {
-margin:0 5px 5px;
-padding:0 20px 15px;
-text-transform:uppercase;
-letter-spacing:.2em;
-line-height: 1.4em;
-font: normal normal 78% 'Trebuchet MS', Trebuchet, Arial, Verdana, Sans-serif;
-color: #999999;
-}
-#header img {
-margin-left: auto;
-margin-right: auto;
-}
-/* Outer-Wrapper
------------------------------------------------ */
-#outer-wrapper {
-margin:0;
-padding:10px;
-text-align:left;
-font: normal normal 100% Georgia, Serif;
-}
-#main-wrapper {
-margin-left: 2%;
-width: 67%;
-float: left;
-display: inline;       /* fix for doubling margin in IE */
-word-wrap: break-word; /* fix for long text breaking sidebar float in IE */
-overflow: hidden;      /* fix for long non-text content breaking IE sidebar float */
-}
-#sidebar-wrapper {
-margin-right: 2%;
-width: 25%;
-float: right;
-display: inline;       /* fix for doubling margin in IE */
-word-wrap: break-word; /* fix for long text breaking sidebar float in IE */
-overflow: hidden;      /* fix for long non-text content breaking IE sidebar float */
-}
 /* Headings
 ----------------------------------------------- */
-h2 {
-margin:1.5em 0 .75em;
-font:normal normal 78% 'Trebuchet MS',Trebuchet,Arial,Verdana,Sans-serif;
-line-height: 1.4em;
-text-transform:uppercase;
-letter-spacing:.2em;
-color:#999999;
-}
+
 /* Posts
 -----------------------------------------------
 */
+
 h2.date-header {
-margin:1.5em 0 .5em;
+  margin: 0 0 1em 0;
+  padding: 0;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8pt;
+  font-weight: normal;
 }
+
 .post {
-margin:.5em 0 1.5em;
-border-bottom:1px dotted #cccccc;
-padding-bottom:1.5em;
+  font-family: Arial, Helvetica, sans-serif;
+  margin-bottom: 2em;
 }
-.post h3 {
-margin:.25em 0 0;
-padding:0 0 4px;
-font-size:140%;
-font-weight:normal;
-line-height:1.4em;
-color:#cc6600;
+
+.post h3.post-title {
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 20pt;
+  padding: 0;
+  margin: 0;
 }
+
 .post h3 a, .post h3 a:visited, .post h3 strong {
-display:block;
-text-decoration:none;
-color:#cc6600;
-font-weight:normal;
+  text-decoration: none;
+  font-family: Arial, Helvetica, sans-serif;
 }
-.post h3 strong, .post h3 a:hover {
-color:#333333;
+
+.post h3 a:hover {
+  font-family: Arial, Helvetica, sans-serif;
 }
-.post-body {
-margin:0 0 .75em;
-line-height:1.6em;
+
+.post h1 {
+  font-size: 18pt;
 }
-.post-body blockquote {
-line-height:1.3em;
+
+.post h2 {
+  font-size: 16pt;
 }
-.post-footer {
-margin: .75em 0;
-color:#999999;
-text-transform:uppercase;
-letter-spacing:.1em;
-font: normal normal 78% 'Trebuchet MS', Trebuchet, Arial, Verdana, Sans-serif;
-line-height: 1.4em;
+
+.post h3 {
+  font-size: 14pt;
 }
-.comment-link {
-margin-left:.6em;
+
+.post h4 {
+  font-size: 12pt;
 }
-.post img {
-padding:4px;
-border:1px solid #cccccc;
-}
-.post blockquote {
-margin:1em 20px;
-}
-.post blockquote p {
-margin:.75em 0;
-}
+
+
 /* Comments
 ----------------------------------------------- */
 #comments h4 {
@@ -278,64 +216,61 @@ text-align: center;
 }
 /* Sidebar Content
 ----------------------------------------------- */
+
+
+
+#sidebar-wrapper {
+  float: right;
+  clear: right;
+  width: 210px;
+  border: 0;
+}
+
 .sidebar {
-color: #666666;
-line-height: 1.5em;
+  font-family: Arial, Helvetica, sans-serif;
+  font-size: 8pt;
+
 }
-.sidebar ul {
-list-style:none;
-margin:0 0 0;
-padding:0 0 0;
+
+.sidebar ul li {
+  margin: .5em 0;
+  padding-top:0;
+  padding-right:0;
+  padding-bottom:.25em;
+  padding-left:15px;
+  text-indent:-15px;
 }
-.sidebar li {
-margin:0;
-padding-top:0;
-padding-right:0;
-padding-bottom:.25em;
-padding-left:15px;
-text-indent:-15px;
-line-height:1.5em;
+
+.sidebar .widget {
+  border: 1px solid #262626;
+  border-right: 0;
+  border-bottom: 0;
+  margin: 1em 0 1em 1em;
 }
-.sidebar .widget, .main .widget {
-border-bottom:1px dotted #cccccc;
-margin:0 0 1.5em;
-padding:0 0 1.5em;
+
+.sidebar .widget ul {
+  clear: both;
+  list-style:none;
 }
+
+.sidebar .widget h2 {
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  background: #262626;
+  color: #fffff2;
+  font-weight: bold;
+  padding: 2pt;
+}
+
 .main .Blog {
-border-bottom-width: 0;
+  border-bottom-width: 0;
 }
-/* Profile
------------------------------------------------ */
-.profile-img {
-float: left;
-margin-top: 0;
-margin-right: 5px;
-margin-bottom: 5px;
-margin-left: 0;
-padding: 4px;
-border: 1px solid #cccccc;
+
+pre {
+  font-size: 10pt;
 }
-.profile-data {
-margin:0;
-text-transform:uppercase;
-letter-spacing:.1em;
-font: normal normal 78% 'Trebuchet MS', Trebuchet, Arial, Verdana, Sans-serif;
-color: #999999;
-font-weight: bold;
-line-height: 1.6em;
-}
-.profile-datablock {
-margin:.5em 0 .5em;
-}
-.profile-textblock {
-margin: 0.5em 0;
-line-height: 1.6em;
-}
-.profile-link {
-font: normal normal 78% 'Trebuchet MS', Trebuchet, Arial, Verdana, Sans-serif;
-text-transform: uppercase;
-letter-spacing: .1em;
-}
+
 /* Footer
 ----------------------------------------------- */
 #footer {
@@ -348,32 +283,16 @@ text-transform:uppercase;
 letter-spacing:.1em;
 text-align: center;
 }
- 
--->
+
+
+
+
+
+
+
 
 ]]></b:skin>
   </head>
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
   <body>
