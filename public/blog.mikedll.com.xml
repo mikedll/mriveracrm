@@ -55,11 +55,10 @@ a img {
   color: #fffff2;
 }
 
-#header a {
-  text-decoration:none;
-}
-
-#header a:hover {
+#header a,
+#header a:hover,
+#header a:visited {
+  color: #fffff2;
 }
 
 /* Outer-Wrapper
@@ -193,7 +192,6 @@ text-align: center;
   width: 210px;
   margin: 0 0 0 1em;
   border: 0;
-  border-left: 1px dotted #262626;
 }
 
 .sidebar {
@@ -231,6 +229,19 @@ text-align: center;
   padding: 2pt;
   display: none;
 }
+
+.sidebar .widget a:active,
+.sidebar .widget a:link,
+.sidebar .widget a:visited {
+  color: #262626;
+  text-decoration: none;
+}
+
+.sidebar .widget a:hover {
+  color: #262626;
+  text-decoration: underline;
+}
+
 
 .main .Blog {
   border-bottom-width: 0;
@@ -1037,5 +1048,16 @@ text-align: center;
     </div>
 
   </div></div> <!-- end outer-wrapper -->
+
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-8301470-2");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
 </body>
 </html>
