@@ -1043,6 +1043,10 @@ text-align: center;
   SyntaxHighlighter.all();
 </script> 
 
+<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g"></script>
+<script type="text/javascript">google.load('jquery', '1')</script>
+<script type="text/javascript" src="http://www.mikedll.com/javascripts/math.js"></script>
+
     <div id='footer-wrapper'>
       <b:section class='footer' id='footer'/>
     </div>

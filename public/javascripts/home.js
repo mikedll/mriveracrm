@@ -20,7 +20,6 @@ function results_callback(results) {
 	}
     }
 }
-
 function initialize() {
     var feed = new google.feeds.Feed("http://blog.mikedll.com/feeds/posts/default");
 
