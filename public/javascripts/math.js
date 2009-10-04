@@ -18,7 +18,11 @@ function renderMath() {
 }
 
 function renderMathBrush() {
+    // New way to format code
     $('pre.math code').each( renderMath );
+
+    // Backwards compatible, pre-October 2009 posts
+    $('pre code.math').each( renderMath );
 }
 
 $( renderMathBrush );
