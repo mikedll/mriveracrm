@@ -32,7 +32,7 @@ a img {
 }
 
 #header {
-  width: 830px;
+  width: 880px;
   margin: 0 auto;
 }
 
@@ -61,7 +61,7 @@ a img {
 
 #content-wrapper {
   margin: 0 auto 0 auto;
-  width: 830px;
+  width: 880px;
   position: relative;
 }
 
@@ -70,7 +70,7 @@ a img {
   top: 0;
   left: 0;
 
-  width: 590px;
+  width: 640px;
 
   text-align: left;
   background: #fffff2;
@@ -79,7 +79,7 @@ a img {
 }
 
 * html #main-wrapper {
-  width: 620px;
+  width: 670px;
 }
 
 #sidebar-wrapper {
@@ -255,6 +255,16 @@ pre {
   letter-spacing:.1em;
   text-align: center;
 }
+
+pre.code {
+  padding: 1em;
+
+  background: #262626;
+
+  font-family: monospace;
+  color: #fffff2;
+}
+
 
 ]]></b:skin>
   </head>
@@ -1015,24 +1025,6 @@ pre {
       <div class='clear'>&#160;</div>
 
     </div> <!-- end content-wrapper -->
-
-<link href='http://www.mikedll.com/stylesheets/sh/shCore.css' rel='Stylesheet' type='text/css'/>
-<link href='http://www.mikedll.com/stylesheets/sh/shThemeDefault.css' rel='Stylesheet' type='text/css'/>
-
-<script src='http://www.mikedll.com/javascripts/sh/shCore.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushBash.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushPlain.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushJava.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushCpp.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushPython.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushPerl.js' type='text/javascript'/>
-	<script src='http://www.mikedll.com/javascripts/sh/shBrushRuby.js' type='text/javascript'/>
-
-<script language='javascript'>  
-  SyntaxHighlighter.config.bloggerMode=true;
-  SyntaxHighlighter.config.tagName = &#39;code&#39;;
-  SyntaxHighlighter.all();
-</script> 
 
 <script src='http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g' type='text/javascript'/>
 <script type='text/javascript'>google.load(&#39;jquery&#39;, &#39;1&#39;)</script>

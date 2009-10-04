@@ -18,7 +18,7 @@ function renderMath() {
 }
 
 function renderMathBrush() {
-    $('pre code.math').each( renderMath );
+    $('pre.math code').each( renderMath );
 }
 
 $( renderMathBrush );

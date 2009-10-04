@@ -25,7 +25,7 @@ a img {
 }
 
 #header {
-  width: 830px;
+  width: 880px;
   margin: 0 auto;
 }
 
@@ -54,7 +54,7 @@ a img {
 
 #content-wrapper {
   margin: 0 auto 0 auto;
-  width: 830px;
+  width: 880px;
   position: relative;
 }
 
@@ -63,7 +63,7 @@ a img {
   top: 0;
   left: 0;
 
-  width: 590px;
+  width: 640px;
 
   text-align: left;
   background: #fffff2;
@@ -72,7 +72,7 @@ a img {
 }
 
 * html #main-wrapper {
-  width: 620px;
+  width: 670px;
 }
 
 #sidebar-wrapper {
@@ -248,3 +248,13 @@ pre {
   letter-spacing:.1em;
   text-align: center;
 }
+
+pre.code {
+  padding: 1em;
+
+  background: #262626;
+
+  font-family: monospace;
+  color: #fffff2;
+}
+
