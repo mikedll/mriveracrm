@@ -4,10 +4,10 @@
   <head>
     <b:include data='blog' name='all-head-content'/>
     <title><data:blog.pageTitle/></title>
-    <b:skin><![CDATA[<!--
+    <b:skin><![CDATA[
 
 body {
-  margin:0px; 
+  margin:0px;
   padding:0px;
   font-family: Arial, Helvetica, sans-serif;
   font-size: 10pt;
@@ -27,190 +27,173 @@ a img {
   display: none !important;
 }
 
-
 #header-wrapper {
-  position:absolute;
-  left:50%;
-  width:710px;
-  margin: 5px 0 5px -355px;
+  text-align: center;
+}
+
+#header {
+  width: 830px;
+  margin: 0 auto;
 }
 
 #header h1 {
-  margin: 0;
-  padding: 0 0 0 90px;
-  vertical-align: bottom;
-  v-align: bottom;
-
-  min-height:100px;
-  height:auto !important;
-  height:100px;
-  z-index: 100;
-
-  background: url('http://www.mikedll.com/images/splash.jpg') top left no-repeat;
-
-  font-size: 10pt;
-  font-weight: normal;
-  font-style: italic;
+  font-size: 24pt;
+  font-weight: bold;
   font-family: Arial,Helvetica,sans-serif;
+  letter-spacing: 1px;
+
   color: #fffff2;
+  text-align: center;
 }
 
-#header a,
-#header a:hover,
-#header a:visited {
+#header a {
+  display: block;
   color: #fffff2;
+  text-decoration: none;
 }
 
-/* Outer-Wrapper
+/* Main division of display
 ----------------------------------------------- */
+
+#outer-wrapper {
+  text-align: center;
+}
+
+#content-wrapper {
+  margin: 0 auto 0 auto;
+  width: 830px;
+  position: relative;
+}
 
 #main-wrapper {
-  position:absolute;
-  left:50%;
-  width:710px;
-  margin-top: 110px;
-  margin-left: -355px;
+  position: absolute;
+  top: 0;
+  left: 0;
+
+  width: 590px;
+
+  text-align: left;
   background: #fffff2;
   font-size: 10pt;
-
   padding:15px;
-  z-index: 1;
 }
 
-* html body #main-wrapper {
-  width: 780px;
+* html #main-wrapper {
+  width: 620px;
 }
 
-/* Headings
------------------------------------------------ */
+#sidebar-wrapper {
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 210px;  
+}
 
-/* Posts
------------------------------------------------
-*/
 
+/**
+   Posts
+ */
 h2.date-header {
   margin: 0 0 1em 0;
   padding: 0;
-  font-family: Arial, Helvetica, sans-serif;
   font-size: 8pt;
   font-weight: normal;
 }
 
 .post {
-  font-family: Arial, Helvetica, sans-serif;
   margin-bottom: 2em;
 }
 
-.post h3.post-title {
-  font-family: Arial, Helvetica, sans-serif;
-  font-size: 20pt;
+h3.post-title {
+  font-size: 18pt;
+  font-weight: bold;
   padding: 0;
   margin: 0;
 }
 
-.post h3 a, .post h3 a:visited, .post h3 strong {
+.post h3 a {
   color: #000000;
   text-decoration: none;
-  font-family: Arial, Helvetica, sans-serif;
-}
-
-.post h3 a:hover {
-  font-family: Arial, Helvetica, sans-serif;
 }
 
 .post h1 {
-  font-size: 18pt;
+  font-size: 14pt;
+  padding-bottom: 0;
+  margin-top: 1.5em;
 }
 
 .post h2 {
-  font-size: 16pt;
-}
-
-.post h3 {
-  font-size: 14pt;
-}
-
-.post h4 {
   font-size: 12pt;
 }
-
 
 /* Comments
 ----------------------------------------------- */
 #comments h4 {
-margin:1em 0;
-font-weight: bold;
-line-height: 1.4em;
-text-transform:uppercase;
-letter-spacing:.2em;
-color: #999999;
+  margin:1em 0;
+  font-weight: bold;
+  line-height: 1.4em;
+  text-transform:uppercase;
+  letter-spacing:.2em;
+  color: #999999;
 }
+
 #comments-block {
-margin:1em 0 1.5em;
-line-height:1.6em;
+  margin:1em 0 1.5em;
+  line-height:1.6em;
 }
+
 #comments-block .comment-author {
-margin:.5em 0;
+  margin:.5em 0;
 }
+
 #comments-block .comment-body {
-margin:.25em 0 0;
+  margin:.25em 0 0;
 }
+
 #comments-block .comment-footer {
-margin:-.25em 0 2em;
-line-height: 1.4em;
-text-transform:uppercase;
-letter-spacing:.1em;
+  margin:-.25em 0 2em;
+  line-height: 1.4em;
+  text-transform:uppercase;
+  letter-spacing:.1em;
 }
+
 #comments-block .comment-body p {
-margin:0 0 .75em;
+  margin:0 0 .75em;
 }
+
 .deleted-comment {
-font-style:italic;
-color:gray;
+  font-style:italic;
+  color:gray;
 }
+
 .feed-links {
-clear: both;
-line-height: 2.5em;
+  clear: both;
+  line-height: 2.5em;
 }
+
 #blog-pager-newer-link {
-float: left;
+  float: left;
 }
+
 #blog-pager-older-link {
-float: right;
+  float: right;
 }
+
 #blog-pager {
-text-align: center;
+  text-align: center;
 }
+
 /* Sidebar Content
 ----------------------------------------------- */
-
-
-
-#sidebar-wrapper {
-  float: right;
-  clear: right;
-  width: 210px;
-  margin: 0 0 0 1em;
-  border: 0;
-}
-
 .sidebar {
   font-family: Arial, Helvetica, sans-serif;
   font-size: 8pt;
-
-}
-
-.sidebar ul li {
-  margin: .5em 0;
-  padding-top:0;
-  padding-right:0;
-  padding-bottom:.25em;
-  padding-left:15px;
-  text-indent:-15px;
+  color: #fffff2;
 }
 
 .sidebar .widget {
-  margin: 2em 0 2em 1em;
+  margin: 3em 0 3em 1em;
+  text-align: left;
 }
 
 .sidebar .widget ul {
@@ -221,30 +204,40 @@ text-align: center;
 .sidebar .widget h2 {
   padding: 0;
   margin: 0;
-  display: none;
+
   font-size: 12px;
   background: #262626;
-  color: #fffff2;
   font-weight: bold;
-  padding: 2pt;
-  display: none;
 }
 
-.sidebar .widget a:active,
-.sidebar .widget a:link,
-.sidebar .widget a:visited {
-  color: #262626;
+.Label ul {
+  margin: 0 0 0 1em;
+  padding: 0;
+}
+
+.LinkList ul,
+.LinkList ul li {
+  padding: 0;
+  margin: 0;
+}
+
+.BlogArchive ul li {
+  padding-left:15px;
+  text-indent:-15px;
+}
+
+.sidebar .widget a {
+  color: #fffff2;
   text-decoration: none;
 }
 
 .sidebar .widget a:hover {
-  color: #262626;
   text-decoration: underline;
 }
 
-
-.main .Blog {
-  border-bottom-width: 0;
+.sidebar .widget ul li {
+  margin: .5em 0;
+  padding: 0 .25em 0;
 }
 
 pre {
@@ -254,27 +247,15 @@ pre {
 /* Footer
 ----------------------------------------------- */
 #footer {
-width:660px;
-clear:both;
-margin:0 auto;
-padding-top:15px;
-line-height: 1.6em;
-text-transform:uppercase;
-letter-spacing:.1em;
-text-align: center;
+  clear:both;
+  margin:0 auto;
+  padding-top:15px;
+  line-height: 1.6em;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  text-align: center;
 }
 
-
-
-
-
-
-
-
-
-
- 
--->
 ]]></b:skin>
   </head>
 
@@ -350,17 +331,6 @@ text-align: center;
     </div>
  
     <div id='content-wrapper'>
-
-      <div id='crosscol-wrapper' style='text-align:center'>
-        <b:section class='crosscol' id='crosscol' showaddelement='no'/>
-      </div>
-
-      <div id='main-wrapper'>
-
-
-
-
-
 
 
 
@@ -461,20 +431,6 @@ text-align: center;
              </b:if>
             </b:includable>
 </b:widget>
-<b:widget id='LinkList1' locked='false' title='See:' type='LinkList'>
-<b:includable id='main'>
-
-            <b:if cond='data:title'><h2><data:title/></h2></b:if>
-             <div class='widget-content'>
-               <ul>
-                 <b:loop values='data:links' var='link'>
-                   <li><a expr:href='data:link.target'><data:link.name/></a></li>
-                 </b:loop>
-               </ul>
-               <b:include name='quickedit'/>
-             </div>
-            </b:includable>
-</b:widget>
 <b:widget id='BlogArchive1' locked='false' title='Blog Archive' type='BlogArchive'>
 <b:includable id='toggle' var='interval'>
               <b:if cond='data:interval.toggleId'>
@@ -558,6 +514,45 @@ text-align: center;
               </div>
             </b:includable>
 </b:widget>
+<b:widget id='Label1' locked='false' title='Labels' type='Label'>
+<b:includable id='main'>
+  <b:if cond='data:title'>
+    <h2><data:title/></h2>
+  </b:if>
+  <div expr:class='&quot;widget-content &quot; + data:display + &quot;-label-widget-content&quot;'>
+    <b:if cond='data:display == &quot;list&quot;'>
+      <ul>
+      <b:loop values='data:labels' var='label'>
+        <li>
+          <b:if cond='data:blog.url == data:label.url'>
+            <span expr:dir='data:blog.languageDirection'><data:label.name/></span>
+          <b:else/>
+            <a expr:dir='data:blog.languageDirection' expr:href='data:label.url'><data:label.name/></a>
+          </b:if>
+          <b:if cond='data:showFreqNumbers'>
+            <span dir='ltr'>(<data:label.count/>)</span>
+          </b:if>
+        </li>
+      </b:loop>
+      </ul>
+    <b:else/>
+      <b:loop values='data:labels' var='label'>
+        <span expr:class='&quot;label-size label-size-&quot; + data:label.cssSize'>
+          <b:if cond='data:blog.url == data:label.url'>
+            <span expr:dir='data:blog.languageDirection'><data:label.name/></span>
+          <b:else/>
+            <a expr:dir='data:blog.languageDirection' expr:href='data:label.url'><data:label.name/></a>
+          </b:if>
+          <b:if cond='data:showFreqNumbers'>
+            <span class='label-count' dir='ltr'>(<data:label.count/>)</span>
+          </b:if>
+        </span>
+      </b:loop>
+    </b:if>
+    <b:include name='quickedit'/>
+  </div>
+</b:includable>
+</b:widget>
 </b:section>
                   </div>
 
@@ -574,11 +569,19 @@ text-align: center;
 
 
 
+      <div id='crosscol-wrapper' style='text-align:center'>
+        <b:section class='crosscol' id='crosscol' showaddelement='no'/>
+      </div>
+
+      <div id='main-wrapper'>
 
 
 
 
-        <b:section class='main' id='main' showaddelement='no'>
+
+
+
+       <b:section class='main' id='main' showaddelement='no'>
 <b:widget id='Blog1' locked='true' title='Blog Posts' type='Blog'>
 <b:includable id='main' var='top'>
   <!-- posts -->
@@ -1013,18 +1016,6 @@ text-align: center;
 
     </div> <!-- end content-wrapper -->
 
-
-
-
-
-
-
-
-
-
-
-
-
 <link href='http://www.mikedll.com/stylesheets/sh/shCore.css' rel='Stylesheet' type='text/css'/>
 <link href='http://www.mikedll.com/stylesheets/sh/shThemeDefault.css' rel='Stylesheet' type='text/css'/>
 
@@ -1043,9 +1034,9 @@ text-align: center;
   SyntaxHighlighter.all();
 </script> 
 
-<script type="text/javascript" src="http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g"></script>
-<script type="text/javascript">google.load('jquery', '1')</script>
-<script type="text/javascript" src="http://www.mikedll.com/javascripts/math.js"></script>
+<script src='http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g' type='text/javascript'/>
+<script type='text/javascript'>google.load(&#39;jquery&#39;, &#39;1&#39;)</script>
+<script src='http://www.mikedll.com/javascripts/math.js' type='text/javascript'/>
 
     <div id='footer-wrapper'>
       <b:section class='footer' id='footer'/>
@@ -1053,13 +1044,13 @@ text-align: center;
 
   </div></div> <!-- end outer-wrapper -->
 
-<script type="text/javascript">
-var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+<script type='text/javascript'>
+var gaJsHost = ((&quot;https:&quot; == document.location.protocol) ? &quot;https://ssl.&quot; : &quot;http://www.&quot;);
+document.write(unescape(&quot;%3Cscript src=&#39;&quot; + gaJsHost + &quot;google-analytics.com/ga.js&#39; type=&#39;text/javascript&#39;%3E%3C/script%3E&quot;));
 </script>
-<script type="text/javascript">
+<script type='text/javascript'>
 try {
-var pageTracker = _gat._getTracker("UA-8301470-2");
+var pageTracker = _gat._getTracker(&quot;UA-8301470-2&quot;);
 pageTracker._trackPageview();
 } catch(err) {}</script>
 
