@@ -249,12 +249,29 @@ pre {
   text-align: center;
 }
 
+/**
+  New markup for formatted code.
+ */
 pre.code {
+  border: 1px solid #262626;
   padding: 1em;
+}
 
-  background: #262626;
+/**
+  Code, old markup.
+*/
+pre {
+  border: 1px solid #262626;
+  padding: 1em;
+}
 
-  font-family: monospace;
-  color: #fffff2;
+/**
+  Latex, old markup.
+ */
+pre.renderedMath {
+  padding: 1em;
+  border: 0;
+  background: #fffff2;
+  color: #000000;
 }
 

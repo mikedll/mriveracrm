@@ -93,6 +93,11 @@ li {
 .feature {
 }
 
+ul#projects_list li {
+  list-style: disc;
+  margin: .5em 0;
+}
+
 #news {
 }
 
