@@ -362,140 +362,65 @@ pre.renderedMath {
 
 
 
+      <!-- Begin Sidebar -->
+      <div id='sidebar-wrapper'>
+        <b:section class='sidebar' id='sidebar' preferred='yes'>
 
-
-
-
-
-
-           <div id='sidebar-wrapper'>
-                    <b:section class='sidebar' id='sidebar' preferred='yes'>
-<b:widget id='LinkList2' locked='false' title='' type='LinkList'>
-<b:includable id='main'>
-
-<b:if cond='data:title'><h2><data:title/></h2></b:if>
- <div class='widget-content'>
-   <ul>
-     <b:loop values='data:links' var='link'>
-       <li><a expr:href='data:link.target'><data:link.name/></a></li>
-     </b:loop>
-   </ul>
-   <b:include name='quickedit'/>
- </div>
-</b:includable>
-</b:widget>
-<b:widget id='Subscribe1' locked='false' title='Subscribe To' type='Subscribe'>
-<b:includable id='main'>
-              <b:if cond='data:isPublic'>
-              <div style='white-space:nowrap'>
-
-                <b:if cond='data:title != &quot;&quot;'>
-                  <h2 class='title'><data:title/></h2>
-                </b:if>
+          <!-- Links -->
+          <b:widget id='LinkList2' locked='false' title='' type='LinkList'>
+            <b:includable id='main'>
+              
+              <b:if cond='data:title'><h2><data:title/></h2></b:if>
               <div class='widget-content'>
-                <b:loop values='data:feeds' var='feed'>
-                    <div expr:class='&quot;subscribe-wrapper subscribe-type-&quot; + data:feed.type'>
-
-
-                    <div expr:class='&quot;subscribe expanded subscribe-type-&quot; + data:feed.type' expr:id='&quot;SW_READER_LIST_&quot; + data:widgetId + data:feed.type' style='display:none;'>
-
-                      <div class='top'>
-                        <span class='inner' expr:onclick='&quot;return(_SW_toggleReaderList(event, \&quot;&quot; + data:widgetId +data:feed.type + &quot;\&quot;));&quot;'>
-                          <img class='subscribe-dropdown-arrow' expr:src='data:arrowDropdownImg'/>
-                          <img align='absmiddle' alt='' border='0' class='feed-icon' expr:src='data:feedIconImg'/>
-                          <data:feed.title/>
-                        </span>
-
-                        <ul class='feed-reader-links'>
-                          <a class='feed-reader-link' expr:href='&quot;http://www.google.com/ig/add?source=bstp&amp;feedurl=&quot; + data:feed.encodedUrl' target='_blank'>
-                            <img expr:src='data:imagePathBase + &quot;subscribe-google.png&quot;'/>
-                          </a>
-                          <a class='feed-reader-link' expr:href='&quot;http://www.bloglines.com/sub/&quot; + data:feed.url' target='_blank'>
-                            <img expr:src='data:imagePathBase + &quot;subscribe-bloglines.png&quot;'/>
-                          </a>
-                          <a class='feed-reader-link' expr:href='&quot;http://www.netvibes.com/subscribe.php?url=&quot; + data:feed.encodedUrl' target='_blank'>
-                            <img expr:src='data:imagePathBase + &quot;subscribe-netvibes.png&quot;'/>
-                          </a>
-                          <a class='feed-reader-link' expr:href='&quot;http://www.newsgator.com/ngs/subscriber/subext.aspx?url=&quot; + data:feed.encodedUrl' target='_blank'>
-                            <img expr:src='data:imagePathBase + &quot;subscribe-newsgator.png&quot;'/>
-                          </a>
-                          <a class='feed-reader-link' expr:href='&quot;http://add.my.yahoo.com/content?url=&quot; + data:feed.encodedUrl' target='_blank'>
-                            <img expr:src='data:imagePathBase + &quot;subscribe-yahoo.png&quot;'/>
-                          </a>
-                          <a class='feed-reader-link' expr:href='data:feed.url' target='_blank'>
-                            <img align='absmiddle' class='feed-icon' expr:src='data:feedIconImg'/>
-                            Atom
-                          </a>
-                        </ul>
-
-                      </div>
-                      <div class='bottom'/>
-                    </div>
-
-                    <div class='subscribe' expr:id='&quot;SW_READER_LIST_CLOSED_&quot; + data:widgetId +data:feed.type' expr:onclick='&quot;return(_SW_toggleReaderList(event, \&quot;&quot; + data:widgetId +data:feed.type + &quot;\&quot;));&quot;'>
-                      <div class='top'>
-                         <span class='inner'>
-                           <img class='subscribe-dropdown-arrow' expr:src='data:arrowDropdownImg'/>
-                           <span expr:onclick='&quot;return(_SW_toggleReaderList(event, \&quot;&quot; + data:widgetId +data:feed.type + &quot;\&quot;));&quot;'>
-                             <img align='absmiddle' alt='' border='0' class='feed-icon' expr:src='data:feedIconImg'/>
-                             <data:feed.title/>
-                           </span>
-                         </span>
-                       </div>
-                      <div class='bottom'/>
-                    </div>
-
-                  </div>
-                </b:loop>
-
-                <div style='clear:both'/>
-
+                <ul>
+                  <b:loop values='data:links' var='link'>
+                    <li><a expr:href='data:link.target'><data:link.name/></a></li>
+                  </b:loop>
+                </ul>
+                <b:include name='quickedit'/>
               </div>
-              </div>
-
-              <b:include name='quickedit'/>
-
-             </b:if>
             </b:includable>
-</b:widget>
-<b:widget id='BlogArchive1' locked='false' title='Blog Archive' type='BlogArchive'>
-<b:includable id='toggle' var='interval'>
+          </b:widget>
+
+          <!-- Archive -->
+          <b:widget id='BlogArchive1' locked='false' title='Blog Archive' type='BlogArchive'>
+            <b:includable id='toggle' var='interval'>
               <b:if cond='data:interval.toggleId'>
-              <b:if cond='data:interval.expclass == &quot;expanded&quot;'>
-                <a class='toggle' href='javascript:void(0)'>
-                  <span class='zippy toggle-open'>&#9660;&#160;</span>
-                </a>
-              <b:else/>
-                <a class='toggle' href='javascript:void(0)'>
-                  <span class='zippy'>
-                    <b:if cond='data:blog.languageDirection == &quot;rtl&quot;'>
-                      &#9668;&#160;
-                    <b:else/>
-                      &#9658;&#160;
-                    </b:if>
-                  </span>
-                </a>
+                <b:if cond='data:interval.expclass == &quot;expanded&quot;'>
+                  <a class='toggle' href='javascript:void(0)'>
+                    <span class='zippy toggle-open'>&#9660;&#160;</span>
+                  </a>
+                  <b:else/>
+                  <a class='toggle' href='javascript:void(0)'>
+                    <span class='zippy'>
+                      <b:if cond='data:blog.languageDirection == &quot;rtl&quot;'>
+                        &#9668;&#160;
+                        <b:else/>
+                        &#9658;&#160;
+                      </b:if>
+                    </span>
+                  </a>
+                </b:if>
               </b:if>
-             </b:if>
             </b:includable>
-<b:includable id='interval' var='intervalData'>
+            <b:includable id='interval' var='intervalData'>
               <b:loop values='data:intervalData' var='i'>
-                  <ul>
-                    <li expr:class='&quot;archivedate &quot; + data:i.expclass'>
-                      <b:include data='i' name='toggle'/>
-                      <a class='post-count-link' expr:href='data:i.url'><data:i.name/></a>
-                        <span class='post-count' dir='ltr'>(<data:i.post-count/>)</span>
-                      <b:if cond='data:i.data'>
-                        <b:include data='i.data' name='interval'/>
-                      </b:if>
-                      <b:if cond='data:i.posts'>
-                        <b:include data='i.posts' name='posts'/>
-                      </b:if>
-                    </li>
-                  </ul>
+                <ul>
+                  <li expr:class='&quot;archivedate &quot; + data:i.expclass'>
+                    <b:include data='i' name='toggle'/>
+                    <a class='post-count-link' expr:href='data:i.url'><data:i.name/></a>
+                    <span class='post-count' dir='ltr'>(<data:i.post-count/>)</span>
+                    <b:if cond='data:i.data'>
+                      <b:include data='i.data' name='interval'/>
+                    </b:if>
+                    <b:if cond='data:i.posts'>
+                      <b:include data='i.posts' name='posts'/>
+                    </b:if>
+                  </li>
+                </ul>
               </b:loop>
             </b:includable>
-<b:includable id='flat' var='data'>
+            <b:includable id='flat' var='data'>
               <ul>
                 <b:loop values='data:data' var='i'>
                   <li class='archivedate'>
@@ -504,7 +429,7 @@ pre.renderedMath {
                 </b:loop>
               </ul>
             </b:includable>
-<b:includable id='menu' var='data'>
+            <b:includable id='menu' var='data'>
               <select expr:id='data:widget.instanceId + &quot;_ArchiveMenu&quot;'>
                 <option value=''><data:title/></option>
                 <b:loop values='data:data' var='i'>
@@ -512,78 +437,81 @@ pre.renderedMath {
                 </b:loop>
               </select>
             </b:includable>
-<b:includable id='posts' var='posts'>
+            <b:includable id='posts' var='posts'>
               <ul class='posts'>
                 <b:loop values='data:posts' var='i'>
                   <li><a expr:href='data:i.url'><data:i.title/></a></li>
                 </b:loop>
               </ul>
             </b:includable>
-<b:includable id='main'>
+            <b:includable id='main'>
               <b:if cond='data:title'>
                 <h2><data:title/></h2>
               </b:if>
               <div class='widget-content'>
-              <div id='ArchiveList'>
-              <div expr:id='data:widget.instanceId + &quot;_ArchiveList&quot;'>
-                <b:if cond='data:style == &quot;HIERARCHY&quot;'>
-                 <b:include data='data' name='interval'/>
-                </b:if>
-                <b:if cond='data:style == &quot;FLAT&quot;'>
-                  <b:include data='data' name='flat'/>
-                </b:if>
-                <b:if cond='data:style == &quot;MENU&quot;'>
-                  <b:include data='data' name='menu'/>
-                </b:if>
-              </div>
-              </div>
-              <b:include name='quickedit'/>
+                <div id='ArchiveList'>
+                  <div expr:id='data:widget.instanceId + &quot;_ArchiveList&quot;'>
+                    <b:if cond='data:style == &quot;HIERARCHY&quot;'>
+                      <b:include data='data' name='interval'/>
+                    </b:if>
+                    <b:if cond='data:style == &quot;FLAT&quot;'>
+                      <b:include data='data' name='flat'/>
+                    </b:if>
+                    <b:if cond='data:style == &quot;MENU&quot;'>
+                      <b:include data='data' name='menu'/>
+                    </b:if>
+                  </div>
+                </div>
+                <b:include name='quickedit'/>
               </div>
             </b:includable>
-</b:widget>
-<b:widget id='Label1' locked='false' title='Labels' type='Label'>
-<b:includable id='main'>
-  <b:if cond='data:title'>
-    <h2><data:title/></h2>
-  </b:if>
-  <div expr:class='&quot;widget-content &quot; + data:display + &quot;-label-widget-content&quot;'>
-    <b:if cond='data:display == &quot;list&quot;'>
-      <ul>
-      <b:loop values='data:labels' var='label'>
-        <li>
-          <b:if cond='data:blog.url == data:label.url'>
-            <span expr:dir='data:blog.languageDirection'><data:label.name/></span>
-          <b:else/>
-            <a expr:dir='data:blog.languageDirection' expr:href='data:label.url'><data:label.name/></a>
-          </b:if>
-          <b:if cond='data:showFreqNumbers'>
-            <span dir='ltr'>(<data:label.count/>)</span>
-          </b:if>
-        </li>
-      </b:loop>
-      </ul>
-    <b:else/>
-      <b:loop values='data:labels' var='label'>
-        <span expr:class='&quot;label-size label-size-&quot; + data:label.cssSize'>
-          <b:if cond='data:blog.url == data:label.url'>
-            <span expr:dir='data:blog.languageDirection'><data:label.name/></span>
-          <b:else/>
-            <a expr:dir='data:blog.languageDirection' expr:href='data:label.url'><data:label.name/></a>
-          </b:if>
-          <b:if cond='data:showFreqNumbers'>
-            <span class='label-count' dir='ltr'>(<data:label.count/>)</span>
-          </b:if>
-        </span>
-      </b:loop>
-    </b:if>
-    <b:include name='quickedit'/>
-  </div>
-</b:includable>
-</b:widget>
-</b:section>
-                  </div>
+          </b:widget>
 
+          <!-- Labels -->
+          <b:widget id='Label1' locked='false' title='Labels' type='Label'>
+            <b:includable id='main'>
+              <b:if cond='data:title'>
+                <h2><data:title/></h2>
+              </b:if>
+              <div expr:class='&quot;widget-content &quot; + data:display + &quot;-label-widget-content&quot;'>
+                <b:if cond='data:display == &quot;list&quot;'>
+                  <ul>
+                    <b:loop values='data:labels' var='label'>
+                      <li>
+                        <b:if cond='data:blog.url == data:label.url'>
+                          <span expr:dir='data:blog.languageDirection'><data:label.name/></span>
+                          <b:else/>
+                          <a expr:dir='data:blog.languageDirection' expr:href='data:label.url'><data:label.name/></a>
+                        </b:if>
+                        <b:if cond='data:showFreqNumbers'>
+                          <span dir='ltr'>(<data:label.count/>)</span>
+                        </b:if>
+                      </li>
+                    </b:loop>
+                  </ul>
+                  <b:else/>
+                  <b:loop values='data:labels' var='label'>
+                    <span expr:class='&quot;label-size label-size-&quot; + data:label.cssSize'>
+                      <b:if cond='data:blog.url == data:label.url'>
+                        <span expr:dir='data:blog.languageDirection'><data:label.name/></span>
+                        <b:else/>
+                        <a expr:dir='data:blog.languageDirection' expr:href='data:label.url'><data:label.name/></a>
+                      </b:if>
+                      <b:if cond='data:showFreqNumbers'>
+                        <span class='label-count' dir='ltr'>(<data:label.count/>)</span>
+                      </b:if>
+                    </span>
+                  </b:loop>
+                </b:if>
+                <b:include name='quickedit'/>
+              </div>
+            </b:includable>
+          </b:widget>
 
+        </b:section>
+      </div>
+
+      <!-- End Sidebar -->
 
 
 
