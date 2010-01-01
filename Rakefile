@@ -8,3 +8,13 @@ require 'rake/testtask'
 require 'rake/rdoctask'
 
 require 'tasks/rails'
+
+
+
+namespace "log" do
+  desc "Creates log directory if it doesn't exist"
+  Rake::Task.define_task "init" do |t|
+    path = File.expand_path( File.join(File.dirname(__FILE__), 'log') )
+    FileUtils.mkdir path if not File.exists?( path )
+  end
+end
