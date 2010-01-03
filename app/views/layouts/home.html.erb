@@ -1,0 +1,48 @@
+<html>
+<head>
+<title>Mike De La Loza</title>
+
+<link href='stylesheets/common.css' rel='stylesheet' type='text/css'/>
+
+<!-- Fixing IE hasLayout -->
+<!--[if lte IE 6]>
+<style>
+/** .gainlayout hack for IE */
+container_hook div { height: 1px; }
+</style>
+<![endif]-->
+<!--[if IE 7]>
+<style>
+/** .gainlayout hack for IE */
+container_hook div { zoom: 1; }
+</style>
+<![endif]-->
+
+<script src="http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g" type="text/javascript" ></script>
+<script src="javascripts/prototype.js" type="text/javascript"></script>
+<script src="javascripts/builder.js" type="text/javascript"></script>
+<script src="javascripts/scriptaculous.js?load=effects" type="text/javascript"></script>
+<script src="javascripts/pretty.js"></script>
+<script src="javascripts/home.js"></script>
+</head>
+<body>
+
+<div class="container_hook" id="main">
+
+  <%= yield %>
+
+  </div><!-- end container hook -->
+
+<!-- Google Analytics Stats -->  
+<script type="text/javascript">
+var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
+document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
+</script>
+<script type="text/javascript">
+try {
+var pageTracker = _gat._getTracker("UA-8301470-1");
+pageTracker._trackPageview();
+} catch(err) {}</script>
+
+</body>
+</html>

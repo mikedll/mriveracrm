@@ -7,6 +7,9 @@
 # Specifies gem version of Rails to use when vendor/rails is not present
 RAILS_GEM_VERSION = '2.2.2' unless defined? RAILS_GEM_VERSION
 
+AMAZON_ACCESS_KEY = 'AKIAI2GAWV3VCMDUC73Q'
+AMAZON_SECRET_KEY = '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'
+
 # Bootstrap the Rails environment, frameworks, and default configuration
 require File.join(File.dirname(__FILE__), 'boot')
 
