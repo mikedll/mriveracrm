@@ -1,7 +1,14 @@
 
-%strong.code#message Hello, World!
+
+%h1 Today's Task Order:
 
 %ul
 	- for task in @tasks
+		%li= task
+
+%h1 Yesterday's Task Order:
+
+%ul
+	- for task in @old_tasks
 		%li= task
 
