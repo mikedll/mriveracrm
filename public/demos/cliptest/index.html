@@ -1,0 +1,55 @@
+<html>
+
+<head>
+<script language="javascript" src="http://ajax.googleapis.com/ajax/libs/prototype/1.6.1.0/prototype.js"></script>
+<script type="text/javascript" src="ZeroClipboard.js"></script>
+
+<style>
+  .clip_button {
+    width:150px;
+    text-align:center;
+    border:1px solid black;
+    background-color:#ccc;
+    margin:10px;
+    padding:10px;
+    cursor:default;
+    font-size:9pt;
+  }
+  .clip_button.hover { background-color:#eee; }
+  .clip_button.active { background-color:#aaa; }
+</style>
+<script language="javascript">
+
+  document.observe("dom:loaded", function() {
+    console.debug('triggering dom:loaded');
+
+    ZeroClipboard.setMoviePath( 'ZeroClipboard10.swf' );
+    clip = new ZeroClipboard.Client();
+    clip.setHandCursor( true );
+
+    clip.setText("email1@myhouse.com; email2@myhouse.com");
+    
+    clip.addEventListener( 'mousedown', function() {
+      console.debug('triggering clip onMousedown');
+      clip.setText("email1@myhouse.com; email2@myhouse.com");
+    });
+    clip.glue('copy_button');
+  });
+</script>
+</head>
+
+<body>
+  Hello!
+
+  <br/><br/>
+
+  <textarea name="copy_me" id="copy_me" rows="10" cols="80">here is some text.
+    </textarea>
+
+    
+  <br/><br/>
+  <br/><br/>
+  
+  <div class="clip_button" id="copy_button">Copy emails to clipboard.</div>
+</body>
+</html>
