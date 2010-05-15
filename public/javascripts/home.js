@@ -7,18 +7,18 @@
 google.load("feeds", "1");
 
 function results_callback(results) {
-    if (!results.error) {
-	for (var i = 0, entry; entry = results.feed.entries[i]; i++) {
-	    var d = new Date( entry.publishedDate );
-	    var n = Builder.node( 'li',
-				  [ Builder.node( 'a', { href: entry.link }, entry.title ),
-				    " ",
-				    Builder.node( 'span', { className: 'date' }, prettyDate( d ) )
-				    ]
-				  );
-	    $('blog_entries').appendChild( n );
-	}
-    }
+  if (!results.error) {
+  	for (var i = 0, entry; entry = results.feed.entries[i]; i++) {
+  	    var d = new Date( entry.publishedDate );
+  	    var n = Builder.node( 'li',
+  				  [ Builder.node( 'a', { href: entry.link }, entry.title ),
+  				    " ",
+  				    Builder.node( 'span', { className: 'date' }, prettyDate( d ) )
+  				    ]
+  				  );
+  	    $('blog_entries').appendChild( n );
+  	}
+  }
 }
 function initialize() {
     var feed = new google.feeds.Feed("http://blog.mikedll.com/feeds/posts/default");
