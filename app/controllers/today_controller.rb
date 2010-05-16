@@ -6,12 +6,12 @@ class TodayController < ApplicationController
       - 3 math/stats/algorithm training
       - 2 bio/physics training
       - 1 fitness & presentation
-      - 2 dragon development (including quagress input and development)
+      - 2 dragon development (including quagress input and base)
       - 3 service 1
       - 3 service 2
-      - 1 hr breakfast / cleaning clothes / shower
+      - 1 breakfast / cleaning clothes / shower
       - 0.5 shopping (food, other)
-      - 0.5 hour internet reading
+      - 0.5 internet reading
       - 0.5 write to mel/amy/peter/andrew, or apply for a job somewhere
       - 0.5 blog writing & publishing
     TASKS

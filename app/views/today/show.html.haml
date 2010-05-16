@@ -1,12 +1,12 @@
 
 
-%h1 Today's Task Order:
+%h1= "Today's Priorities (#{Time.zone.now.strftime("%A")})"
 
 %ul
 	- for task in @tasks
 		%li= task
 
-%h1 Yesterday's Task Order:
+%h1= "Yesterday's Priorities (#{(Time.zone.now - 1.day).strftime("%A")})"
 
 %ul
 	- for task in @old_tasks
