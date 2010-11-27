@@ -4,7 +4,7 @@
  */
 
 var MathSettings = {
-  server : 'http://www.cyberroadie.org/cgi-bin/mathtex.cgi?',
+  server : 'http://math.mikedll.com/mathtex.cgi?',
   preamble : '\\usepackage[usenames]{color}\\gammacorrection{1}\\png'
 };
 
