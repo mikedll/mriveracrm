@@ -3,20 +3,25 @@ class TodayController < ApplicationController
   
   def show
     a = YAML.load <<-TASKS
-      - 3 math/stats/algorithm training
-      - 2 bio/physics training
-      - 1 fitness & presentation
-      - 2 dragon development (including quagress input and base)
-      - 3 service 1
-      - 3 service 2
-      - 1 breakfast / cleaning clothes / shower
-      - 0.5 shopping (food, other)
-      - 0.5 internet reading
-      - 0.5 write to mel/amy/peter/andrew, or apply for a job somewhere
-      - 0.5 blog writing & publishing
+    - 7 Hours Sleep
+    - 5 bcg service
+    - 1 dragon development (emacs, personal tool development, portfolio enhancements, daily budgeting and planning, automation of daily activities like mikedll/today, base, publishing platform development, quagress input)
+    - 1 quagress service
+    - 3 hr math exercises, with some publishing.
+    - 2 hr math tool development
+    - 0.5 more of fitness & presentation, drawing (paper and photoshop)
+    - 1.25 going out to eat
+    - 1 cooking, cleaning
+    - 1.25 transportation
+    - 1 apply for a job. make a letter. write. publish something. 
     TASKS
     @tasks = randtasks(a)
+    @total = total( randtasks(a) )
     @old_tasks = randtasks(a, Time.zone.now - 1.day)
+  end
+
+  def total( tasks )
+    tasks.inject(0) { |acc,t| t =~ /^(\d(\.\d+)?)/; acc += $1.to_f }
   end
 
   def randtasks(a,t = Time.zone.now)
