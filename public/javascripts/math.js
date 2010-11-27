@@ -12,7 +12,8 @@ function renderMath() {
     $(this).addClass("renderedMath");
     $(this).html( '<center><img src=\'' + 
                   MathSettings.server + 
-                  MathSettings.preamble + 
+                  MathSettings.preamble +
+		  ' ' +
                   encodeURI( $(this).html() ) +
                   '\'/></center>' );
 }
