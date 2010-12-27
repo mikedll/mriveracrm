@@ -3,15 +3,19 @@ class TodayController < ApplicationController
   
   def show
     a = YAML.load <<-TASKS
-    - 8 Hours Sleep
+    - 7 Hours Sleep
     - 5 client 1 service
     - 5 client 2 service
-    - 1 dragon development (emacs, personal tool development, portfolio enhancements, daily budgeting and planning, automation of daily activities like mikedll/today, base, publishing platform development, quagress input)
+    - 1 dragon development (emacs, personal tool development,
+      portfolio enhancements, daily budgeting and planning, automation
+      of daily activities like mikedll/today, base, publishing
+      platform development, quagress input)
     - 1 quagress|getadonkey|pimpeq|pybomber service
     - 1 hr math exercises, with some publishing.
-    - 1.5 going for a walk or to eat
+    - 2.5 going for a walk or to eat
     - 0.5 more of fitness & presentation, drawing (paper and photoshop)
     - 0.5 apply for a job. make a letter. write. publish something.
+    - 0.5 lost
     TASKS
 
     @tasks = randtasks(a)
@@ -22,6 +26,7 @@ class TodayController < ApplicationController
   def total( tasks )
     tasks.inject(0) { |acc,t| t =~ /^(\d(\.\d+)?)/; acc += $1.to_f }
   end
+
 
   def randtasks(a,t = Time.zone.now)
     random_indicies(a.size, t).map { |i| a[i] }
