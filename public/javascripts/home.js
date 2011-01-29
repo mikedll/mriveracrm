@@ -10,13 +10,12 @@ function results_callback(results) {
   if (!results.error) {
   	for (var i = 0, entry; entry = results.feed.entries[i]; i++) {
   	    var d = new Date( entry.publishedDate );
-  	    var n = Builder.node( 'li',
-  				  [ Builder.node( 'a', { href: entry.link }, entry.title ),
-  				    " ",
-  				    Builder.node( 'span', { className: 'date' }, prettyDate( d ) )
-  				    ]
-  				  );
-  	    $('blog_entries').appendChild( n );
+  	    var n = '<li><a href=":href">:title</a> <span class="date">:date</span></li>'
+		.replace( /:href/, entry.link )
+		.replace( /:title/, entry.title )
+		.replace( /:date/, prettyDate( d ) );
+
+  	    $('#blog_entries').append( n );
   	}
   }
 }

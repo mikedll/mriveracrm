@@ -1,4 +1,4 @@
 Mikedll::Application.routes.draw do
   get 'today', :to => 'today#show', :as => :todays
-  match '/:controller(/:action(/:id))'
+  root :to => "home#index"
 end

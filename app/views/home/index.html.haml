@@ -1,0 +1,39 @@
+- content_for :head do
+  = javascript_include_tag "home.js"
+
+#latest_blog_entries.feature.dynamic
+  %h1
+    Recent Blog Entries
+  %ul#blog_entries
+    %li
+
+#missionstatement
+
+  %p
+    The Mike De La Loza Company was created December 13th, 2010 and will be in service until 2025.
+
+  %p
+    This exists to give me something to do.
+
+  %p
+    The goal of the company is to help intelligent life forms minimize the variance of pain that may be experienced while alive.
+
+
+#projects.feature
+  %h4
+    Projects
+
+  %ul#projects_list
+    %li
+      = link_to "My Philosophy", "http://docs.google.com/View?id=dgh7zrgz_25hqnbk9"
+      (2010, ongoing)
+    %li
+      = link_to "Quagress.com", "http://www.quagress.com"
+      (2010, ongoing)
+    %li
+      = link_to "PyBomber", "http://www.pygame.org/projects/20/194/"
+      (2006, now abandoned)
+
+
+
+
