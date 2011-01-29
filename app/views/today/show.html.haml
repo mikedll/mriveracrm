@@ -1,14 +1,19 @@
 
 
-%h1= "Today's Priorities (#{Time.zone.now.strftime("%A")})"
+.floating_container
 
-%ul
-	- for task in @tasks
-		%li= task
+  %h1
+    = "Today's Priorities (#{Time.zone.now.strftime("%A")})"
 
-%h1= "Yesterday's Priorities (#{(Time.zone.now - 1.day).strftime("%A")})"
+  %ul
+    - for task in @tasks
+      %li= task
 
-%ul
-	- for task in @old_tasks
-		%li= task
+.floating_container
+  %h1
+    = "Yesterday's Priorities (#{(Time.zone.now - 1.day).strftime("%A")})"
+
+  %ul.floating_container
+    - for task in @old_tasks
+      %li= task
 

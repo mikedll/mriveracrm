@@ -1,5 +1,5 @@
 class TodayController < ApplicationController
-  layout 'home'
+  layout 'minimal'
   
   def show
     a = YAML.load <<-TASKS
