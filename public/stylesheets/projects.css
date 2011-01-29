@@ -1,0 +1,154 @@
+/**
+  http://tympanus.net/codrops/2010/11/14/animated-portfolio-gallery/
+*/
+
+h1.title{
+    position:absolute;
+    right:20px;
+    top:0px;
+    font-weight:normal;
+    text-transform:uppercase;
+    font-size:56px;
+    color:#fff;
+    background: #fffff2;
+    padding:0px 15px 10px 15px;
+}
+h1.title span{
+    font-size:12px;
+    display:block;
+}
+span.reference{
+    font-family:Verdana;
+    position:fixed;
+    right:10px;
+    bottom:10px;
+    font-size:10px;
+}
+span.reference a{
+    color:#333;
+    text-transform:uppercase;
+    text-decoration:none;
+    margin-left:20px;
+}
+
+
+
+#overlay{
+	position:fixed;
+	top:0px;
+	left:0px;
+	width:100%;
+	height:100%;
+	background: #000;
+	display:none;
+	opacity:0.9;	
+}
+#thumbContainter{
+	position:fixed;
+	top:0px;
+	left:0px;
+	bottom:0px;
+	margin:0;
+	width:175px;
+	padding:0 10px;
+	background: #262626;
+	border-right:1px solid #f0f0f0;
+	-moz-box-shadow:-2px 0px 10px #000 inset;
+	-webkit-box-shadow:-2px 0px 10px #000 inset;
+	box-shadow:-2px 0px 10px #000 inset;
+}
+#thumbScroller{
+	position:relative;
+	height:600px;
+	overflow:hidden;
+	left:-180px;
+}
+#thumbScroller .container{
+	position:relative;
+	top:0;
+	float:left;
+}
+#thumbScroller .content{
+	clear:both;
+	float:left;
+}
+#thumbScroller .content div{
+	padding:2px;
+	height:100%;
+	float:left;
+}
+#thumbScroller .content a{
+	outline:none;
+}
+#thumbScroller img{
+	border:5px solid #000;
+	-moz-box-shadow:0px 0px 2px #000;
+	-webkit-box-shadow:0px 0px 2px #000;
+	box-shadow:0px 0px 2px #000;
+}
+
+img.pg_thumb,
+img#pg_large,
+.pg_title h1,
+.pg_content .pg_description div
+{
+	position:absolute;
+}
+
+.pg_content .pg_description div{
+	display:none;
+}
+
+.pg_title h1{
+	display:none;
+	left:250px;
+	top:-50px;/*25*/
+
+	background: #fffff2;
+	padding:15px;
+	color: black;
+}
+
+.pg_title {
+}
+
+img.pg_thumb{
+	display:none;
+}
+img#pg_large{
+	z-index:9999;
+}
+img.pg_thumb,
+img#pg_large{
+	top:90px;
+	left:250px;
+	padding:10px;
+	cursor:pointer;
+}
+
+.pg_description h2{
+	font-size:12pt;
+	margin-bottom:5px;
+	padding: 5px;
+
+	background: #fffff2;
+	color: black;
+}
+
+.pg_description p{
+	font-size:12px;
+	width:320px;
+	overflow:hidden;
+	padding: 20px;
+
+	background: #fffff2;
+	color: black;
+}
+#pg_desc1 div{
+	top:420px;
+	left:205px;
+}
+#pg_desc2 div{
+	top:420px;
+	left:695px;
+}

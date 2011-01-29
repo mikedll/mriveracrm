@@ -26,13 +26,23 @@ function initialize() {
     feed.load( results_callback );
 }
 
-google.setOnLoadCallback(initialize);
- 
-function m_vanish( strHide ) {
-  new Effect.Fade( strHide, { from: 1, to: 0, duration: 0, queue: 'front' } );
-}
+$(initialize);
 
-function m_show(strShow) {
-  new Effect.Appear( strShow, { from: 0, to: 1, duration: .5, queue: 'end' } );
-}
+function setupGallery() {
 
+    var transition = function( out, into ) {
+	out.fadeOut( 200, function() { into.fadeIn( 700 ); } );
+    };
+
+    var homeToProjects = function() {
+	transition( $('#main'), $('.pg_content').add('#thumbContainter') );
+    };
+
+    var projectsToHome = function() {
+	transition( $('.pg_content').add('#thumbContainter'), $('#main') );
+    };
+
+    $('#projects_link').bind('click', homeToProjects );
+    $('#home_link').bind('click', projectsToHome );    
+}
+$(setupGallery);

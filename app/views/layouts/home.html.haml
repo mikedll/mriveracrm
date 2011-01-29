@@ -6,6 +6,8 @@
     = csrf_meta_tag
 
     = stylesheet_link_tag :defaults
+    = stylesheet_link_tag "projects"
+
     = javascript_include_tag :defaults
     = javascript_include_tag "http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g"
     = javascript_include_tag "pretty.js"
@@ -18,21 +20,6 @@
 
     #header
 
-    #main.container_hook
+    = yield
 
-      %h2
-        The Mike De La Loza Company
-
-      .clear
-
-      = yield
-
-    :javascript
-      var gaJsHost = (("https:" == document.location.protocol) ? "https://ssl." : "http://www.");
-      document.write(unescape("%3Cscript src='" + gaJsHost + "google-analytics.com/ga.js' type='text/javascript'%3E%3C/script%3E"));
-
-    :javascript
-      try {
-      var pageTracker = _gat._getTracker("UA-8301470-1");
-      pageTracker._trackPageview();
-      } catch(err) {}
+    = render  :partial => "shared/ganalytics" if Rails.env.production?

@@ -1,39 +1,33 @@
+
 - content_for :head do
   = javascript_include_tag "home.js"
 
-#latest_blog_entries.feature.dynamic
-  %h1
-    Recent Blog Entries
-  %ul#blog_entries
-    %li
+#main.floating_container
 
-#missionstatement
+  #latest_blog_entries.feature.dynamic
+    %h1
+      Recent Blog Entries
+    %ul#blog_entries
+      %li
 
-  %p
-    The Mike De La Loza Company was created December 13th, 2010 and will be in service until 2025.
-
-  %p
-    This exists to give me something to do.
-
-  %p
-    The goal of the company is to help intelligent life forms minimize the variance of pain that may be experienced while alive.
+  %h2
+    The Mike De La Loza Company
 
 
-#projects.feature
-  %h4
-    Projects
+  #missionstatement
 
-  %ul#projects_list
-    %li
-      = link_to "My Philosophy", "http://docs.google.com/View?id=dgh7zrgz_25hqnbk9"
-      (2010, ongoing)
-    %li
-      = link_to "Quagress.com", "http://www.quagress.com"
-      (2010, ongoing)
-    %li
-      = link_to "PyBomber", "http://www.pygame.org/projects/20/194/"
-      (2006, now abandoned)
+    %p
+      Located in Monterey, California, the Mike De La Loza Company
+      was created December 13th, 2010 and will be in service until
+      2025.
 
+    %p
+      The goal of the company is to help intelligent life forms minimize the variance of pain that they may experience while alive.
 
+    %p
+      To pay the bills, I work as a
+      = link_to("freelance software developer", "http://www.odesk.com/users/Skills-pay-bills_~~b7c77f857ebb0450") + "."
 
+    %p.hide
+      = link_to "View my portfolio", "#", :id => "projects_link"
 

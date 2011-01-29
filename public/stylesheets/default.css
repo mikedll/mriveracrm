@@ -16,17 +16,13 @@ body {
     position: relative;
 }
 
-body div#main {
+body div#main{
   position:absolute;
-  left:40%;
+  left:30%;
   width:600px;
 
   top: 340px;
   margin-left:-315px;
-  background: #fffff2;
-
-  padding:15px;
-  z-index: 1;
 }
 
 * html body div#main {
@@ -71,31 +67,10 @@ li {
   font-family: Courier;
 }
 
-.container_hook {
-
-}
-
-#greeting {
-  position: absolute;
-  top: 30px;
-  margin-left: 30%;
-  margin-right: 30%;
-  color: #fffff2;
-  font-style: italic;
-  padding-left: 90px;
-  background: url('../images/splash.jpg') top left no-repeat;
-
-  min-height:100px;
-  height:auto !important;
-  height:100px;
-  z-index: 100;
-}
-
-
-#belowheader {
-}
-
-#belowheader img {
+.floating_container {
+  background: #fffff2;
+  padding:15px;
+  z-index: 1;
 }
 
 .feature {
@@ -105,10 +80,6 @@ ul#projects_list li {
   list-style: disc;
   margin: .5em 0;
 }
-
-#news {
-}
-
 
 .dynamic h1 {
   padding: 0;
@@ -149,35 +120,6 @@ ul#projects_list li {
     clear: both;
 }
 
-
-
-
-
-h1.title{
-    position:absolute;
-    right:20px;
-    top:0px;
-    font-weight:normal;
-    text-transform:uppercase;
-    font-size:56px;
-    color:#fff;
-    background: #fffff2;
-    padding:0px 15px 10px 15px;
-}
-h1.title span{
-    font-size:14px;
-    display:block;
-}
-span.reference{
-    font-family:Arial;
-    position:fixed;
-    right:10px;
-    bottom:10px;
-    font-size:10px;
-}
-span.reference a{
-    color:#333;
-    text-transform:uppercase;
-    text-decoration:none;
-    margin-left:20px;
+.hide {
+    display: none;
 }

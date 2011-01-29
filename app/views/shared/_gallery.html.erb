@@ -79,7 +79,7 @@
 					//hide it, and animate the next one down
 					$currentTitle.stop().animate({'top':'-50px'},animSpeed,function(){
 						$(this).hide();
-						$nextTitle.show().stop().animate({'top':'25px'},animSpeed);
+						$nextTitle.show().stop().animate({'top':'5px'},animSpeed);
 					});
 					
 					//show the next image,
@@ -101,9 +101,9 @@
 						$(this).hide();
 						$nextDesc1.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
 					});
-					$currentDesc2.stop().animate({'left':'295px','opacity':'0'},animSpeed,function(){
+					$currentDesc2.stop().animate({'left':'695px','opacity':'0'},animSpeed,function(){
 						$(this).hide();
-						$nextDesc2.show().stop().animate({'left':'250px','opacity':'1'},animSpeed);
+						$nextDesc2.show().stop().animate({'left':'650px','opacity':'1'},animSpeed);
 					});
 					e.preventDefault();
 				});
