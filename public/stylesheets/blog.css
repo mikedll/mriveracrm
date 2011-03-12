@@ -265,10 +265,18 @@ pre {
 }
 
 pre code {
-  margin-left: -20%;
-  margin-right: -20%;
+  margin-left: -8%;
+  margin-right: -8%;
   overflow: auto;
 }
+
+ol li pre code,
+ul li pre code {
+  margin-left: -14%;
+  margin-right: -8%;
+  overflow: auto;
+}
+
 
 /**
   Latex, old markup.

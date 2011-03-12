@@ -20,13 +20,13 @@ pre .django .keyword,
 pre .css .class,
 pre .css .id,
 pre .lisp .title {
-  color: #E3CEAB;
+  color: #AAF2EC;
 }
 
 pre .django .template_tag,
 pre .django .variable,
 pre .django .filter .argument {
-  color: #DCDCDC;
+  color: #009C9E;
 }
 
 pre .number,
@@ -38,7 +38,7 @@ pre .dos .envvar,
 pre .dos .stream,
 pre .variable,
 pre .apache .sqbracket {
-  color: #EFDCBC;
+  color: #00E7D9;
 }
 
 pre .dos .flow,
@@ -65,17 +65,19 @@ pre .ruby .class .parent,
 pre .apache .tag,
 pre .nginx .built_in,
 pre .tex .command {
-    color: #efef8f;
+    color: #7de9ed;
 }
 
 pre .dos .winutils,
 pre .ruby .symbol,
 pre .ruby .symbol .string,
 pre .ruby .symbol .keyword,
-pre .ruby .symbol .keymethods,
-pre .ruby .string,
+pre .ruby .symbol .keymethods  {
+  color: #83FAB0;
+}
+
 pre .ruby .instancevar {
-  color: #DCA3A3;
+  color: #00E7D9;
 }
 
 pre .diff .deletion,
@@ -93,7 +95,7 @@ pre .attr_selector,
 pre .pseudo,
 pre .apache .cbracket,
 pre .tex .formula {
-  color: #CC9393;
+  color: #68D3F9;;
 }
 
 pre .shebang,
@@ -103,7 +105,7 @@ pre .java .annotation,
 pre .template_comment,
 pre .pi,
 pre .doctype {
-  color: #7F9F7F;
+  color: #AFE0EA;
 }
 
 pre .html .css,
