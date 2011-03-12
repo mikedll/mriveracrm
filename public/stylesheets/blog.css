@@ -249,42 +249,33 @@ pre {
   text-align: center;
 }
 
-/**
-  New markup for formatted code.
- */
-pre.code {
-  border: 1px solid #262626;
-  padding: 1em;
-}
-
-/**
-  Code, old markup.
-*/
 pre {
   padding: 1em;
 }
 
+pre.math {
+  margin-left: auto;
+  margin-right: auto;
+  border: 1px solid black;
+}
+
+pre code.renderedMath {
+    margin-left: auto;
+    margin-right: auto;
+    background: #FFFFF2
+}
+
 pre code {
-  margin-left: -8%;
-  margin-right: -8%;
+  margin-left: -6%;
+  margin-right: -6%;
   overflow: auto;
 }
 
 ol li pre code,
 ul li pre code {
-  margin-left: -14%;
-  margin-right: -8%;
+  margin-left: -12%;
+  margin-right: -6%;
   overflow: auto;
 }
 
-
-/**
-  Latex, old markup.
- */
-pre.renderedMath {
-  padding: 1em;
-  border: 0;
-  background: #fffff2;
-  color: #000000;
-}
 
