@@ -261,8 +261,13 @@ pre.code {
   Code, old markup.
 */
 pre {
-  border: 1px solid #262626;
   padding: 1em;
+}
+
+pre code {
+  margin-left: -20%;
+  margin-right: -20%;
+  overflow: auto;
 }
 
 /**

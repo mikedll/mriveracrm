@@ -1,0 +1,76 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"> 
+<html dir='ltr' xmlns='http://www.w3.org/1999/xhtml' xmlns:b='http://www.google.com/2005/gml/b' xmlns:data='http://www.google.com/2005/gml/data' xmlns:expr='http://www.google.com/2005/gml/expr'> 
+
+<head> 
+  <script src='http://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g' type='text/javascript'></script>
+  <script type='text/javascript' language="javascript">google.load("jquery", "1.5.1")</script>
+  <script src='http://www.mikedll.com/javascripts/math.js' type='text/javascript'/></script>
+
+  <script type="text/javascript" src="javascripts/vendor/highlight/highlight.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/1c.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/apache.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/avrasm.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/axapta.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/bash.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/cmake.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/cpp.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/cs.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/css.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/delphi.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/diff.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/dos.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/html-xml.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/ini.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/java.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/javascript.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/lisp.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/lua.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/mel.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/nginx.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/parser3.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/perl.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/php.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/profile.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/python.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/renderman.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/ruby.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/scala.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/smalltalk.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/sql.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/tex.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/vbscript.js"></script>
+  <script type="text/javascript" src="javascripts/vendor/highlight/languages/vhdl.js"></script>
+  <link href="stylesheets/vendor/highlight/zenburn.css" rel="stylesheet" type="text/css" />
+  <script type='text/javascript' src='javascripts/syntaxHighlighterConfig.js'></script>
+</head>
+
+<body>
+
+ 
+  <p>I put RubyGems in charge.</p> 
+  
+
+  <pre><code class="brush: bash; gutter: false;">
+      # Remove Ubuntu's versions
+      sudo aptitude remove rails
+      sudo aptitude remove rubygems
+      
+      # Install RubyGems.
+      # The only surprise here is that I have to create a symlink.
+      tar -xzf ./rubygems-1.3.5.tgz.tar -C ~/
+      cd ~/rubygems-1.3.5
+      sudo ruby setup.rb
+      sudo ln -s /usr/bin/gem1.8 /usr/bin/gem
+  </code></pre> 
+
+
+  
+  <p>I then installed some dependencies with Ubuntu. The ruby 1.8 development files <a href="http://mentalized.net/journal/2006/01/24/no_such_file_to_load_mkmf/">may be required</a> by the sqlite3-ruby gem. The sqlite3 development headers are definitely required. Without them, the sqlite3-ruby gem gives a "missing sqlite3.h" build error.</p> 
+  
+  <pre><code class="brush: bash; gutter: false;"># Following above explanations, get sqlite3-ruby dependencies
+      sudo aptitude install ruby1.8-dev
+      sudo aptitude install libsqlite3-dev
+  </code></pre> 
+
+</body>
+
