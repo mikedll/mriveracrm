@@ -29,16 +29,9 @@ body div#main{
   width: 630px;
 }
 
-div#main a, 
-div#main a:link, 
-div#main a:visited {
-  text-decoration: none;
-  color: #40e0d0
-}
-
-div#main a:hover {
-  text-decoration: underline;
-  color: #40e0d0;
+body div div {
+  margin: 1em 0 1em 0;
+  padding: 0;
 }
 
 div#main div a,
@@ -51,10 +44,7 @@ div#main div a:hover {
   color: #373737;
 }
 
-body div div {
-  margin: 1em 0 1em 0;
-  padding: 0;
-}
+
 
 h1 {
 }

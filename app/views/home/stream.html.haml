@@ -1,0 +1,16 @@
+
+
+- content_for :head do
+  = javascript_include_tag "home.js"
+
+#main.floating_container
+
+  %h1
+    Live (sometimes) stream
+
+  %p
+    = render :partial => "embedded_stream"
+
+
+  %p
+    = link_to "< Back Home", root_path
