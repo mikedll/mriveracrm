@@ -29,6 +29,23 @@ body div#main{
   width: 630px;
 }
 
+
+
+body div#stream{
+  position:absolute;
+  left:30%;
+  width:1000px;
+  top: 340px;
+  margin-left:-315px;
+}
+
+* html body div#stream {
+  width: 1030px;
+}
+
+
+
+
 body div div {
   margin: 1em 0 1em 0;
   padding: 0;
