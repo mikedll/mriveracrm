@@ -10,13 +10,6 @@
     %ul#blog_entries
       %li
 
-  .feature.dynamic
-    %h1
-      Live Stream
-    %ul#blog_entries
-      %li
-        = link_to "Justin.tv Stream", stream_path
-
   %h2
     The Mike De La Loza Company
 
@@ -87,6 +80,7 @@
     %p
       = image_tag "http://www.gravatar.com/avatar/1dcdef27de90f92bb7761b0f43912e07?s=80"
 
-    %p.hide
+    %p
       = link_to "View my portfolio", "#", :id => "projects_link"
 
+= render :partial => "shared/projects"
