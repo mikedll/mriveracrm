@@ -130,3 +130,14 @@ ul#projects_list li {
 .hide {
     display: none;
 }
+
+#top_menu ul {
+  margin: 0;
+  padding: 0;
+}
+
+#top_menu ul li {
+    padding: 0;
+    float: left;
+    margin: 0em 1em 2em;
+}

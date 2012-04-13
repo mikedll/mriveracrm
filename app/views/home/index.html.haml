@@ -4,9 +4,24 @@
 
 #main.floating_container
 
+  #top_menu
+    %ul
+      %li
+        = link_to "Portfolio", "#", :id => "projects_link"
+
+      %li
+        = link_to "Sample Code", "https://github.com/mikedll", :target => "_blank"
+        (github.com)
+
+      %li
+        = link_to("Hire Me", "http://www.odesk.com/users/Skills-pay-bills_~~b7c77f857ebb0450", :target => "_blank")
+        (odesk.com)
+
+  .clear
+
   #latest_blog_entries.feature.dynamic
     %h1
-      Recent Blog Entries
+      My Articles & Videos
     %ul#blog_entries
       %li
 
@@ -16,71 +31,17 @@
   #missionstatement
 
     %p 
-      This is the front to my self-titled company. Its just me,
-      Mike. I created this December 13th, 2010 in Monterey,
-      California. I just wanted to live independently and work
-      passionately. My blog and my personal projects are
-      meant to serve this end.
+      I'm Mike De La Loza and this is my work. I started working alone on December 13th, 2010
+      in Monterey, California.
 
     %p
-      To pay the bills, I work as a
-      = link_to("freelance software developer on ODesk.com", "http://www.odesk.com/users/Skills-pay-bills_~~b7c77f857ebb0450") + "."
-      I seek clients who want to enhance or build a business with effective, ethical use of technology.
-
-    %p 
-      I can say a little about my background. I grew up in Southern
-      California. I was educated at Iowa State University and the
-      University of California, Riverside.
+      I'm available as a freelance software developer on ODesk.com.
+      I seek clients that are building something with software.
 
     %p
-      When I was 19, I got my first technical job teaching C++ to
-      college students. Later, I started doing web development at my
-      college. I learned a lot of web development technology at the
-      same time, including Linux, Apache, MySQL, Perl, Python, PHP,
-      and JavaScript.
+      Tech I work with: Linux, .NET, Apache, MySQL, Perl, Python, PHP,
+      JavaScript, OpenGL, C/C++, Java, Scala, Visual Basic,
+      MongoDB, PostgreSQL, Git, Ruby on Rails, Haml/Sass, jQuery, CoffeeScript, Android and Objective-C.
 
-    %p
-      When I graduated, I worked for research scientists in both
-      psychology and space propulsion subject matters. I made
-      simulations for the research work. One of these was an OpenGL
-      C/C++ application, and the other was a C/C++ high-performance
-      physics application. I also worked on some embedded satellite
-      communication devices.
-
-    %p
-      After that, I went traveling to get some international business
-      experience. I moved on my own to India and got a job in Bangalore. This was a
-      typical offshore development environment. I completed a few
-      major projects for US clients. This gave me intense experience
-      with Ruby on Rails and C#.
-
-    %p
-      Most recently, I've been working on undergrad level math and
-      intermediate level algorithms on my blog. During project work, I tend
-      to use technologies like Python, MongoDB, PostgreSQL, Git (
-      = link_to "my github account", "https://github.com/mikedll"
-      ), Ruby
-      on Rails, Haml/Sass, jQuery, and CoffeeScript.
-
-    %p
-      Emacs is my preferred editor, regardless of whether I'm
-      on Windows 7, Ubuntu, or Snow Leopard. It's common for me to
-
-      = link_to "extend emacs myself with elisp.", "https://github.com/mikedll/mikedll-emacs"
-
-    %p
-      I've done some Android and Objective-C, and I'm trying to get
-      more into node.js, especially when writing with CoffeeScript.
-
-    %p
-      Warm regards,
-      %br
-      Mike
-
-    %p
-      = image_tag "http://www.gravatar.com/avatar/1dcdef27de90f92bb7761b0f43912e07?s=80"
-
-    %p
-      = link_to "View my portfolio", "#", :id => "projects_link"
 
 = render :partial => "shared/projects"
