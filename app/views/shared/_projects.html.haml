@@ -1,4 +1,7 @@
 
+- content_for :head do
+  = javascript_include_tag "gallery"
+
 .pg_content.hide
   #pg_title.pg_title
     - Project.all.each_with_index do |p, i|
@@ -37,7 +40,4 @@
             = link_to( image_tag("portfolio/thumbs/#{p[:image]}", :alt => "", :class => "thumb"), "#")
 
 #overlay
-
-
-= render :partial => "shared/gallery"
 

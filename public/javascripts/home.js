@@ -28,21 +28,42 @@ function initialize() {
 
 $(initialize);
 
+var STATES = {
+    MAIN: 0,
+    PROJECTS: 1
+};
+
+var GLOBAL_STATE = STATES.MAIN;
+
 function setupGallery() {
 
-    var transition = function( out, into ) {
-	out.fadeOut( 200, function() { into.fadeIn( 700 ); } );
+    var transition = function( out, into, new_state ) {
+	      out.fadeOut( 200, function() { 
+                         into.fadeIn( 700 ); 
+                         GLOBAL_STATE = new_state;
+                     } );
     };
 
     var homeToProjects = function() {
-	transition( $('#main'), $('.pg_content').add('#thumbContainter') );
+	      transition( $('#main'), $('.pg_content').add('#thumbContainter'), STATES.PROJECTS );
     };
 
     var projectsToHome = function() {
-	transition( $('.pg_content').add('#thumbContainter'), $('#main') );
+	      transition( $('.pg_content').add('#thumbContainter'), $('#main'), STATES.MAIN );
     };
 
     $('#projects_link').bind('click', homeToProjects );
-    $('#home_link').bind('click', projectsToHome );    
+
+    $('#thumbContainter').add('.pg_content')
+        .bind('click', function(e) {
+                         e.stopPropagation();
+                     });
+
+
+    $(document).bind('click', function() {
+                         if(GLOBAL_STATE == STATES.PROJECTS)  {
+                             projectsToHome();
+                         }
+                     });
 }
 $(setupGallery);
