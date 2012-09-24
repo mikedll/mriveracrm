@@ -11,6 +11,17 @@ gem 'heroku_san', :group => :development
 gem "heroku", :group => :development
 gem 'sqlite3-ruby', :require => 'sqlite3', :group => :development
 gem 'taps', :group => :development
+gem 'sass'
+gem 'compass'
 
+gem 'carrierwave'
+
+gem 'activeadmin'
+
+gem "fog"
+gem 'rmagick'
+
+gem "barista", :group => :development
 
 gem "pg", :group => :production
+

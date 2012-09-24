@@ -1,0 +1,9 @@
+
+development:
+  bucket: mikedll.com-development
+
+test:
+  bucket: mikedll.com-test
+
+production:
+  bucket: mikedll.com-production

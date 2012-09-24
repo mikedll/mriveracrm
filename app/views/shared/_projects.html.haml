@@ -4,16 +4,16 @@
 
 .pg_content.hide
   #pg_title.pg_title
-    - Project.all.each_with_index do |p, i|
+    - @projects.each_with_index do |p, i|
       %h1{ :style => ((i == 0) ? "display:block;top:5px;" : "" ) }
         = p[:title]
 
   #pg_preview
-    - Project.all.each_with_index do |p, i|
+    - @projects.each_with_index do |p, i|
       = image_tag( "portfolio/medium/#{p[:image]}", :class => "pg_thumb", :style=> ((i == 0) ? "display:block;z-index:9999;" : ""), :alt => "images/portfolio/large/#{p[:image]}")
 
   #pg_desc1.pg_description
-    - Project.all.each_with_index do |p, i|
+    - @projects.each_with_index do |p, i|
       .project_entry{ :style=> ((i == 0) ? "display:block;left:250px;" : "" ) }
         %h2
           Project Description
@@ -21,7 +21,7 @@
           = p[:desc]
 
   #pg_desc2.pg_description
-    - Project.all.each_with_index do |p, i|
+    - @projects.each_with_index do |p, i|
       .project_entry{ :style=> ((i == 0) ? "display:block;left:650px;" : "" ) }
         %h2
           Technologies Used
@@ -32,7 +32,7 @@
 
   #thumbScroller
     .container
-      - Project.all.each_with_index do |p, i|
+      - @projects.each_with_index do |p, i|
         .content
           %div
             = link_to( image_tag("portfolio/thumbs/#{p[:image]}", :alt => "", :class => "thumb"), "#")

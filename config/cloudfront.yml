@@ -1,0 +1,9 @@
+
+development:
+  bucket: none
+
+test:
+  bucket: none
+
+production:
+  bucket: www.mikedll.com
