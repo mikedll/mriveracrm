@@ -21,7 +21,7 @@ namespace :assets do
   # end
 
   desc "Deploy assets to prod - uses Rails.env or the FIRST selected heroku app"
-  task :deploy => [:environment, :css_compile, :coffee_compile, :compile_jammit] do
+  task :deploy => [:environment, :coffee_compile] do
 
     require 'aws/s3'
 

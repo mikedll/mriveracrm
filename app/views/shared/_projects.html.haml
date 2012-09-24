@@ -10,7 +10,7 @@
 
   #pg_preview
     - @projects.each_with_index do |p, i|
-      = image_tag( "portfolio/medium/#{p[:image]}", :class => "pg_thumb", :style=> ((i == 0) ? "display:block;z-index:9999;" : ""), :alt => "images/portfolio/large/#{p[:image]}")
+      = image_tag( p[:small], :class => "pg_thumb", :style=> ((i == 0) ? "display:block;z-index:9999;" : ""), :alt => p[:medium] )
 
   #pg_desc1.pg_description
     - @projects.each_with_index do |p, i|
@@ -35,7 +35,7 @@
       - @projects.each_with_index do |p, i|
         .content
           %div
-            = link_to( image_tag("portfolio/thumbs/#{p[:image]}", :alt => "", :class => "thumb"), "#")
+            = link_to( image_tag(p[:thumb], :alt => "", :class => "thumb"), "#")
 
 #overlay
 
