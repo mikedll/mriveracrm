@@ -20,7 +20,7 @@
 
     = render :partial => "shared/gain_layout"
 
-    %div{ 'data-asset-host' => ActionController::Base.asset_host, 'id' => 'header'}
+    %div{ 'data-asset-prefix' => asset_prefix, 'id' => 'header'}
 
     = yield
 

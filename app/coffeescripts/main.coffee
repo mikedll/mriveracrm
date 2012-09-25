@@ -18,9 +18,14 @@ class Main
           @next = Math.round(Math.random() * (@choices.length - 1))
         @current = @next
 
-        host = $('#header').data('asset-host')
-        host = "" if !host?
-        $('#header').css('background', "top center url(#{host}/images/#{@choices[ @current ]}) no-repeat")
+        prefix = $('#header').data('asset-prefix')
+
+        if !prefix?
+          prefix = ""
+        else
+          prefix = "http://#{prefix}"
+
+        $('#header').css('background', "top center url(#{prefix}/images/#{@choices[ @current ]}) no-repeat")
         $('#header').fadeIn(@fadeOut, () =>
           setTimeout(rotateImages, @interval)
         )
