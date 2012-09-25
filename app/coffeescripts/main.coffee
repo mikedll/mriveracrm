@@ -20,10 +20,10 @@ class Main
 
         prefix = $('#header').data('asset-prefix')
 
-        if !prefix?
-          prefix = ""
-        else
+        if prefix? && prefix != ""
           prefix = "http://#{prefix}"
+        else
+          prefix = "" # this may be redundant depending on what we got
 
         $('#header').css('background', "top center url(#{prefix}/images/#{@choices[ @current ]}) no-repeat")
         $('#header').fadeIn(@fadeOut, () =>

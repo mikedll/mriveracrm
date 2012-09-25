@@ -1,3 +1,3 @@
 module Mikedll
-  VERSION = 'cace091c9dbd19b361b5f9e114fe2a3ebbcdfc2b'
+  VERSION = '9819cfbb5c68e0cdf1b3bdf87eefa6238a1f5437'
 end
