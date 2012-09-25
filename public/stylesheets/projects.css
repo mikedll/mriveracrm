@@ -63,6 +63,11 @@ span.reference a{
 	overflow:hidden;
 	left:-180px;
 }
+
+#thumbScroller div {
+  margin: 0 0 0;
+}
+
 #thumbScroller .container{
 	position:relative;
 	top:0;
@@ -87,8 +92,7 @@ span.reference a{
 	box-shadow:0px 0px 2px #000;
 }
 
-img.pg_thumb,
-img#pg_large,
+.pg_thumb_block,
 .pg_title h1,
 .pg_content .pg_description div
 {
@@ -112,18 +116,20 @@ img#pg_large,
 .pg_title {
 }
 
-img.pg_thumb{
-	display:none;
-}
-img#pg_large{
-	z-index:9999;
-}
-img.pg_thumb,
-img#pg_large{
+.pg_thumb_block {
 	top:90px;
 	left:250px;
+	display:none;
+}
+
+.pg_thumb_block img.pg_thumb {
 	padding:10px;
 	cursor:pointer;
+}
+
+img#grower, img#pg_large {
+  position: absolute;
+	z-index:9999;
 }
 
 .pg_description h2{

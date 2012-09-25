@@ -49,6 +49,7 @@ function setupGallery() {
     };
 
     var projectsToHome = function() {
+        $('#overlay').fadeOut(200);
 	      transition( $('.pg_content').add('#thumbContainter'), $('#main'), STATES.MAIN );
     };
 
@@ -65,5 +66,6 @@ function setupGallery() {
                              projectsToHome();
                          }
                      });
+
 }
 $(setupGallery);

@@ -6,8 +6,9 @@ class HomeController < ApplicationController
         :title => p.title,
         :tech => p.tech,
         :decs => p.description,
+        :images => p.images,
         :thumb => p.images.first.data.thumb.url,
-        :medium => p.images.first.data.medium.url,
+        :medium => p.images.first.data.large.url,
         :small => p.images.first.data.small.url
       }
     end

@@ -10,7 +10,9 @@
 
   #pg_preview
     - @projects.each_with_index do |p, i|
-      = image_tag( p[:small], :class => "pg_thumb", :style=> ((i == 0) ? "display:block;z-index:9999;" : ""), :alt => p[:medium] )
+      .pg_thumb_block{:style=> ((i == 0) ? "display:block;z-index:9999;" : "")}
+        - p[:images].each do |im|
+          = image_tag( im.data.small.url, :class => "pg_thumb", :alt => im.data.large.url )
 
   #pg_desc1.pg_description
     - @projects.each_with_index do |p, i|

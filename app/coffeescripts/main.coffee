@@ -13,7 +13,11 @@ class Main
 
     rotateImages = () =>
       $('#header').fadeOut(@fadeOut, () =>
-        @current = Math.round(Math.random() * (@choices.length - 1))
+        @next = @current
+        while @next == @current
+          @next = Math.round(Math.random() * (@choices.length - 1))
+        @current = @next
+
         $('#header').css('background', "top center url(/images/#{@choices[ @current ]}) no-repeat")
         $('#header').fadeIn(@fadeOut, () =>
           setTimeout(rotateImages, @interval)

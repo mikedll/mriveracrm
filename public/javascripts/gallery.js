@@ -64,8 +64,8 @@ $(function() {
 					                      //get the current and clicked items elements
 					                      var $currentTitle 		= $pg_title.find('h1:nth-child('+(current+1)+')');
 					                      var $nextTitle 			= $pg_title.find('h1:nth-child('+(idx+1)+')');
-					                      var $currentThumb		= $pg_preview.find('img.pg_thumb:eq('+current+')');
-					                      var $nextThumb			= $pg_preview.find('img.pg_thumb:eq('+idx+')');
+					                      var $currentThumb		= $pg_preview.find('.pg_thumb_block:eq('+current+')');
+					                      var $nextThumb			= $pg_preview.find('.pg_thumb_block:eq('+idx+')');
 					                      var $currentDesc1 		= $pg_desc1.find('div:nth-child('+(current+1)+')');
 					                      var $nextDesc1 			= $pg_desc1.find('div:nth-child('+(idx+1)+')');
 					                      var $currentDesc2 		= $pg_desc2.find('div:nth-child('+(current+1)+')');
@@ -115,46 +115,65 @@ $(function() {
 			$pg_preview.find('.pg_thumb').bind('click',showLargeImage);
 			
 			//enlarges the thumb
-			function showLargeImage(){
-					//if theres a large one remove
-					$('#pg_large').remove();
-					var $thumb 		= $(this);
-					$thumb.unbind('click');
-					var large_src 	= $thumb.attr('alt');
+      function showLargeImage(){
+          //if theres a large one remove
+          $('#pg_large').remove();
+          $('#grower').remove();
+          var $thumb 		= $(this);
+
+			    $pg_preview.find('.pg_thumb').unbind('click');
+          var large_src 	= $thumb.attr('alt');
+
+          $overlay.fadeIn(200);
+
+          var padding = parseInt($thumb.css('padding'));
+          var left = padding + ($thumb.index() * (padding * 2)) + ($thumb.index() * parseInt($thumb.css('width'))); // leftmost padding, plus padding inbetween elements (collapsed), plus 
+          var top = padding;
+          var startPosition = {
+              'top': top,
+              'left': left,
+              'width': '360px',
+              'height': '300px'
+          };
+          var endPosition = {
+              'top': '0px',
+              'left': '250px',
+              'width': '900px',
+              'height': '750px'
+          };
+
+          // grow image
+          var $growerImg = $('<img id="grower"/>').css(startPosition);
+          $growerImg.attr('src', $thumb.attr('src'));
+          $growerImg.insertBefore($thumb);
+          $growerImg.animate(endPosition,
+                             500,
+                             function() {
+                                 
+							                   $thumb.css({
+								                                'opacity'	: 1,
+								                                'z-index'	: 1
+							                              });
+
+                                 $('<img src="' + large_src + '" id="pg_large"/>').css(endPosition).load(function() {
+                                                                                            var $largeImg = $(this);
+                                                                                            $largeImg.insertAfter($thumb).show();
+                                                                                            $growerImg.remove();
+							                                                                              $largeImg.bind('click',function(){
+                                                                                                               // $thumb.show();
+                                                                                                               $overlay.fadeOut(200);
+                                                                                                               $(this).stop().animate(startPosition,500, function() {
+                                                                                                                                          $largeImg.remove();
+                                                                                                                                          $thumb
+                                                                                                                                              .css({'z-index': 9999});
+
+			                                                                                                                                    $pg_preview.find('.pg_thumb').bind('click', showLargeImage);
+                                                                                                                                      });
+                                                                                                           });
+                                                                                            
+                                                                                        });
+                             });
           
-					$overlay.fadeIn(200);
-					//animate width to 600px,height to 500px
-					$thumb.stop().animate({
-						                        'width'	: '600px',
-						                        'height': '500px'
-					                      },500,function(){
-						                        $('<img id="pg_large"/>').load(function(){
-							                                                         var $largeImg = $(this);
-							                                                         $largeImg.insertAfter($thumb).show();
-							                                                         $thumb.hide().css({
-								                                                                             'left'		: '250px',
-								                                                                             'opacity'	: 1,
-								                                                                             'z-index'	: 1,
-								                                                                             'width'		: '360px',
-								                                                                             'height'	: '300px'
-							                                                                           });
-							                                                         //when we click the large image
-							                                                         //we revert the animation
-							                                                         $largeImg.bind('click',function(){
-								                                                                          $thumb.show();
-								                                                                          $overlay.fadeOut(200);
-								                                                                          $(this).stop().animate({
-									                                                                                                   'width'	: '360px',
-									                                                                                                   'height': '300px'
-								                                                                                                 },500,function(){
-									                                                                                                   $(this).remove();
-									                                                                                                   $thumb.css({'z-index'	: 9999});
-									                                                                                                   $thumb.bind('click',showLargeImage);
-								                                                                                                 });
-								                                                                          
-							                                                                        });
-						                                                       }).attr('src',large_src);
-					                      });
 			}
 			
 			//resize window event:
