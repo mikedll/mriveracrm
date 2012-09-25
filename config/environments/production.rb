@@ -14,5 +14,5 @@ Mikedll::Application.configure do
 
   config.action_controller.asset_host = 'd3dvas2xyyj1e3.cloudfront.net'
 
-  Sass::Plugin.options[:never_update] = true[0m[K
+  Sass::Plugin.options[:never_update] = true
 end
