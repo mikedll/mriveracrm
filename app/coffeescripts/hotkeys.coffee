@@ -9,8 +9,6 @@ class Hotkeys
     @hotKeyRegistry = {}
 
   handleKeyUp: (e) ->
-    console.log(k)
-    console.log(@hotKeyRegistry)
     for k, el of @hotKeyRegistry
       if(k == String.fromCharCode(e.keyCode).toLowerCase())
         e.stopPropagation()
