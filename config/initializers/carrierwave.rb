@@ -12,5 +12,6 @@ CarrierWave.configure do |config|
   config.fog_directory  = s3store['bucket']
   # config.fog_public     = false                                   # optional, defaults to true
   # config.fog_attributes = {'Cache-Control'=>'max-age=315576000'}  # optional, defaults to {}
-  config.asset_host     = 'http://mikedll.com-production.s3.amazonaws.com'            # optional, defaults to nil
+
+  config.fog_host     = "http://#{config.fog_directory}.s3.amazonaws.com"            # optional, defaults to nil
 end
