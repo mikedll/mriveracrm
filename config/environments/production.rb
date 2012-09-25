@@ -11,4 +11,7 @@ Mikedll::Application.configure do
   config.active_support.deprecation = :notify
 
   config.action_mailer.default_url_options = { :host => 'www.mikedll.com:80' }
+
+  config.action_controller.asset_host = 'd3dvas2xyyj1e3.cloudfront.net'
+
 end
