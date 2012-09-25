@@ -10,7 +10,7 @@ class ProjectsImages < ActiveRecord::Migration
 
     create_table :images do |t|
       t.string :data
-      t.string :project_id
+      t.integer :project_id
       t.timestamps
     end
 
