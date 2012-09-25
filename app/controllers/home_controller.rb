@@ -5,7 +5,7 @@ class HomeController < ApplicationController
       {
         :title => p.title,
         :tech => p.tech,
-        :decs => p.description,
+        :desc => p.description,
         :images => p.images,
         :thumb => p.images.first.data.thumb.url,
         :medium => p.images.first.data.large.url,
