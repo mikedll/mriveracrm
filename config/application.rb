@@ -9,9 +9,6 @@ Bundler.require(:default, Rails.env) if defined?(Bundler)
 module Mikedll
   class Application < Rails::Application
 
-    AMAZON_ACCESS_KEY = 'AKIAI2GAWV3VCMDUC73Q'
-    AMAZON_SECRET_KEY = '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'
-
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
