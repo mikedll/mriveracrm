@@ -61,7 +61,6 @@ function setupGallery() {
                          e.stopPropagation();
                      });
 
-
     $(document)
         .bind('click', function() {
                          if(GLOBAL_STATE == STATES.PROJECTS)  {
@@ -73,7 +72,10 @@ function setupGallery() {
                   // This is ugly because it depends on a lot of selectors that are repeated in the below
                   // gallery setup. Such is what happens when you merge disparate pieces of code.
                   //
-                  if (GLOBAL_STATE == STATES.PROJECTS) {
+                  if (GLOBAL_STATE == STATES.MAIN) {
+                      $('body').data('hotkeys').handleKeyUp(e);
+                  }
+                  else if (GLOBAL_STATE == STATES.PROJECTS) {
                       if(e.keyCode === 38 || e.keyCode === 40) {
                           e.stopPropagation();
                           var allThumbnails = $('#thumbScroller .content');
@@ -104,7 +106,6 @@ function setupGallery() {
                   }
 
               });
-
 }
 $(setupGallery);
 

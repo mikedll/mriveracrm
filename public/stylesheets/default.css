@@ -129,11 +129,14 @@ ul#projects_list li {
     margin: 0em 1em 1em;
 }
 
-#top_menu ul li a {
+a {
     text-decoration: none;
 }
 
-#top_menu ul li a:hover {
+a:hover {
     text-decoration: underline;
+}
 
+a span.hotkey {
+    text-decoration: underline;
 }

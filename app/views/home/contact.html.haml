@@ -1,4 +1,6 @@
 
+- content_for :head do
+  = javascript_include_tag 'contact'
 
 #main.floating_container
 
@@ -13,4 +15,5 @@
     three, two eight four, six two, eight two.
 
   %p
-    = link_to '< Back', root_path
+    = link_to '< Back', root_path, 'data-hotkey' => 'b'
+

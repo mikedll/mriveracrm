@@ -1,22 +1,19 @@
 
-- content_for :head do
-  = javascript_include_tag "home.js"
-
 #main.floating_container
 
   #top_menu
     %ul
       %li
-        = link_to "Portfolio", "#", :id => "projects_link"
+        = link_to "Portfolio", "#", :id => "projects_link", 'data-hotkey' => 'p'
 
       %li
-        = link_to "Github", "https://github.com/mikedll"
+        = link_to "Github", "https://github.com/mikedll", 'data-hotkey' => 'g'
 
       %li
-        = link_to("Hire Me on ODesk", "http://www.odesk.com/users/Skills-pay-bills_~~b7c77f857ebb0450")
+        = link_to("Hire Me on ODesk", "http://www.odesk.com/users/Skills-pay-bills_~~b7c77f857ebb0450", 'data-hotkey' => 'h')
 
       %li
-        = link_to("Contact Me", contact_home_path)
+        = link_to("Contact Me", contact_home_path, 'data-hotkey' => 'c')
 
   .clear
 
@@ -36,7 +33,7 @@
       developer.  I started on December 13th, 2010 in Monterey,
       California, and now live in Anza, California. The scenic pictures
       you see in the background are from those two small towns.
-
+    
     %p
       I'm available for hire as a contractor.
 
@@ -46,8 +43,9 @@
       7 and can run multiple Linux VMs without any performance
       issues. Additionally, I have an 8GB RAM MacBook Pro that dual
       boots into both Windows 7 and OS X. I understand why log(n) is
-      better than n and way better than (n^2). My blogpost is the #8
-      Google search result for "red black trees python".
+      better than n and way better than (n^2).  I occasionally produce
+      instructional videos or articles on my blog. One of my blogposts is the #8 Google
+      search result for "red black trees python".
       
     %p
       Tech I work with: Linux, .NET, Apache, MySQL, Perl, Python, PHP,
