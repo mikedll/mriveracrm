@@ -1,7 +1,6 @@
 class Image < ActiveRecord::Base
 
-  has_many :image_projects
-  has_many :projects, :through => :image_project
+  belongs_to :project
 
   mount_uploader :data, PortfolioImageUploader
 

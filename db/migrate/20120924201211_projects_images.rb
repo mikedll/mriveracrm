@@ -10,18 +10,13 @@ class ProjectsImages < ActiveRecord::Migration
 
     create_table :images do |t|
       t.string :data
-      t.timestamps
-    end
-
-    create_table :image_projects do |t|
-      t.string :image_id
       t.string :project_id
+      t.timestamps
     end
 
   end
 
   def self.down
-    drop_table :image_projects
     drop_table :images
     drop_table :projects
   end
