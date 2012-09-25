@@ -3,6 +3,7 @@ CarrierWave.configure do |config|
 
   s3store = YAML.load( File.read(Rails.root.join('config', 's3store.yml')))[Rails.env]
 
+  config.root = Rails.root.join('tmp')
   config.fog_credentials = {
     :provider               => 'AWS',       # required
     :aws_access_key_id      => ENV['AMAZON_ACCESS_KEY_ID'],
