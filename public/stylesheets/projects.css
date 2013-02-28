@@ -49,19 +49,16 @@ span.reference a{
 	left:0px;
 	bottom:0px;
 	margin:0;
-	width:175px;
+	width:188px;
 	padding:0 10px;
 	background: #262626;
 	border-right:1px solid #f0f0f0;
 	-moz-box-shadow:-2px 0px 10px #000 inset;
 	-webkit-box-shadow:-2px 0px 10px #000 inset;
 	box-shadow:-2px 0px 10px #000 inset;
+  overflow-y: auto;
 }
 #thumbScroller{
-	position:relative;
-	height:600px;
-	overflow:hidden;
-	left:-180px;
 }
 
 #thumbScroller div {

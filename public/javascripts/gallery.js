@@ -153,10 +153,6 @@ $(function() {
 						                                                   ++cnt;
 						                                                   if(cnt == scrollerContentCnt){
 							                                                     //one items height
-							                                                     itemHeight = $thumbScroller.find('.content:first').height();
-							                                                     buildScrollableItems();
-							                                                     //show the scrollable container
-							                                                     $thumbScroller.stop().animate({'left':'0px'},animSpeed);
 						                                                   }
 					                                                 }).attr('src',$img.attr('src'));
 				                              });
@@ -330,54 +326,5 @@ $(function() {
                              });          
 			}
 			
-			//resize window event:
-			//the scroller container needs to update
-			//its height based on the new windows height
-			$(window).resize(function() {
-					                 var w_h			= $(window).height();
-					                 $thumbScroller.css('height',w_h);
-					                 sliderHeight	= w_h;
-				               });
 			
-			//create the scrollable container
-			//taken from Manos :
-			//http://manos.malihu.gr/jquery-thumbnail-scroller
-			function buildScrollableItems(){
-					totalContent = (scrollerContentCnt-1)*itemHeight;
-					$thumbScroller.css('height',sliderHeight)
-					    .mousemove(function(e){
-						                 if($scrollerContainer.height()>sliderHeight){
-							                   var mouseCoords		= (e.pageY - this.offsetTop);
-							                   var mousePercentY	= mouseCoords/sliderHeight;
-							                   var destY			= -(((totalContent-(sliderHeight-itemHeight))-sliderHeight)*(mousePercentY));
-							                   var thePosA			= mouseCoords-destY;
-							                   var thePosB			= destY-mouseCoords;
-							                   if(mouseCoords==destY)
-								                     $scrollerContainer.stop();
-							                   else if(mouseCoords>destY)
-								                 $scrollerContainer.stop()
-							                       .animate({
-								                                  top: -thePosA
-							                                },
-							                                animSpeed,
-							                                easeType);
-							                   else if(mouseCoords<destY)
-								                 $scrollerContainer.stop()
-							                       .animate({
-								                                  top: thePosB
-							                                },
-							                                animSpeed,
-							                                easeType);
-						                 }
-					               }).find('.thumb')
-					    .fadeTo(fadeSpeed, 0.6)
-					    .hover(
-					        function(){ //mouse over
-						          $(this).fadeTo(fadeSpeed, 1);
-					        },
-					        function(){ //mouse out
-						          $(this).fadeTo(fadeSpeed, 0.6);
-					        }
-				      );
-			}
 	});
