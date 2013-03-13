@@ -8,7 +8,7 @@ Bundler.require(:default, Rails.env) if defined?(Bundler)
 
 require Bundler.root.join('config', 'version')
 
-module Mikedll
+module MikedllCrm
   class Application < Rails::Application
 
     unless Rails.env.development?

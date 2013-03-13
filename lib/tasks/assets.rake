@@ -67,7 +67,7 @@ namespace :assets do
   def s3_key_for(file_path)
     @root_path_length ||= Rails.root.join("public").to_s.length + "/".length
     relative_to_public = file_path[ @root_path_length, file_path.length]
-    "version_#{Mikedll::VERSION}/#{relative_to_public}"
+    "version_#{MikedllCrm::VERSION}/#{relative_to_public}"
   end
 
   def s3_update_asset( bucket, file_path, options = {} )

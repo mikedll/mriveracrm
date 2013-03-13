@@ -1,5 +1,5 @@
 
-Mikedll::Application.routes.draw do
+MikedllCrm::Application.routes.draw do
 
   ActiveAdmin.routes(self)
 

@@ -1,4 +1,4 @@
-Mikedll::Application.configure do
+MikedllCrm::Application.configure do
   config.cache_classes = false
   config.whiny_nils = true
 
