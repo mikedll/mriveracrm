@@ -1,7 +1,14 @@
+
+.bundle/
+.DS_Store
+
 log/*
 tmp/*
 db/*.sqlite3
-.bundle/
-.DS_Store
+
+config/credentials.yml
+config/database.yml
+
+
 public/javascripts/generated/
 public/stylesheets/active_admin.css

@@ -1,0 +1,26 @@
+
+development:
+  adapter: postgresql
+  host: localhost
+  database: mikedllcrm_development
+  username: mikedllcrmdev
+  password: rakeleaves
+
+test:
+  adapter: postgresql
+  host: localhost
+  database: mikedllcrm_test
+  username: mikedllcrmdev
+  password: rakeleaves
+
+
+production:
+  # this is junk; its just so that the assets precompile will function.
+  adapter: postgresql
+  host: localhost
+  database: mikedllcrm_development
+  username: mikedllcrmdev
+  password: rakeleaves
+  
+
+

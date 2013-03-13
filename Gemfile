@@ -13,6 +13,11 @@ gem 'sqlite3-ruby', :require => 'sqlite3', :group => :development
 gem 'taps', :group => :development
 gem 'sass'
 gem 'compass'
+gem 'devise'
+gem 'omniauth'
+gem "omniauth-google-oauth2"
+
+gem "activemerchant"
 
 gem 'carrierwave'
 
@@ -23,5 +28,16 @@ gem 'rmagick'
 
 gem "barista", :group => :development
 
-gem "pg", :group => :production
+gem "pg"
+
+group :test, :development do
+  gem 'rb-inotify'
+  gem "guard-spork"
+  gem "guard-rspec"
+  gem "timecop"
+  gem "database_cleaner"
+  gem 'rspec-rails'
+  gem "capybara"
+  gem "factory_girl_rails"
+end
 
