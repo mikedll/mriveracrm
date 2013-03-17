@@ -10,8 +10,8 @@ class CreateBusinesses < ActiveRecord::Migration
 
     create_table :clients do |t|
       t.string :first_name, :default => "", :null => false
-      t.string :last_name, :default => "", :null => false
-      t.integer :user_id
+      t.string :last_name,  :default => "", :null => false
+      t.string :email,      :default => "", :null => false
       t.timestamps
     end
 
@@ -35,6 +35,11 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
+    create_table :clients_users, :id => false do |t|
+      t.integer :client_id
+      t.integer :user_id
+    end
+
     create_table :businesses_users, :id => false do |t|
       t.integer :business_id
       t.integer :user_id
@@ -49,6 +54,8 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
+    add_index :credentials, :email, :name => :credentials_email_index, :unique => true
+
     create_table :invoices do |t|
       t.integer :business_id
       t.decimal :total
@@ -60,16 +67,27 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_column :projects, :user_id, :integer
+    add_column :projects, :business_id, :integer
+
+    execute "update projects set business_id = (select id from businesses where domain = 'www.mikedll.com')"
+
+    create_table :invitations do |t|
+      t.integer :business_id
+      t.integer :client_id
+      t.string  :email, :default => "", :null => false
+      t.timestamps
+    end
 
   end
 
   def self.down
-    remove_column :projects, :user_id    
+    remove_column :projects, :business_id
     drop_table :payment_gateway_profiles
     drop_table :invoices
+    remove_index :credentials_email_index
     drop_table :credentials
     drop_table :businesses_users
+    drop_table :clients_users
     drop_table :users
     drop_table :businesses_clients
     drop_table :clients

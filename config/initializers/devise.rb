@@ -196,10 +196,10 @@ Devise.setup do |config|
   # ==> OmniAuth
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
-  require "omniauth-google-oauth2"
   config.omniauth :google_oauth2, MikedllCrm::GOOGLE_OAUTH2_CLIENT_ID, MikedllCrm::GOOGLE_OAUTH2_CLIENT_SECRET, {
     :scope => ['userinfo.email','userinfo.profile', "https://mail.google.com/", "https://www.google.com/m8/feeds/"],
-    :approval_prompt => "auto"
+    :approval_prompt => "auto",
+    :require => "omniauth-google-oauth2"
   }
 
   # ==> Warden configuration

@@ -65,9 +65,14 @@ ActiveRecord::Schema.define(:version => 20130312210039) do
   create_table "clients", :force => true do |t|
     t.string   "first_name", :default => "", :null => false
     t.string   "last_name",  :default => "", :null => false
-    t.integer  "user_id"
+    t.string   "email",      :default => "", :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "clients_users", :id => false, :force => true do |t|
+    t.integer "client_id"
+    t.integer "user_id"
   end
 
   create_table "credentials", :force => true do |t|
@@ -80,9 +85,19 @@ ActiveRecord::Schema.define(:version => 20130312210039) do
     t.datetime "updated_at"
   end
 
+  add_index "credentials", ["email"], :name => "credentials_email_index", :unique => true
+
   create_table "images", :force => true do |t|
     t.string   "data"
     t.integer  "project_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "invitations", :force => true do |t|
+    t.integer  "business_id"
+    t.integer  "client_id"
+    t.string   "email",       :default => "", :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -107,7 +122,7 @@ ActiveRecord::Schema.define(:version => 20130312210039) do
     t.string   "tech"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "user_id"
+    t.integer  "business_id"
   end
 
   create_table "users", :force => true do |t|

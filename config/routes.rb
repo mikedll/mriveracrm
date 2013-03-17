@@ -14,6 +14,10 @@ MikedllCrm::Application.routes.draw do
     get :projects
   end
 
+  resources :invitations, :only => [:show] do
+    put :accept
+  end
+
   root :to => "home#index"
 
 end

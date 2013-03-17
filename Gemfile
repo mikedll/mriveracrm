@@ -1,16 +1,15 @@
 source 'http://rubygems.org'
 
 gem 'rails', '3.0.3'
+gem "pg"
 gem "haml"
 gem "haml-rails"
 gem "aws-s3"
 gem "dynamic_form"
 gem "simple_form"
+gem 'state_machine'
 
-gem 'heroku_san', :group => :development
-gem "heroku", :group => :development
-gem 'sqlite3-ruby', :require => 'sqlite3', :group => :development
-gem 'taps', :group => :development
+
 gem 'sass'
 gem 'compass'
 gem 'devise'
@@ -26,9 +25,12 @@ gem 'activeadmin'
 gem "fog"
 gem 'rmagick'
 
-gem "barista", :group => :development
-
-gem "pg"
+group :development do
+  gem "barista"
+  gem 'taps', '> 0.3.23'
+  gem 'heroku_san'
+  gem "heroku"
+end
 
 group :test, :development do
   gem 'rb-inotify'
