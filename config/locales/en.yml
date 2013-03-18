@@ -2,4 +2,5 @@
 # See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
-  hello: "Hello world"
+  payment_gateway_profile:
+    update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."

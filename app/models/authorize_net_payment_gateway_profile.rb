@@ -217,6 +217,10 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
   #   nil
   # end
 
+  def card_prompt
+    card_last_4.blank? ? "No card on file" : "Card ending in #{card_last_4}"
+  end
+
   #
   # 
   #
@@ -228,8 +232,8 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
           :credit_card => ActiveMerchant::Billing::CreditCard.new({
                                                                     :first_name => self.client.first_name,
                                                                     :last_name => self.client.last_name,
-                                                                    :month => opts[:expiration_month],
-                                                                    :year => opts[:expiration_year],
+                                                                    :month => opts[:expiration_month].to_i,
+                                                                    :year => opts[:expiration_year].to_i,
                                                                     :number => opts[:card_number],
                                                                     :verification_value => opts[:card_code]
                                                                   })
@@ -240,18 +244,19 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
     call_prefix = 'create'
     if !self.card_profile_id.nil?
-      call_opts[:payment_profile].merge(:customer_payment_profile_id => self.card_profile_id) 
+      call_opts[:payment_profile].merge!(:customer_payment_profile_id => self.card_profile_id) 
       call_prefix = 'update'
     end
     response = PaymentGateway.authorizenet.send("#{call_prefix}_customer_payment_profile".to_sym, call_opts)
       
     if response.params['messages']['result_code'] != AuthorizeResponses::OK
       DetectedErrors.create!(:message => "Authorize.net payment profile update failure responded that duplicate customer payment profile already exists.", :client_id => self.client.id) if response.params['messages']['message']['code'] == 'E00039'
-      self.errors.add(:base, 'Payment information failed to update. Check your inputs. If this persists, please contact your business representative.')
+      self.errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
       return false
     end
 
-    self.card_profile_id = response.params['profile']['payment_profiles']['customer_payment_profile_id'] if self.card_profile_id.nil?
+    self.card_last_4 = opts[:card_number].last(4)
+    self.card_profile_id = response.params['customer_payment_profile_id'] if self.card_profile_id.nil?
     save!
   end
 
