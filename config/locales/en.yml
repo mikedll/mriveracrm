@@ -2,5 +2,12 @@
 # See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
+  errors:
+    unexpected_internal_error: "Unexpected internal system error"
+
+  invoice:
+    already_paid: "has already been paid"
+
   payment_gateway_profile:
+    cant_pay: "Payment information is not setup properly to make payments. Have you entered valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."

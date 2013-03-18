@@ -26,12 +26,29 @@ FactoryGirl.define do
     client { FactoryGirl.create(:client) }
   end
 
+  factory :authorize_net_payment_gateway_profile_ready, :parent => :authorize_net_payment_gateway_profile do
+    client { FactoryGirl.create(:client) }
+    after(:create) do |profile, evaluator|
+      profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111')
+    end
+  end
 
   factory :stubbed_authorize_net_payment_gateway_profile, :parent => :authorize_net_payment_gateway_profile do
     before(:create) do |profile, evaluator|
       PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
     end
     client { FactoryGirl.create(:client) }
+  end
+
+  factory :invoice do
+    description "Test invoice."
+    client { FactoryGirl.create(:client) }
+    date { Time.now }
+    total 2500.00
+  end
+
+  factory :transaction do
+    invoice { FactoryGirl.create(:invoice) }
   end
 
 end

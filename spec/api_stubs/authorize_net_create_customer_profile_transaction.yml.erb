@@ -1,0 +1,62 @@
+--- !ruby/object:ActiveMerchant::Billing::Response
+params:
+  messages:
+    result_code: Ok
+    message:
+      code: I00001
+      text: Successful.
+  direct_response:
+    raw: 1,1,1,(TESTMODE) This transaction has been approved.,000000,P,0,,,2500.00,CC,auth_capture,,,,,,,,,,,,user32SHj+yZABQ=@example.com,,,,,,,,,,,,,,4C10BF8145331E2509E1FB0D9759EE50,,,,,,,,,,,,,XXXX2222,Visa,,,,,,,,,,,,,,,,
+    response_code: '1'
+    response_subcode: '1'
+    response_reason_code: '1'
+    message: (TESTMODE) This transaction has been approved.
+    approval_code: '000000'
+    avs_response: P
+    transaction_id: '0'
+    invoice_number: ''
+    order_description: ''
+    amount: '2500.00'
+    method: CC
+    transaction_type: auth_capture
+    customer_id: ''
+    first_name: ''
+    last_name: ''
+    company: ''
+    address: ''
+    city: ''
+    state: ''
+    zip_code: ''
+    country: ''
+    phone: ''
+    fax: ''
+    email_address: user32SHj+yZABQ=@example.com
+    ship_to_first_name: ''
+    ship_to_last_name: ''
+    ship_to_company: ''
+    ship_to_address: ''
+    ship_to_city: ''
+    ship_to_state: ''
+    ship_to_zip_code: ''
+    ship_to_country: ''
+    tax: ''
+    duty: ''
+    freight: ''
+    tax_exempt: ''
+    purchase_order_number: ''
+    md5_hash: 4C10BF8145331E2509E1FB0D9759EE50
+    card_code: ''
+    cardholder_authentication_verification_response: ''
+message: Successful.
+success: true
+test: true
+authorization: !!null 
+fraud_review: !!null 
+avs_result:
+  code: !!null 
+  message: !!null 
+  street_match: !!null 
+  postal_match: !!null 
+cvv_result:
+  code: !!null 
+  message: !!null 

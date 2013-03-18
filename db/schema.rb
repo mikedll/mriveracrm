@@ -116,6 +116,10 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.decimal  "total"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.text     "description"
+    t.string   "status",      :null => false
+    t.datetime "date"
+    t.integer  "client_id"
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|
@@ -139,14 +143,16 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
   end
 
   create_table "transactions", :force => true do |t|
-    t.integer "invoice_id"
-    t.integer "payment_gateway_profile_id"
-    t.string  "vendor_payment_gateway_profile_id"
-    t.decimal "amount",                                    :precision => 10, :scale => 2, :default => 0.0
-    t.string  "vendor_id"
-    t.text    "error"
-    t.integer "authorizenet_gateway_response_code"
-    t.integer "authorizenet_gateway_response_reason_code"
+    t.integer  "invoice_id"
+    t.integer  "payment_gateway_profile_id"
+    t.string   "status"
+    t.decimal  "amount",                                    :precision => 10, :scale => 2, :default => 0.0
+    t.string   "vendor_id"
+    t.text     "error"
+    t.integer  "authorizenet_gateway_response_code"
+    t.integer  "authorizenet_gateway_response_reason_code"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "users", :force => true do |t|

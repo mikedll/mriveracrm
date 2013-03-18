@@ -17,7 +17,7 @@ describe AuthorizeNetPaymentGatewayProfile do
       DetectedError.count.should == 0
     end
 
-    it "should be able to reload remotely with vendor_id, including getting payment profile", :current => true do
+    it "should be able to reload remotely with vendor_id, including getting payment profile" do
         @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
         @profile.card_last_4 = ""
         before = @profile.card_profile_id
@@ -70,7 +70,43 @@ describe AuthorizeNetPaymentGatewayProfile do
         @profile.card_profile_id.should be_nil
         @profile.card_prompt.should == "No card on file"
       end      
-     end
+    end
+
+    context "pay", :current => true do
+      before(:each) do
+        @profile = FactoryGirl.create(:authorize_net_payment_gateway_profile)
+        @invoice = FactoryGirl.create(:invoice, :client => @profile.client)
+      end
+
+      it "should fail unless payment info confgured" do
+        @profile.pay_invoice!(@invoice).should be_false
+        @profile.last_error.should == I18n.t('payment_gateway_profile.cant_pay')
+      end
+
+      it "should be able to pay normal invoice" do
+        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111')
+        @profile.transactions.count.should == 0
+        @invoice.transactions.count.should == 0
+        @invoice.paid?.should be_false
+        @profile.pay_invoice!(@invoice).should be_true
+        @invoice.paid?.should be_true
+        @invoice.transactions.count.should == 1
+        @profile.transactions.count.should == 1
+        @profile.transactions.first.should == @invoice.transactions.first
+
+        @invoice.transactions.first.successful?.should be_true
+        @invoice.transactions.first.vendor_id.should_not be_blank
+        @invoice.transactions.first.amount.should == @invoice.total
+
+        invoice2 = FactoryGirl.create(:invoice, :client => @profile.client, :total => 1823.34)
+        invoice2.transactions.count.should == 0
+        @profile.pay_invoice!(invoice2)
+        invoice2.transactions.first.amount.should == 1823.34
+      end
+
+      it "should capture error when transaction fails due to expired card", :current => true do
+      end
+    end
   end
 
 end

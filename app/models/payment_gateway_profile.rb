@@ -1,19 +1,13 @@
 class PaymentGatewayProfile < ActiveRecord::Base
   belongs_to :client
+  has_many :transactions
 
   after_create :_create_remote
 
-  def pay_invoice!(invoice)
-    return false if self.can_make_payments?
+  attr_accessor :last_error
 
-    t = transaction.new(:customer_profile_id => self.vendor_id, :amount => invoice.amount)
-    t.begin!
-    result = t.process
-    if result[:success]
-      t.succeed!
-    else
-      t.fail!
-    end
+  def pay_invoice!(invoice)
+    raise "Implement in subclass."
   end
 
   def _create_remote
