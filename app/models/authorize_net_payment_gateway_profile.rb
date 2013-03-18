@@ -274,7 +274,8 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     end
     
     if response.params['profile']['payment_profiles'] && response.params['profile']['payment_profiles']['customer_payment_profile_id']
-      self.card_last_4 = response.params['profile']['payment_profiles']
+      self.card_profile_id = response.params['profile']['payment_profiles']['customer_payment_profile_id']
+      self.card_last_4 = response.params['profile']['payment_profiles']['payment']['credit_card']['card_number'].last(4)
     end
 
     self.save!

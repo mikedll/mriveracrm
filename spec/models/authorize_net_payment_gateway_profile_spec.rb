@@ -17,6 +17,20 @@ describe AuthorizeNetPaymentGatewayProfile do
       DetectedError.count.should == 0
     end
 
+    it "should be able to reload remotely with vendor_id, including getting payment profile", :current => true do
+        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
+        @profile.card_last_4 = ""
+        before = @profile.card_profile_id
+        @profile.card_profile_id = nil
+        @profile.save!
+
+        @profile.card_last_4.should == ''
+        @profile.card_profile_id.should be_nil
+        @profile.reload_remote
+        @profile.card_last_4.should == '2222'
+        @profile.card_profile_id.should == before
+    end
+
     context "payment profile" do
       it "should be able to create credit card info" do
         @profile.card_profile_id.should be_nil
