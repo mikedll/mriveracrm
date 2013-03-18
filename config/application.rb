@@ -39,4 +39,7 @@ module MikedllCrm
   GOOGLE_OAUTH2_CLIENT_ID = Credentials.get('google.oauth2_client_id')
   GOOGLE_OAUTH2_CLIENT_SECRET = Credentials.get('google.oauth2_client_secret')
 
+  AUTHNET_LOGIN = Credentials.get('authorizenet.api_login_id')
+  AUTHNET_PASSWORD = Credentials.get('authorizenet.transaction_key')
+
 end

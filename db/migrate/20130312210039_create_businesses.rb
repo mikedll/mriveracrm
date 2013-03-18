@@ -81,6 +81,7 @@ class CreateBusinesses < ActiveRecord::Migration
   end
 
   def self.down
+    drop_table :invitations
     remove_column :projects, :business_id
     drop_table :payment_gateway_profiles
     drop_table :invoices
