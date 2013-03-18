@@ -8,7 +8,7 @@ class Transaction < ActiveRecord::Base
       transition [:open] => [:pending]
     end
 
-    event :fail do
+    event :has_failed do
       transition [:pending] => [:failed]
     end
 

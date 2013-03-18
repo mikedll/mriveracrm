@@ -1,0 +1,24 @@
+--- !ruby/object:ActiveMerchant::Billing::Response
+params:
+  messages:
+    result_code: Ok
+    message:
+      code: I00001
+      text: Successful.
+  customer_profile_id: '<%= customer_profile_id %>'
+  customer_payment_profile_id_list: !!null 
+  customer_shipping_address_id_list: !!null 
+  validation_direct_response_list: !!null 
+message: Successful.
+success: true
+test: true
+authorization: '<%= customer_profile_id %>'
+fraud_review: !!null 
+avs_result:
+  code: !!null 
+  message: !!null 
+  street_match: !!null 
+  postal_match: !!null 
+cvv_result:
+  code: !!null 
+  message: !!null

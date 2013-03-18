@@ -1,9 +1,11 @@
 class AuthorizeNet < ActiveRecord::Migration
   def self.up
     create_table :payment_gateway_profiles do |t|
-      t.integer    :client_id
       t.string     :type
+      t.integer    :client_id
       t.string     :vendor_id
+      t.string     :card_profile_id
+      t.string     :card_last_4
       t.timestamps
     end
  
@@ -17,9 +19,18 @@ class AuthorizeNet < ActiveRecord::Migration
       t.integer         :authorizenet_gateway_response_code
       t.integer         :authorizenet_gateway_response_reason_code
     end
+
+    create_table :detected_errors do |t|
+      t.text  :message
+      t.integer :client_id
+      t.integer :business_id
+      t.integer :user_id
+      t.timestamps
+    end
   end
 
   def self.down
+    drop_table :detected_errors
     drop_table :transactions
     drop_table :payment_gateway_profiles
   end

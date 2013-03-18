@@ -30,9 +30,18 @@ module MikedllCrm
     def self.get(path)
       cur = config
       path.to_s.split('.').each do |segment|
-        cur = cur[segment.force_encoding('UTF-8').to_s]
+        cur = cur[segment.force_encoding('UTF-8').to_s] if cur
       end
-      cur      
+
+      # retry, this time with env prefix.
+      if cur.nil?
+        cur = config[Rails.env]
+        path.to_s.split('.').each do |segment|
+          cur = cur[segment.force_encoding('UTF-8').to_s] if cur
+        end
+      end
+
+      cur
     end
   end
  
@@ -41,5 +50,6 @@ module MikedllCrm
 
   AUTHNET_LOGIN = Credentials.get('authorizenet.api_login_id')
   AUTHNET_PASSWORD = Credentials.get('authorizenet.transaction_key')
+  AUTHNET_TEST = (Credentials.get('authorizenet.test') == true)
 
 end

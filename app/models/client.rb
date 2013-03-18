@@ -6,4 +6,6 @@ class Client < ActiveRecord::Base
 
   has_one :authorize_net_customer_profile
 
+  validates :email, :format => { :with => Regexes::EMAIL }
+
 end

@@ -62,11 +62,6 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :payment_gateway_profiles do |t|
-      t.integer :user_id
-      t.timestamps
-    end
-
     add_column :projects, :business_id, :integer
 
     execute "update projects set business_id = (select id from businesses where domain = 'www.mikedll.com')"
@@ -83,7 +78,6 @@ class CreateBusinesses < ActiveRecord::Migration
   def self.down
     drop_table :invitations
     remove_column :projects, :business_id
-    drop_table :payment_gateway_profiles
     drop_table :invoices
     remove_index :credentials_email_index
     drop_table :credentials

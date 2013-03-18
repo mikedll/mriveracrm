@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20120924200540) do
+ActiveRecord::Schema.define(:version => 20130318003712) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.integer  "resource_id",   :null => false
@@ -65,9 +65,14 @@ ActiveRecord::Schema.define(:version => 20120924200540) do
   create_table "clients", :force => true do |t|
     t.string   "first_name", :default => "", :null => false
     t.string   "last_name",  :default => "", :null => false
-    t.integer  "user_id"
+    t.string   "email",      :default => "", :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "clients_users", :id => false, :force => true do |t|
+    t.integer "client_id"
+    t.integer "user_id"
   end
 
   create_table "credentials", :force => true do |t|
@@ -80,6 +85,32 @@ ActiveRecord::Schema.define(:version => 20120924200540) do
     t.datetime "updated_at"
   end
 
+  add_index "credentials", ["email"], :name => "credentials_email_index", :unique => true
+
+  create_table "detected_errors", :force => true do |t|
+    t.text     "message"
+    t.integer  "client_id"
+    t.integer  "business_id"
+    t.integer  "user_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "images", :force => true do |t|
+    t.string   "data"
+    t.integer  "project_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  create_table "invitations", :force => true do |t|
+    t.integer  "business_id"
+    t.integer  "client_id"
+    t.string   "email",       :default => "", :null => false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
   create_table "invoices", :force => true do |t|
     t.integer  "business_id"
     t.decimal  "total"
@@ -88,9 +119,32 @@ ActiveRecord::Schema.define(:version => 20120924200540) do
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|
-    t.integer  "user_id"
+    t.integer  "client_id"
+    t.string   "type"
+    t.string   "vendor_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "projects", :force => true do |t|
+    t.string   "title"
+    t.string   "link"
+    t.text     "description"
+    t.string   "tech"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "business_id"
+  end
+
+  create_table "transactions", :force => true do |t|
+    t.integer "invoice_id"
+    t.integer "payment_gateway_profile_id"
+    t.string  "vendor_payment_gateway_profile_id"
+    t.decimal "amount",                                    :precision => 10, :scale => 2, :default => 0.0
+    t.string  "vendor_id"
+    t.text    "error"
+    t.integer "authorizenet_gateway_response_code"
+    t.integer "authorizenet_gateway_response_reason_code"
   end
 
   create_table "users", :force => true do |t|
