@@ -1,15 +1,20 @@
 
 - content_for :head do
   = javascript_include_tag 'clients'
+  = javascript_include_tag 'invoices'
   = render 'bootstrap'
 
 .container-fluid.gui-container
   
   .row-fluid.clients-gui
-    
+
+    .span12
+      %h1
+        Clients
+
     .span4
-      %button.add-client
-        Add
+      %button.add-client.btn
+        +New
 
       %ul.clients-list
 
@@ -22,6 +27,26 @@
     .spinner-container.hide 
       .spinner
         = image_tag 'loading.gif'
+
+  .row-fluid.invoices-gui.hide
+    
+    .span12
+      %h1
+        Invoices
+
+    .span4
+
+      .btn-group
+        %button.back.btn
+          Back
+        %button.add-invoice.btn
+          +New
+
+      %ul.invoice-list
+
+    .span8
+      .errors.alert.alert-error.hide
+      .invoices-show-container
 
 .templates.hide
   .client_view_example

@@ -149,6 +149,7 @@ a span.hotkey {
   margin: -400px 0 0 -500px; 
   background: #fffff2;
   position: absolute;
+  overflow-x: hidden;
 }
 
 .pane {
@@ -157,6 +158,10 @@ a span.hotkey {
   overflow: auto;
 }
 
+.clients-gui, .invoices-gui {
+  position: absolute;
+  left: 0;
+}
 
 .clients-list {
 }

@@ -15,9 +15,23 @@ class ClientView extends Backbone.View
   className: 'client-view'
   events:
     'keypress input': 'onKeypress'
+    'submit form': 'noSubmit'
+    'click button.invoices': 'invoices'
 
   initialize: () ->
     @listenTo(@model, 'sync', @render)
+
+  invoices: () ->
+    $('.clients-gui')
+      .css('left': '0px')
+      .animate('left': '-1200px', 400, 'swing', () ->
+      )
+    $('.invoices-gui')
+      .show()
+      .css('left': '1200px')
+      .animate('left': '0px', 400, 'swing', () ->
+
+      )
 
   onKeypress: (e) ->
     if(e.keyCode == 13)
@@ -31,6 +45,10 @@ class ClientView extends Backbone.View
       @model.set()
       @model.save(updated, {wait: true})
       return false
+
+  noSubmit: (e) ->
+    e.stopPropagation()
+    false
 
   render: () ->
     node = $('.client_view_example form').clone()
