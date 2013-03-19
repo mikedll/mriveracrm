@@ -3,11 +3,26 @@
   = javascript_include_tag 'clients'
   = render 'bootstrap'
 
-.clients-root
+.container-fluid.gui-container
+  
+  .row-fluid.clients-gui
+    
+    .span4
+      %button.add-client
+        Add
 
-  %button.add-client
-    Add
+      %ul.clients-list
+
+    .span8
+      .clients-show-container
+
+    .clear
+
+    .spinner-container.hide 
+      .spinner
+        = image_tag 'loading.gif'
 
 .templates.hide
   .client_view_example
     = render Client.new
+

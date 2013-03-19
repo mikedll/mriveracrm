@@ -141,13 +141,29 @@ a span.hotkey {
     text-decoration: underline;
 }
 
-.clients-root {
-  overflow-y: auto;
-  position: absolute;
+.gui-container {
   top: 50%;
   left: 50%;
-  height: 500px;
-  width: 500px;
-  margin: -250px 0 0 -250px; 
+  height: 800px;
+  width: 1000px;
+  margin: -400px 0 0 -500px; 
   background: #fffff2;
+  position: absolute;
+}
+
+.pane {
+  float: left;
+  margin: 1em;
+  overflow: auto;
+}
+
+
+.clients-list {
+}
+
+.clients-show-container {
+}
+
+.spinner {
+  
 }
