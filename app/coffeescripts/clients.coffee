@@ -17,9 +17,18 @@ class ClientView extends Backbone.View
     'keypress input': 'onKeypress'
     'submit form': 'noSubmit'
     'click button.invoices': 'invoices'
+    'click button.save': 'save'
+    'click button.destroy': 'destroy'
 
   initialize: () ->
     @listenTo(@model, 'sync', @render)
+    @listenTo(@model, 'destroy', @remove)
+
+  remove: () ->
+    @$el.remove()
+
+  destroy: (e) ->
+    @model.destroy({wait: true})
 
   invoices: () ->
     $('.clients-gui')
@@ -35,16 +44,19 @@ class ClientView extends Backbone.View
 
   onKeypress: (e) ->
     if(e.keyCode == 13)
-      e.stopPropagation()
-      updated = {}
-      _.each(@$('input'), (el) ->
-        attribute_keys = /client\[(\w+)\]/.exec($(el).prop('name'))
-        if attribute_keys? && attribute_keys.length == 2
-          updated[ attribute_keys[1] ] = $(el).val()
-      )
-      @model.set()
-      @model.save(updated, {wait: true})
+      save()
       return false
+    return true
+
+  save: () ->
+    updated = {}
+    _.each(@$('input'), (el) ->
+      attribute_keys = /client\[(\w+)\]/.exec($(el).prop('name'))
+      if attribute_keys? && attribute_keys.length == 2
+        updated[ attribute_keys[1] ] = $(el).val()
+    )
+    @model.set()
+    @model.save(updated, {wait: true})
 
   noSubmit: (e) ->
     e.stopPropagation()
@@ -66,6 +78,10 @@ class ClientListItemView extends Backbone.View
 
   initialize: () ->
     @listenTo(@model, 'sync', @render)
+    @listenTo(@model, 'destroy', @remove)
+
+  remove: () ->
+    @$el.remove()
 
   show: (e) ->
     e.stopPropagation()

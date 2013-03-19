@@ -31,6 +31,13 @@ class ClientsController < ApplicationController
     render :layout => nil
   end
 
+  def destroy
+    @client = Client.find params[:id]
+    @client.destroy
+    render :ok, :json => @client
+  end
+
+
   def client_params
     params.slice(* Client.accessible_attributes.map { |k| k.underscore.to_sym } )
   end

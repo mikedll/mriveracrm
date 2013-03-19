@@ -7,7 +7,16 @@
   = f.input :email, :input_html => { :id => nil }
 
   .btn-group
+    %button.save.btn.btn-primary
+      Save
+
+  .btn-group
+    %button.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
+      Delete
+
+  .btn-group
     %button.invoices.btn
       Invoices
     %button.btn
       Users
+
