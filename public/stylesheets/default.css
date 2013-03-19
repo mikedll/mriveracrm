@@ -165,14 +165,14 @@ a span.hotkey {
 
 .clients-list li {
   font-weight: bold;
-  margin: 0.5em 0;
+  margin: 2px 0;
 }
 
 .clients-list li:nth-child(even) {
 }
 
 .clients-list li a {
-  padding: 5px;
+  padding: 3px;
   display: block;
 }
 
