@@ -1,0 +1,13 @@
+
+- content_for :head do
+  = javascript_include_tag 'clients'
+  = render 'bootstrap'
+
+.clients-root
+
+  %button.add-client
+    Add
+
+.templates.hide
+  .client_view_example
+    = render Client.new

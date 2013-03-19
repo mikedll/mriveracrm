@@ -31,7 +31,7 @@ class Main
         )
       )
 
-    setTimeout(rotateImages, @interval)
+    # setTimeout(rotateImages, @interval)
     this
 
 $(() ->

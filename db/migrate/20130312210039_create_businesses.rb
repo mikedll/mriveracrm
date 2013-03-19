@@ -9,15 +9,11 @@ class CreateBusinesses < ActiveRecord::Migration
     execute "insert into businesses (name, domain) values ('The Mike De La Loza Company', 'www.mikedll.com')"
 
     create_table :clients do |t|
+      t.integer :business_id
       t.string :first_name, :default => "", :null => false
       t.string :last_name,  :default => "", :null => false
       t.string :email,      :default => "", :null => false
       t.timestamps
-    end
-
-    create_table :businesses_clients, :id => false do |t|
-      t.integer :business_id
-      t.integer :client_id
     end
 
     create_table :users do |t|
@@ -54,7 +50,7 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
-    add_index :credentials, :email, :name => :credentials_email_index, :unique => true
+    add_index :credentials, :email, :unique => true
 
     create_table :invoices do |t|
       t.integer :business_id
@@ -79,7 +75,7 @@ class CreateBusinesses < ActiveRecord::Migration
     drop_table :invitations
     remove_column :projects, :business_id
     drop_table :invoices
-    remove_index :credentials_email_index
+    remove_index :credentials, :column => :email
     drop_table :credentials
     drop_table :businesses_users
     drop_table :clients_users

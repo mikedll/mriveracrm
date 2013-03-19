@@ -52,20 +52,16 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "updated_at"
   end
 
-  create_table "businesses_clients", :id => false, :force => true do |t|
-    t.integer "business_id"
-    t.integer "client_id"
-  end
-
   create_table "businesses_users", :id => false, :force => true do |t|
     t.integer "business_id"
     t.integer "user_id"
   end
 
   create_table "clients", :force => true do |t|
-    t.string   "first_name", :default => "", :null => false
-    t.string   "last_name",  :default => "", :null => false
-    t.string   "email",      :default => "", :null => false
+    t.integer  "business_id"
+    t.string   "first_name",  :default => "", :null => false
+    t.string   "last_name",   :default => "", :null => false
+    t.string   "email",       :default => "", :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
   end
@@ -85,7 +81,7 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "updated_at"
   end
 
-  add_index "credentials", ["email"], :name => "credentials_email_index", :unique => true
+  add_index "credentials", ["email"], :name => "index_credentials_on_email", :unique => true
 
   create_table "detected_errors", :force => true do |t|
     t.text     "message"

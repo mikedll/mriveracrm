@@ -140,3 +140,13 @@ a:hover {
 a span.hotkey {
     text-decoration: underline;
 }
+
+.clients-root {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  height: 500px;
+  width: 500px;
+  margin: -250px 0 0 -250px; 
+  background: #fffff2;
+}

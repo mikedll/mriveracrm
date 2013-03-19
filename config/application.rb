@@ -20,6 +20,7 @@ module MikedllCrm
     config.time_zone = "Pacific Time (US & Canada)"
 
     config.filter_parameters += [:password, :credit_card, :card_number]
+
   end
 
   class Credentials
