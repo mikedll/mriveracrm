@@ -8,11 +8,10 @@
   
   .row-fluid.clients-gui
 
-    .span12
+    .span4
       %h1
         Clients
 
-    .span4
       %button.add-client.btn
         +New
 
@@ -28,13 +27,10 @@
       .spinner
         = image_tag 'loading.gif'
 
-  .row-fluid.invoices-gui.hide
-    
-    .span12
+  .row-fluid.invoices-gui.hide  
+    .span4
       %h1
         Invoices
-
-    .span4
 
       .btn-group
         %button.back.btn
@@ -48,6 +44,11 @@
       .errors.alert.alert-error.hide
       .invoices-show-container
 
+    .clear
+
+    .spinner-container.hide 
+      .spinner
+        = image_tag 'loading.gif'
 .templates.hide
   .client_view_example
     = render Client.new

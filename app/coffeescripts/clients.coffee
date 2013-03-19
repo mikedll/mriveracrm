@@ -62,19 +62,21 @@ class ClientListItemView extends Backbone.View
   tagName: 'li'
   className: 'client-list-item'
   events:
-    'click span': 'show'
+    'click a': 'show'
 
   initialize: () ->
     @listenTo(@model, 'sync', @render)
 
-  show: () ->
+  show: (e) ->
+    e.stopPropagation()
     if !@showview?
       @showview = new ClientView({model:@model, className: 'client-view', id: "client-view-#{@model.get('id')}"})
       @showview.render()
     @options.clientApp.show(@showview)
+    false
 
   render: () ->
-    @$el.html("<span>#{@model.get('id')} #{@model.get('first_name')} #{@model.get('last_name')}</span>")
+    @$el.html("<a href='#'>#{@model.get('first_name')} #{@model.get('last_name')}</a>")
     @
 
 
