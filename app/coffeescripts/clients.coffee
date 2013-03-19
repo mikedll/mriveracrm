@@ -16,6 +16,9 @@ class ClientView extends Backbone.View
   events:
     'keypress input': 'onKeypress'
 
+  initialize: () ->
+    @listenTo(@model, 'sync', @render)
+
   onKeypress: (e) ->
     if(e.keyCode == 13)
       e.stopPropagation()
@@ -43,20 +46,17 @@ class ClientListItemView extends Backbone.View
   events:
     'click span': 'show'
 
+  initialize: () ->
+    @listenTo(@model, 'sync', @render)
+
   show: () ->
-    @options.clientApp.$('.clients-show-container').hide()
-
     if !@showview?
-      @showview = new ClientView({'model':@model})
+      @showview = new ClientView({model:@model, className: 'client-view', id: "client-view-#{@model.get('id')}"})
       @showview.render()
-
-    @options.clientApp.$('.clients-show-container').html(@showview.el)
-    @options.clientApp.$('.clients-show-container').show()
-    @showview.$(':input:visible').first().focus()
+    @options.clientApp.show(@showview)
 
   render: () ->
     @$el.html("<span>#{@model.get('id')} #{@model.get('first_name')} #{@model.get('last_name')}</span>")
-    @showview.render() if @showview?
     @
 
 
@@ -80,10 +80,17 @@ class ClientAppView extends Backbone.View
   addOne: (client) ->
     clientListView = new ClientListItemView({'model':client, 'clientApp': @})
     @$('.clients-list').append(clientListView.render().el)
-    client.on('sync', clientListView.render, clientListView)
     @collection.on('sync', @onSync, @)
     @collection.on('error', @onError, @)
   render: () ->
+  show: (clientView) ->
+    @$('.clients-show-container').hide()
+    @$('.clients-show-container .client-view').hide()
+    @$('.clients-show-container').append(clientView.el) if @$('#' + clientView.id).length == 0
+    @$('#' + clientView.id).show()
+    @$('.clients-show-container').show()
+    clientView.$(':input:visible').first().focus()
+
   onSync: () ->
     @$('.errors').hide()
   onError: (model, xhr, options) ->
