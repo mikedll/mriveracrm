@@ -59,6 +59,7 @@ class ClientListItemView extends Backbone.View
     @showview.render() if @showview?
     @
 
+
 class ClientAppView extends Backbone.View
   events:
     'click .add-client': 'create'
@@ -80,7 +81,13 @@ class ClientAppView extends Backbone.View
     clientListView = new ClientListItemView({'model':client, 'clientApp': @})
     @$('.clients-list').append(clientListView.render().el)
     client.on('sync', clientListView.render, clientListView)
+    @collection.on('sync', @onSync, @)
+    @collection.on('error', @onError, @)
   render: () ->
+  onSync: () ->
+    @$('.errors').hide()
+  onError: (model, xhr, options) ->
+    @$('.errors').text('An error occured while saving.').show()
 
 
 
