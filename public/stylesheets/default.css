@@ -142,6 +142,7 @@ a span.hotkey {
 }
 
 .clients-root {
+  overflow-y: auto;
   position: absolute;
   top: 50%;
   left: 50%;
