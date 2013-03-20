@@ -101,6 +101,7 @@ class ClientListItemView extends Backbone.View
 
 
 class ClientAppView extends Backbone.View
+  delay: 300
   events:
     'click .add-client': 'create'
   create: () ->
@@ -129,22 +130,22 @@ class ClientAppView extends Backbone.View
         top: '0px'
         opacity: '1.0'
       incoming:
-        left: '50px'
-        top: '50px'
+        left: '150px'
+        top: '150px'
         opacity: '0.0'
 
   childViewPushed: (view) ->
     if @children.length > 0
       @children[ @children.length - 1]
         .css(@transforms['in'])
-        .animate(@transforms['out'], 200, 'easeOutCirc', () ->
+        .animate(@transforms['out'], @delay, 'easeOutCirc', () ->
         )
 
     @$el.append(view.el)
     @children.push( view.$el )
     @children[ @children.length - 1 ]
       .css(@transforms['incoming'])
-      .animate(@transforms['in'], 200, 'easeOutCirc', () =>
+      .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
       )
 
   #
@@ -157,13 +158,13 @@ class ClientAppView extends Backbone.View
     if @children.length > 1
       @children[ @children.length - 2 ]
         .css(@transforms['out'])
-        .animate(@transforms['in'], 200, 'easeOutCirc', () ->
+        .animate(@transforms['in'], @delay, 'easeOutCirc', () ->
        )
 
     lastChild = @children[ @children.length - 1 ]
     lastChild
       .css(@transforms['in'])
-      .animate(@transforms['incoming'], 200, 'easeOutCirc', () =>
+      .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
         view.remove()
         @children.pop()
       )

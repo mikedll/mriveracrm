@@ -11,6 +11,7 @@ class InvoiceView extends Backbone.View
   initialize: () ->
 
 class InvoiceAppView extends Backbone.View
+  className: 'invoices-gui app-gui'
   events:
     'click button.back': 'back'
 
@@ -24,13 +25,6 @@ class InvoiceAppView extends Backbone.View
     @parent.childViewPulled(@)
 
   render: () ->
-    node = $('.templates .invoices_view_example').clone()
+    node = $('.templates .invoices_view_example').children().clone()
     @$el.html(node)
     @
-
-$(() ->
-    app = new InvoiceAppView(
-      'el': $('.invoices-gui')
-    )
-    app.render()
-  )

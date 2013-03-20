@@ -33,25 +33,24 @@
   .client_view_example
     = render Client.new
   .invoices_view_example
-    .invoices-gui.app-gui
-      %h1
-        Invoices
-      .btn-group
-        %button.back.btn
-          Back
-        %button.add-invoice.btn
-          +New
+    %h1
+      Invoices
+    .btn-group
+      %button.back.btn
+        Back
+      %button.add-invoice.btn
+        +New
 
-      .row-fluid
-        .span3
-          %ul.invoice-list
+    .row-fluid
+      .span3
+        %ul.invoice-list
 
-        .span9
-          .errors.alert.alert-error.hide
-          .invoices-show-container
+      .span9
+        .errors.alert.alert-error.hide
+        .invoices-show-container
 
-        .clear
+      .clear
 
-        .spinner-container.hide 
-          .spinner
-            = image_tag 'loading.gif'
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'
