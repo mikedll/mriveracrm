@@ -31,16 +31,9 @@ class ClientView extends Backbone.View
     @model.destroy({wait: true})
 
   invoices: () ->
-    $('.clients-gui')
-      .css('left': '0px')
-      .animate('left': '-1200px', 400, 'swing', () ->
-      )
-    $('.invoices-gui')
-      .show()
-      .css('left': '1200px')
-      .animate('left': '0px', 400, 'swing', () ->
-
-      )
+    @invoicesAppView = new InvoiceAppView({parent: @})
+    @invoicesAppView.render()
+    @parent.childViewPushed(@invoicesAppView)
 
   onKeypress: (e) ->
     if(e.keyCode == 13)
@@ -80,15 +73,21 @@ class ClientListItemView extends Backbone.View
     @listenTo(@model, 'sync', @render)
     @listenTo(@model, 'destroy', @remove)
 
+  childViewPushed: (view) ->
+    @options.parent.childViewPushed(view)
+
+  childViewPulled: (view) ->
+    @options.parent.childViewPulled(view)
+
   remove: () ->
     @$el.remove()
 
   show: (e) ->
     e.stopPropagation()
     if !@showview?
-      @showview = new ClientView({model:@model, className: 'client-view', id: "client-view-#{@model.get('id')}"})
+      @showview = new ClientView({model:@model, className: 'client-view', id: "client-view-#{@model.get('id')}", parent: @})
       @showview.render()
-    @options.clientApp.show(@showview)
+    @options.parent.show(@showview)
     false
 
   render: () ->
@@ -104,6 +103,8 @@ class ClientAppView extends Backbone.View
   initialize: () ->
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
+    @listenTo(@collection, 'sync', @onSync)
+    @listenTo(@collection, 'error', @onError)
 
     $(document).ajaxStart(() =>
       @$('.spinner-container').show()
@@ -111,13 +112,48 @@ class ClientAppView extends Backbone.View
     $(document).ajaxStop(() =>
       @$('.spinner-container').hide()
     )
+
+    @transforms =
+      out:
+        left: '-50px'
+        top: '-50px'
+        opacity: '0.5'
+      in:
+        left: '0px'
+        top: '0px'
+        opacity: '1.0'
+      incoming:
+        left: '50px'
+        top: '50px'
+        opacity: '0.0'
+
+  childViewPushed: (view) ->
+    @$el
+      .css(@transforms['in'])
+      .animate(@transforms['out'], 200, 'linear', () ->
+      )
+    @parent.append(view)
+    view.$el
+      .css(@transforms['incoming'])
+      .animate(@transforms['in'], 200, linear, () ->
+      )
+
+  childViewPulled: (view) ->
+    view.$el
+      .css(@transforms['in'])
+      .animate(@transforms['incoming'], 200, 'swing', () ->
+      )
+    @$el
+      .css(@transforms['out'])
+      .animate(@transforms['in'], 200, 'linear', () ->
+       )
+    view.remove()
+
   addAll: () ->
     @collection.each(@addOne, @)
   addOne: (client) ->
-    clientListView = new ClientListItemView({'model':client, 'clientApp': @})
+    clientListView = new ClientListItemView({'model':client, 'parent': @})
     @$('.clients-list').append(clientListView.render().el)
-    @collection.on('sync', @onSync, @)
-    @collection.on('error', @onError, @)
   render: () ->
   show: (clientView) ->
     @$('.clients-show-container').hide()
@@ -128,17 +164,32 @@ class ClientAppView extends Backbone.View
     clientView.$(':input:visible').first().focus()
 
   onSync: () ->
+    @$(".client-view:visible control-group").removeClass('error')
+      .find('span.help-inline').remove()
     @$('.errors').hide()
+
   onError: (model, xhr, options) ->
-    @$('.errors').text('An error occured while saving.').show()
+    response = jQuery.parseJSON( xhr.responseText )
+    s = ""
+    _.each(response.full_messages, (m) ->
+      s = "#{s} #{m}."
+    )
+    @$('.errors').text(s).show()
 
-
+    childView = @$('#' + response.object.id)
+    if childView.length != 0
+      _.each(response.errors, (value, key, list) ->
+        @$("control-group.client_#{key}")
+          .find(":input").addClass('error').end()
+          .find('.controls').append('<span class="help-inline">' + value + '</span>').end()
+      )
 
 $(() ->
   clients = new Clients()
   app = new ClientAppView(
-    'el': $('.clients-gui').get(0)
-    'collection': clients
+    el: $('.clients-gui').get(0)
+    parent: $('.gui-container')
+    collection: clients
   )
   clients.reset(__clients)
   )

@@ -13,17 +13,17 @@ class InvoiceView extends Backbone.View
 class InvoiceAppView extends Backbone.View
   events:
     'click button.back': 'back'
-  back: () ->
-    $('.clients-gui')
-      .css('left': '-1200px')
-      .animate('left': '0px', 400, 'swing', () ->
-      )
-    $('.invoices-gui')
-      .show()
-      .css('left': '0px')
-      .animate('left': '1200px', 400, 'swing', () ->
-      )
 
+  remove: () ->
+    @$el.remove()
+
+  back: () ->
+    @parent.childViewPulled(@)
+
+  render: () ->
+    node = $('.templates .invoices_view_example').clone()
+    @$el.html(node)
+    @
 
 $(() ->
     app = new InvoiceAppView(
