@@ -3,6 +3,7 @@ source 'http://rubygems.org'
 gem 'rails', '3.0.3'
 
 # vital
+gem "rake", "~> 0.8.7"
 gem "pg"
 gem "haml"
 gem "haml-rails"

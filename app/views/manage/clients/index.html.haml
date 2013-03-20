@@ -1,5 +1,6 @@
 
 - content_for :head do
+  = javascript_include_tag 'backbone_basic'
   = javascript_include_tag 'clients'
   = javascript_include_tag 'invoices'
   = render 'bootstrap'
@@ -17,11 +18,11 @@
     .row-fluid
 
       .span3
-        %ul.clients-list
+        %ul.clients-list.models-list
 
       .span9
         .errors.alert.alert-error.hide
-        .clients-show-container
+        .models-show-container
 
       .clear
 
@@ -32,6 +33,8 @@
 .templates.hide
   .client_view_example
     = render Client.new
+  .invoice_view_example
+    = render Invoice.new
   .invoices_view_example
     %h1
       Invoices
@@ -43,11 +46,11 @@
 
     .row-fluid
       .span3
-        %ul.invoice-list
+        %ul.invoices-list.models-list
 
       .span9
         .errors.alert.alert-error.hide
-        .invoices-show-container
+        .models-show-container
 
       .clear
 

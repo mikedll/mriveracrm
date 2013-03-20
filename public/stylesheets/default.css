@@ -150,20 +150,20 @@ ul#projects_list li {
 
 /* clients */
 
-.clients-list li {
+.models-list li {
   font-weight: bold;
   margin: 2px 0;
 }
 
-.clients-list li a {
+.models-list li a {
   padding: 3px;
   display: block;
 }
 
-.clients-list li a:hover {
+.models-list li a:hover {
   background: #ffffb0;
 }
 
-.clients-show-container {
+.models-show-container {
 }
 

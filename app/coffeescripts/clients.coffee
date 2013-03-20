@@ -11,7 +11,8 @@ class Clients extends Backbone.Collection
   comparator: (client) ->
     client.get('id')
 
-class ClientView extends Backbone.View
+class ClientView extends CrmModelView
+  modelName: 'client'
   className: 'client-view'
   events:
     'keypress input': 'onKeypress'
@@ -20,44 +21,11 @@ class ClientView extends Backbone.View
     'click button.save': 'save'
     'click button.destroy': 'destroy'
 
-  initialize: (options) ->
-    @parent = options.parent
-    @listenTo(@model, 'sync', @render)
-    @listenTo(@model, 'destroy', @remove)
-
-  childViewPulled: (view) ->
-    @options.parent.childViewPulled(view)
-
-  remove: () ->
-    @$el.remove()
-
-  destroy: (e) ->
-    @model.destroy({wait: true})
-
   invoices: () ->
-    @invoicesAppView = new InvoiceAppView({parent: @})
+    @invoices = new Invoices({url: @model.get('id') + '/invoices'})
+    @invoicesAppView = new InvoiceAppView({parent: @, collection: @invoices})
     @invoicesAppView.render()
     @parent.childViewPushed(@invoicesAppView)
-
-  onKeypress: (e) ->
-    if(e.keyCode == 13)
-      @model.save()
-      return false
-    return true
-
-  save: () ->
-    updated = {}
-    _.each(@$('input'), (el) ->
-      attribute_keys = /client\[(\w+)\]/.exec($(el).prop('name'))
-      if attribute_keys? && attribute_keys.length == 2
-        updated[ attribute_keys[1] ] = $(el).val()
-    )
-    @model.set()
-    @model.save(updated, {wait: true})
-
-  noSubmit: (e) ->
-    e.stopPropagation()
-    false
 
   render: () ->
     node = $('.client_view_example form').clone()
@@ -67,38 +35,14 @@ class ClientView extends Backbone.View
     @$el.html(node)
     @
 
-class ClientListItemView extends Backbone.View
-  tagName: 'li'
-  className: 'client-list-item'
-  events:
-    'click a': 'show'
+class ClientListItemView extends ListItemView
+  className: 'client-list-item list-item'
 
-  initialize: (options) ->
-    @parent = options.parent
-    @listenTo(@model, 'sync', @render)
-    @listenTo(@model, 'destroy', @remove)
+  spawnView: (model) ->
+    new ClientView({model:@model, className: 'client-view', id: "client-view-#{@model.get('id')}", parent: @})
 
-  childViewPushed: (view) ->
-    @options.parent.childViewPushed(view)
-
-  childViewPulled: (view) ->
-    @options.parent.childViewPulled(view)
-
-  remove: () ->
-    @$el.remove()
-
-  show: (e) ->
-    e.stopPropagation()
-    if !@showview?
-      @showview = new ClientView({model:@model, className: 'client-view', id: "client-view-#{@model.get('id')}", parent: @})
-      @showview.render()
-    @options.parent.show(@showview)
-    false
-
-  render: () ->
-    @$el.html("<a href='#'>#{@model.get('first_name')} #{@model.get('last_name')}</a>")
-    @
-
+  title: () ->
+    "#{@model.get('first_name')} #{@model.get('last_name')}"
 
 class ClientAppView extends Backbone.View
   delay: 300
@@ -173,14 +117,14 @@ class ClientAppView extends Backbone.View
     @collection.each(@addOne, @)
   addOne: (client) ->
     clientListView = new ClientListItemView({'model':client, 'parent': @})
-    @$('.clients-list').append(clientListView.render().el)
+    @$('.models-list').append(clientListView.render().el)
   render: () ->
   show: (clientView) ->
-    @$('.clients-show-container').hide()
-    @$('.clients-show-container .client-view').hide()
-    @$('.clients-show-container').append(clientView.el) if @clientView(clientView.id).length == 0
+    @$('.models-show-container').hide()
+    @$('.models-show-container .client-view').hide()
+    @$('.models-show-container').append(clientView.el) if @clientView(clientView.id).length == 0
     @$('#' + clientView.id).show()
-    @$('.clients-show-container').show()
+    @$('.models-show-container').show()
     clientView.$(':input:visible').first().focus()
 
   onSync: () ->

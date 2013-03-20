@@ -1,23 +1,12 @@
-class Manage::InvoicesController < ApplicationController
+class Manage::InvoicesController < Manage::BaseController
 
-  make_resourceful
+  make_resourceful do
+    belongs_to :client
+  end
 
-  # def index
-  #   @invoices = Invoice.all
-  #   respond_to do |fmt|
-  #     fmt.js { render :json => @invoices }
-  #     fmt.html
-  #   end
-  # end
-
-  # def create
-  #   @client = Client.new client_params
-  #   if @client.save
-  #     render :status => :created, :json => @client
-  #   else
-  #     render :status => :unprocessable_entity, :json => @client.errors
-  #   end
-  # end
+  def object_parameters
+    params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
+  end
 
 end
 

@@ -22,6 +22,8 @@ MikedllCrm::Application.routes.draw do
     resources :clients do
       resources :invoices
     end
+
+    resources :invoices, :only => [:index, :create, :show]
   end
 
   root :to => "home#index"
