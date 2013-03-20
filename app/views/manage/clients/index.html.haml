@@ -6,50 +6,52 @@
 
 .container-fluid.gui-container
   
-  .row-fluid.clients-gui.app-gui
+  .clients-gui.app-gui
+    %h1
+      Clients
 
-    .span3
-      %h1
-        Clients
-
+    .btn-group
       %button.add-client.btn
         +New
 
-      %ul.clients-list
+    .row-fluid
 
-    .span9
-      .errors.alert.alert-error.hide
-      .clients-show-container
-
-    .clear
-
-    .spinner-container.hide 
-      .spinner
-        = image_tag 'loading.gif'
-
-.templates.hide
-  .client_view_example
-    = render Client.new
-  .invoices_view_example
-    .row-fluid.invoices-gui.app-gui
       .span3
-        %h1
-          Invoices
-
-        .btn-group
-          %button.back.btn
-            Back
-          %button.add-invoice.btn
-            +New
-
-        %ul.invoice-list
+        %ul.clients-list
 
       .span9
         .errors.alert.alert-error.hide
-        .invoices-show-container
+        .clients-show-container
 
       .clear
 
       .spinner-container.hide 
         .spinner
           = image_tag 'loading.gif'
+
+.templates.hide
+  .client_view_example
+    = render Client.new
+  .invoices_view_example
+    .invoices-gui.app-gui
+      %h1
+        Invoices
+      .btn-group
+        %button.back.btn
+          Back
+        %button.add-invoice.btn
+          +New
+
+      .row-fluid
+        .span3
+          %ul.invoice-list
+
+        .span9
+          .errors.alert.alert-error.hide
+          .invoices-show-container
+
+        .clear
+
+        .spinner-container.hide 
+          .spinner
+            = image_tag 'loading.gif'

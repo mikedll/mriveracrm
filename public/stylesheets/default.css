@@ -120,19 +120,26 @@ ul#projects_list li {
 .gui-container {
   top: 45%;
   left: 45%;
-  height: 800px;
-  width: 1000px;
+  height: 600px;
+  width: 900px;
   margin: -400px 0 0 -500px; 
-  background: #fffff2;
   position: absolute;
-  overflow-x: hidden;
 }
 
 .app-gui {
-  position: absolute;
   left: 0;
   top: 0;
-  padding: 1em;
+  height: 600px;
+  width: 900px;
+  background: #fffff2;
+  position: absolute;
+
+  overflow-x: hidden;
+
+  padding: 2em;
+  border: 2px solid #000;
+  box-shadow: 3px 3px 3px #000;
+  border-radius: 6px;
 }
 
 .pane {
