@@ -16,37 +16,27 @@ body {
     position: relative;
 }
 
-body div#main{
-  position:absolute;
-  left:30%;
-  width:600px;
+/* util */
 
-  top: 340px;
-  margin-left:-315px;
+.clear {
+    clear: both;
 }
 
-* html body div#main {
-  width: 630px;
+.hide {
+    display: none;
 }
 
-
-
-body div div {
-  margin: 1em 0 1em 0;
-  padding: 0;
+a {
+    text-decoration: none;
 }
 
-div#main div a,
-div#main div a:link,
-div#main div a:visited {
-  color: blue;
+a:hover {
+    text-decoration: underline;
 }
 
-div#main div a:hover {
-  color: #373737;
+a span.hotkey {
+    text-decoration: underline;
 }
-
-
 
 h1 {
 }
@@ -108,13 +98,6 @@ ul#projects_list li {
   font-size: 8pt;
 }
 
-.clear {
-    clear: both;
-}
-
-.hide {
-    display: none;
-}
 
 #top_menu ul {
   margin: 0;
@@ -129,21 +112,14 @@ ul#projects_list li {
     margin: 0em 1em 1em;
 }
 
-a {
-    text-decoration: none;
-}
 
-a:hover {
-    text-decoration: underline;
-}
 
-a span.hotkey {
-    text-decoration: underline;
-}
+
+/* apps */
 
 .gui-container {
-  top: 50%;
-  left: 50%;
+  top: 45%;
+  left: 45%;
   height: 800px;
   width: 1000px;
   margin: -400px 0 0 -500px; 
@@ -152,23 +128,24 @@ a span.hotkey {
   overflow-x: hidden;
 }
 
+.app-gui {
+  position: absolute;
+  left: 0;
+  top: 0;
+  padding: 1em;
+}
+
 .pane {
   float: left;
   margin: 1em;
   overflow: auto;
 }
 
-.clients-gui, .invoices-gui {
-  position: absolute;
-  left: 0;
-}
+/* clients */
 
 .clients-list li {
   font-weight: bold;
   margin: 2px 0;
-}
-
-.clients-list li:nth-child(even) {
 }
 
 .clients-list li a {
@@ -183,6 +160,3 @@ a span.hotkey {
 .clients-show-container {
 }
 
-.spinner {
-  
-}

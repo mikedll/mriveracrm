@@ -1,0 +1,22 @@
+
+= simple_form_for client, :remote => true, :url => manage_clients_path(client), :html => { :class => 'form-horizontal'} do |f|
+  = f.input :first_name, :input_html => {}.merge( client.persisted? ? {} : { :id => nil } )
+
+  = f.input :last_name, :input_html => {}.merge( client.persisted? ? {} : { :id => nil } )
+
+  = f.input :email, :input_html => {}.merge( client.persisted? ? {} : { :id => nil } )
+
+  .btn-group
+    %button.save.btn.btn-primary
+      Save
+
+  .btn-group
+    %button.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
+      Delete
+
+  .btn-group
+    %button.invoices.btn
+      Invoices
+    %button.btn
+      Users
+

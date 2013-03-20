@@ -1,0 +1,28 @@
+body div#main{
+  position:absolute;
+  left:30%;
+  width:600px;
+
+  top: 340px;
+  margin-left:-315px;
+}
+
+* html body div#main {
+  width: 630px;
+}
+
+
+body div div {
+  margin: 1em 0 1em 0;
+  padding: 0;
+}
+
+div#main div a,
+div#main div a:link,
+div#main div a:visited {
+  color: blue;
+}
+
+div#main div a:hover {
+  color: #373737;
+}

@@ -6,7 +6,7 @@
 
 .container-fluid.gui-container
   
-  .row-fluid.clients-gui
+  .row-fluid.clients-gui.app-gui
 
     .span3
       %h1
@@ -27,29 +27,29 @@
       .spinner
         = image_tag 'loading.gif'
 
-  .row-fluid.invoices-gui.hide  
-    .span4
-      %h1
-        Invoices
-
-      .btn-group
-        %button.back.btn
-          Back
-        %button.add-invoice.btn
-          +New
-
-      %ul.invoice-list
-
-    .span8
-      .errors.alert.alert-error.hide
-      .invoices-show-container
-
-    .clear
-
-    .spinner-container.hide 
-      .spinner
-        = image_tag 'loading.gif'
 .templates.hide
   .client_view_example
     = render Client.new
+  .invoices_view_example
+    .row-fluid.invoices-gui.app-gui
+      .span3
+        %h1
+          Invoices
 
+        .btn-group
+          %button.back.btn
+            Back
+          %button.add-invoice.btn
+            +New
+
+        %ul.invoice-list
+
+      .span9
+        .errors.alert.alert-error.hide
+        .invoices-show-container
+
+      .clear
+
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'

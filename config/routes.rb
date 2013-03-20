@@ -18,7 +18,7 @@ MikedllCrm::Application.routes.draw do
     put :accept
   end
 
-  scope 'manage' do
+  namespace 'manage' do
     resources :clients do
       resources :invoices
     end
