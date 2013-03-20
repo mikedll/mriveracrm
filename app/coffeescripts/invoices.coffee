@@ -8,6 +8,8 @@ class Invoices extends Backbone.Collection
   model: Invoice
   comparator: (invoice) ->
     invoice.get('id')
+  url: () ->
+    "#{@client.url()}/invoices"
 
 class InvoiceView extends Backbone.View
   modelName: 'invoice'

@@ -41,8 +41,20 @@ class Invoice < ActiveRecord::Base
   validates :description, :length => { :minimum => 3 }
   validates :total, :presence => true
 
+  before_validation :_defaults
+
   def charge!
     self.client.payment_gateway_profile.pay!(self)
+  end
+
+  private
+
+  def _defaults
+    if new_record?
+      self.description = "An invoice."
+      self.total = 0.0
+      self.date = Time.now
+    end
   end
 
 end

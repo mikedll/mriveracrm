@@ -1,6 +1,6 @@
 
 = simple_form_for invoice, :remote => true, :url => manage_invoices_path(invoice), :html => { :class => 'form-horizontal'} do |f|
-  = f.input :description, :input_html => {}.merge( invoice.persisted? ? {} : { :id => nil } )
+  = f.input :description, :input_html => {:rows => 4}.merge( invoice.persisted? ? {} : { :id => nil } )
   = f.input :total, :input_html => {}.merge( invoice.persisted? ? {} : { :id => nil } )
   = f.input :date, :as => :string, :input_html => {}.merge( invoice.persisted? ? {} : { :id => nil } )
 

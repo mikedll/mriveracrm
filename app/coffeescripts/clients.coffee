@@ -22,7 +22,8 @@ class ClientView extends CrmModelView
     'click button.destroy': 'destroy'
 
   invoices: () ->
-    @invoices = new Invoices({url: @model.get('id') + '/invoices'})
+    @invoices = new Invoices()
+    @invoices.client = @model
     @invoicesAppView = new InvoiceAppView({id: "client-#{@model.get('id')}-invoices", parent: @, collection: @invoices})
     @invoicesAppView.render()
     @parent.childViewPushed(@invoicesAppView)
