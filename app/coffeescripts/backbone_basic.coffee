@@ -79,7 +79,7 @@ class CrmModelView extends Backbone.View
 
   save: () ->
     updated = {}
-    _.each(@$('input'), (el) =>
+    _.each(@$(':input:visible'), (el) =>
       matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
       attribute_keys = matcher.exec($(el).prop('name'))
       if attribute_keys? && attribute_keys.length == 2

@@ -11,7 +11,7 @@ class Invoices extends Backbone.Collection
   url: () ->
     "#{@client.url()}/invoices"
 
-class InvoiceView extends Backbone.View
+class InvoiceView extends CrmModelView
   modelName: 'invoice'
   render: () ->
     @$el.html($('.invoice_view_example form').clone())
