@@ -25,6 +25,9 @@ class ClientView extends Backbone.View
     @listenTo(@model, 'sync', @render)
     @listenTo(@model, 'destroy', @remove)
 
+  childViewPulled: (view) ->
+    @options.parent.childViewPulled(view)
+
   remove: () ->
     @$el.remove()
 
@@ -103,6 +106,7 @@ class ClientAppView extends Backbone.View
   create: () ->
     @collection.create()
   initialize: () ->
+    @children = [@$('.clients-gui')] # this is jquery-wrapped dom elements, not backbone views
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
@@ -130,26 +134,39 @@ class ClientAppView extends Backbone.View
         opacity: '0.0'
 
   childViewPushed: (view) ->
-    @$el
-      .css(@transforms['in'])
-      .animate(@transforms['out'], 200, 'easeOutCirc', () ->
-      )
+    if @children.length > 0
+      @children[ @children.length - 1]
+        .css(@transforms['in'])
+        .animate(@transforms['out'], 200, 'easeOutCirc', () ->
+        )
+
     @$el.append(view.el)
-    view.$el
+    @children.push( view.$el )
+    @children[ @children.length - 1 ]
       .css(@transforms['incoming'])
-      .animate(@transforms['in'], 200, 'easeOutCirc', () ->
+      .animate(@transforms['in'], 200, 'easeOutCirc', () =>
       )
 
+  #
+  # view param is used to do backbone removal.
+  # it is asssmed that view.$el == @children[ @children.length - 1 ]
+  #
   childViewPulled: (view) ->
-    view.$el
-      .css(@transforms['in'])
-      .animate(@transforms['incoming'], 200, 'easeOutCirc', () ->
-      )
-    @$el
-      .css(@transforms['out'])
-      .animate(@transforms['in'], 200, 'easeOutCirc', () ->
+    return if @children.length == 0
+
+    if @children.length > 1
+      @children[ @children.length - 2 ]
+        .css(@transforms['out'])
+        .animate(@transforms['in'], 200, 'easeOutCirc', () ->
        )
-    view.remove()
+
+    lastChild = @children[ @children.length - 1 ]
+    lastChild
+      .css(@transforms['in'])
+      .animate(@transforms['incoming'], 200, 'easeOutCirc', () =>
+        view.remove()
+        @children.pop()
+      )
 
   addAll: () ->
     @collection.each(@addOne, @)
@@ -195,8 +212,7 @@ class ClientAppView extends Backbone.View
 $(() ->
   clients = new Clients()
   app = new ClientAppView(
-    el: $('.clients-gui').get(0)
-    parent: $('.gui-container')
+    el: $('.gui-container')
     collection: clients
   )
   clients.reset(__clients)
