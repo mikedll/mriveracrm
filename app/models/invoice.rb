@@ -36,6 +36,8 @@ class Invoice < ActiveRecord::Base
 
   end
 
+  attr_accessible :description, :total, :date
+
   validates :client, :presence => true
   validates :date, :presence => true
   validates :description, :length => { :minimum => 3 }

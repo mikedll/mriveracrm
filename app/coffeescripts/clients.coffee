@@ -13,20 +13,22 @@ class Clients extends Backbone.Collection
 
 class ClientView extends CrmModelView
   modelName: 'client'
-  className: 'client-view'
   events:
     'keypress input': 'onKeypress'
     'submit form': 'noSubmit'
-    'click button.invoices': 'invoices'
+    'click button.invoices': 'showInvoices'
     'click button.save': 'save'
     'click button.destroy': 'destroy'
 
-  invoices: () ->
-    @invoices = new Invoices()
-    @invoices.client = @model
+  showInvoices: () ->
+    if !@invoices?
+      @invoices = new Invoices()
+      @invoices.client = @model
+
     @invoicesAppView = new InvoiceAppView({id: "client-#{@model.get('id')}-invoices", parent: @, collection: @invoices})
     @invoicesAppView.render()
     @parent.childViewPushed(@invoicesAppView)
+    @invoices.fetch()
 
   render: () ->
     node = $('.client_view_example form').clone()

@@ -13,11 +13,11 @@ class Invoices extends Backbone.Collection
 
 class InvoiceView extends Backbone.View
   modelName: 'invoice'
-  className: 'invoice-view'
   render: () ->
     @$el.html($('.invoice_view_example form').clone())
-    @$('input[name="invoice[description]"]').val(@model.get('first_name'))
-    @$('input[name="invoice[total]"]').val(@model.get('last_name'))
+    @$('textarea[name="invoice[description]"]').val(@model.get('description'))
+    @$('input[name="invoice[total]"]').val(@model.get('total'))
+    @$('input[name="invoice[date]"]').val(@model.get('date'))
     @$('input[name="invoice[date]"]').datepicker();
     @
 

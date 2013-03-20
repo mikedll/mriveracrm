@@ -41,7 +41,7 @@ class ListItemView extends Backbone.View
     @model.get('id')
 
   spawnView: () ->
-    new @spawnViewType({model:@model, className: "#{@modelName}-view", id: "#{@modelName}-view-#{@model.get('id')}", parent: @})
+    new @spawnViewType({model:@model, className: "#{@modelName}-view model-view", id: "#{@modelName}-view-#{@model.get('id')}", parent: @})
 
 
 #
@@ -50,7 +50,7 @@ class ListItemView extends Backbone.View
 # implement render
 #
 class CrmModelView extends Backbone.View
-  className: 'crm-model-view'
+  className: 'model-view'
   events:
     'keypress input': 'onKeypress'
     'submit form': 'noSubmit'
@@ -204,7 +204,7 @@ class AppView extends Backbone.View
 
   show: (view) ->
     @$('.models-show-container').hide()
-    @$('.models-show-container .client-view').hide()
+    @$('.models-show-container .model-view').hide()
     @$('.models-show-container').append(view.el) if @$modelView(view.model.get('id')).length == 0
     @$modelView(view.model.get('id')).show()
     @$('.models-show-container').show()
