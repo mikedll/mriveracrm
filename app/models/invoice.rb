@@ -36,7 +36,7 @@ class Invoice < ActiveRecord::Base
 
   end
 
-  attr_accessible :description, :total, :date
+  attr_accessible :description, :total, :date, :title
 
   validates :client, :presence => true
   validates :date, :presence => true
@@ -53,9 +53,10 @@ class Invoice < ActiveRecord::Base
 
   def _defaults
     if new_record?
-      self.description = "An invoice."
+      self.description = "..."
       self.total = 0.0
       self.date = Time.now
+      self.title = "New invoice"
     end
   end
 

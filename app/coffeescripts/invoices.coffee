@@ -17,8 +17,9 @@ class InvoiceView extends CrmModelView
     @$el.html($('.invoice_view_example form').clone())
     @$('textarea[name="invoice[description]"]').val(@model.get('description'))
     @$('input[name="invoice[total]"]').val(@model.get('total'))
+    @$('input[name="invoice[title]"]').val(@model.get('title'))
     @$('input[name="invoice[date]"]').val(@model.get('date'))
-    @$('input[name="invoice[date]"]').datepicker();
+    @$('input[name="invoice[date]"]').datepicker(dateFormat: 'yy-mm-dd');
     @
 
 class InvoiceListItemView extends ListItemView
@@ -27,7 +28,7 @@ class InvoiceListItemView extends ListItemView
   className: 'invoice-list-item list-item'
 
   title: () ->
-    @model.get('description')
+    @model.get('title')
 
 class InvoiceAppView extends AppView
   modelName: 'invoice'

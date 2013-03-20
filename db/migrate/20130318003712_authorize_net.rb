@@ -30,12 +30,14 @@ class AuthorizeNet < ActiveRecord::Migration
     end
 
     add_column :invoices, :description, :text
-    add_column :invoices, :status, :string, :null => false
+    add_column :invoices, :status, :string
     add_column :invoices, :date, :datetime
     add_column :invoices, :client_id, :integer
+    add_column :invoices, :title, :string
   end
 
   def self.down
+    remove_column :invoices, :title
     remove_column :invoices, :client_id
     remove_column :invoices, :date
     remove_column :invoices, :status

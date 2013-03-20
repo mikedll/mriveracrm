@@ -113,9 +113,10 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.text     "description"
-    t.string   "status",      :null => false
+    t.string   "status"
     t.datetime "date"
     t.integer  "client_id"
+    t.string   "title"
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|

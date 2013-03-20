@@ -80,7 +80,6 @@ class CreateBusinesses < ActiveRecord::Migration
     drop_table :businesses_users
     drop_table :clients_users
     drop_table :users
-    drop_table :businesses_clients
     drop_table :clients
     drop_table :businesses
   end
