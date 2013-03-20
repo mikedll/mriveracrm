@@ -20,7 +20,8 @@ class ClientView extends Backbone.View
     'click button.save': 'save'
     'click button.destroy': 'destroy'
 
-  initialize: () ->
+  initialize: (options) ->
+    @parent = options.parent
     @listenTo(@model, 'sync', @render)
     @listenTo(@model, 'destroy', @remove)
 
@@ -37,7 +38,7 @@ class ClientView extends Backbone.View
 
   onKeypress: (e) ->
     if(e.keyCode == 13)
-      save()
+      @model.save()
       return false
     return true
 
@@ -69,7 +70,8 @@ class ClientListItemView extends Backbone.View
   events:
     'click a': 'show'
 
-  initialize: () ->
+  initialize: (options) ->
+    @parent = options.parent
     @listenTo(@model, 'sync', @render)
     @listenTo(@model, 'destroy', @remove)
 
@@ -130,22 +132,22 @@ class ClientAppView extends Backbone.View
   childViewPushed: (view) ->
     @$el
       .css(@transforms['in'])
-      .animate(@transforms['out'], 200, 'linear', () ->
+      .animate(@transforms['out'], 200, 'easeOutCirc', () ->
       )
-    @parent.append(view)
+    @$el.append(view.el)
     view.$el
       .css(@transforms['incoming'])
-      .animate(@transforms['in'], 200, linear, () ->
+      .animate(@transforms['in'], 200, 'easeOutCirc', () ->
       )
 
   childViewPulled: (view) ->
     view.$el
       .css(@transforms['in'])
-      .animate(@transforms['incoming'], 200, 'swing', () ->
+      .animate(@transforms['incoming'], 200, 'easeOutCirc', () ->
       )
     @$el
       .css(@transforms['out'])
-      .animate(@transforms['in'], 200, 'linear', () ->
+      .animate(@transforms['in'], 200, 'easeOutCirc', () ->
        )
     view.remove()
 
@@ -158,15 +160,19 @@ class ClientAppView extends Backbone.View
   show: (clientView) ->
     @$('.clients-show-container').hide()
     @$('.clients-show-container .client-view').hide()
-    @$('.clients-show-container').append(clientView.el) if @$('#' + clientView.id).length == 0
+    @$('.clients-show-container').append(clientView.el) if @clientView(clientView.id).length == 0
     @$('#' + clientView.id).show()
     @$('.clients-show-container').show()
     clientView.$(':input:visible').first().focus()
 
   onSync: () ->
-    @$(".client-view:visible control-group").removeClass('error')
+    @$(".client-view:visible .control-group")
+      .removeClass('error')
       .find('span.help-inline').remove()
     @$('.errors').hide()
+
+  clientView: (id) ->
+    @$('#client-view-' + id)
 
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )
@@ -176,11 +182,13 @@ class ClientAppView extends Backbone.View
     )
     @$('.errors').text(s).show()
 
-    childView = @$('#' + response.object.id)
-    if childView.length != 0
-      _.each(response.errors, (value, key, list) ->
-        @$("control-group.client_#{key}")
-          .find(":input").addClass('error').end()
+    if @clientView(response.object.id).length != 0
+      @clientView(response.object.id)
+        .removeClass('error')
+        .find('span.help-inline').remove()
+      _.each(response.errors, (value, key, list) =>
+        @clientView(response.object.id).find(".control-group.client_#{key}")
+          .addClass('error')
           .find('.controls').append('<span class="help-inline">' + value + '</span>').end()
       )
 

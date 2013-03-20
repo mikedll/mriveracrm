@@ -14,6 +14,9 @@ class InvoiceAppView extends Backbone.View
   events:
     'click button.back': 'back'
 
+  initialize: (options) ->
+    @parent = options.parent
+
   remove: () ->
     @$el.remove()
 
