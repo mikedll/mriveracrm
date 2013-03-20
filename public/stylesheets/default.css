@@ -139,7 +139,7 @@ ul#projects_list li {
   padding: 2em;
   border: 2px solid #000;
   box-shadow: 3px 3px 3px #000;
-  border-radius: 6px;
+  border-top-left-radius: 10px;
 }
 
 .pane {

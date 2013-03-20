@@ -1,8 +1,11 @@
 
 #
-# Implement spawnView and title. Override className.
+# Override modelName, spawnViewType and className.
+#
+# Implement title.
 #
 class ListItemView extends Backbone.View
+  modelName: 'some_type'
   tagName: 'li'
   className: 'list-item'
   events:
@@ -14,10 +17,10 @@ class ListItemView extends Backbone.View
     @listenTo(@model, 'destroy', @remove)
 
   childViewPushed: (view) ->
-    @options.parent.childViewPushed(view)
+    @parent.childViewPushed(view)
 
   childViewPulled: (view) ->
-    @options.parent.childViewPulled(view)
+    @parent.childViewPulled(view)
 
   remove: () ->
     @$el.remove()
@@ -38,7 +41,7 @@ class ListItemView extends Backbone.View
     @model.get('id')
 
   spawnView: () ->
-    throw new "Implement spawnView in ListItemView subclass."
+    new @spawnViewType({model:@model, className: "#{@modelName}-view", id: "#{@modelName}-view-#{@model.get('id')}", parent: @})
 
 
 #
@@ -70,7 +73,7 @@ class CrmModelView extends Backbone.View
 
   onKeypress: (e) ->
     if(e.keyCode == 13)
-      @model.save()
+      @save()
       return false
     return true
 
@@ -90,3 +93,148 @@ class CrmModelView extends Backbone.View
 
   render: () ->
     throw "Implement in subclass"
+
+class AppStack extends Backbone.View
+  delay: 300
+
+  initialize: (options) ->
+    @children = [] # backbone views
+    $(document).ajaxStart(() => @toBusy())
+    $(document).ajaxStop(() => @toNotBusy())
+
+    @transforms =
+      out:
+        left: '-50px'
+        top: '-50px'
+        opacity: '0.5'
+      in:
+        left: '0px'
+        top: '0px'
+        opacity: '1.0'
+      incoming:
+        left: '150px'
+        top: '150px'
+        opacity: '0.0'
+
+    $(document).bind('keyup', (e) =>
+      @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
+    )
+
+  toBusy: () ->
+    return if @children.length == 0
+    @children[ @children.length - 1].$('.spinner-container').show()
+
+  toNotBusy: () ->
+    return if @children.length == 0
+    @children[ @children.length - 1].$('.spinner-container').hide()
+
+  childViewPushed: (view) ->
+    if @children.length > 0
+      @children[ @children.length - 1].$el
+        .css(@transforms['in'])
+        .animate(@transforms['out'], @delay, 'easeOutCirc', () ->
+        )
+
+    @$el.append(view.el) if @$(view.id).length == 0
+    @children.push( view )
+    @children[ @children.length - 1 ].$el
+      .css(@transforms['incoming'])
+      .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
+      )
+
+  #
+  # view param is used to do backbone removal.
+  # it is asssmed that view.$el == @children[ @children.length - 1 ]
+  #
+  childViewPulled: (view) ->
+    return if @children.length <= 1
+
+    if @children.length > 1
+      @children[ @children.length - 2 ].$el
+        .css(@transforms['out'])
+        .animate(@transforms['in'], @delay, 'easeOutCirc', () ->
+       )
+
+    lastChild = @children[ @children.length - 1 ]
+    lastChild.$el
+      .css(@transforms['in'])
+      .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
+        view.remove()
+        @children.pop()
+      )
+
+#
+# Override modelName, spawnListItemType
+#
+# Optional override render.
+#
+class AppView extends Backbone.View
+  events:
+    'click .add-model': 'create'
+    'click button.back': 'back'
+
+  initialize: (options) ->
+    @parent = options.parent
+    @listenTo(@collection, 'reset', @addAll)
+    @listenTo(@collection, 'add', @addOne)
+    @listenTo(@collection, 'sync', @onSync)
+    @listenTo(@collection, 'error', @onError)
+
+  childViewPushed: (view) ->
+    @parent.childViewPushed(view)
+
+  childViewPulled: (view) ->
+    @parent.childViewPulled(view)
+
+  addAll: () ->
+    @collection.each(@addOne, @)
+
+  addOne: (model) ->
+    listItemView = new @spawnListItemType({'model':model, 'parent': @})
+    @$('.models-list').append(listItemView.render().el)
+
+  create: () ->
+    @collection.create()
+
+  remove: () ->
+    @$el.remove()
+
+  back: () ->
+    @parent.childViewPulled(@)
+
+  show: (view) ->
+    @$('.models-show-container').hide()
+    @$('.models-show-container .client-view').hide()
+    @$('.models-show-container').append(view.el) if @$modelView(view.model.get('id')).length == 0
+    @$modelView(view.model.get('id')).show()
+    @$('.models-show-container').show()
+    view.$(':input:visible').first().focus()
+
+  $modelView: (id) ->
+    @$("##{@modelName}-view-" + id)
+
+  onSync: () ->
+    @$(".#{@modelName}-view:visible .control-group")
+      .removeClass('error')
+      .find('span.help-inline').remove()
+    @$('.errors').hide()
+
+  onError: (model, xhr, options) ->
+    response = jQuery.parseJSON( xhr.responseText )
+    s = ""
+    _.each(response.full_messages, (m) ->
+      s = "#{s} #{m}."
+    )
+    @$('.errors').text(s).show()
+
+    if @$modelView(response.object.id).length != 0
+      @$modelView(response.object.id)
+        .removeClass('error')
+        .find('span.help-inline').remove()
+      _.each(response.errors, (value, key, list) =>
+        @$modelView(response.object.id).find(".control-group.client_#{key}")
+          .addClass('error')
+          .find('.controls').append('<span class="help-inline">' + value + '</span>').end()
+      )
+
+
