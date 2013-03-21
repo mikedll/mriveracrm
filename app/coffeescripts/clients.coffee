@@ -18,7 +18,7 @@ class ClientView extends CrmModelView
     'submit form': 'noSubmit'
     'click button.invoices': 'showInvoices'
     'click button.save': 'save'
-    'click button.destroy': 'destroy'
+    'confirm:complete button.destroy': 'destroy'
 
   showInvoices: () ->
     if !@invoices?

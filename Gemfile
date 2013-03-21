@@ -18,7 +18,7 @@ gem "activemerchant"
 gem 'carrierwave'
 gem "fog"
 gem 'rmagick'
-
+gem 'jquery-rails', '~> 2.1'
 
 # unsure
 gem 'activeadmin'

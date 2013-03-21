@@ -55,7 +55,7 @@ class CrmModelView extends Backbone.View
     'keypress input': 'onKeypress'
     'submit form': 'noSubmit'
     'click button.save': 'save'
-    'click button.destroy': 'destroy'
+    'confirm:complete button.destroy': 'destroy'
 
   initialize: (options) ->
     @parent = options.parent
@@ -68,8 +68,8 @@ class CrmModelView extends Backbone.View
   remove: () ->
     @$el.remove()
 
-  destroy: (e) ->
-    @model.destroy({wait: true})
+  destroy: (e, answer) ->
+    @model.destroy({wait: true}) if answer
 
   onKeypress: (e) ->
     if(e.keyCode == 13)
