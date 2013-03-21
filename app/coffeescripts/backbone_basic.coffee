@@ -11,6 +11,9 @@ class ListItemView extends Backbone.View
   events:
     'click a': 'show'
 
+  id: () ->
+    "list-item-#{@model.get('id')}"
+
   initialize: (options) ->
     @parent = options.parent
     @listenTo(@model, 'sync', @render)
@@ -194,7 +197,13 @@ class AppView extends Backbone.View
     @$('.models-list').append(listItemView.render().el)
 
   create: () ->
-    @collection.create()
+    @collection.create({},
+      wait: true,
+      success: (model, response, options) => @afterSave(model, response, options)
+    )
+
+  afterSave: (model, response, options) ->
+    @$(".models-list #list-item-#{model.get('id')} a").trigger('click')
 
   remove: () ->
     @$el.remove()
@@ -213,7 +222,7 @@ class AppView extends Backbone.View
   $modelView: (id) ->
     @$("##{@modelName}-view-" + id)
 
-  onSync: () ->
+  onSync: (model, resp, options) ->
     @$(".#{@modelName}-view:visible .control-group")
       .removeClass('error')
       .find('span.help-inline').remove()
