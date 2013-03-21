@@ -63,9 +63,9 @@ class CrmModelView extends Backbone.View
     @events =
       'keypress input': 'onKeypress'
       'ajax:beforeSend form': 'noSubmit'
-      'click button.save': 'save'
-      'confirm:complete button.destroy': 'destroy'
-      'confirm:complete button.put_action': 'putAction'
+      'click a.save': 'save'
+      'confirm:complete a.destroy': 'destroy'
+      'confirm:complete a.put_action': 'putAction'
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'destroy', @remove)
@@ -106,6 +106,7 @@ class CrmModelView extends Backbone.View
 
   onSync: () ->
     @render()
+    @parent.rebindGlobalHotKeys()
 
   render: () ->
     throw "Implement in subclass"
@@ -185,10 +186,11 @@ class AppView extends Backbone.View
     @$('.models-show-container').append(view.el) if @$modelView(view.model.get('id')).length == 0
     @$modelView(view.model.get('id'))
       .show()
-      .find(':input:visible').first().focus()
 
-    # raise curtain
+    # raise curtain and focus
     @$('.models-show-container').show()
+    @$modelView(view.model.get('id'))
+      .find(':input:visible').first().focus()
     @parent.rebindGlobalHotKeys()
 
   $modelView: (id) ->

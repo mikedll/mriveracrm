@@ -7,14 +7,14 @@
   = f.input :email, :input_html => {}.merge( client.persisted? ? {} : { :id => nil } )
 
   .btn-group
-    %button.save.btn.btn-primary
+    %a.save.btn.btn-primary
       Save
 
   .btn-group.pull-right
-    %button.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
+    %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
       Delete
 
   .btn-group
-    %button.invoices.btn{ :data => { :hotkey => 'i' }}
+    %a.invoices.btn{ :data => { :hotkey => 'i' }}
       Invoices
 

@@ -18,7 +18,7 @@ class ClientView extends CrmModelView
 
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
-    @events = $.extend(@events, 'click button.invoices': 'showInvoices')
+    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
 
   showInvoices: () ->
     if !@invoices?
