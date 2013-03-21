@@ -1,11 +1,9 @@
-class Employee < ActiceRecord::Base
+class Employee < ActiveRecord::Base
 
-  belongs_to :business_id
+  belongs_to :business
 
   has_many :employments
   has_many :users, :through => :employments
-
-  validates :user_id, :uniqueness => { :scope => :business_id }
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }
 

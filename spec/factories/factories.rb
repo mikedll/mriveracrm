@@ -5,9 +5,31 @@ FactoryGirl.define do
   factory :business do
     domain "www.domain" + SecureRandom.base64(8) + "yup.com"
   end
-  factory :credential
+
+  factory :employee do
+    business { FactoryGirl.create(:business) }
+    first_name "Mike"
+    last_name "Worker Bee"
+    email { "employee" + SecureRandom.base64(8) + "@example.com" }
+  end
+
+  factory :employment do
+    before(:create) do |employment|
+      employee = FactoryGirl.create(:employee)
+      employment.employee = employee
+      employment.business  = employee.business
+      employment.user = FactoryGirl.create(:user)
+    end
+  end
+
+  factory :credential do
+    uid SecureRandom.base64(8)
+    provider :google_oauth2
+  end
 
   factory :user do
+    first_name "Phil"
+    last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
     after(:create) do |user, evaluator|
       FactoryGirl.create(:credential, :email => user.email)

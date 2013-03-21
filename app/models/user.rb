@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
   has_many :clients, :through => :contact_relationships
 
   has_many :employments
-  has_many :business, :through => :employments
+  has_many :employees, :through => :employments
 
   devise :omniauthable
 
@@ -16,8 +16,8 @@ class User < ActiveRecord::Base
   before_validation :_default_timezone, :if => :new_record?
 
   scope :by_credential, lambda { |email| joins(:credentials).where('credentials.email = ?', email) }
-  scope :by_employment, lambda { |b| joins(:employments => :businesses).where('businesses.id = ?', b.id) }
-  scope :by_contact_relationship, lambda { |b| joins(:contact_relationships => :businesses).where('businesses.id = ?', b.id) }
+  scope :by_employment, lambda { |b| joins(:employments => { :employee => :business }).where('businesses.id = ?', b.id) }
+  scope :by_contact_relationship, lambda { |b| joins(:contact_relationships => { :client => :business }).where('businesses.id = ?', b.id) }
 
   def self.find_for_google_oauth2(auth, current_user, current_business)
 
