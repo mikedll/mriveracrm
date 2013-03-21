@@ -31,8 +31,8 @@ FactoryGirl.define do
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
-    after(:create) do |user, evaluator|
-      FactoryGirl.create(:credential, :email => user.email)
+    after(:create) do |user|
+      FactoryGirl.create(:credential, :email => user.email, :user => user)
     end
   end
 

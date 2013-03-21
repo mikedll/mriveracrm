@@ -1,7 +1,7 @@
 class Client < ActiveRecord::Base
 
   belongs_to :business
-  has_many :contact_relationships
+  has_many :contact_relationships, :dependent => :destroy
   has_many :users, :through => :contact_relationships
 
   has_many :invitations
