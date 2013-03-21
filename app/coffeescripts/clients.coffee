@@ -15,10 +15,10 @@ class Clients extends Backbone.Collection
 
 class ClientView extends CrmModelView
   modelName: 'client'
-  events: () ->
-    $.extend(CrmModelView.events,
-      'click button.invoices': 'showInvoices'
-    )
+
+  initialize: () ->
+    CrmModelView.prototype.initialize.apply(this, arguments)
+    @events = $.extend(@events, 'click button.invoices': 'showInvoices')
 
   showInvoices: () ->
     if !@invoices?

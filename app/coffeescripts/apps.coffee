@@ -8,13 +8,13 @@ class ListItemView extends Backbone.View
   modelName: 'some_type'
   tagName: 'li'
   className: 'list-item'
-  events:
-    'click a': 'show'
 
   id: () ->
     "list-item-#{@model.get('id')}"
 
   initialize: (options) ->
+    @events =
+      'click a': 'show'
     @parent = options.parent
     @listenTo(@model, 'sync', @render)
     @listenTo(@model, 'destroy', @remove)
@@ -25,8 +25,8 @@ class ListItemView extends Backbone.View
   childViewPulled: (view) ->
     @parent.childViewPulled(view)
 
-  rebindGlobalHotKeys: (container) ->
-    @parent.rebindGlobalHotKeys(container)
+  rebindGlobalHotKeys: () ->
+    @parent.rebindGlobalHotKeys()
 
   remove: () ->
     @$el.remove()
@@ -57,14 +57,14 @@ class ListItemView extends Backbone.View
 #
 class CrmModelView extends Backbone.View
   className: 'model-view'
-  events:
-    'keypress input': 'onKeypress'
-    'submit form': 'noSubmit'
-    'click button.save': 'save'
-    'confirm:complete button.destroy': 'destroy'
-    'confirm:complete button.put_action': 'putAction'
 
   initialize: (options) ->
+    @events =
+      'keypress input': 'onKeypress'
+      'submit form': 'noSubmit'
+      'click button.save': 'save'
+      'confirm:complete button.destroy': 'destroy'
+      'confirm:complete button.put_action': 'putAction'
     @parent = options.parent
     @listenTo(@model, 'sync', @render)
     @listenTo(@model, 'destroy', @remove)
@@ -72,8 +72,8 @@ class CrmModelView extends Backbone.View
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
 
-  rebindGlobalHotKeys: (container) ->
-    @parent.rebindGlobalHotKeys(container)
+  rebindGlobalHotKeys: () ->
+    @parent.rebindGlobalHotKeys()
 
   putAction: (e, answer) ->
     @model.save({}, url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
@@ -113,11 +113,11 @@ class CrmModelView extends Backbone.View
 # Optional override render.
 #
 class AppView extends Backbone.View
-  events:
-    'click .add-model': 'create'
-    'click button.back': 'back'
-
   initialize: (options) ->
+    @events =
+      'click .add-model': 'create'
+      'click button.back': 'back'
+
     @parent = options.parent
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
@@ -130,8 +130,8 @@ class AppView extends Backbone.View
   childViewPulled: (view) ->
     @parent.childViewPulled(view)
 
-  rebindGlobalHotKeys: (container) ->
-    @parent.rebindGlobalHotKeys(container)
+  rebindGlobalHotKeys: () ->
+    @parent.rebindGlobalHotKeys()
 
   addAll: () ->
     @collection.each(@addOne, @)
@@ -178,7 +178,7 @@ class AppView extends Backbone.View
     @$modelView(view.model.get('id')).show()
     @$('.models-show-container').show()
     view.$(':input:visible').first().focus()
-    @parent.rebindGlobalHotKeys(@$el)
+    @parent.rebindGlobalHotKeys()
 
   $modelView: (id) ->
     @$("##{@modelName}-view-" + id)
@@ -245,7 +245,8 @@ class AppStack extends Backbone.View
     )
 
   rebindGlobalHotKeys: (container) ->
-    @eventHotKeys.bind(container)
+    return if @children.length == 0
+    @eventHotKeys.bind( @children[ @children.length - 1 ].$el )
 
   toBusy: () ->
     return if @children.length == 0
@@ -268,6 +269,7 @@ class AppStack extends Backbone.View
       .css(@transforms['incoming'])
       .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
       )
+    @rebindGlobalHotKeys()
 
   #
   # view param is used to do backbone removal.
@@ -289,4 +291,4 @@ class AppStack extends Backbone.View
         view.remove()
         @children.pop()
       )
-    @eventHotKeys.bind(@children[ @children.length - 1 ].$el)
+    @rebindGlobalHotKeys()
