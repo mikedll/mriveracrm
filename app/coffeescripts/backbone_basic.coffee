@@ -125,9 +125,11 @@ class AppStack extends Backbone.View
 
     $(document).bind('keyup.appstack', (e) =>
       return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
-      return @children[ @children.length - 1].previous() if( e.keyCode == 38)
-      return @children[ @children.length - 1].next() if( e.keyCode == 40)
-      $('body').data('hotkeys').handleKeyUp(e)
+
+      if (e.ctrlKey)
+        return @children[ @children.length - 1].previous() if( e.keyCode == 38)
+        return @children[ @children.length - 1].next() if( e.keyCode == 40)
+        $('body').data('hotkeys').handleKeyUp(e)
     )
 
   toBusy: () ->
