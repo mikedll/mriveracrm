@@ -84,6 +84,7 @@ class CreateBusinesses < ActiveRecord::Migration
       t.integer :employee_id
       t.integer :client_id
       t.string  :email, :default => "", :null => false
+      t.string  :status
       t.timestamps
     end
 

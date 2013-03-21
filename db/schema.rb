@@ -124,6 +124,7 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.integer  "employee_id"
     t.integer  "client_id"
     t.string   "email",       :default => "", :null => false
+    t.string   "status"
     t.datetime "created_at"
     t.datetime "updated_at"
   end
