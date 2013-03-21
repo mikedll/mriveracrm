@@ -27,15 +27,15 @@ class Invitation < ActiveRecord::Base
       contact_relationship = ContactRelationship.new
       contact_relationship.user = user
       contact_relationship.client = client
-      contact_relationship.business = businesses
+      contact_relationship.business = business
       contact_relationship.save!
       accept!
     elsif employee
-      contact_relationship = ContactRelationship.new
-      contact_relationship.user = user
-      contact_relationship.client = client
-      contact_relationship.business = businesses
-      contact_relationship.save!
+      employment = Employment.new
+      employment.user = user
+      employment.employee = employee
+      employment.business = business
+      employment.save!
       accept!
     else
       raise "Nonsensical invitation. Neither employee nor client relationship."

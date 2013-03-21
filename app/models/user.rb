@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
 
-  has_many :credentials
+  has_many :credentials, :dependent => :destroy
 
   has_many :contact_relationships, :dependent => :destroy
   has_many :clients, :through => :contact_relationships
@@ -15,15 +15,18 @@ class User < ActiveRecord::Base
 
   before_validation :_default_timezone, :if => :new_record?
 
-  scope :by_credential_email, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.email = ?', email) }
+  scope :by_google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :by_employment, lambda { |b| joins(:employments => { :employee => :business }).where('businesses.id = ?', b.id) }
   scope :by_contact_relationship, lambda { |b| joins(:contact_relationships => { :client => :business }).where('businesses.id = ?', b.id) }
 
   def self.find_for_google_oauth2(auth, current_user, current_business)
 
     # user exists
-    user = by_employment(current_business).by_credential_email(auth[:info][:email]).first || by_contact_relationship(current_business).by_credential_email(auth[:info][:email]).first
+    user = by_employment(current_business).by_google_oauth2(auth[:info][:email]).first || by_contact_relationship(current_business).by_google_oauth2(auth[:info][:email]).first
     return user if user
+
+    user = by_google_oauth2(auth[:info][:email]).first
+    return User.new if user # user is likely belonging to another business
 
     # does not exist. require open invite.
     invitation = Invitation.open.by_business(current_business).find_by_email auth[:info][:email]
@@ -39,7 +42,6 @@ class User < ActiveRecord::Base
 
     if current_user
       credential.user = current_user
-      credential.save!
     else
       user = User.new
       user.email = credential.email
@@ -47,8 +49,9 @@ class User < ActiveRecord::Base
       user.last_name = auth[:info][:last_name]
       user.save! # not sure if this is needed
       credential.user = user
-      credential.save!
     end
+    credential.save!
+
     invitation.accept_user!(credential.user)
     credential.user
   end

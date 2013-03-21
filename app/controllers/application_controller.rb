@@ -27,5 +27,15 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def after_sign_in_path_for(resource)
+    stored_location_for(resource) ||
+      if resource.is_a?(User)
+        manage_clients_path
+      elsif resource.is_a?(AdminUser)
+        beezlebub_dashboard_path
+      else
+        signed_in_root_path(resource)
+      end
+  end
 
 end
