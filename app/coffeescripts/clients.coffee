@@ -4,6 +4,8 @@ class Client extends Backbone.Model
     first_name: 'John'
     last_name: 'Doe'
     email: 'noone@example.com'
+  fullName: () ->
+    "#{@get('first_name')} #{@get('last_name')}"
 
 class Clients extends Backbone.Collection
   model: Client
@@ -49,7 +51,8 @@ class ClientListItemView extends ListItemView
 class ClientAppView extends AppView
   modelName: 'client'
   spawnListItemType: ClientListItemView
-  render: () ->
+  title: () ->
+    'Clients'
 
 
 $(() ->
@@ -58,6 +61,7 @@ $(() ->
 
   clients = new Clients()
   clientApp = new ClientAppView(el: guiContaner.find('.clients-gui'), collection: clients, parent: appStack)
+  clientApp.render()
   clients.reset(__clients)
 
   appStack.childViewPushed(clientApp)

@@ -13,6 +13,13 @@ class Invoices extends Backbone.Collection
 
 class InvoiceView extends CrmModelView
   modelName: 'invoice'
+  events:
+    'keypress input': 'onKeypress'
+    'submit form': 'noSubmit'
+    'click button.save': 'save'
+    'confirm:complete button.destroy': 'destroy'
+    'click button.put_action': 'putAction'
+
   render: () ->
     @$el.html($('.invoice_view_example form').clone())
     @$('textarea[name="invoice[description]"]').val(@model.get('description'))
@@ -20,6 +27,10 @@ class InvoiceView extends CrmModelView
     @$('input[name="invoice[title]"]').val(@model.get('title'))
     @$('input[name="invoice[date]"]').val(@model.get('date'))
     @$('input[name="invoice[date]"]').datepicker(dateFormat: 'yy-mm-dd');
+    if @model.get('status') == 'open'
+      @$('button.pending').removeClass('disabled')
+    else
+      @$('button.pending').addClass('disabled')
     @
 
 class InvoiceListItemView extends ListItemView
@@ -35,8 +46,12 @@ class InvoiceAppView extends AppView
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui app-gui'
 
+  title: () ->
+    "Invoices for #{@collection.client.fullName()}"
+
   render: () ->
     node = $('.templates .invoices_view_example').children().clone()
     @$el.html(node)
+    @$('h1').text(@title())
     @
 

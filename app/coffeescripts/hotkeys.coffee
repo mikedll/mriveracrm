@@ -12,13 +12,14 @@ class Hotkeys
     for k, el of @hotKeyRegistry
       if(k == String.fromCharCode(e.keyCode).toLowerCase())
         e.stopPropagation()
-        if(typeof(el.data('events')) != "undefined")
+        if (typeof(el.data('events')) != "undefined") || typeof($._data( el, "events" )) != 'undefined' || typeof(el.prop('href')) == 'undefined' || el.prop('href') == '#'
           el.trigger('click')
         else
           window.location = el.attr('href');
 
   onDocLoad: () ->
-    $('a').each((i, el) =>
+    @hotKeyRegistry = {}
+    $('a:visible, button:visible').each((i, el) =>
       k = $(el).data('hotkey')
       if(typeof(k) != "undefined")
         text = $(el).text()

@@ -20,7 +20,11 @@ MikedllCrm::Application.routes.draw do
 
   namespace 'manage' do
     resources :clients do
-      resources :invoices
+      resources :invoices do
+        member do
+          put :mark_pending
+        end
+      end
     end
 
     resources :invoices, :only => [:index, :create, :show]

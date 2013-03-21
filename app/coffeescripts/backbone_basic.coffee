@@ -59,6 +59,7 @@ class CrmModelView extends Backbone.View
     'submit form': 'noSubmit'
     'click button.save': 'save'
     'confirm:complete button.destroy': 'destroy'
+    'click button.put_action': 'putAction'
 
   initialize: (options) ->
     @parent = options.parent
@@ -67,6 +68,9 @@ class CrmModelView extends Backbone.View
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
+
+  putAction: (e) ->
+    @model.save({}, url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true)
 
   remove: () ->
     @$el.remove()
@@ -119,8 +123,11 @@ class AppStack extends Backbone.View
         top: '150px'
         opacity: '0.0'
 
-    $(document).bind('keyup', (e) =>
-      @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
+    $(document).bind('keyup.appstack', (e) =>
+      return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
+      return @children[ @children.length - 1].previous() if( e.keyCode == 38)
+      return @children[ @children.length - 1].next() if( e.keyCode == 40)
+      $('body').data('hotkeys').handleKeyUp(e)
     )
 
   toBusy: () ->
@@ -191,6 +198,7 @@ class AppView extends Backbone.View
 
   addAll: () ->
     @collection.each(@addOne, @)
+    @$(".models-list .list-item a").first().trigger('click')
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
@@ -214,6 +222,15 @@ class AppView extends Backbone.View
   back: () ->
     @parent.childViewPulled(@)
 
+  move: (sibling) ->
+    sibling.find('a').trigger('click') if sibling.length > 0
+
+  next: () ->
+    @move(@$(".models-list .list-item a.active").parent().next())
+
+  previous: () ->
+    @move(@$(".models-list .list-item a.active").parent().prev())
+
   show: (view) ->
     @$(".models-list .list-item a").removeClass('active')
     @modelListItemLink(view.model).addClass('active')
@@ -224,6 +241,7 @@ class AppView extends Backbone.View
     @$modelView(view.model.get('id')).show()
     @$('.models-show-container').show()
     view.$(':input:visible').first().focus()
+    $('body').data('hotkeys').onDocLoad()
 
   $modelView: (id) ->
     @$("##{@modelName}-view-" + id)
@@ -233,6 +251,10 @@ class AppView extends Backbone.View
       .removeClass('error')
       .find('span.help-inline').remove()
     @$('.errors').hide()
+
+  render: () ->
+    @$('h1').text(@title)
+    @
 
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )

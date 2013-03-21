@@ -25,6 +25,12 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
+  def mark_pending
+    load_object
+    current_object.mark_pending!
+    render :json => current_object
+  end
+
   def object_parameters
     params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
   end

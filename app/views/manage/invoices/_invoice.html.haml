@@ -12,6 +12,10 @@
     %button.save.btn.btn-primary
       Save
 
+  .btn-group
+    %button.put_action.btn.btn-primary{ :data => {:action => 'mark_pending'}}
+      Mark Pending
+
   .btn-group.pull-right
     %button.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
       Delete
