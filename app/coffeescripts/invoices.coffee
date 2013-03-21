@@ -27,10 +27,12 @@ class InvoiceView extends CrmModelView
     @$('input[name="invoice[title]"]').val(@model.get('title'))
     @$('input[name="invoice[date]"]').val(@model.get('date'))
     @$('input[name="invoice[date]"]').datepicker(dateFormat: 'yy-mm-dd');
+    @$('input[name="invoice[status]"]').val( @model.get('status'))
+
     if @model.get('status') == 'open'
-      @$('button.pending').removeClass('disabled')
+      @$('button.put_action[data-action="mark_pending"]').removeClass('disabled')
     else
-      @$('button.pending').addClass('disabled')
+      @$('button.put_action[data-action="mark_pending"]').addClass('disabled')
     @
 
 class InvoiceListItemView extends ListItemView
