@@ -202,8 +202,11 @@ class AppView extends Backbone.View
       success: (model, response, options) => @afterSave(model, response, options)
     )
 
+  modelListItemLink: (model) ->
+    @$(".models-list #list-item-#{model.get('id')} a")
+
   afterSave: (model, response, options) ->
-    @$(".models-list #list-item-#{model.get('id')} a").trigger('click')
+    @modelListItemLink(model).trigger('click')
 
   remove: () ->
     @$el.remove()
@@ -212,6 +215,9 @@ class AppView extends Backbone.View
     @parent.childViewPulled(@)
 
   show: (view) ->
+    @$(".models-list .list-item a").removeClass('active')
+    @modelListItemLink(view.model).addClass('active')
+
     @$('.models-show-container').hide()
     @$('.models-show-container .model-view').hide()
     @$('.models-show-container').append(view.el) if @$modelView(view.model.get('id')).length == 0

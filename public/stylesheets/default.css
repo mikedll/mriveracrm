@@ -160,6 +160,12 @@ ul#projects_list li {
   display: block;
 }
 
+.models-list li a.active {
+  padding: 3px;
+  display: block;
+  background: #ffffb0;
+}
+
 .models-list li a:hover {
   background: #ffffb0;
 }
