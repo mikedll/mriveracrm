@@ -1,9 +1,10 @@
 
-
 #
 # Binding to the document's keyup is no handled here.
 #
-class Hotkeys
+# Branched from original hot keys which was causing too much trouble with window.location=
+#
+class EventHotKeys
 
   constructor: () ->
     @hotKeyRegistry = {}
@@ -12,14 +13,11 @@ class Hotkeys
     for k, el of @hotKeyRegistry
       if(k == String.fromCharCode(e.keyCode).toLowerCase())
         e.stopPropagation()
-        if (typeof(el.data('events')) != "undefined") || typeof($._data( el, "events" )) != 'undefined' || typeof(el.prop('href')) == 'undefined' || el.prop('href') == '#'
-          el.trigger('click') if !el.hasClass('disabled')
-        else
-          window.location = el.attr('href');
+        $(el).trigger('click') if !$(el).hasClass('disabled')
 
-  onDocLoad: () ->
+  bind: (container) ->
     @hotKeyRegistry = {}
-    $('a:visible, button:visible').each((i, el) =>
+    container.find('a:visible, button:visible').each((i, el) =>
       k = $(el).data('hotkey')
       if(typeof(k) != "undefined")
         @hotKeyRegistry[k] = $(el)
@@ -31,5 +29,3 @@ class Hotkeys
               break
     )
     this
-
-$(() -> $('body').data('hotkeys', (new Hotkeys()).onDocLoad()));

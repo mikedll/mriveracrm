@@ -25,6 +25,9 @@ class ListItemView extends Backbone.View
   childViewPulled: (view) ->
     @parent.childViewPulled(view)
 
+  rebindGlobalHotKeys: (container) ->
+    @parent.rebindGlobalHotKeys(container)
+
   remove: () ->
     @$el.remove()
 
@@ -59,7 +62,7 @@ class CrmModelView extends Backbone.View
     'submit form': 'noSubmit'
     'click button.save': 'save'
     'confirm:complete button.destroy': 'destroy'
-    'click button.put_action': 'putAction'
+    'confirm:complete button.put_action': 'putAction'
 
   initialize: (options) ->
     @parent = options.parent
@@ -69,8 +72,11 @@ class CrmModelView extends Backbone.View
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
 
-  putAction: (e) ->
-    @model.save({}, url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true)
+  rebindGlobalHotKeys: (container) ->
+    @parent.rebindGlobalHotKeys(container)
+
+  putAction: (e, answer) ->
+    @model.save({}, url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
 
   remove: () ->
     @$el.remove()
@@ -79,7 +85,7 @@ class CrmModelView extends Backbone.View
     @model.destroy({wait: true}) if answer
 
   onKeypress: (e) ->
-    if(e.keyCode == 13)
+    if(e.ctrlKey == false && e.keyCode == 13)
       @save()
       return false
     return true
@@ -95,85 +101,11 @@ class CrmModelView extends Backbone.View
     @model.save(updated, {wait: true})
 
   noSubmit: (e) ->
-    e.stopPropagation()
     false
 
   render: () ->
     throw "Implement in subclass"
 
-class AppStack extends Backbone.View
-  delay: 300
-
-  initialize: (options) ->
-    @children = [] # backbone views
-    $(document).ajaxStart(() => @toBusy())
-    $(document).ajaxStop(() => @toNotBusy())
-
-    @transforms =
-      out:
-        left: '-50px'
-        top: '-50px'
-        opacity: '0.5'
-      in:
-        left: '0px'
-        top: '0px'
-        opacity: '1.0'
-      incoming:
-        left: '150px'
-        top: '150px'
-        opacity: '0.0'
-
-    $(document).bind('keyup.appstack', (e) =>
-      return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
-
-      if (e.ctrlKey)
-        return @children[ @children.length - 1].previous() if( e.keyCode == 38)
-        return @children[ @children.length - 1].next() if( e.keyCode == 40)
-        $('body').data('hotkeys').handleKeyUp(e)
-    )
-
-  toBusy: () ->
-    return if @children.length == 0
-    @children[ @children.length - 1].$('.spinner-container').show()
-
-  toNotBusy: () ->
-    return if @children.length == 0
-    @children[ @children.length - 1].$('.spinner-container').hide()
-
-  childViewPushed: (view) ->
-    if @children.length > 0
-      @children[ @children.length - 1].$el
-        .css(@transforms['in'])
-        .animate(@transforms['out'], @delay, 'easeOutCirc', () ->
-        )
-
-    @$el.append(view.el) if @$(view.id).length == 0
-    @children.push( view )
-    @children[ @children.length - 1 ].$el
-      .css(@transforms['incoming'])
-      .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
-      )
-
-  #
-  # view param is used to do backbone removal.
-  # it is asssmed that view.$el == @children[ @children.length - 1 ]
-  #
-  childViewPulled: (view) ->
-    return if @children.length <= 1
-
-    if @children.length > 1
-      @children[ @children.length - 2 ].$el
-        .css(@transforms['out'])
-        .animate(@transforms['in'], @delay, 'easeOutCirc', () ->
-       )
-
-    lastChild = @children[ @children.length - 1 ]
-    lastChild.$el
-      .css(@transforms['in'])
-      .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
-        view.remove()
-        @children.pop()
-      )
 
 #
 # Override modelName, spawnListItemType
@@ -197,6 +129,9 @@ class AppView extends Backbone.View
 
   childViewPulled: (view) ->
     @parent.childViewPulled(view)
+
+  rebindGlobalHotKeys: (container) ->
+    @parent.rebindGlobalHotKeys(container)
 
   addAll: () ->
     @collection.each(@addOne, @)
@@ -243,7 +178,7 @@ class AppView extends Backbone.View
     @$modelView(view.model.get('id')).show()
     @$('.models-show-container').show()
     view.$(':input:visible').first().focus()
-    $('body').data('hotkeys').onDocLoad()
+    @parent.rebindGlobalHotKeys(@$el)
 
   $modelView: (id) ->
     @$("##{@modelName}-view-" + id)
@@ -277,3 +212,81 @@ class AppView extends Backbone.View
       )
 
 
+class AppStack extends Backbone.View
+  delay: 300
+
+  initialize: (options) ->
+    @eventHotKeys = new EventHotKeys()
+    @children = [] # backbone views
+    $(document).ajaxStart(() => @toBusy())
+    $(document).ajaxStop(() => @toNotBusy())
+
+    @transforms =
+      out:
+        left: '-50px'
+        top: '-50px'
+        opacity: '0.5'
+      in:
+        left: '0px'
+        top: '0px'
+        opacity: '1.0'
+      incoming:
+        left: '150px'
+        top: '150px'
+        opacity: '0.0'
+
+    $(document).on('keyup.appstack', (e) =>
+      return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
+
+      if (e.ctrlKey)
+        return @children[ @children.length - 1].previous() if( e.keyCode == 38)
+        return @children[ @children.length - 1].next() if( e.keyCode == 40)
+        @eventHotKeys.handleKeyUp(e)
+    )
+
+  rebindGlobalHotKeys: (container) ->
+    @eventHotKeys.bind(container)
+
+  toBusy: () ->
+    return if @children.length == 0
+    @children[ @children.length - 1].$('.spinner-container').show()
+
+  toNotBusy: () ->
+    return if @children.length == 0
+    @children[ @children.length - 1].$('.spinner-container').hide()
+
+  childViewPushed: (view) ->
+    if @children.length > 0
+      @children[ @children.length - 1].$el
+        .css(@transforms['in'])
+        .animate(@transforms['out'], @delay, 'easeOutCirc', () ->
+        )
+
+    @$el.append(view.el) if @$(view.id).length == 0
+    @children.push( view )
+    @children[ @children.length - 1 ].$el
+      .css(@transforms['incoming'])
+      .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
+      )
+
+  #
+  # view param is used to do backbone removal.
+  # it is asssmed that view.$el == @children[ @children.length - 1 ]
+  #
+  childViewPulled: (view) ->
+    return if @children.length <= 1
+
+    if @children.length > 1
+      @children[ @children.length - 2 ].$el
+        .css(@transforms['out'])
+        .animate(@transforms['in'], @delay, 'easeOutCirc', () ->
+       )
+
+    lastChild = @children[ @children.length - 1 ]
+    lastChild.$el
+      .css(@transforms['in'])
+      .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
+        view.remove()
+        @children.pop()
+      )
+    @eventHotKeys.bind(@children[ @children.length - 1 ].$el)

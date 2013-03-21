@@ -13,12 +13,6 @@ class Invoices extends Backbone.Collection
 
 class InvoiceView extends CrmModelView
   modelName: 'invoice'
-  events:
-    'keypress input': 'onKeypress'
-    'submit form': 'noSubmit'
-    'click button.save': 'save'
-    'confirm:complete button.destroy': 'destroy'
-    'click button.put_action': 'putAction'
 
   render: () ->
     @$el.html($('.invoice_view_example form').clone())
