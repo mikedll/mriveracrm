@@ -282,8 +282,8 @@ class AppStack extends Backbone.View
     @children[ @children.length - 1 ].$el
       .css(@transforms['incoming'])
       .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
+        @rebindGlobalHotKeys()
       )
-    @rebindGlobalHotKeys()
 
   #
   # view param is used to do backbone removal.
@@ -304,5 +304,5 @@ class AppStack extends Backbone.View
       .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
         view.remove()
         @children.pop()
+        @rebindGlobalHotKeys()
       )
-    @rebindGlobalHotKeys()
