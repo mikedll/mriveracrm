@@ -148,6 +148,10 @@ ul#projects_list li {
   overflow: auto;
 }
 
+.app-top {
+  margin-bottom: 1em;
+}
+
 /* clients */
 
 .models-list li {

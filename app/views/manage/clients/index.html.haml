@@ -11,9 +11,8 @@
     %h1
       Clients
 
-    .btn-group
-      %button.add-model.btn
-        +New
+    .app-top
+      = render :partial => 'shared/app_top'
 
     .row-fluid
 
@@ -38,11 +37,11 @@
   .invoices_view_example
     %h1
       Invoices
-    .btn-group
-      %button.back.btn
-        Back
-      %button.add-model.btn
-        +New
+    .app-top
+      .btn-group
+        %button.back.btn
+          Back
+      = render :partial => 'shared/app_top'
 
     .row-fluid
       .span3
