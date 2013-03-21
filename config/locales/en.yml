@@ -5,6 +5,10 @@ en:
   errors:
     unexpected_internal_error: "Unexpected internal system error"
 
+  invitation:
+    errors:
+      only_one: 'must have either a client or an employee, and not both'
+
   invoice:
     already_paid: "has already been paid"
 

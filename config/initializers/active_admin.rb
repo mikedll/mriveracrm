@@ -27,7 +27,7 @@ ActiveAdmin.setup do |config|
   #   config.default_namespace = false
   #
   # Default:
-  # config.default_namespace = :admin
+  config.default_namespace = :beezlebub
 
   # == User Authentication
   #

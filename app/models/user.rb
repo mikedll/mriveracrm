@@ -2,8 +2,11 @@ class User < ActiveRecord::Base
 
   has_many :credentials
 
-  has_and_belongs_to_many :clients
-  has_and_belongs_to_many :businesses
+  has_many :contact_relationships
+  has_many :clients, :through => :contact_relationships
+
+  has_many :employments
+  has_many :business, :through => :employments
 
   devise :omniauthable
 
