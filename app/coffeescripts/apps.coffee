@@ -36,11 +36,12 @@ class ListItemView extends Backbone.View
     if !@showview?
       @showview = @spawnView()
       @showview.render()
-    @options.parent.show(@showview)
+    @parent.show(@showview)
     false
 
   render: () ->
-    @$el.html("<a href='#'>#{@title()}</a>")
+    @$el.html("<a href='#'></a>") if @$('a').length == 0
+    @$('a').text(@title())
     @
 
   title: () ->
@@ -61,12 +62,12 @@ class CrmModelView extends Backbone.View
   initialize: (options) ->
     @events =
       'keypress input': 'onKeypress'
-      'submit form': 'noSubmit'
+      'ajax:beforeSend form': 'noSubmit'
       'click button.save': 'save'
       'confirm:complete button.destroy': 'destroy'
       'confirm:complete button.put_action': 'putAction'
     @parent = options.parent
-    @listenTo(@model, 'sync', @render)
+    @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'destroy', @remove)
 
   childViewPulled: (view) ->
@@ -102,6 +103,9 @@ class CrmModelView extends Backbone.View
 
   noSubmit: (e) ->
     false
+
+  onSync: () ->
+    @render()
 
   render: () ->
     throw "Implement in subclass"
@@ -169,24 +173,34 @@ class AppView extends Backbone.View
     @move(@$(".models-list .list-item a.active").parent().prev())
 
   show: (view) ->
+    @$('.errors').hide()
     @$(".models-list .list-item a").removeClass('active')
     @modelListItemLink(view.model).addClass('active')
 
+    # lower curtain
     @$('.models-show-container').hide()
+
+    # rearrange stage (hide other model views, show this model view)
     @$('.models-show-container .model-view').hide()
     @$('.models-show-container').append(view.el) if @$modelView(view.model.get('id')).length == 0
-    @$modelView(view.model.get('id')).show()
+    @$modelView(view.model.get('id'))
+      .show()
+      .find(':input:visible').first().focus()
+
+    # raise curtain
     @$('.models-show-container').show()
-    view.$(':input:visible').first().focus()
     @parent.rebindGlobalHotKeys()
 
   $modelView: (id) ->
     @$("##{@modelName}-view-" + id)
 
   onSync: (model, resp, options) ->
-    @$(".#{@modelName}-view:visible .control-group")
+    @$modelView(model.get('id')).find(' .control-group')
       .removeClass('error')
       .find('span.help-inline').remove()
+    if @$modelView(model.get('id')).is(':visible')
+      @$modelView(model.get('id')).find(':input:visible').first().focus()
+
     @$('.errors').hide()
 
   render: () ->
