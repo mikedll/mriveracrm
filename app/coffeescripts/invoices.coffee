@@ -24,9 +24,9 @@ class InvoiceView extends CrmModelView
     @$('input[name="invoice[status]"]').val( @model.get('status'))
 
     if @model.get('status') == 'open'
-      @$('button.put_action[data-action="mark_pending"]').removeClass('disabled')
+      @$('.put_action[data-action="mark_pending"]').removeClass('disabled')
     else
-      @$('button.put_action[data-action="mark_pending"]').addClass('disabled')
+      @$('.put_action[data-action="mark_pending"]').addClass('disabled')
     @
 
 class InvoiceListItemView extends ListItemView

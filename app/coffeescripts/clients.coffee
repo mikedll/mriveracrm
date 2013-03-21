@@ -60,8 +60,6 @@ $(() ->
   clients = new Clients()
   clientApp = new ClientAppView(el: guiContaner.find('.clients-gui'), collection: clients, parent: appStack)
   clientApp.render()
-  clients.reset(__clients)
-
   appStack.childViewPushed(clientApp)
-
+  clients.reset(__clients)
   )

@@ -164,14 +164,17 @@ class AppView extends Backbone.View
   back: () ->
     @parent.childViewPulled(@)
 
-  move: (sibling) ->
-    sibling.find('a').trigger('click') if sibling.length > 0
+  move: (listItem) ->
+    listItem.find('a').trigger('click') if listItem.length > 0
 
   next: () ->
     @move(@$(".models-list .list-item a.active").parent().next())
 
   previous: () ->
     @move(@$(".models-list .list-item a.active").parent().prev())
+
+  focusTopModelView: () ->
+    @$('.models-show-container .model-view:visible').find(':input:visible').first().focus()
 
   show: (view) ->
     @$('.errors').hide()
@@ -189,8 +192,7 @@ class AppView extends Backbone.View
 
     # raise curtain and focus
     @$('.models-show-container').show()
-    @$modelView(view.model.get('id'))
-      .find(':input:visible').first().focus()
+    @focusTopModelView()
     @parent.rebindGlobalHotKeys()
 
   $modelView: (id) ->
@@ -228,6 +230,9 @@ class AppView extends Backbone.View
       )
 
 
+#
+# Stack of AppViews
+#
 class AppStack extends Backbone.View
   delay: 300
 
@@ -284,6 +289,7 @@ class AppStack extends Backbone.View
     @children[ @children.length - 1 ].$el
       .css(@transforms['incoming'])
       .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
+        @children[ @children.length - 1].focusTopModelView()
         @rebindGlobalHotKeys()
       )
 
@@ -306,5 +312,6 @@ class AppStack extends Backbone.View
       .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
         view.remove()
         @children.pop()
+        @children[ @children.length - 1].focusTopModelView()
         @rebindGlobalHotKeys()
       )
