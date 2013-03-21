@@ -2,7 +2,9 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
-  factory :business
+  factory :business do
+    domain "www.domain" + SecureRandom.base64(8) + "yup.com"
+  end
   factory :credential
 
   factory :user do

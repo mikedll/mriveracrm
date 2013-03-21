@@ -38,7 +38,7 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :employees do |e|
+    create_table :employees do |t|
       t.integer :business_id
       t.string   :first_name,             :default => "", :null => false
       t.string   :last_name,              :default => "", :null => false
@@ -55,10 +55,15 @@ class CreateBusinesses < ActiveRecord::Migration
 
     create_table :credentials do |t|
       t.integer :user_id
+      t.string :name,          :default => "", :null => false
+      t.string :uid,           :default => "", :null => false
       t.string :email,         :default => "", :null => false
-      t.string :credential_id
+      t.string :provider,      :default => "", :null => false
       t.string :oauth_token
       t.string :oauth_secret
+      t.string :oauth2_access_token
+      t.datetime :oauth2_access_token_expires_at
+      t.string :oauth2_refresh_token
       t.timestamps
     end
 

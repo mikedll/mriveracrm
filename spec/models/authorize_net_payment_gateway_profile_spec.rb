@@ -72,7 +72,7 @@ describe AuthorizeNetPaymentGatewayProfile do
       end      
     end
 
-    context "pay", :current => true do
+    context "pay" do
       before(:each) do
         @profile = FactoryGirl.create(:authorize_net_payment_gateway_profile)
         @invoice = FactoryGirl.create(:invoice, :client => @profile.client)
@@ -104,7 +104,7 @@ describe AuthorizeNetPaymentGatewayProfile do
         invoice2.transactions.first.amount.should == 1823.34
       end
 
-      it "should capture error when transaction fails due to expired card", :current => true do
+      it "should capture error when transaction fails due to expired card" do
       end
     end
   end

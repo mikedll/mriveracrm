@@ -12,4 +12,20 @@ class ApplicationController < ActionController::Base
   # Uncomment this to filter the contents of submitted sensitive data parameters
   # from your application log (in this case, all fields with names like "password"). 
   # filter_parameter_logging :password
+
+  skip_before_filter :authenticate_user!
+
+  before_filter :require_business
+
+  def current_business
+    @current_business ||= Business.find_by_domain (Rails.env.development? ? 'www.mikedll.com' : request.host )
+  end
+
+  def require_business
+    if current_business.nil?
+      head :forbidden
+    end
+  end
+
+
 end
