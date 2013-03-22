@@ -2,7 +2,6 @@ class Client::InvoicesController < Client::BaseController
 
   make_resourceful do
     actions :index
-    belongs_to :client
 
     response_for(:index) do |format|
       format.html
@@ -26,8 +25,8 @@ class Client::InvoicesController < Client::BaseController
     end
   end
 
-  def parent_object
-    @parent_object ||= current_user.client
+  def current_objects
+    @current_objects ||= current_user.client.invoices
   end
 
 end
