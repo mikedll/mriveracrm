@@ -35,7 +35,11 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource)
     stored_location_for(resource) ||
       if resource.is_a?(User)
-        manage_clients_path
+        if resource.employee
+          manage_clients_path
+        else
+          client_invoices_path
+        end
       elsif resource.is_a?(AdminUser)
         beezlebub_dashboard_path
       else

@@ -26,11 +26,11 @@ class Invitation < ActiveRecord::Base
     if client
       user.client = client
     elsif employee
-      user = user.employee = employee
+      user.employee = employee
     else
       raise "Nonsensical invitation. Neither employee nor client relationship."
     end
-    user.save!
+    return false if user.save!
     accept!
   end
 

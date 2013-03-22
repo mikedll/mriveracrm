@@ -1,0 +1,12 @@
+
+- content_for :head do
+  = javascript_include_tag 'apps'
+  = javascript_include_tag 'clientInvoices'
+
+.container-fluid.gui-container  
+
+.templates.hide
+  .invoice_view_example
+    = render Invoice.new
+  .invoices_view_example
+    = render :partial => 'shared/app', :locals => { :app_top => false, :app_class => 'invoices', :title => "Invoices for #{current_user.client.display_name}" }

@@ -1,0 +1,22 @@
+- content_for :head do
+  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => app_class }
+
+%h1
+  = title
+
+.app-top
+  = render :partial => 'shared/app_top' if app_top
+
+.row-fluid
+  .span3
+    %ul.invoices-list.models-list
+
+  .span9
+    .errors.alert.alert-error.hide
+    .models-show-container
+
+  .clear
+
+  .spinner-container.hide 
+    .spinner
+      = image_tag 'loading.gif'

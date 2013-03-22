@@ -47,6 +47,18 @@ class Invoice < ActiveRecord::Base
     self.client.payment_gateway_profile.pay!(self)
   end
 
+  def public
+    {
+      :title => title,
+      :description => description,
+      :total => total,
+      :can_pay => can_pay?,
+      :date => date,
+      :status => status
+    }    
+  end
+
+
   private
 
   def _defaults

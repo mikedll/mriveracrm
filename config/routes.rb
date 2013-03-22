@@ -34,6 +34,14 @@ MikedllCrm::Application.routes.draw do
     resources :invoices, :only => [:index, :create, :show]
   end
 
+  namespace "client" do
+    resources :invoices do
+      member do
+        put :charge
+      end
+    end
+  end
+
   root :to => "home#index"
 
 end

@@ -9,9 +9,14 @@ class User < ActiveRecord::Base
   devise :omniauthable
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
-  validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
-  validates :first_name, :last_name, :business, :presence => true
 
+  #
+  # CHECK THIS OUT; ISNT WORKING RIGHT.
+  #
+  # validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
+
+  validates :first_name, :last_name, :business, :presence => true
+  validate :_employee_or_client
   before_validation :_defaults, :if => :new_record?
 
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
@@ -42,13 +47,10 @@ class User < ActiveRecord::Base
       user.email = credential.email
       user.first_name = auth[:info][:first_name]
       user.last_name = auth[:info][:last_name]
-      user.save! # not sure if this is needed
       credential.user = user
     end
 
-    return User.new if !credential.save # credential likely is already in use for this business
-
-    invitation.accept_user!(credential.user)
+    return User.new  if invitation.accept_user!(credential.user) # credential likely is already in use for this business
     credential.user
   end
 
@@ -60,14 +62,15 @@ class User < ActiveRecord::Base
     "#{first_name} #{last_name}"
   end
 
-  def client
-    clients.first
-  end
-
   def _defaults
     self.business = Business.current
     self.timezone = 'Pacific Time (US & Canada)' if timezone.nil?
   end
+
+  def _employee_or_client
+    errors.add(:base, 'must be associated with employee or client of this business') if (self.employee.nil? && self.client.nil?)
+  end
+
   
 end
 

@@ -25,4 +25,19 @@ class Business < ActiveRecord::Base
     invitation
   end
 
+  def invite_client(email)
+    client = clients.find_by_email(email)
+    if client.nil?
+      client = clients.build
+      client.email = email
+      client.save!
+    end
+
+    invitation = self.invitations.build
+    invitation.email = email
+    invitation.client = client
+    invitation.save!
+    invitation
+  end
+
 end
