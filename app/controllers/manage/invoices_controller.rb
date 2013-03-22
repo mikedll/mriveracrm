@@ -27,8 +27,15 @@ class Manage::InvoicesController < Manage::BaseController
 
   def mark_pending
     load_object
-    current_object.mark_pending!
-    render :json => current_object
+    if current_object.update_attributes(object_parameters)
+      if current_object.mark_pending!
+        response_for :update
+      else
+        response_for :update_fails
+      end
+    else
+      response_for :update_fails
+    end
   end
 
   def object_parameters

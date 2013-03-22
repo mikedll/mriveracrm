@@ -3,7 +3,20 @@ require 'factory_girl'
 FactoryGirl.define do
 
   factory :business do
+    name "my small business"
     domain "www.domain" + SecureRandom.base64(8) + "yup.com"
+    after(:create) do |business|
+      Business.current = business
+    end
+
+    factory :emerging_papacy do
+      name "Emerging Papacy"
+      domain "www.emergingpapacy" + SecureRandom.base64(8) + "yup.com"
+      after(:create) do |business, evaluator|
+        FactoryGirl.create(:employee, :business => business, :first_name => "Gregory", :last_name => "the Great")
+        FactoryGirl.create(:employee, :business => business, :first_name => "Saint", :last_name => "Benedict")
+      end   
+    end
   end
 
   factory :employee do
@@ -11,15 +24,6 @@ FactoryGirl.define do
     first_name "Mike"
     last_name "Worker Bee"
     email { "employee" + SecureRandom.base64(8) + "@example.com" }
-  end
-
-  factory :employment do
-    before(:create) do |employment|
-      employee = FactoryGirl.create(:employee)
-      employment.employee = employee
-      employment.business  = employee.business
-      employment.user = FactoryGirl.create(:user)
-    end
   end
 
   factory :credential do
@@ -37,6 +41,7 @@ FactoryGirl.define do
   end
 
   factory :client do
+    business { FactoryGirl.create(:business) }
     email { "user" + SecureRandom.base64(8) + "@example.com" }
   end
 

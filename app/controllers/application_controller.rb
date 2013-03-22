@@ -13,17 +13,22 @@ class ApplicationController < ActionController::Base
   # from your application log (in this case, all fields with names like "password"). 
   # filter_parameter_logging :password
 
-  skip_before_filter :authenticate_user!
+  before_filter :authenticate_user!
 
-  before_filter :require_business
+  before_filter :require_business_and_current_user_belongs_to_it
 
   def current_business
     @current_business ||= Business.find_by_domain (Rails.env.development? ? 'www.mikedll.com' : request.host )
   end
 
-  def require_business
+  def require_business_and_current_user_belongs_to_it
     if current_business.nil?
       head :forbidden
+    else
+      Business.current = current_business
+      if user_signed_in? && !current_user.cb?
+        head :forbidden      
+      end
     end
   end
 

@@ -77,7 +77,7 @@ class CrmModelView extends Backbone.View
     @parent.rebindGlobalHotKeys()
 
   putAction: (e, answer) ->
-    @model.save({}, url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
+    @model.save(@getUpdated(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
 
   remove: () ->
     @$el.remove()
@@ -91,7 +91,7 @@ class CrmModelView extends Backbone.View
       return false
     return true
 
-  save: () ->
+  getUpdated: () ->
     updated = {}
     _.each(@$(':input:visible'), (el) =>
       matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
@@ -99,7 +99,10 @@ class CrmModelView extends Backbone.View
       if attribute_keys? && attribute_keys.length == 2
         updated[ attribute_keys[1] ] = $(el).val()
     )
-    @model.save(updated, {wait: true})
+    updated
+
+  save: () ->
+    @model.save(@getUpdated(), {wait: true})
 
   noSubmit: (e) ->
     false

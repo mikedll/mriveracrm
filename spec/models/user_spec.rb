@@ -12,8 +12,9 @@ describe User do
       user.should_not be_nil
     end
 
-    it "should be able to lookup by credntial email", :current => true do
-      business = FactoryGirl.create(:employment).business
+    it "should be able to lookup by credntial email" do
+      employment = FactoryGirl.create(:employment)
+      business = employment.business
       cred_email = business.employees.first.users.first.credentials.first.email
       user = User.by_employment(business).by_credential_email(cred_email).first
       user.should_not be_nil

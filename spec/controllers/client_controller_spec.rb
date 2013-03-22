@@ -1,7 +1,7 @@
 
 require 'spec_helper'
 
-describe ClientController do
+describe Manage::ClientsController do
   it "should work" do
   end
 end

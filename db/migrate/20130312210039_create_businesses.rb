@@ -17,6 +17,7 @@ class CreateBusinesses < ActiveRecord::Migration
     end
 
     create_table :users do |t|
+      t.integer  :business_id
       t.string   :first_name,             :default => "", :null => false
       t.string   :last_name,              :default => "", :null => false
       t.string   :email,                  :default => "", :null => false
@@ -28,13 +29,8 @@ class CreateBusinesses < ActiveRecord::Migration
       t.datetime :created_at, :null => false
       t.datetime :updated_at, :null => false
       t.string   :timezone
-      t.timestamps
-    end
-
-    create_table :contact_relationships do |t|
-      t.integer :business_id
-      t.integer :client_id
-      t.integer :user_id
+      t.integer  :employee_id
+      t.integer  :client_id
       t.timestamps
     end
 
@@ -46,14 +42,8 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :employments do |t|
-      t.integer :business_id
-      t.integer :employee_id
-      t.integer :user_id
-      t.timestamps
-    end
-
     create_table :credentials do |t|
+      t.integer :business_id
       t.integer :user_id
       t.string :name,          :default => "", :null => false
       t.string :uid,           :default => "", :null => false
@@ -70,7 +60,6 @@ class CreateBusinesses < ActiveRecord::Migration
     add_index :credentials, :email, :unique => true
 
     create_table :invoices do |t|
-      t.integer :business_id
       t.decimal :total
       t.timestamps
     end
@@ -96,11 +85,7 @@ class CreateBusinesses < ActiveRecord::Migration
     drop_table :invoices
     remove_index :credentials, :column => :email
     drop_table :credentials
-
-    drop_table :employments
     drop_table :employees
-
-    drop_table :contact_relationships
     drop_table :users
     drop_table :clients
     drop_table :businesses

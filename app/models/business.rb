@@ -1,5 +1,10 @@
 class Business < ActiveRecord::Base
 
+  has_many :users, :dependent => :destroy
+  has_many :credentials # used validations in credential. destroyed by users, not here.
+
+  cattr_accessor :current
+
   has_many :clients, :dependent => :destroy
   has_many :employees, :dependent => :destroy
 

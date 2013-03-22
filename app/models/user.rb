@@ -1,35 +1,30 @@
 class User < ActiveRecord::Base
 
+  belongs_to :business
+  belongs_to :employee
+  belongs_to :client
+
   has_many :credentials, :dependent => :destroy
-
-  has_many :contact_relationships, :dependent => :destroy
-  has_many :clients, :through => :contact_relationships
-
-  has_many :employments, :dependent => :destroy
-  has_many :employees, :through => :employments
 
   devise :omniauthable
 
-  validates :email, :format => { :with => Regexes::EMAIL }
-  validates :first_name, :last_name, :presence => true
+  validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
+  validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
+  validates :first_name, :last_name, :business, :presence => true
 
-  before_validation :_default_timezone, :if => :new_record?
+  before_validation :_defaults, :if => :new_record?
 
-  scope :by_google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
-  scope :by_employment, lambda { |b| joins(:employments => { :employee => :business }).where('businesses.id = ?', b.id) }
-  scope :by_contact_relationship, lambda { |b| joins(:contact_relationships => { :client => :business }).where('businesses.id = ?', b.id) }
+  scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
+  scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
 
-  def self.find_for_google_oauth2(auth, current_user, current_business)
+  def self.find_for_google_oauth2(auth, current_user)
 
     # user exists
-    user = by_employment(current_business).by_google_oauth2(auth[:info][:email]).first || by_contact_relationship(current_business).by_google_oauth2(auth[:info][:email]).first
+    user = cb.google_oauth2(auth[:info][:email]).first
     return user if user
 
-    user = by_google_oauth2(auth[:info][:email]).first
-    return User.new if user # user is likely belonging to another business
-
     # does not exist. require open invite.
-    invitation = Invitation.open.by_business(current_business).find_by_email auth[:info][:email]
+    invitation = Invitation.cb.open.find_by_email auth[:info][:email]
     return User.new if invitation.nil?
 
     credential = Credential.new(:provider => :google_oauth2,
@@ -50,10 +45,15 @@ class User < ActiveRecord::Base
       user.save! # not sure if this is needed
       credential.user = user
     end
-    credential.save!
+
+    return User.new if !credential.save # credential likely is already in use for this business
 
     invitation.accept_user!(credential.user)
     credential.user
+  end
+
+  def cb?
+    business_id == Business.current.id
   end
 
   def display_name
@@ -64,12 +64,9 @@ class User < ActiveRecord::Base
     clients.first
   end
 
-  def business
-    businesses.first
-  end
-
-  def _default_timezone
-    timezone = 'Pacific Time (US & Canada)' if timezone.nil?
+  def _defaults
+    self.business = Business.current
+    self.timezone = 'Pacific Time (US & Canada)' if timezone.nil?
   end
   
 end

@@ -20,7 +20,7 @@ Spork.prefork do
     config.infer_base_class_for_anonymous_controllers = false
     config.order = "random"
 
-    config.filter_run_including :current => true
+    # config.filter_run_including :current => true
     # config.filter_run_excluding :live_authorizenet => true
 
     config.before(:suite) do

@@ -61,15 +61,8 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "updated_at"
   end
 
-  create_table "contact_relationships", :force => true do |t|
-    t.integer  "business_id"
-    t.integer  "client_id"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "credentials", :force => true do |t|
+    t.integer  "business_id"
     t.integer  "user_id"
     t.string   "name",                           :default => "", :null => false
     t.string   "uid",                            :default => "", :null => false
@@ -104,14 +97,6 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "updated_at"
   end
 
-  create_table "employments", :force => true do |t|
-    t.integer  "business_id"
-    t.integer  "employee_id"
-    t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "images", :force => true do |t|
     t.string   "data"
     t.integer  "project_id"
@@ -130,7 +115,6 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
   end
 
   create_table "invoices", :force => true do |t|
-    t.integer  "business_id"
     t.decimal  "total"
     t.datetime "created_at"
     t.datetime "updated_at"
@@ -175,6 +159,7 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
   end
 
   create_table "users", :force => true do |t|
+    t.integer  "business_id"
     t.string   "first_name",         :default => "", :null => false
     t.string   "last_name",          :default => "", :null => false
     t.string   "email",              :default => "", :null => false
@@ -186,6 +171,8 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "timezone"
+    t.integer  "employee_id"
+    t.integer  "client_id"
   end
 
 end

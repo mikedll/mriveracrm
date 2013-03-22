@@ -4,7 +4,7 @@ class Invitation < ActiveRecord::Base
   belongs_to :employee
   belongs_to :client
 
-  scope :by_business, lambda { |business| where('invitations.business_id = ?', business.id) }
+  scope :cb, lambda { where('invitations.business_id = ?', Business.current.try(:id)) }
   scope :open, where('invitations.status = ?', :open)
 
   before_validation :_capture_client_email
@@ -24,22 +24,14 @@ class Invitation < ActiveRecord::Base
 
   def accept_user!(user)
     if client
-      contact_relationship = ContactRelationship.new
-      contact_relationship.user = user
-      contact_relationship.client = client
-      contact_relationship.business = business
-      contact_relationship.save!
-      accept!
+      user.client = client
     elsif employee
-      employment = Employment.new
-      employment.user = user
-      employment.employee = employee
-      employment.business = business
-      employment.save!
-      accept!
+      user = user.employee = employee
     else
       raise "Nonsensical invitation. Neither employee nor client relationship."
     end
+    user.save!
+    accept!
   end
 
   private

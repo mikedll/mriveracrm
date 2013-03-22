@@ -5,6 +5,10 @@ en:
   errors:
     unexpected_internal_error: "Unexpected internal system error"
 
+  employment:
+    errors:
+      user_unique_in_business_employment: 'is already employed as anothe employee at this business'
+      one_user_per_employee: 'already has a user assigned'
   invitation:
     errors:
       only_one: 'must have either a client or an employee, and not both'
