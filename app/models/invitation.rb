@@ -30,7 +30,7 @@ class Invitation < ActiveRecord::Base
     else
       raise "Nonsensical invitation. Neither employee nor client relationship."
     end
-    return false if user.save!
+    return false if !user.save
     accept!
   end
 

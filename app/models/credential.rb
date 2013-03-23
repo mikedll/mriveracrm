@@ -12,7 +12,18 @@ class Credential < ActiveRecord::Base
   before_validation :_copy_business
 
   scope :with_user, includes(:user)
-  
+
+  def self.new_from_google_oauth2(auth, user)
+    Credential.new(:provider => :google_oauth2,
+                   :uid => auth[:uid], 
+                   :email => auth[:info][:email],
+                   :name =>  auth[:info][:name],
+                   :oauth2_access_token => auth[:credentials][:token],
+                   :oauth2_access_token_expires_at => Time.at(auth[:credentials][:expires_at]),
+                   :oauth2_refresh_token => auth[:credentials][:refresh_token],
+                   :user => user)
+  end
+
   def _copy_business
     self.business = user.try(:business) if new_record?
   end

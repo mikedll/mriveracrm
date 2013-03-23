@@ -23,35 +23,28 @@ class User < ActiveRecord::Base
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
 
   def self.find_for_google_oauth2(auth, current_user)
-
     # user exists
     user = cb.google_oauth2(auth[:info][:email]).first
     return user if user
 
     # does not exist. require open invite.
     invitation = Invitation.cb.open.find_by_email auth[:info][:email]
-    return User.new if invitation.nil?
+    return nil if invitation.nil?
 
-    credential = Credential.new(:provider => :google_oauth2,
-                                :uid => auth[:uid], 
-                                :email => auth[:info][:email],
-                                :name =>  auth[:info][:name],
-                                :oauth2_access_token => auth[:credentials][:token],
-                                :oauth2_access_token_expires_at => Time.at(auth[:credentials][:expires_at]),
-                                :oauth2_refresh_token => auth[:credentials][:refresh_token])
+    user = if current_user.nil?
+             user = User.new
+             user.email = auth[:info][:email]
+             user.first_name = auth[:info][:first_name]
+             user.last_name = auth[:info][:last_name]    
+             user
+           else
+             current_user
+           end
+    user.credentials.push(Credential.new_from_google_oauth2(auth, user))
 
-    if current_user
-      credential.user = current_user
-    else
-      user = User.new
-      user.email = credential.email
-      user.first_name = auth[:info][:first_name]
-      user.last_name = auth[:info][:last_name]
-      credential.user = user
-    end
+    return nil if !invitation.accept_user!(user) # credential likely is already in use for this business
 
-    return User.new  if invitation.accept_user!(credential.user) # credential likely is already in use for this business
-    credential.user
+    user
   end
 
   def cb?
