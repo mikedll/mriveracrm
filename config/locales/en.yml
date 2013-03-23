@@ -18,5 +18,5 @@ en:
     already_paid: "has already been paid"
 
   payment_gateway_profile:
-    cant_pay: "Payment information is not setup properly to make payments. Have you entered valid credit card information?"
+    cant_pay: "Payment information is not properly setup. Have you entered valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."

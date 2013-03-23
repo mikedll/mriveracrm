@@ -224,8 +224,11 @@ class AppView extends Backbone.View
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )
     s = ""
-    _.each(response.full_messages, (m) ->
-      s = "#{s} #{m}."
+    _.chain(response.full_messages).filter((m) ->
+      /\w/.test(m)
+    ).each((m) ->
+      s = "#{s} #{m}"
+      s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
     )
     @$('.errors').text(s).show()
 

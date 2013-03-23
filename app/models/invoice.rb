@@ -44,7 +44,14 @@ class Invoice < ActiveRecord::Base
   before_validation :_defaults
 
   def charge!
-    self.client.payment_gateway_profile.pay!(self)
+    if self.client.payment_gateway_profile.nil?
+      errors.add(:base, I18n.t('payment_gateway_profile.cant_pay'))
+      return false
+    end
+
+    self.client.payment_gateway_profile.pay_invoice!(self).tap do |result|
+      errors.add(:base, self.client.payment_gateway_profile.last_error) if !result
+    end
   end
 
   def public
