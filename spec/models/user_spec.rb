@@ -28,20 +28,21 @@ describe User do
       user.persisted?.should be_true
     end
   end
+
   context "scopes" do
     it "should be able to lookup by business" do
-      business = FactoryGirl.create(:employment).business
-      user = User.by_employment(business).first
+      FactoryGirl.create(:client_user)
+      user = User.cb.first
       user.should_not be_nil
     end
 
-    it "should be able to lookup by credntial email" do
-      employment = FactoryGirl.create(:employment)
-      business = employment.business
-      cred_email = business.employees.first.users.first.credentials.first.email
-      user = User.by_employment(business).by_credential_email(cred_email).first
+    it "should be able to lookup by google_oauth2" do
+      user = FactoryGirl.create(:employee_user)
+      business = user.business
+      business.reload
+      user = User.cb.google_oauth2(business.employees.first.user.credentials.first.email).first
       user.should_not be_nil
-      user.email.should == cred_email
+      user.email.should == business.employees.first.user.credentials.first.email
     end
   end
 end

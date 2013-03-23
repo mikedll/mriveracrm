@@ -21,7 +21,7 @@ Spork.prefork do
     config.order = "random"
 
     # config.filter_run_including :current => true
-    # config.filter_run_excluding :live_authorizenet => true
+    config.filter_run_excluding :live_authorizenet => true
 
     config.before(:suite) do
       DatabaseCleaner.strategy = :transaction
