@@ -3,7 +3,7 @@ class Client::PaymentGatewayProfilesController < Client::BaseController
   make_resourceful do
     actions :update, :show
 
-    response_for(:show) do |format|
+    response_for(:show, :update) do |format|
       format.js { render :json => current_object.public }
     end
 

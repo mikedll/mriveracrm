@@ -93,10 +93,11 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
                                                      :first_name => self.client.first_name,
                                                      :last_name => self.client.last_name,
                                                      :month => opts[:expiration_month].to_i,
-                                                     :year => opts[:expiration_year].to_i,
+                                                     :year => "20#{opts[:expiration_year]}".to_i,
                                                      :number => opts[:card_number],
                                                      :verification_value => opts[:cv_code]
                                                    })
+
     card.validate
     if !card.valid?
       lookup = {:month => :expiration_month, :year => :expiration_year, :number => :card_number, :verification_value => :cv_code}
@@ -140,7 +141,9 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
       return false
     end
 
-    self.card_last_4 = opts[:card_number].last(4)
+    self.card_brand = card.brand.camelize
+    self.card_last_4 = card.number.last(4)
+
     self.card_profile_id = response.params['customer_payment_profile_id'] if self.card_profile_id.nil?
     save!
   end

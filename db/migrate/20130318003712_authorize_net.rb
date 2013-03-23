@@ -6,6 +6,7 @@ class AuthorizeNet < ActiveRecord::Migration
       t.string     :vendor_id
       t.string     :card_profile_id
       t.string     :card_last_4
+      t.string     :card_brand
       t.timestamps
     end
  

@@ -8,7 +8,7 @@ class Client::InvoicesController < Client::BaseController
       format.js { render :json => current_objects }
     end
 
-    response_for(:show) do |format|
+    response_for(:show, :update) do |format|
       format.js { render :json => current_object.public }
     end
 

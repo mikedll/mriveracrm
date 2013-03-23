@@ -131,6 +131,7 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.string   "vendor_id"
     t.string   "card_profile_id"
     t.string   "card_last_4"
+    t.string   "card_brand"
     t.datetime "created_at"
     t.datetime "updated_at"
   end

@@ -15,12 +15,12 @@ class PaymentGatewayProfileView extends CrmModelView
     @listenTo(@model, 'error', @onError)
 
   onSync: () ->
-    @copyModelToForm()
-    @$('input[name="payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_last_4'))
+    @$(':input').val('')
+    @$('input[name="authorize_net_payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
 
   render: () ->
     @$el.html($('.templates .payment-gateway-profile-view-example').children().clone()) if @$el.children().length == 0
-    @$('input[name="payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_last_4'))
+    @$('input[name="authorize_net_payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
     @
 
   onError: (model, xhr, options) ->
