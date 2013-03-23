@@ -25,7 +25,7 @@
   %body
     = render :partial => "shared/gain_layout"
     %div{ 'data-asset-prefix' => asset_prefix, 'id' => 'header'}
-
+    = render :partial => "shared/flash", :locals => { :flash => flash }
     = yield
 
     = render :partial => "shared/ganalytics" if Rails.env.production?

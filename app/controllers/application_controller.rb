@@ -32,6 +32,21 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def require_employee
+    if current_user.employee.nil?
+      flash[:error] = I18n.t('errors.no_access')
+      redirect_to after_sign_in_path_for(current_user)
+    end
+  end
+
+  def require_client
+    if current_user.client.nil?
+      flash[:error] = I18n.t('errors.no_access')
+      redirect_to after_sign_in_path_for(current_user)
+    end
+  end
+
+
   def after_sign_in_path_for(resource)
     stored_location_for(resource) ||
       if resource.is_a?(User)

@@ -16,6 +16,23 @@ body {
     position: relative;
 }
 
+.flash {
+  margin-left: -300px;
+  width: 600px;
+  top: 0;
+  left: 50%;
+  background: #fffff2;
+  padding: 5px;
+  position: absolute;
+
+  border-bottom-left-radius: 5px;
+  border-bottom-right-radius: 5px;
+  border-bottom: 1px solid #000;
+  border-left: 1px solid #000;
+  border-right: 1px solid #000;
+
+}
+
 /* util */
 
 .clear {

@@ -4,6 +4,7 @@
 en:
   errors:
     unexpected_internal_error: "Unexpected internal system error"
+    no_access: "You tried to access a resource that you don't have access to. You've been redirected."
 
   employment:
     errors:

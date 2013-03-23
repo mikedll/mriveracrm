@@ -62,6 +62,10 @@ class User < ActiveRecord::Base
     "#{first_name} #{last_name}"
   end
 
+  def login_name
+    "#{first_name} #{last_name} (#{self.email})"
+  end
+
   def _defaults
     self.business = Business.current
     self.timezone = 'Pacific Time (US & Canada)' if timezone.nil?

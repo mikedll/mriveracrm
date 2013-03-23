@@ -1,5 +1,7 @@
 class Client::InvoicesController < Client::BaseController
 
+  before_filter :require_client
+
   make_resourceful do
     actions :index
 

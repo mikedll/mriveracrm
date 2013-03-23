@@ -2,7 +2,7 @@
 .login.menu.major
   - if user_signed_in?
     Logged In:
-    = current_user.display_name
+    = current_user.login_name
     = link_to 'Logout', destroy_user_session_path
   - else
     = link_to 'Login', user_omniauth_authorize_path(:google_oauth2)
