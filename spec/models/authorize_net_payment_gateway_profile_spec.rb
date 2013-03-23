@@ -18,7 +18,7 @@ describe AuthorizeNetPaymentGatewayProfile do
     end
 
     it "should be able to reload remotely with vendor_id, including getting payment profile" do
-        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_true
         @profile.card_last_4 = ""
         before = @profile.card_profile_id
         @profile.card_profile_id = nil
@@ -36,7 +36,7 @@ describe AuthorizeNetPaymentGatewayProfile do
         @profile.card_profile_id.should be_nil
         @profile.card_last_4.should be_nil
 
-        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_true
 
         @profile.card_profile_id.should_not be_nil
         @profile.card_last_4.should == "2222"
@@ -44,20 +44,20 @@ describe AuthorizeNetPaymentGatewayProfile do
       end
 
       it "should be able to update credit card info" do
-        @profile.update_payment_info(:card_number => '4222222222221', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4222222222221', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_true
 
         @profile.card_profile_id.should_not be_nil
         @profile.card_last_4.should == "2221"
-        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_true
         @profile.card_last_4.should == "2222"
       end
 
       it "should leave record on update failure" do
-        @profile.update_payment_info(:card_number => '4222222222221', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4222222222221', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_true
 
         @profile.card_profile_id.should_not be_nil
         @profile.card_last_4.should == "2221"
-        @profile.update_payment_info(:card_number => 'junk', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_false
+        @profile.update_payment_info(:card_number => 'junk', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_false
         
         @profile.errors.full_messages.first.should match(Regexp.new(I18n.t('payment_gateway_profile.update_error')))
         @profile.card_last_4.should == "2221"
@@ -65,7 +65,7 @@ describe AuthorizeNetPaymentGatewayProfile do
       end
 
       it "should not create card profile if create fails" do
-        @profile.update_payment_info(:card_number => 'junk', :expiration_month => '08', :expiration_year => '2016', :card_code => '111').should be_false
+        @profile.update_payment_info(:card_number => 'junk', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111').should be_false
         @profile.card_last_4.should be_nil
         @profile.card_profile_id.should be_nil
         @profile.card_prompt.should == "No card on file"
@@ -84,7 +84,7 @@ describe AuthorizeNetPaymentGatewayProfile do
       end
 
       it "should be able to pay normal invoice" do
-        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111')
+        @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111')
         @profile.transactions.count.should == 0
         @invoice.transactions.count.should == 0
         @invoice.paid?.should be_false

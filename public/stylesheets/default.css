@@ -199,8 +199,6 @@ ul#projects_list li {
   margin-bottom: 1em;
 }
 
-/* clients */
-
 .models-list li {
   font-weight: bold;
   margin: 2px 0;
@@ -224,3 +222,17 @@ ul#projects_list li {
 .models-show-container {
 }
 
+
+/* client/ */
+
+input.card_number  {
+}
+
+input.expiration_year,
+input.expiration_month {
+  width: 50px;
+}
+
+input.cv_code {
+  width: 40px;
+}

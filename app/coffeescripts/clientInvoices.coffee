@@ -39,7 +39,7 @@ class ClientInvoiceAppView extends AppView
     @paymentGatewayProfileView = new PaymentGatewayProfileView(model: @paymentGatewayProfile, parent: @)
 
   title: () ->
-    "Your Invoices"
+    "Invoices"
 
   render: () ->
     @$el.html($('.templates .invoices-app-example').children().clone())

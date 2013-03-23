@@ -84,7 +84,7 @@ FactoryGirl.define do
   factory :authorize_net_payment_gateway_profile_ready, :parent => :authorize_net_payment_gateway_profile do
     client { FactoryGirl.create(:client) }
     after(:create) do |profile, evaluator|
-      profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :card_code => '111')
+      profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111')
     end
   end
 

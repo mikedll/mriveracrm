@@ -8,7 +8,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
   def public
     {
       :id => id,
-      :card_last_4 => card_prompt,
+      :card_prompt => card_prompt,
       :updated_at => updated_at
     }
   end
@@ -97,9 +97,9 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
                                                                     :first_name => self.client.first_name,
                                                                     :last_name => self.client.last_name,
                                                                     :month => opts[:expiration_month].to_i,
-                                                                    :year => opts[:expiration_year].to_i,
+                                                                    :year => "20#{opts[:expiration_year]}".to_i,
                                                                     :number => opts[:card_number],
-                                                                    :verification_value => opts[:card_code]
+                                                                    :verification_value => opts[:cv_code]
                                                                   })
 
         }

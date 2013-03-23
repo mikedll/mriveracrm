@@ -1,0 +1,18 @@
+
+.errors.alert.alert-error.hide
+
+%h2
+  Payment Information
+
+= simple_form_for authorize_net_payment_gateway_profile, :remote => true, :url => '#', :html => { :class => 'form-inline' } do |f|
+
+  = f.text_field :card_number, { :placeholder => authorize_net_payment_gateway_profile.card_prompt, :maxlength => 19, :class => 'card_number'}
+
+  = f.text_field :expiration_month, { :placeholder => 'MM', :maxlength => 2, :class => 'expiration_month' }
+
+  = f.text_field :expiration_year, {:placeholder => 'YY', :maxlength => 2, :class => 'expiration_year' }
+
+  = f.text_field :cv_code, { :max_length => 3, :class => "cv_code", :placeholder => 'CVV' }
+
+  %a.save.btn.btn-primary
+    Save

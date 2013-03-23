@@ -4,7 +4,7 @@ class PaymentGatewayProfile < ActiveRecord::Base
 
   after_create :_create_remote
 
-  attr_accessor :last_error
+  attr_accessor :last_error, :card_number, :expiration_month, :expiration_year, :cv_code
 
   def pay_invoice!(invoice)
     raise "Implement in subclass."
