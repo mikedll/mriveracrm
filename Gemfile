@@ -14,7 +14,7 @@ gem 'devise'
 gem 'omniauth'
 gem "omniauth-google-oauth2"
 gem 'make_resourceful'
-gem "activemerchant"
+gem "activemerchant", '~> 1.31'
 gem 'carrierwave'
 gem "fog"
 gem 'rmagick'

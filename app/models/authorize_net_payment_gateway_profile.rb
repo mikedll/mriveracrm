@@ -89,18 +89,32 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
   # 
   #
   def update_payment_info(opts)
+    card = ActiveMerchant::Billing::CreditCard.new({
+                                                     :first_name => self.client.first_name,
+                                                     :last_name => self.client.last_name,
+                                                     :month => opts[:expiration_month].to_i,
+                                                     :year => opts[:expiration_year].to_i,
+                                                     :number => opts[:card_number],
+                                                     :verification_value => opts[:cv_code]
+                                                   })
+    card.validate
+    if !card.valid?
+      lookup = {:month => :expiration_month, :year => :expiration_year, :number => :card_number, :verification_value => :cv_code}
+      card.errors.each do |k,v|
+        if lookup[k.to_sym]
+          errors.add(lookup[k.to_sym], v) 
+        else
+          errors.add(k, v) 
+        end
+      end
+      return false
+    end
+
     call_opts = {
       :customer_profile_id => self.vendor_id,
       :payment_profile => {
         :payment => {
-          :credit_card => ActiveMerchant::Billing::CreditCard.new({
-                                                                    :first_name => self.client.first_name,
-                                                                    :last_name => self.client.last_name,
-                                                                    :month => opts[:expiration_month].to_i,
-                                                                    :year => "20#{opts[:expiration_year]}".to_i,
-                                                                    :number => opts[:card_number],
-                                                                    :verification_value => opts[:cv_code]
-                                                                  })
+          :credit_card => card 
 
         }
       }
@@ -111,7 +125,14 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
       call_opts[:payment_profile].merge!(:customer_payment_profile_id => self.card_profile_id) 
       call_prefix = 'update'
     end
-    response = PaymentGateway.authorizenet.send("#{call_prefix}_customer_payment_profile".to_sym, call_opts)
+
+    response = nil
+    begin
+      response = PaymentGateway.authorizenet.send("#{call_prefix}_customer_payment_profile".to_sym, call_opts)
+    rescue => e
+      self.errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
+      return false      
+    end
       
     if response.params['messages']['result_code'] != AuthorizeResponses::OK
       DetectedErrors.create!(:message => "Authorize.net payment profile update failure responded that duplicate customer payment profile already exists.", :client_id => self.client.id) if response.params['messages']['message']['code'] == 'E00039'

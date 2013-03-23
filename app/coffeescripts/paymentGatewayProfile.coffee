@@ -12,6 +12,7 @@ class PaymentGatewayProfileView extends CrmModelView
       'ajax:beforeSend form': 'noSubmit'
       'click a.save': 'save'
     @listenTo(@model, 'sync', @onSync)
+    @listenTo(@model, 'error', @onError)
 
   onSync: () ->
     @copyModelToForm()
@@ -22,3 +23,13 @@ class PaymentGatewayProfileView extends CrmModelView
     @$('input[name="payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_last_4'))
     @
 
+  onError: (model, xhr, options) ->
+    response = jQuery.parseJSON( xhr.responseText )
+    s = ""
+    _.chain(response.full_messages).filter((m) ->
+      /\w/.test(m)
+    ).each((m) ->
+      s = "#{s} #{m}"
+      s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
+    )
+    @$('.errors').text(s).show()
