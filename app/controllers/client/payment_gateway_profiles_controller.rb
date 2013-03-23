@@ -13,7 +13,7 @@ class Client::PaymentGatewayProfilesController < Client::BaseController
   end
 
   def update
-    if current_object.update_payment_info(params.slice(:expiration_month, :expiration_year, :card_code, :card_number))
+    if current_object.update_payment_info(params.slice(:card_number, :expiration_month, :expiration_year, :cv_code))
       response_for :update
     else
       response_for :update_fails

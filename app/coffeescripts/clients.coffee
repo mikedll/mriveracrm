@@ -46,7 +46,7 @@ class ClientListItemView extends ListItemView
   title: () ->
     "#{@model.get('first_name')} #{@model.get('last_name')}"
 
-class ClientAppView extends AppView
+class ClientAppView extends CollectionAppView
   modelName: 'client'
   spawnListItemType: ClientListItemView
   title: () ->
@@ -55,11 +55,11 @@ class ClientAppView extends AppView
 
 $(() ->
   guiContaner = $('.gui-container')
-  appStack = new AppStack(el: guiContaner)
+  stack = new StackedChildrenView(el: guiContaner)
 
   clients = new Clients()
-  clientApp = new ClientAppView(el: guiContaner.find('.clients-gui'), collection: clients, parent: appStack)
+  clientApp = new ClientAppView(el: guiContaner.find('.clients-gui'), collection: clients, parent: stack)
   clientApp.render()
-  appStack.childViewPushed(clientApp)
+  stack.childViewPushed(clientApp)
   clients.reset(__clients)
   )

@@ -13,24 +13,36 @@ class Invoice < ActiveRecord::Base
     end
 
     event :fail_payment do
-      transition [:open, :pending, :failed_payment] => [:failed_payment]
+      transition [:pending, :failed_payment] => [:failed_payment]
     end
 
     event :mark_paid do
-      transition [:open, :pending, :failed_payment] => [:paid]
+      transition [:pending, :failed_payment] => [:paid]
     end
 
     event :close do
-      transition [:open, :pending, :failed_payment] => [:closed]
+      transition [:pending, :failed_payment] => [:closed]
     end
 
-    state :pending, :failed_payment, :closed do
+    state :open do
+      def can_edit?
+        true
+      end
+    end
+
+    state :pending, :failed_payment, :closed, :paid do
+      def can_edit?
+        false
+      end
+    end
+
+    state :pending, :failed_payment do
       def can_pay?
         true
       end
     end
 
-    state :open, :paid do
+    state :open, :paid, :closed do
       def can_pay?
         false
       end
@@ -45,6 +57,7 @@ class Invoice < ActiveRecord::Base
 
   before_validation { @_virtual_path = 'invoice' }
   before_validation :_defaults
+  before_validation :_verify_can_edit?
 
   def charge!
     if !can_pay?
@@ -69,6 +82,7 @@ class Invoice < ActiveRecord::Base
       :description => description,
       :total => total,
       :can_pay => can_pay?,
+      :can_edit => can_edit?,
       :date => date,
       :status => status
     }    
@@ -85,5 +99,10 @@ class Invoice < ActiveRecord::Base
       self.title = "New invoice" if title.nil?
     end
   end
+
+  def _verify_can_edit?
+    errors.add(:base, t('.uneditable')) if (changed.reject { |attr| attr == "status"}.count > 0) && !can_edit?
+  end
+
 
 end

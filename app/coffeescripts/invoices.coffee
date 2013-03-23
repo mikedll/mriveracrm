@@ -37,7 +37,7 @@ class InvoiceListItemView extends ListItemView
   title: () ->
     @model.get('title')
 
-class InvoiceAppView extends AppView
+class InvoiceAppView extends CollectionAppView
   modelName: 'invoice'
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui app-gui'

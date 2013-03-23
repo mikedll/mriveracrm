@@ -28,32 +28,45 @@ class InvoiceListItemView extends ListItemView
   title: () ->
     "#{@model.get('title')}"
 
-class ClientInvoiceAppView extends AppView
+class InvoicesAppView extends CollectionAppView
   modelName: 'invoice'
   spawnListItemType: InvoiceListItemView
-  className: 'invoices-gui app-gui'
+  className: 'invoices-gui'
 
   initialize: () ->
-    AppView.prototype.initialize.apply(@, arguments)
-    @paymentGatewayProfile = new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile')
-    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: @paymentGatewayProfile, parent: @)
+    CollectionAppView.prototype.initialize.apply(@, arguments)
 
   title: () ->
     "Invoices"
 
   render: () ->
     @$el.html($('.templates .invoices-app-example').children().clone())
+    @addAll()
+    @$('h2').text(@title())
+    @
+
+class PartitionedChildrenView extends WithChildrenView
+  className: 'container-app app-gui'
+
+  initialize: (options) ->
+    WithChildrenView.prototype.initialize.apply(@, arguments)
+    @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices)), parent: @)
+    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile'), parent: @)
+
+  focusTopModelView: () ->
+    @invoicesAppView.focusTopModelView()
+
+  next: () -> @invoicesAppView.next()
+  previous: () -> @invoicesAppView.previous()
+
+  render: () ->
+    @$el.html($('.templates .container-app-example').children().clone()) if @$el.children().length == 0
     @$('.payment-gateway-profile-view-container').html(@paymentGatewayProfileView.render().el)
-    @$('h1').text(@title())
+    @$('.invoices-app-view-container').html(@invoicesAppView.render().el)
     @
 
 $(() ->
   guiContaner = $('.gui-container')
-  appStack = new AppStack(el: guiContaner)
-
-  collection = new Invoices()
-  appView = new ClientInvoiceAppView(collection: collection, parent: appStack)
-  appView.render()
-  appStack.childViewPushed(appView)
-  collection.reset(__invoices)
+  stack = new StackedChildrenView(el: guiContaner)
+  stack.childViewPushed((new PartitionedChildrenView(parent: stack)).render())
   )

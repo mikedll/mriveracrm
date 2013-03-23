@@ -1,23 +1,7 @@
-
-#
-# Override modelName, spawnViewType and className.
-#
-# Implement title.
-#
-class ListItemView extends Backbone.View
-  modelName: 'some_type'
-  tagName: 'li'
-  className: 'list-item'
-
-  id: () ->
-    "list-item-#{@model.get('id')}"
-
+class BaseView extends Backbone.View
   initialize: (options) ->
-    @events =
-      'click a': 'show'
+    @events = {}
     @parent = options.parent
-    @listenTo(@model, 'sync', @render)
-    @listenTo(@model, 'destroy', @remove)
 
   childViewPushed: (view) ->
     @parent.childViewPushed(view)
@@ -27,6 +11,41 @@ class ListItemView extends Backbone.View
 
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
+
+class WithChildrenView extends BaseView
+  initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
+    $.extend(@events, 'click a,button': 'checkDisabled')
+
+  checkDisabled: (e) ->
+    if $(e.target).hasClass('disabled')
+      e.stopPropagation()
+      return false
+    return true
+
+  focusTopModelView: () ->
+    throw "Must implement in child class."
+
+#
+# Override modelName, spawnViewType and className.
+#
+# Implement title.
+#
+class ListItemView extends BaseView
+  modelName: 'some_type'
+  tagName: 'li'
+  className: 'list-item'
+
+  id: () ->
+    "list-item-#{@model.get('id')}"
+
+  initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
+    @events =
+      'click a': 'show'
+    @parent = options.parent
+    @listenTo(@model, 'sync', @render)
+    @listenTo(@model, 'destroy', @remove)
 
   remove: () ->
     @$el.remove()
@@ -56,10 +75,11 @@ class ListItemView extends Backbone.View
 #
 # implement render
 #
-class CrmModelView extends Backbone.View
+class CrmModelView extends BaseView
   className: 'model-view'
 
   initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
     @events =
       'keypress input': 'onKeypress'
       'ajax:beforeSend form': 'noSubmit'
@@ -121,32 +141,22 @@ class CrmModelView extends Backbone.View
   render: () ->
     throw "Implement in subclass"
 
-
 #
 # Override modelName, spawnListItemType
 #
 # Optional override render.
 #
-class AppView extends Backbone.View
+class CollectionAppView extends WithChildrenView
   initialize: (options) ->
+    WithChildrenView.prototype.initialize.apply(@, arguments)
     @events =
       'click .add-model': 'create'
       'click button.back': 'back'
 
-    @parent = options.parent
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
-
-  childViewPushed: (view) ->
-    @parent.childViewPushed(view)
-
-  childViewPulled: (view) ->
-    @parent.childViewPulled(view)
-
-  rebindGlobalHotKeys: () ->
-    @parent.rebindGlobalHotKeys()
 
   addAll: () ->
     @collection.each(@addOne, @)
@@ -218,7 +228,7 @@ class AppView extends Backbone.View
     @$('.errors').hide()
 
   render: () ->
-    @$('h1').text(@title)
+    @$('h2').text(@title)
     @
 
   onError: (model, xhr, options) ->
@@ -242,18 +252,16 @@ class AppView extends Backbone.View
           .find('.controls').append('<span class="help-inline">' + value + '</span>').end()
       )
 
-
 #
-# Stack of AppViews
+# Stack of Views
 #
-class AppStack extends Backbone.View
+class StackedChildrenView extends WithChildrenView
   delay: 300
 
   initialize: (options) ->
-    @events =
-      'click a,button': 'checkDisabled' # why do i have to do this. damn you confirm boxes.
+    WithChildrenView.prototype.initialize.apply(@, arguments)
+    @children = []
     @eventHotKeys = new EventHotKeys()
-    @children = [] # backbone views
     $(document).ajaxStart(() => @toBusy())
     $(document).ajaxStop(() => @toNotBusy())
 
@@ -271,7 +279,7 @@ class AppStack extends Backbone.View
         top: '150px'
         opacity: '0.0'
 
-    $(document).on('keyup.appstack', (e) =>
+    $(document).on('keyup.stackedchildrenview', (e) =>
       return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
 
       if (e.ctrlKey)
@@ -279,12 +287,6 @@ class AppStack extends Backbone.View
         return @children[ @children.length - 1].next() if( e.keyCode == 40)
         @eventHotKeys.handleKeyUp(e)
     )
-
-  checkDisabled: (e) ->
-    if $(e.target).hasClass('disabled')
-      e.stopPropagation()
-      return false
-    return true
 
   rebindGlobalHotKeys: (container) ->
     return if @children.length == 0

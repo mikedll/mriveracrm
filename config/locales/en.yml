@@ -16,7 +16,8 @@ en:
 
   invoice:
     cannot_pay: "cannot be paid in its current state"
+    uneditable: "is no longer open and not available for editing"
 
   payment_gateway_profile:
-    cant_pay: "Payment information is not properly setup. Have you entered valid credit card information?"
+    cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."
