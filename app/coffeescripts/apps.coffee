@@ -250,6 +250,8 @@ class AppStack extends Backbone.View
   delay: 300
 
   initialize: (options) ->
+    @events =
+      'click a,button': 'checkDisabled' # why do i have to do this. damn you confirm boxes.
     @eventHotKeys = new EventHotKeys()
     @children = [] # backbone views
     $(document).ajaxStart(() => @toBusy())
@@ -277,6 +279,12 @@ class AppStack extends Backbone.View
         return @children[ @children.length - 1].next() if( e.keyCode == 40)
         @eventHotKeys.handleKeyUp(e)
     )
+
+  checkDisabled: (e) ->
+    if $(e.target).hasClass('disabled')
+      e.stopPropagation()
+      return false
+    return true
 
   rebindGlobalHotKeys: (container) ->
     return if @children.length == 0
