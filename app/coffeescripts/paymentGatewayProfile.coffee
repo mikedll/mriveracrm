@@ -1,6 +1,6 @@
 
 class PaymentGatewayProfile extends Backbone.Model
-  url: '/clients/payment_gateway_profile'
+  url: '/client/payment_gateway_profile'
 
 class PaymentGatewayProfileView extends CrmModelView
   modelName: 'payment_gateway_profile'

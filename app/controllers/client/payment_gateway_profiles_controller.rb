@@ -1,4 +1,4 @@
-class PaymentGatewayProfilesController < Client::BaseController
+class Client::PaymentGatewayProfilesController < Client::BaseController
 
   make_resourceful do
     actions :update, :show

@@ -35,7 +35,7 @@ class ClientInvoiceAppView extends AppView
 
   initialize: () ->
     AppView.prototype.initialize.apply(@, arguments)
-    @paymentGatewayProfile = new PaymentGatewayProfile(url: '/client/payment_gateway_profile')
+    @paymentGatewayProfile = new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile')
     @paymentGatewayProfileView = new PaymentGatewayProfileView(model: @paymentGatewayProfile, parent: @)
 
   title: () ->
@@ -43,7 +43,7 @@ class ClientInvoiceAppView extends AppView
 
   render: () ->
     @$el.html($('.templates .invoices-app-example').children().clone())
-    # @$('.payment-gateway-profile-view-container').html(@paymentGatewayProfileView.render())
+    @$('.payment-gateway-profile-view-container').html(@paymentGatewayProfileView.render().el)
     @$('h1').text(@title())
     @
 

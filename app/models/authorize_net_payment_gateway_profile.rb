@@ -7,7 +7,8 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
   def public
     {
-      :card_last_4 => card_last_4,
+      :id => id,
+      :card_last_4 => card_prompt,
       :updated_at => updated_at
     }
   end
@@ -19,7 +20,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     end
 
     if !invoice.can_pay?
-      self.last_error = I18n.t('invoice.already_paid')
+      self.last_error = I18n.t('invoice.cannot_pay')
       return false
     end
 

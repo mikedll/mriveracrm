@@ -15,7 +15,7 @@ en:
       only_one: 'must have either a client or an employee, and not both'
 
   invoice:
-    already_paid: "has already been paid"
+    cannot_pay: "cannot be paid in its current state"
 
   payment_gateway_profile:
     cant_pay: "Payment information is not properly setup. Have you entered valid credit card information?"
