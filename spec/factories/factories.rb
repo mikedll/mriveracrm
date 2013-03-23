@@ -27,8 +27,17 @@ FactoryGirl.define do
   end
 
   factory :credential do
-    uid SecureRandom.base64(8)
-    provider :google_oauth2
+    uid { SecureRandom.hex(12) }
+    provider :someone
+    name 'Bob Jenkins'
+    email 'bob@email.com'
+
+    factory :google_oauth2_credential do
+      provider :google_oauth2
+      oauth2_access_token { SecureRandom.hex(16) }
+      oauth2_refresh_token { SecureRandom.hex(16) }
+      oauth2_access_token_expires_at { Time.now + 3600 }
+    end
   end
 
   factory :user do
@@ -45,10 +54,19 @@ FactoryGirl.define do
     email { "user" + SecureRandom.base64(8) + "@example.com" }
   end
 
-  factory :invitation
+  factory :invitation do
+    before(:create) do |invitation|
+      invitation.business = invitation.employee.try(:business) || invitation.client.business
+    end
 
-  factory :client_invitation, :parent => :invitation do
-    client { FactoryGirl.create(:client) }
+    factory :client_invitation, :parent => :invitation do
+      client { FactoryGirl.create(:client) }
+    end
+
+    factory :employee_invitation, :parent => :invitation do
+      employee { FactoryGirl.create(:employee) }
+    end
+
   end
 
   factory :authorize_net_payment_gateway_profile do
