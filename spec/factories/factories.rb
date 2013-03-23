@@ -41,11 +41,17 @@ FactoryGirl.define do
   end
 
   factory :user do
+    client { FactoryGirl.create(:client) }
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
     after(:create) do |user|
       FactoryGirl.create(:credential, :email => user.email, :user => user)
+    end
+
+    factory :employee_user do
+      employee { FactoryGirl.create(:employee) }
+      client nil
     end
   end
 
@@ -91,7 +97,7 @@ FactoryGirl.define do
     description "Test invoice."
     client { FactoryGirl.create(:client) }
     date { Time.now }
-    total 2500.00
+    total { 2500.00 }
   end
 
   factory :transaction do

@@ -63,10 +63,10 @@ class Invoice < ActiveRecord::Base
 
   def _defaults
     if new_record?
-      self.description = "..."
-      self.total = 0.0
-      self.date = Time.now
-      self.title = "New invoice"
+      self.description = "..." if description.nil?
+      self.total = 0.0 if total.nil?
+      self.date = Time.now if date.nil?
+      self.title = "New invoice" if title.nil?
     end
   end
 
