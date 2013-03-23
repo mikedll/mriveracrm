@@ -35,14 +35,14 @@ class ApplicationController < ActionController::Base
   def require_employee
     if current_user.employee.nil?
       flash[:error] = I18n.t('errors.no_access')
-      redirect_to after_sign_in_path_for(current_user)
+      redirect_to new_user_session_path
     end
   end
 
   def require_client
     if current_user.client.nil?
       flash[:error] = I18n.t('errors.no_access')
-      redirect_to after_sign_in_path_for(current_user)
+      redirect_to new_user_session_path
     end
   end
 

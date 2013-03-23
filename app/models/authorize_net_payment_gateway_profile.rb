@@ -171,7 +171,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
 
   def _create_remote
-    response = PaymentGateway.authorizenet.create_customer_profile(:profile => { :email => self.client.email })
+    response = PaymentGateway.authorizenet.create_customer_profile(:profile => { :merchant_customer_id => self.client.id })
 
     if response.params['messages']['result_code'] != AuthorizeResponses::OK
       if response.params['messages']['message']['code'] == 'E00039'
