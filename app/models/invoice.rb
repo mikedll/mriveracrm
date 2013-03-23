@@ -4,6 +4,8 @@ class Invoice < ActiveRecord::Base
 
   has_many :transactions
 
+  include ActionView::Helpers::TranslationHelper
+
   state_machine :status, :initial => :open do
 
     event :mark_pending do
@@ -41,9 +43,15 @@ class Invoice < ActiveRecord::Base
   validates :client, :date, :total, :presence => true
   validates :description, :length => { :minimum => 3 }
 
+  before_validation { @_virtual_path = 'invoice' }
   before_validation :_defaults
 
   def charge!
+    if !can_pay?
+      errors.add(:base, t('.cannot_pay'))
+      return false
+    end
+
     if self.client.payment_gateway_profile.nil?
       errors.add(:base, I18n.t('payment_gateway_profile.cant_pay'))
       return false
