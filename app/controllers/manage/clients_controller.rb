@@ -1,7 +1,5 @@
 class Manage::ClientsController < Manage::BaseController
 
-  before_filter :require_employee
-
   make_resourceful do
     actions :all
     belongs_to :business

@@ -5,6 +5,13 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     ERROR = 'Error'
   end
 
+  def public
+    {
+      :card_last_4 => card_last_4,
+      :updated_at => updated_at
+    }
+  end
+
   def pay_invoice!(invoice)
     if self.vendor_id.nil? || self.card_profile_id.nil?
       self.last_error = I18n.t('payment_gateway_profile.cant_pay')

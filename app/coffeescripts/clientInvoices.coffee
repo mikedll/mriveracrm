@@ -12,13 +12,8 @@ class ClientInvoiceView extends CrmModelView
   modelName: 'invoice'
 
   render: () ->
-    @$el.html($('.invoice_view_example form').clone())
-    @$('textarea[name="invoice[description]"]').val(@model.get('description'))
-    @$('input[name="invoice[total]"]').val(@model.get('total'))
-    @$('input[name="invoice[title]"]').val(@model.get('title'))
-    @$('input[name="invoice[date]"]').val(@model.get('date'))
-    @$('input[name="invoice[status]"]').val( @model.get('status'))
-
+    @$el.html($('.invoice_view_example').children().clone()) if @$el.children().length == 0
+    @copyModelToForm()
     if @model.get('can_pay')
       @$('.put_action[data-action="charge"]').removeClass('disabled')
     else
@@ -38,12 +33,17 @@ class ClientInvoiceAppView extends AppView
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui app-gui'
 
+  initialize: () ->
+    AppView.prototype.initialize.apply(@, arguments)
+    @paymentGatewayProfile = new PaymentGatewayProfile(url: '/client/payment_gateway_profile')
+    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: @paymentGatewayProfile, parent: @)
+
   title: () ->
     "Your Invoices"
 
   render: () ->
-    node = $('.templates .invoices_view_example').children().clone()
-    @$el.html(node)
+    @$el.html($('.templates .invoices-app-example').children().clone())
+    # @$('.payment-gateway-profile-view-container').html(@paymentGatewayProfileView.render())
     @$('h1').text(@title())
     @
 

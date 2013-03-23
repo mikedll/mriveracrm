@@ -1,0 +1,19 @@
+
+.errors.alert.alert-error.hide
+
+= simple_form_for payment_gateway_profile, :remote => true, :url => '#' do |f|
+
+  .input
+    = text_field_tag :card_number, '', :placeholder => payment_gateway_profile.card_last_4
+
+  .input
+    = text_field_tag :expiration_month, ''
+
+  .input
+    = text_field_tag :expiration_year, ''
+
+  .input
+    = text_field_tag :card_code, ''
+
+  %a.save.btn.btn-primary
+    Save

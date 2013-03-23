@@ -22,13 +22,13 @@ class Invoice < ActiveRecord::Base
       transition [:open, :pending, :failed_payment] => [:closed]
     end
 
-    state :open, :pending, :failed_payment, :closed do
+    state :pending, :failed_payment, :closed do
       def can_pay?
         true
       end
     end
 
-    state :paid do
+    state :open, :paid do
       def can_pay?
         false
       end
@@ -49,6 +49,7 @@ class Invoice < ActiveRecord::Base
 
   def public
     {
+      :id => id,
       :title => title,
       :description => description,
       :total => total,

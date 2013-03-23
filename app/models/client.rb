@@ -4,7 +4,7 @@ class Client < ActiveRecord::Base
   has_many :users
   has_many :invitations
   has_many :invoices
-  has_one :authorize_net_customer_profile
+  has_one :payment_gateway_profile
 
 
   attr_accessible :first_name, :last_name, :email
@@ -13,6 +13,8 @@ class Client < ActiveRecord::Base
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }
 
   validate :_static_business
+
+  after_create :_require_payment_gateway_profile
 
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
 
@@ -26,5 +28,9 @@ class Client < ActiveRecord::Base
     "#{first_name} #{last_name}"    
   end
 
+  def _require_payment_gateway_profile
+    self.payment_gateway_profile = AuthorizeNetPaymentGatewayProfile.new
+    self.payment_gateway_profile.save!
+  end
 
 end

@@ -52,7 +52,7 @@ class ListItemView extends Backbone.View
 
 
 #
-# Define className, modelName, and probably events
+# Define className, modelName, and probably events and render
 #
 # implement render
 #
@@ -77,7 +77,7 @@ class CrmModelView extends Backbone.View
     @parent.rebindGlobalHotKeys()
 
   putAction: (e, answer) ->
-    @model.save(@getUpdated(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
+    @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
 
   remove: () ->
     @$el.remove()
@@ -91,9 +91,9 @@ class CrmModelView extends Backbone.View
       return false
     return true
 
-  getUpdated: () ->
+  fromForm: () ->
     updated = {}
-    _.each(@$(':input:visible'), (el) =>
+    _.each(@$(':input'), (el) =>
       matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
       attribute_keys = matcher.exec($(el).prop('name'))
       if attribute_keys? && attribute_keys.length == 2
@@ -101,8 +101,15 @@ class CrmModelView extends Backbone.View
     )
     updated
 
+  copyModelToForm: () ->
+    _.each(@$(':input'), (el) =>
+      matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
+      attribute_key = matcher.exec($(el).prop('name'))
+      $(el).val(@model.get(attribute_key[1])) if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
+    )
+
   save: () ->
-    @model.save(@getUpdated(), {wait: true})
+    @model.save(@fromForm(), {wait: true})
 
   noSubmit: (e) ->
     false
