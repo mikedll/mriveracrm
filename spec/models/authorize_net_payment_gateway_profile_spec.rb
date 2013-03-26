@@ -88,7 +88,7 @@ describe AuthorizeNetPaymentGatewayProfile do
         @profile.last_error.should == I18n.t('payment_gateway_profile.cant_pay')
       end
 
-      it "should be able to pay normal invoice", :current => true do
+      it "should be able to pay normal invoice", :broken => true do
         @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111')
         @profile.transactions.count.should == 0
         @invoice.transactions.count.should == 0
@@ -110,7 +110,7 @@ describe AuthorizeNetPaymentGatewayProfile do
         invoice2.transactions.first.amount.should == 1823.34
       end
 
-      it "should capture error when transaction fails due to expired card" do
+      it "should capture error when transaction fails due to declined card", :broken => true do
       end
     end
   end

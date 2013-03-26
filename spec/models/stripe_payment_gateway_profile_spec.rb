@@ -107,6 +107,7 @@ describe StripePaymentGatewayProfile do
         @invoice.transactions.count.should == 0
         @invoice.paid?.should be_false
         @profile.pay_invoice!(@invoice).should be_true
+        @profile.last_error.should be_nil
         @invoice.paid?.should be_true
         @invoice.transactions.count.should == 1
         @profile.transactions.count.should == 1
@@ -123,7 +124,17 @@ describe StripePaymentGatewayProfile do
         invoice2.transactions.first.amount.should == 1823.34
       end
 
-      it "should capture error when transaction fails due to expired card" do
+      it "should capture error when transaction fails due to declined card" do
+        token = Stripe::Token.create(:card => { :number => "4000000000000341", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
+        @profile.update_payment_info(:token => token.id)
+        @profile.transactions.count.should == 0
+        @invoice.paid?.should be_false
+        @profile.pay_invoice!(@invoice).should be_false
+        @profile.transactions.count.should == 1
+        @profile.transactions.first.should == @invoice.transactions.first
+        @invoice.transactions.first.failed?.should be_true
+        @invoice.failed_payment?.should be_true
+        @profile.last_error.should == 'Your card was declined'
       end
     end
   end

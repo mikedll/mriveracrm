@@ -107,7 +107,7 @@ FactoryGirl.define do
     end
 
     factory :pending_invoice do
-      status :pending
+      status "pending"
     end
   end
 

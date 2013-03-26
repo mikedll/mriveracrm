@@ -28,15 +28,24 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     transaction.amount = invoice.total
     transaction.begin!
 
-    charge = Stripe::Charge.create({
-                                     :customer => vendor_id,
-                                     :amount => (invoice.total * 100).to_i,
-                                     :currency => "usd",
-                                     :description => invoice.title
-                                   })
+    charge = nil
+    begin
+      charge = Stripe::Charge.create({
+                                       :customer => vendor_id,
+                                       :amount => (invoice.total * 100).to_i,
+                                       :currency => "usd",
+                                       :description => invoice.title
+                                     })
+    rescue Stripe::CardError => e
+      self.last_error = e.message
+      invoice.fail_payment!
+      transaction.has_failed!
+      return false
+    end
 
     transaction.vendor_id = charge.id
     if !charge[:captured]
+      # unknown as to whether this can ever be reached
       self.last_error = charge[:failure_message]
       invoice.fail_payment!
       transaction.has_failed!
