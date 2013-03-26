@@ -60,6 +60,11 @@ FactoryGirl.define do
   factory :client do
     business { FactoryGirl.create(:business) }
     email { "user" + SecureRandom.base64(8) + "@example.com" }
+
+    factory :stubbed_client do
+      before(:create) { |profile, evaluator| PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } }
+      payment_gateway_profile { FactoryGirl.build(:stubbed_authorize_net_payment_gateway_profile) }
+    end
   end
 
   factory :invitation do
@@ -89,10 +94,8 @@ FactoryGirl.define do
   end
 
   factory :stubbed_authorize_net_payment_gateway_profile, :parent => :authorize_net_payment_gateway_profile do
-    before(:create) do |profile, evaluator|
-      PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
-    end
-    client { FactoryGirl.create(:client) }
+    before(:create) { |profile, evaluator| PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } }
+    client nil # create this from the client.
   end
 
   factory :invoice do
@@ -100,6 +103,19 @@ FactoryGirl.define do
     client { FactoryGirl.create(:client) }
     date { Time.now }
     total { 2500.00 }
+
+    factory :stubbed_invoice do
+      client { FactoryGirl.create(:stubbed_client) }
+    end
+
+    factory :pending_invoice do
+      status :pending
+
+      factory :stubbed_pending_invoice do
+        client { FactoryGirl.create(:stubbed_client) }      
+      end
+
+    end
   end
 
   factory :transaction do

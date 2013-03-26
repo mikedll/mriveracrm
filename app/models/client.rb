@@ -29,8 +29,15 @@ class Client < ActiveRecord::Base
   end
 
   def _require_payment_gateway_profile
-    self.payment_gateway_profile = AuthorizeNetPaymentGatewayProfile.new
-    self.payment_gateway_profile.save!
+    if payment_gateway_profile.nil?
+      self.payment_gateway_profile = AuthorizeNetPaymentGatewayProfile.new
+      self.payment_gateway_profile.save!
+    end
   end
+
+  def destroy
+    raise "Clients cannot be destroyed."
+  end
+
 
 end

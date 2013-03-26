@@ -25,12 +25,20 @@ class Invoice < ActiveRecord::Base
     end
 
     state :open do
+      def can_delete?
+        true
+      end
+
       def can_edit?
         true
       end
     end
 
-    state :pending, :failed_payment, :closed, :paid do
+    state all - [:open] do
+      def can_delete?
+        false
+      end
+
       def can_edit?
         false
       end
@@ -58,6 +66,8 @@ class Invoice < ActiveRecord::Base
   before_validation { @_virtual_path = 'invoice' }
   before_validation :_defaults
   before_validation :_verify_can_edit?
+
+  before_destroy :_verify_destroyable
 
   def charge!
     if !can_pay?
@@ -88,7 +98,6 @@ class Invoice < ActiveRecord::Base
     }    
   end
 
-
   private
 
   def _defaults
@@ -102,6 +111,13 @@ class Invoice < ActiveRecord::Base
 
   def _verify_can_edit?
     errors.add(:base, t('.uneditable')) if (changed.reject { |attr| attr == "status"}.count > 0) && !can_edit?
+  end
+
+  def _verify_destroyable
+    if !can_delete?
+      errors.add(:base, I18n.t('invoice.cannot_delete')) 
+      return false
+    end    
   end
 
 

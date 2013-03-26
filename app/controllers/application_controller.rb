@@ -13,6 +13,8 @@ class ApplicationController < ActionController::Base
   # from your application log (in this case, all fields with names like "password"). 
   # filter_parameter_logging :password
 
+  before_filter :_enforce_ssl
+
   before_filter :authenticate_user!
 
   before_filter :require_business_and_current_user_belongs_to_it
@@ -60,6 +62,21 @@ class ApplicationController < ActionController::Base
       else
         signed_in_root_path(resource)
       end
+  end
+
+  protected 
+
+  def ssl_required?
+    false
+  end
+
+  def _enforce_ssl
+    # This doesn't work in dev partially due to the port.
+    if ssl_required? && !request.ssl?
+      redirect_to "https://" + request.host + request.fullpath
+      flash.keep
+      return false
+    end
   end
 
 end
