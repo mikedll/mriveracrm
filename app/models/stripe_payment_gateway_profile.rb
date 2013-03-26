@@ -59,24 +59,28 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
 
   def update_payment_info(opts)
-    customer = Stripe::Customer.retrieve(self.vendor_id)
-
+    card_param = nil
     if opts[:token].blank?
       card = card_from_opts(opts)
       return false if !card_valid?(card)
-
-      customer.card = {
+      card_param = {
         :number => card.number,
         :exp_month => card.month, 
         :exp_year => card.year,
         :cvc => card.verification_value
       }
     else      
-      customer.card = opts[:token]
+      card_param = opts[:token]
     end
+
+    customer = Stripe::Customer.retrieve(self.vendor_id)
+    customer.card = card_param
 
     begin
       customer.save
+    rescue Stripe::CardError => e
+      errors.add(:base, e.message)
+      return false
     rescue Stripe::InvalidRequestError => e
       DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => self.client.id)
       errors.add(:base, I18n.t('payment_gateway_profile.update_error'))

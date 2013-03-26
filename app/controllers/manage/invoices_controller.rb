@@ -20,7 +20,7 @@ class Manage::InvoicesController < Manage::BaseController
       format.js { render :status => :created, :json => current_object }
     end
 
-    response_for(:update_fails, :create_fails) do |format|
+    response_for(:update_fails, :create_fails, :destroy_fails) do |format|
       format.js { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
   end
