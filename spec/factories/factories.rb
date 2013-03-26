@@ -41,7 +41,7 @@ FactoryGirl.define do
   end
 
   factory :user do
-    client { FactoryGirl.create(:client) }
+    client { FactoryGirl.create(:stubbed_client) }
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
@@ -63,7 +63,6 @@ FactoryGirl.define do
 
     factory :stubbed_client do
       before(:create) { |profile, evaluator| PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } }
-      payment_gateway_profile { FactoryGirl.build(:stubbed_authorize_net_payment_gateway_profile) }
     end
   end
 
@@ -73,7 +72,7 @@ FactoryGirl.define do
     end
 
     factory :client_invitation, :parent => :invitation do
-      client { FactoryGirl.create(:client) }
+      client { FactoryGirl.create(:stubbed_client) }
     end
 
     factory :employee_invitation, :parent => :invitation do
@@ -84,37 +83,27 @@ FactoryGirl.define do
 
   factory :authorize_net_payment_gateway_profile do
     client { FactoryGirl.create(:client) }
-  end
 
-  factory :authorize_net_payment_gateway_profile_ready, :parent => :authorize_net_payment_gateway_profile do
-    client { FactoryGirl.create(:client) }
-    after(:create) do |profile, evaluator|
-      profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111')
+    factory :authorize_net_payment_gateway_profile_ready, :parent => :authorize_net_payment_gateway_profile do
+      client { FactoryGirl.create(:client) }
+      after(:create) do |profile, evaluator|
+        profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111')
+      end
     end
-  end
-
-  factory :stubbed_authorize_net_payment_gateway_profile, :parent => :authorize_net_payment_gateway_profile do
-    before(:create) { |profile, evaluator| PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } }
-    client nil # create this from the client.
   end
 
   factory :invoice do
     description "Test invoice."
-    client { FactoryGirl.create(:client) }
+    client { FactoryGirl.create(:stubbed_client) }
     date { Time.now }
     total { 2500.00 }
 
-    factory :stubbed_invoice do
-      client { FactoryGirl.create(:stubbed_client) }
+    factory :unstubbed_client_invoice do
+      client { FactoryGirl.create(:client) }
     end
 
     factory :pending_invoice do
       status :pending
-
-      factory :stubbed_pending_invoice do
-        client { FactoryGirl.create(:stubbed_client) }      
-      end
-
     end
   end
 

@@ -26,7 +26,7 @@ describe Invoice do
   end
 
   context "destroy" do
-    before(:each) { @invoice = FactoryGirl.create(:stubbed_invoice) }
+    before(:each) { @invoice = FactoryGirl.create(:invoice) }
 
     it "should work for open and fail for invoices past open state" do
       id = @invoice.id
