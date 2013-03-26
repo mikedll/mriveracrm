@@ -64,7 +64,7 @@ describe StripePaymentGatewayProfile do
         @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
         @profile.card_last_4.should == "4242"
         @profile.update_payment_info({}).should be_false
-        @profile.errors.full_messages.first.should == I18n.t('payment_gateway_profile.update_error')
+        @profile.errors.should_not be_empty
         @profile.card_last_4.should == "4242"
         @profile.card_prompt.should == "Visa ending in 4242"
       end

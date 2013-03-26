@@ -69,6 +69,8 @@ class Invoice < ActiveRecord::Base
 
   before_destroy :_verify_destroyable
 
+  scope :pending_or_later, where('invoices.status != ?', :open)
+
   def charge!
     if !can_pay?
       errors.add(:base, t('.cannot_pay'))

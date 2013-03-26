@@ -26,7 +26,7 @@ class Client::InvoicesController < Client::BaseController
   end
 
   def current_objects
-    @current_objects ||= current_user.client.invoices.map(&:public)
+    @current_objects ||= current_user.client.invoices.pending_or_later.map(&:public)
   end
 
 end

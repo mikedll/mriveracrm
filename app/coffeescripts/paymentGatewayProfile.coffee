@@ -15,6 +15,7 @@ class PaymentGatewayProfileView extends CrmModelView
     @listenTo(@model, 'error', @onError)
 
   onSync: () ->
+    @$('.errors').hide()
     @$(':input').val('')
     @$('input[name="authorize_net_payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
 
