@@ -1,0 +1,58 @@
+--- !ruby/exception:Stripe::InvalidRequestError
+message: ! 'Invalid token id: 13431'
+http_status: 400
+http_body: !str
+  str: ! "{\n  \"error\": {\n    \"type\": \"invalid_request_error\",\n    \"message\":
+    \"Invalid token id: 13431\"\n  }\n}\n"
+  net_http_res: &35043420 !ruby/object:Net::HTTPBadRequest
+    http_version: '1.1'
+    code: '400'
+    message: Bad Request
+    header:
+      server:
+      - nginx
+      date:
+      - Tue, 26 Mar 2013 18:16:55 GMT
+      content-type:
+      - application/json;charset=utf-8
+      content-length:
+      - '99'
+      connection:
+      - keep-alive
+      access-control-max-age:
+      - '300'
+      cache-control:
+      - no-cache, no-store
+      access-control-allow-credentials:
+      - 'true'
+    body: !str
+      str: ! "{\n  \"error\": {\n    \"type\": \"invalid_request_error\",\n    \"message\":
+        \"Invalid token id: 13431\"\n  }\n}\n"
+      net_http_res: *35043420
+      args: &35513940
+        :method: :post
+        :url: https://api.stripe.com/v1/customers/cus_1X5ohqGmC7yjVj
+        :user: sk_test_SoDXR6QkygrYnlnFhDWKNbB2
+        :headers:
+          :user_agent: Stripe/v1 RubyBindings/1.5.26
+          :x_stripe_client_user_agent: ! '{"bindings_version":"1.5.26","lang":"ruby","lang_version":"1.9.2
+            p320 (2012-04-20)","platform":"x86_64-linux","publisher":"stripe","uname":"Linux
+            ubuntu 3.2.0-23-generic #36-Ubuntu SMP Tue Apr 10 20:39:51 UTC 2012 x86_64
+            x86_64 x86_64 GNU/Linux"}'
+        :open_timeout: 30
+        :payload:
+          :card: '13431'
+        :timeout: 80
+        :verify_ssl: 1
+        :ssl_ca_file: /home/mrmike/.rvm/gems/ruby-1.9.2-p320/gems/stripe-1.5.26/lib/data/ca-certificates.crt
+      code: 400
+    read: true
+    socket: !!null 
+    body_exist: true
+  args: *35513940
+  code: 400
+json_body:
+  :error:
+    :type: invalid_request_error
+    :message: ! 'Invalid token id: 13431'
+param: !!null

@@ -56,7 +56,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
           transaction.error.chop! if full_base_error.ends_with?('.')
           self.last_error = transaction.error
         else
-          DetectedErrors.create!(:message => "Authorize.net payment gateway.pay_invoice! unexpected error. Message: #{response.params['direct_response']['message']}, Reason code: #{response.params['direct_response']['response_reason_code']}", :client_id => self.client.id)
+          DetectedError.create!(:message => "Authorize.net payment gateway.pay_invoice! unexpected error. Message: #{response.params['direct_response']['message']}, Reason code: #{response.params['direct_response']['response_reason_code']}", :client_id => self.client.id)
           transaction.error = I18n.t('errors.unexpected_internal_error')
         end
         
@@ -65,7 +65,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
         return false
       else
         # completey unexpected response from gateway
-        DetectedErrors.create!(:message => "Authorize.net payment gateway.pay_invoice! very unexpected response: #{response.params}", :client_id => self.client.id)
+        DetectedError.create!(:message => "Authorize.net payment gateway.pay_invoice! very unexpected response: #{response.params}", :client_id => self.client.id)
         transaction.error = I18n.t('errors.unexpected_internal_error')
         invoice.fail_payment!
         transaction.has_failed!
@@ -78,11 +78,6 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     transaction.succeed!
     invoice.mark_paid!
     true
-  end
-
-
-  def card_prompt
-    card_last_4.blank? ? "No card on file" : "Card ending in #{card_last_4}"
   end
 
   #
@@ -136,7 +131,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     end
       
     if response.params['messages']['result_code'] != AuthorizeResponses::OK
-      DetectedErrors.create!(:message => "Authorize.net payment profile update failure responded that duplicate customer payment profile already exists.", :client_id => self.client.id) if response.params['messages']['message']['code'] == 'E00039'
+      DetectedError.create!(:message => "Authorize.net payment profile update failure responded that duplicate customer payment profile already exists.", :client_id => self.client.id) if response.params['messages']['message']['code'] == 'E00039'
       self.errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
       return false
     end
@@ -150,14 +145,14 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
   def reload_remote
     if self.vendor_id.blank?
-      DetectedErrors.create(:message => "Reloading but no vendor id", :client_id => self.client.id)
+      DetectedError.create(:message => "Reloading but no vendor id", :client_id => self.client.id)
       return
     end
 
     response = PaymentGateway.authorizenet.get_customer_profile :customer_profile_id => self.vendor_id
 
     if response.params['messages']['result_code'] != AuthorizeResponses::OK
-      DetectedErrors.create!(:message => "Failed to retrieve customer profile #{response.params['messages']['message']}", :client_id => self.client.id)
+      DetectedError.create!(:message => "Failed to retrieve customer profile #{response.params['messages']['message']}", :client_id => self.client.id)
       return
     end
     

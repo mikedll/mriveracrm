@@ -92,6 +92,10 @@ FactoryGirl.define do
     end
   end
 
+  factory :stripe_payment_gateway_profile do
+    client { FactoryGirl.create(:client) }
+  end
+
   factory :invoice do
     description "Test invoice."
     client { FactoryGirl.create(:stubbed_client) }

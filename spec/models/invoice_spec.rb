@@ -34,7 +34,7 @@ describe Invoice do
       (Invoice.find_by_id id).should be_nil
     end
 
-    it "should fail for invoices past open state", :current => true  do
+    it "should fail for invoices past open state" do
       id = @invoice.id
       @invoice.mark_pending!
       @invoice.destroy

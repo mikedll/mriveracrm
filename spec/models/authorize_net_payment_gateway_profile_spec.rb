@@ -75,7 +75,7 @@ describe AuthorizeNetPaymentGatewayProfile do
     context "pay" do
       before(:each) do
         @profile = FactoryGirl.create(:authorize_net_payment_gateway_profile)
-        @invoice = FactoryGirl.create(:invoice, :client => @profile.client)
+        @invoice = FactoryGirl.create(:pending_invoice, :client => @profile.client)
       end
 
       it "should fail unless payment info confgured" do
@@ -83,12 +83,18 @@ describe AuthorizeNetPaymentGatewayProfile do
         @profile.last_error.should == I18n.t('payment_gateway_profile.cant_pay')
       end
 
-      it "should be able to pay normal invoice" do
+      it "should fail on open invoice" do
+        @profile.pay_invoice!(FactoryGirl.create(:invoice)).should be_false
+        @profile.last_error.should == I18n.t('payment_gateway_profile.cant_pay')
+      end
+
+      it "should be able to pay normal invoice", :current => true do
         @profile.update_payment_info(:card_number => '4222222222222', :expiration_month => '08', :expiration_year => '2016', :cv_code => '111')
         @profile.transactions.count.should == 0
         @invoice.transactions.count.should == 0
         @invoice.paid?.should be_false
-        @profile.pay_invoice!(@invoice).should be_true
+        @profile.pay_invoice!(@invoice)
+        @profile.last_error.should be_nil
         @invoice.paid?.should be_true
         @invoice.transactions.count.should == 1
         @profile.transactions.count.should == 1
@@ -98,7 +104,7 @@ describe AuthorizeNetPaymentGatewayProfile do
         @invoice.transactions.first.vendor_id.should_not be_blank
         @invoice.transactions.first.amount.should == @invoice.total
 
-        invoice2 = FactoryGirl.create(:invoice, :client => @profile.client, :total => 1823.34)
+        invoice2 = FactoryGirl.create(:pending_invoice, :client => @profile.client, :total => 1823.34)
         invoice2.transactions.count.should == 0
         @profile.pay_invoice!(invoice2)
         invoice2.transactions.first.amount.should == 1823.34

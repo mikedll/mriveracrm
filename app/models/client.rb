@@ -30,7 +30,7 @@ class Client < ActiveRecord::Base
 
   def _require_payment_gateway_profile
     if payment_gateway_profile.nil?
-      self.payment_gateway_profile = AuthorizeNetPaymentGatewayProfile.new
+      self.payment_gateway_profile = StripePaymentGatewayProfile.new
       self.payment_gateway_profile.save!
     end
   end

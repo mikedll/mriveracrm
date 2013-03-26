@@ -110,7 +110,7 @@ class Invoice < ActiveRecord::Base
   end
 
   def _verify_can_edit?
-    errors.add(:base, t('.uneditable')) if (changed.reject { |attr| attr == "status"}.count > 0) && !can_edit?
+    errors.add(:base, t('.uneditable')) if !new_record? && (changed.reject { |attr| attr == "status"}.count > 0) && !can_edit?
   end
 
   def _verify_destroyable
