@@ -59,13 +59,22 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
 
   def update_payment_info(opts)
+    customer = Stripe::Customer.retrieve(self.vendor_id)
+
     if opts[:token].blank?
-      errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-      return      
+      card = card_from_opts(opts)
+      return false if !card_valid?(card)
+
+      customer.card = {
+        :number => card.number,
+        :exp_month => card.month, 
+        :exp_year => card.year,
+        :cvc => card.verification_value
+      }
+    else      
+      customer.card = opts[:token]
     end
 
-    customer = Stripe::Customer.retrieve(self.vendor_id)
-    customer.card = opts[:token]
     begin
       customer.save
     rescue Stripe::InvalidRequestError => e

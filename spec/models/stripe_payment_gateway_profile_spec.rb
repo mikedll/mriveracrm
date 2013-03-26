@@ -18,12 +18,7 @@ describe StripePaymentGatewayProfile do
     end
 
     it "should be able to reload remotely with vendor_id, including getting payment profile" do
-      token = Stripe::Token.create(:card => {
-                                     :number => "4242424242424242",
-                                     :exp_month => 3,
-                                     :exp_year => Time.now.year + 1,
-                                     :cvc => 314
-                                   })
+      token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 314})
       
       @profile.update_payment_info(:token => token.id).should be_true
       @profile.card_last_4 = ""
@@ -40,6 +35,14 @@ describe StripePaymentGatewayProfile do
 
     context "payment profile" do
       it "should be able to create credit card info" do
+        @profile.card_last_4.should be_nil
+        @profile.card_prompt.should == "No card on file"
+        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
+        @profile.card_last_4.should == "1881"
+        @profile.card_prompt.should == "Visa ending in 1881"        
+      end
+
+      it "should be able to create credit card info with token instaed of raw data" do
         @profile.card_profile_id.should be_nil
         @profile.card_last_4.should be_nil
 
@@ -51,24 +54,16 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should be able to update credit card info" do
-        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
-        @profile.update_payment_info(:token => token.id).should be_true
-
+        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
         @profile.card_last_4.should == "4242"
-        token = Stripe::Token.create(:card => { :number => "4012888888881881", :exp_month => 6, :exp_year => Time.now.year + 2, :cvc => 222})
-        @profile.update_payment_info(:token => token.id).should be_true
+        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
         @profile.card_last_4.should == "1881"
       end
 
-# card_declined_token = Stripe::Token.create({:card => {:number => "4000000000000002",:exp_month => 4,:exp_year => Time.now.year + 3, :cvc => 777}})
-
-
       it "should leave record alone on update failure." do
-        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
-        @profile.update_payment_info(:token => token.id).should be_true
-
+        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
         @profile.card_last_4.should == "4242"
-        @profile.update_payment_info(:token => 'junk').should be_false
+        @profile.update_payment_info({}).should be_false
         @profile.errors.full_messages.first.should == I18n.t('payment_gateway_profile.update_error')
         @profile.card_last_4.should == "4242"
         @profile.card_prompt.should == "Visa ending in 4242"
@@ -80,7 +75,16 @@ describe StripePaymentGatewayProfile do
         @profile.card_profile_id.should be_nil
         @profile.card_prompt.should == "No card on file"
         @profile.can_pay?.should be_false
-      end      
+      end
+
+      it "should catch credit card errors when updated with raw data instead of token" do
+        @profile.card_last_4.should be_nil
+        @profile.card_prompt.should == "No card on file"
+        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '11', :cv_code => '111').should be_false
+        @profile.errors.full_messages.should == ['Expiration year expired']
+        @profile.card_last_4.should be_nil
+        @profile.card_prompt.should == "No card on file"
+      end
     end
 
     context "pay" do
@@ -100,9 +104,7 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should be able to pay normal invoice" do
-        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
-
-        @profile.update_payment_info(:token => token.id).should
+        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
         @profile.transactions.count.should == 0
         @invoice.transactions.count.should == 0
         @invoice.paid?.should be_false
@@ -125,8 +127,7 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should capture error when transaction fails due to declined card" do
-        token = Stripe::Token.create(:card => { :number => "4000000000000341", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
-        @profile.update_payment_info(:token => token.id)
+        @profile.update_payment_info(:card_number => '4000000000000341', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
         @profile.transactions.count.should == 0
         @invoice.paid?.should be_false
         @profile.pay_invoice!(@invoice).should be_false

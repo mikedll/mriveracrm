@@ -84,34 +84,15 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
   # 
   #
   def update_payment_info(opts)
-    card = ActiveMerchant::Billing::CreditCard.new({
-                                                     :first_name => self.client.first_name,
-                                                     :last_name => self.client.last_name,
-                                                     :month => opts[:expiration_month].to_i,
-                                                     :year => "20#{opts[:expiration_year]}".to_i,
-                                                     :number => opts[:card_number],
-                                                     :verification_value => opts[:cv_code]
-                                                   })
+    card = card_from_opts(opts)
 
-    card.validate
-    if !card.valid?
-      lookup = {:month => :expiration_month, :year => :expiration_year, :number => :card_number, :verification_value => :cv_code}
-      card.errors.each do |k,v|
-        if lookup[k.to_sym]
-          errors.add(lookup[k.to_sym], v) 
-        else
-          errors.add(k, v) 
-        end
-      end
-      return false
-    end
+    return false if !card_valid?(card)
 
     call_opts = {
       :customer_profile_id => self.vendor_id,
       :payment_profile => {
         :payment => {
           :credit_card => card 
-
         }
       }
     }
