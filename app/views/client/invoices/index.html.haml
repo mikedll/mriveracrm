@@ -1,8 +1,8 @@
 
 - content_for :head do
-  = javascript_include_tag 'apps'
-  = javascript_include_tag 'paymentGatewayProfile'
-  = javascript_include_tag 'clientInvoices'
+  = javascript_include_tag 'generated/apps'
+  = javascript_include_tag 'generated/paymentGatewayProfile'
+  = javascript_include_tag 'generated/clientInvoices'
   = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'payment_gateway_profile', :bootstrap => current_user.client.payment_gateway_profile.public }
 
 .container-fluid.gui-container  
