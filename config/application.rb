@@ -13,7 +13,7 @@ module MikedllCrm
 
     unless Rails.env.development?
       config.action_controller.asset_path = proc { |asset_path| 
-        "/version_#{Mikedll::VERSION}#{asset_path}" 
+        "/version_#{MikedllCrm::VERSION}#{asset_path}" 
       }
     end
 
