@@ -202,6 +202,17 @@ ul#projects_list li {
 .models-list li {
   font-weight: bold;
   margin: 2px 0;
+  padding: 1px;
+}
+
+.models-list li.error {
+  padding: 0px;
+  border: 1px solid red; 
+}
+
+.models-list li.requesting {
+  padding: 0px;
+  border: 1px dotted blue; 
 }
 
 .models-list li a {
@@ -221,7 +232,6 @@ ul#projects_list li {
 
 .models-show-container {
 }
-
 
 /* client/ */
 

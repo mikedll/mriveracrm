@@ -18,6 +18,7 @@ class ClientInvoiceView extends CrmModelView
       @$('.put_action[data-action="charge"]').removeClass('disabled')
     else
       @$('.put_action[data-action="charge"]').addClass('disabled')
+    @renderErrors(@model.validationError) if @model.validationError?
     @
 
 class InvoiceListItemView extends ListItemView

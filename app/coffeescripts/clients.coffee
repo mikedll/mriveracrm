@@ -1,11 +1,15 @@
 
 class Client extends Backbone.Model
   defaults: () ->
-    first_name: 'John'
-    last_name: 'Doe'
-    email: 'noone@example.com'
+    first_name: 'New'
+    last_name: 'Client'
   fullName: () ->
     "#{@get('first_name')} #{@get('last_name')}"
+
+  validate: (attrs, options) ->
+    if (!EmailRegex.test(attrs.email))
+      return {email: "is invalid"}
+    return
 
 class Clients extends Backbone.Collection
   model: Client
@@ -32,10 +36,9 @@ class ClientView extends CrmModelView
 
   render: () ->
     node = $('.client_view_example form').clone()
-    node.find('input[name="client[first_name]"]').val(@model.get('first_name'))
-    node.find('input[name="client[last_name]"]').val(@model.get('last_name'))
-    node.find('input[name="client[email]"]').val(@model.get('email'))
     @$el.html(node)
+    @copyModelToForm()
+    @renderErrors(@model.validationError) if @model.validationError?
     @
 
 class ClientListItemView extends ListItemView

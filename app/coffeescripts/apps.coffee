@@ -37,15 +37,21 @@ class ListItemView extends BaseView
   className: 'list-item'
 
   id: () ->
-    "list-item-#{@model.get('id')}"
+    if !@model.isNew()
+      "list-item-#{@model.get('id')}"
+    else
+      ""
 
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
     @events =
       'click a': 'show'
     @parent = options.parent
-    @listenTo(@model, 'sync', @render)
+    @listenTo(@model, 'sync', @onSync)
+    @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'destroy', @remove)
+    @listenTo(@model, 'invalid', @onInvalid)
+    @listenTo(@model, 'request', @onRequest)
 
   remove: () ->
     @$el.remove()
@@ -63,11 +69,29 @@ class ListItemView extends BaseView
     @$('a').text(@title())
     @
 
+  onRequest: () ->
+    @$el.removeClass('error')
+    @$el.addClass('requesting')
+
+  onInvalid: () ->
+    @$el.addClass('error')
+
+  onSync: (model, resp, options) ->
+    @$el.prop('id', @id()) if @$el.prop('id') == ""
+    @$el.removeClass('requesting')
+    @$el.removeClass('error')
+    @render()
+
+  onError: (model, xhr, options) ->
+    @$el.removeClass('requesting')
+    response = jQuery.parseJSON( xhr.responseText )
+    @$el.addClass('error')
+
   title: () ->
     @model.get('id')
 
   spawnView: () ->
-    new @spawnViewType({model:@model, className: "#{@modelName}-view model-view", id: "#{@modelName}-view-#{@model.get('id')}", parent: @})
+    new @spawnViewType({model:@model, className: "#{@modelName}-view model-view", parent: @})
 
 
 #
@@ -78,6 +102,12 @@ class ListItemView extends BaseView
 class CrmModelView extends BaseView
   className: 'model-view'
 
+  id: () ->
+    if !@model.isNew()
+      "#{@modelName}-view-#{@model.get('id')}"
+    else
+      ""
+
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
     @events =
@@ -86,9 +116,12 @@ class CrmModelView extends BaseView
       'click a.save': 'save'
       'confirm:complete a.destroy': 'destroy'
       'confirm:complete a.put_action': 'putAction'
+
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'destroy', @remove)
+    @listenTo(@model, 'error', @onError)
+    @listenTo(@model, 'invalid', @onInvalid)
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
@@ -129,13 +162,42 @@ class CrmModelView extends BaseView
     )
 
   save: () ->
-    @model.save(@fromForm(), {wait: true})
+    @clearErrors()
+    @model.save(@fromForm())
+
+  renderErrors: (errors) ->
+    _.each(errors, (value, key, list) =>
+      @$el
+        .find(".control-group.#{@modelName}_#{key}")
+        .addClass('error')
+          .find('.controls').append('<span class="help-inline">' + value + '</span>')
+          .end()
+        .end()
+      )
+
+  onInvalid: () ->
+    @renderErrors(@model.validationError) if @model.validationError?
+
+  clearErrors: () ->
+    @$el
+      .removeClass('error')
+      .find('span.help-inline').remove()
+
+  onError: (model, xhr, options) ->
+    response = jQuery.parseJSON( xhr.responseText )
+    @clearErrors()
+    @renderErrors(response.errors)
 
   noSubmit: (e) ->
     false
 
-  onSync: () ->
-    @render()
+  onSync: (model, resp, options) ->
+    @$el.prop('id', @id()) if @$el.prop('id') == ""
+    @$el.find('.control-group')
+      .removeClass('error')
+      .find('span.help-inline').remove()
+    @copyModelToForm()
+    @$el.find(':input:visible').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
   render: () ->
@@ -168,7 +230,7 @@ class CollectionAppView extends WithChildrenView
 
   create: () ->
     @collection.create({},
-      wait: true,
+      wait: false,
       success: (model, response, options) => @afterSave(model, response, options)
     )
 
@@ -205,10 +267,7 @@ class CollectionAppView extends WithChildrenView
     @$('.models-show-container').hide()
 
     # rearrange stage (hide other model views, show this model view)
-    @$('.models-show-container .model-view').hide()
-    @$('.models-show-container').append(view.el) if @$modelView(view.model.get('id')).length == 0
-    @$modelView(view.model.get('id'))
-      .show()
+    @$('.models-show-container').html(view.el)
 
     # raise curtain and focus
     @$('.models-show-container').show()
@@ -219,12 +278,6 @@ class CollectionAppView extends WithChildrenView
     @$("##{@modelName}-view-" + id)
 
   onSync: (model, resp, options) ->
-    @$modelView(model.get('id')).find(' .control-group')
-      .removeClass('error')
-      .find('span.help-inline').remove()
-    if @$modelView(model.get('id')).is(':visible')
-      @$modelView(model.get('id')).find(':input:visible').first().focus()
-
     @$('.errors').hide()
 
   render: () ->
@@ -241,16 +294,6 @@ class CollectionAppView extends WithChildrenView
       s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
     )
     @$('.errors').text(s).show()
-
-    if @$modelView(response.object.id).length != 0
-      @$modelView(response.object.id)
-        .removeClass('error')
-        .find('span.help-inline').remove()
-      _.each(response.errors, (value, key, list) =>
-        @$modelView(response.object.id).find(".control-group.client_#{key}")
-          .addClass('error')
-          .find('.controls').append('<span class="help-inline">' + value + '</span>').end()
-      )
 
 #
 # Stack of Views
