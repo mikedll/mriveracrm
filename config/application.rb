@@ -26,7 +26,11 @@ module MikedllCrm
   class Credentials
 
     def self.config 
-      @config ||= YAML.load( File.read( Rails.root.join('config', 'credentials.yml'))).with_indifferent_access
+      @config ||= if File.exists? Rails.root.join('config', 'credentials.yml')
+                    YAML.load( File.read( Rails.root.join('config', 'credentials.yml'))).with_indifferent_access 
+                  else
+                    {}
+                  end
     end
 
     def self.get(path)
@@ -41,6 +45,10 @@ module MikedllCrm
         path.to_s.split('.').each do |segment|
           cur = cur[segment.force_encoding('UTF-8').to_s] if cur
         end
+      end
+
+      if cur.nil?
+        cur = ENV[path]
       end
 
       cur
