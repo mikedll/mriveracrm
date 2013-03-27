@@ -1,6 +1,6 @@
 source 'http://rubygems.org'
 
-# ruby '1.9.2'
+# ruby '1.9.2'  # need to wait for cedar stack on heroku
 
 gem 'rails', '3.0.3'
 
@@ -16,7 +16,7 @@ gem 'devise'
 gem 'omniauth'
 gem "omniauth-google-oauth2"
 gem 'make_resourceful'
-# gem "activemerchant", '~> 1.31'
+gem "activemerchant", '~> 1.31'
 gem 'carrierwave'
 gem "fog"
 gem 'rmagick'
