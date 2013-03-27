@@ -267,7 +267,9 @@ class CollectionAppView extends WithChildrenView
     @$('.models-show-container').hide()
 
     # rearrange stage (hide other model views, show this model view)
-    @$('.models-show-container').html(view.el)
+    @$('.models-show-container .model-view').hide()
+    @$('.models-show-container').append(view.el) if $.contains( @$('.models-show-container'), view.el)
+    view.$el.show()
 
     # raise curtain and focus
     @$('.models-show-container').show()
