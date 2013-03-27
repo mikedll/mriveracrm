@@ -1,3 +1,3 @@
 module MikedllCrm
-  VERSION = 'e1c09b99263f7b9d8fd1080857ef8556890bbf70'
+  VERSION = '962317516f423f2141ae4412a995c816cab516fa'
 end
