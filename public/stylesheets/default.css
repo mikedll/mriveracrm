@@ -11,9 +11,10 @@ body {
 }
 
 #header {
-    padding: 960px 0 0;
+    position: absolute;
+    height: 100%;
+    width: 100%;
     background: top center url(/images/anza1.png) no-repeat;
-    position: relative;
 }
 
 .flash {
@@ -165,7 +166,7 @@ ul#projects_list li {
 /* apps */
 
 .gui-container {
-  top: 50%;
+  top: 45%;
   left: 45%;
   position: absolute;
 }
