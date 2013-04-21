@@ -43,7 +43,7 @@ class InvoicesAppView extends CollectionAppView
   render: () ->
     @$el.html($('.templates .invoices-app-example').children().clone())
     @addAll()
-    @$('h2').text(@title())
+    @$('.section-title').text(@title())
     @
 
 class PartitionedChildrenView extends WithChildrenView
@@ -53,6 +53,15 @@ class PartitionedChildrenView extends WithChildrenView
     WithChildrenView.prototype.initialize.apply(@, arguments)
     @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices)), parent: @)
     @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile'), parent: @)
+
+  resizeView: () ->
+    # override so that we dont shift the content of this box way wrong to the left/top
+    h = Math.max( 200, parseInt( $(window).height() * 0.8 ))
+    w = Math.max(200, parseInt( $(window).width() * 0.8 ))
+    @$el.css(
+      'height': h + "px"
+      'width': w + "px"
+    )
 
   focusTopModelView: () ->
     @invoicesAppView.focusTopModelView()

@@ -17,6 +17,19 @@ class WithChildrenView extends BaseView
     BaseView.prototype.initialize.apply(@, arguments)
     $.extend(@events, 'click a,button': 'checkDisabled')
 
+    $(window).resize( () => @resizeView() )
+    @resizeView()
+
+  resizeView: () ->
+    h = Math.max( 200, parseInt( $(window).height() * 0.8 ))
+    w = Math.max(200, parseInt( $(window).width() * 0.8 ))
+    @$el.css(
+      'height': h + "px"
+      'width': w + "px"
+      'margin-left': -(w / 2) + "px"
+      'margin-top': -(h / 2) + "px"
+    )
+
   checkDisabled: (e) ->
     if $(e.target).hasClass('disabled')
       e.stopPropagation()
@@ -219,6 +232,14 @@ class CollectionAppView extends WithChildrenView
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
+
+  resizeView: () ->
+    h = Math.max( 200, parseInt( $(window).height() * 0.8 ))
+    w = Math.max(200, parseInt( $(window).width() * 0.8 ))
+    @$el.css(
+      'height': h + "px"
+      'width': w + "px"
+    )
 
   addAll: () ->
     @collection.each(@addOne, @)

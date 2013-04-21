@@ -165,19 +165,14 @@ ul#projects_list li {
 /* apps */
 
 .gui-container {
-  top: 45%;
+  top: 50%;
   left: 45%;
-  height: 600px;
-  width: 900px;
-  margin: -400px 0 0 -500px; 
   position: absolute;
 }
 
 .app-gui {
   left: 0;
   top: 0;
-  height: 600px;
-  width: 900px;
   background: #fffff2;
   position: absolute;
 
@@ -197,6 +192,12 @@ ul#projects_list li {
 
 .app-top {
   margin-bottom: 1em;
+}
+
+.section-title {
+  font-size: 14pt;
+  font-weight: bold;
+  margin-bottom: 5px;
 }
 
 .models-list li {
