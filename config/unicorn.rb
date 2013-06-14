@@ -8,6 +8,7 @@ worker_processes Integer(ENV["WEB_CONCURRENCY"] || 1)
 timeout 15
 preload_app false
 
+pid "#{app_path}/tmp/pids/unicorn.pid"
 listen "#{app_path}/tmp/sockets/unicorn.sock", :backlog => 64
 
 before_fork do |server, worker|
