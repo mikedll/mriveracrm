@@ -3,6 +3,14 @@
   - if user_signed_in?
     Logged In:
     = current_user.login_name
+
+    = link_to "Home", root_path
+    |
+    - if current_user.employee
+      = link_to 'Manage Clients', manage_clients_path
+    - else
+      = link_to 'Invoices', client_invoices_path
+    |
     = link_to 'Logout', destroy_user_session_path
   - else
     = link_to 'Login', user_omniauth_authorize_path(:google_oauth2)
