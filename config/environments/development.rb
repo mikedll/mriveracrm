@@ -15,4 +15,6 @@ MikedllCrm::Application.configure do
 
   config.active_support.deprecation = :log
 
+  HOST = 'dev1.mikedll.com:3000'
+
 end

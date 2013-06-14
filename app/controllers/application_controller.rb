@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
   # from your application log (in this case, all fields with names like "password"). 
   # filter_parameter_logging :password
 
+  before_filter :force_www
   before_filter :_enforce_ssl
 
   before_filter :authenticate_user!
@@ -66,6 +67,11 @@ class ApplicationController < ActionController::Base
 
   protected 
 
+  def force_www
+    return if Rails.env.development? # doesnt work with port 3000
+    redirect_to :host => MikedllCrm::Application::HOST if request.host != MikedllCrm::Application::HOST
+  end
+
   def ssl_required?
     false
   end
@@ -78,5 +84,6 @@ class ApplicationController < ActionController::Base
       return false
     end
   end
+
 
 end
