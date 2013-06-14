@@ -23,8 +23,10 @@ gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 
+# for cap deploys
 # unsure
 gem 'activeadmin'
+
 
 
 # probably leaving
@@ -32,16 +34,16 @@ gem 'sass'
 gem 'compass'
 gem "dynamic_form"
 
-
-
 group :development do
   gem "barista"
   gem 'taps', '> 0.3.23'
   gem 'heroku_san'
   gem "heroku"
+  gem 'capistrano-unicorn', :require => false
+  gem "capistrano"
+  gem "rvm-capistrano"
+  gem "rvm"
 end
-
-
 
 group :test, :development do
   gem 'rb-inotify'
@@ -54,3 +56,6 @@ group :test, :development do
   gem "factory_girl_rails"
 end
 
+group :production do
+  gem 'unicorn'
+end
