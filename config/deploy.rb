@@ -24,6 +24,7 @@ namespace :deploy do
 
   task :configs do
     run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
+    run "ln -nfs #{shared_path}/config/credentials.yml #{release_path}/config/credentials.yml"
     run "ln -nfs #{shared_path}/sockets #{release_path}/tmp/sockets"
   end
 end
