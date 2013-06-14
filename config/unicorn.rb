@@ -4,9 +4,9 @@ app_path = "/home/mrmike/mikedllcrm/current"
 
 rails_env = ENV['RAILS_ENV'] || 'production'
 
-worker_processes Integer(ENV["WEB_CONCURRENCY"] || 2)
+worker_processes Integer(ENV["WEB_CONCURRENCY"] || 1)
 timeout 15
-preload_app true
+preload_app false
 
 listen "#{app_path}/tmp/sockets/unicorn.sock", :backlog => 64
 

@@ -38,4 +38,4 @@ task :production do
 end
 
 after 'deploy:update_code', 'deploy:configs'
-after 'deploy:restart', 'unicorn:reload'  # app preloaded
+after 'deploy:restart', 'unicorn:restart'  # app preloaded
