@@ -35,6 +35,7 @@ gem 'compass'
 gem "dynamic_form"
 
 group :development do
+  gem "right_aws"
   gem "barista"
   gem 'taps', '> 0.3.23'
   gem 'heroku_san'
