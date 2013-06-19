@@ -13,7 +13,7 @@
       Save
 
   .btn-group
-    %a.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :confirm => "Mark this invoice as pending so others can see it?"}}
+    %a.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
       Mark Pending
 
   .btn-group.pull-right

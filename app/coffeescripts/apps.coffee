@@ -188,6 +188,15 @@ class CrmModelView extends BaseView
           v = @parseDate(attribute_key[1])
         el$.val(v)
     )
+    _.each( @$('.put_action'), (el) =>
+      el$ = $(el)
+      enablerValue = @model.get(el$.data('attribute_enabler'))
+      if enablerValue?
+        if _.any( el$.data('enabled_when').toString().split(/,/), (val) -> val == enablerValue.toString())
+          el$.removeClass('disabled')
+        else
+          el$.addClass('disabled')
+    )
 
   save: () ->
     @clearErrors()

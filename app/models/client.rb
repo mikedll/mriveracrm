@@ -17,6 +17,17 @@ class Client < ActiveRecord::Base
   after_create :_require_payment_gateway_profile
 
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
+  scope :unarchived, where('archived = ?', false)
+
+  def archive!
+    if archived?
+      self.errors.add(:base, "Client is already archived") 
+      return false
+    end
+      
+    self.archived = true
+    self.save
+  end
 
   def _static_business
     if persisted? && business_id_changed?

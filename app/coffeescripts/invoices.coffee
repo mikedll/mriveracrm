@@ -20,11 +20,6 @@ class InvoiceView extends CrmModelView
       dateFormat: 'D yy-mm-dd'
     )
     @copyModelToForm()
-
-    if @model.get('status') == 'open'
-      @$('.put_action[data-action="mark_pending"]').removeClass('disabled')
-    else
-      @$('.put_action[data-action="mark_pending"]').addClass('disabled')
     @
 
 class InvoiceListItemView extends ListItemView

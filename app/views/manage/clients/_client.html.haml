@@ -1,5 +1,21 @@
 
 = simple_form_for client, :remote => true, :url => manage_clients_path(client), :html => { :class => 'form-horizontal'} do |f|
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.save.btn.btn-primary
+          Save
+
+      .btn-group
+        %a.invoices.btn{ :data => { :hotkey => 'i' }}
+          Invoices
+
+      .btn-group.pull-right
+        %a.archive.put_action.btn.btn-danger{ :data => {:action => 'archive', :attribute_enabler => 'archived', :enabled_when => 'false', :confirm => "Archive this client? It won't show up in normal client views."}}
+          Archive
+
   = f.input :company, :input_html => client.persisted? ? {} : { :id => nil }
 
   = f.input :first_name, :input_html => client.persisted? ? {} : { :id => nil }
@@ -19,12 +35,3 @@
   = f.input :last_contact_at, :as => :string, :input_html => client.persisted? ? {} : { :class => 'datetimepicker', :id => nil }
 
   = f.input :next_contact_at, :as => :string, :input_html => client.persisted? ? {} : { :class => 'datetimepicker', :id => nil }
-
-  .btn-group
-    %a.save.btn.btn-primary
-      Save
-
-  .btn-group
-    %a.invoices.btn{ :data => { :hotkey => 'i' }}
-      Invoices
-

@@ -25,6 +25,23 @@ class Manage::ClientsController < Manage::BaseController
     end
   end
 
+  def current_objects
+    @current_objects ||= current_model.unarchived.order("updated_at DESC")
+  end
+
+  def archive
+    load_object
+    if current_object.update_attributes(object_parameters)
+      if current_object.archive!
+        response_for :update
+      else
+        response_for :update_fails
+      end
+    else
+      response_for :update_fails
+    end
+  end
+
   def build_object
     @current_object = current_business.clients.build(object_parameters)
   end
