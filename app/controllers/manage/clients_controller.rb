@@ -1,5 +1,7 @@
 class Manage::ClientsController < Manage::BaseController
 
+  before_filter :_parent_name
+
   make_resourceful do
     actions :all
     belongs_to :business
@@ -67,6 +69,10 @@ class Manage::ClientsController < Manage::BaseController
     else
       response_for :update_fails
     end
+  end
+
+  def _parent_name
+    @parent_name = "business" # hack; parent_object isnt enough.
   end
 
 
