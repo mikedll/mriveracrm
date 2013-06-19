@@ -37,16 +37,11 @@ class Manage::ClientsController < Manage::BaseController
   end
 
   def archive
-    load_object
-    if current_object.update_attributes(object_parameters)
-      if current_object.archive!
-        response_for :update
-      else
-        response_for :update_fails
-      end
-    else
-      response_for :update_fails
-    end
+    with_update_and_transition { current_object.archive! }
+  end
+
+  def unarchive
+    with_update_and_transition { current_object.unarchive! }
   end
 
   def build_object
@@ -60,5 +55,19 @@ class Manage::ClientsController < Manage::BaseController
   def parent_object
     @parent_object ||= Business.current
   end
+
+  def with_update_and_transition
+    load_object
+    if current_object.update_attributes(object_parameters)
+      if yield
+        response_for :update
+      else
+        response_for :update_fails
+      end
+    else
+      response_for :update_fails
+    end
+  end
+
 
 end

@@ -27,8 +27,16 @@ class Client < ActiveRecord::Base
       return false
     end
       
-    self.archived = true
-    self.save
+    self.update_attributes(:archived => true)
+  end
+
+  def unarchive!
+    if !archived?
+      self.errors.add(:base, "Client is not archived") 
+      return false
+    end
+
+    self.update_attributes(:archived => false)
   end
 
   def _static_business
