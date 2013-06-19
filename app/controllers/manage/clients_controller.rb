@@ -34,7 +34,8 @@ class Manage::ClientsController < Manage::BaseController
     else
       top_scope = top_scope.archived
     end
-    top_scope = top_scope.recently_modified if params[:recently_modified].blank?
+    top_scope = top_scope.recently_modified if !params[:recently_modified].blank?
+
     @current_objects ||= top_scope.order("updated_at DESC")
   end
 
