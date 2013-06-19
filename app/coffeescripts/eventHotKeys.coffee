@@ -21,11 +21,12 @@ class EventHotKeys
       k = $(el).data('hotkey')
       if(typeof(k) != "undefined")
         @hotKeyRegistry[k] = $(el)
-        if $(el).is('a') && $(el).find('span.hotkey').length == 0
-          text = $(el).text()
-          for c, j in text
-            if(c.toLowerCase() == k.toLowerCase())
-              $(el).html( text.substr(0, j) + '<span class="hotkey">' + c + '</span>' + text.substr(j + 1, text.length - j) )
-              break
+        # this breaks the bootstrap icons
+        # if $(el).is('a') && $(el).find('span.hotkey').length == 0
+        #   text = $(el).text()
+        #   for c, j in text
+        #     if(c.toLowerCase() == k.toLowerCase())
+        #       $(el).html( text.substr(0, j) + '<span class="hotkey">' + c + '</span>' + text.substr(j + 1, text.length - j) )
+        #       break
     )
     this
