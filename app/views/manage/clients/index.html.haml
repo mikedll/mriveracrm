@@ -3,6 +3,7 @@
   = javascript_include_tag 'generated/apps'
   = javascript_include_tag 'generated/clients'
   = javascript_include_tag 'generated/invoices'
+  = javascript_include_tag 'generated/notes'
   = render 'bootstrap'
 
 
@@ -34,6 +35,8 @@
     = render Client.new
   .invoice_view_example
     = render Invoice.new
+  .note_view_example
+    = render Note.new
   .invoices_view_example
     %h2
       Invoices
@@ -46,6 +49,28 @@
     .row-fluid
       .span3
         %ul.invoices-list.models-list
+
+      .span9
+        .errors.alert.alert-error.hide
+        .models-show-container
+
+      .clear
+
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'
+  .notes_view_example
+    %h2
+      Notes
+    .app-top
+      .btn-group
+        %button.back.btn
+          Back
+      = render :partial => 'shared/app_top'
+
+    .row-fluid
+      .span3
+        %ul.notes-list.models-list
 
       .span9
         .errors.alert.alert-error.hide

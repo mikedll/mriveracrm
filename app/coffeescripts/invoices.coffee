@@ -41,6 +41,6 @@ class InvoiceAppView extends CollectionAppView
   render: () ->
     node = $('.templates .invoices_view_example').children().clone()
     @$el.html(node)
-    @$('h1').text(@title())
+    @$('h2').text(@title())
     @
 

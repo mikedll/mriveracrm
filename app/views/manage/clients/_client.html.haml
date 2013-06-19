@@ -11,6 +11,8 @@
       .btn-group
         %a.invoices.btn{ :data => { :hotkey => 'i' }}
           Invoices
+        %a.notes.btn
+          Notes
 
       .btn-group.pull-right
         %a.archive.put_action.btn.btn-danger{ :data => {:action => 'archive', :attribute_enabler => 'archived', :enabled_when => 'false', :confirm => t('client.archive_confirm') } }
@@ -34,6 +36,6 @@
 
   = f.input :phone_2, :input_html => client.persisted? ? {} : { :id => nil }
 
-  = f.input :last_contact_at, :as => :string, :input_html => client.persisted? ? {} : { :class => 'datetimepicker', :id => nil }
+  = f.input :last_contact_at, :as => :string, :input_html => {:class => 'datetimepicker'}.merge(client.persisted? ? {} : { :id => nil })
 
-  = f.input :next_contact_at, :as => :string, :input_html => client.persisted? ? {} : { :class => 'datetimepicker', :id => nil }
+  = f.input :next_contact_at, :as => :string, :input_html => {:class => 'datetimepicker'}.merge(client.persisted? ? {} : { :id => nil })

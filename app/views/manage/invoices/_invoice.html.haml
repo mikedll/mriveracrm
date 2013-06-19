@@ -1,5 +1,21 @@
 
-= simple_form_for invoice, :remote => true, :url => manage_invoices_path(invoice), :html => { :class => 'form-horizontal'} do |f|
+= simple_form_for invoice, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.save.btn.btn-primary
+          Save
+
+      .btn-group
+        %a.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
+          Mark Pending
+
+      .btn-group.pull-right
+        %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
+          Delete
+
   = f.input :title, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
   = f.input :date, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
   = f.input :total, :input_html => invoice.persisted? ? {} : { :id => nil }
@@ -8,16 +24,5 @@
   = f.input :status, :as => :string, :input_html => {:disabled => true}.merge( invoice.persisted? ? {} : { :id => nil } )
   
 
-  .btn-group
-    %a.save.btn.btn-primary
-      Save
-
-  .btn-group
-    %a.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
-      Mark Pending
-
-  .btn-group.pull-right
-    %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
-      Delete
 
 

@@ -52,14 +52,6 @@ ActiveRecord::Schema.define(:version => 20130618212238) do
     t.datetime "updated_at"
   end
 
-  create_table "client_notes", :force => true do |t|
-    t.integer  "client_id"
-    t.datetime "recorded_at"
-    t.text     "body"
-    t.datetime "created_at"
-    t.datetime "updated_at"
-  end
-
   create_table "clients", :force => true do |t|
     t.integer  "business_id"
     t.string   "first_name",      :default => "",    :null => false
@@ -73,7 +65,7 @@ ActiveRecord::Schema.define(:version => 20130618212238) do
     t.datetime "next_contact_at"
     t.string   "phone",           :default => "",    :null => false
     t.string   "phone_2",         :default => "",    :null => false
-    t.boolean  "archived",        :default => false
+    t.boolean  "archived",        :default => false, :null => false
     t.string   "company"
   end
 
@@ -139,6 +131,14 @@ ActiveRecord::Schema.define(:version => 20130618212238) do
     t.datetime "date"
     t.integer  "client_id"
     t.string   "title"
+  end
+
+  create_table "notes", :force => true do |t|
+    t.integer  "client_id"
+    t.datetime "recorded_at"
+    t.text     "body"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|

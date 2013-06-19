@@ -26,6 +26,7 @@ MikedllCrm::Application.routes.draw do
     resources :clients do
       put :archive
       put :unarchive
+      resources :notes
       resources :invoices do
         member do
           put :mark_pending

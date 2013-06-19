@@ -1,6 +1,6 @@
 class ClientsMoreBasicFieldsAndNotes < ActiveRecord::Migration
   def self.up
-    create_table :client_notes do |t|
+    create_table :notes do |t|
       t.integer  :client_id
       t.datetime :recorded_at
       t.text     :body
@@ -13,7 +13,7 @@ class ClientsMoreBasicFieldsAndNotes < ActiveRecord::Migration
     add_column :clients, :next_contact_at, :datetime
     add_column :clients, :phone, :string, :null => false, :default => ""
     add_column :clients, :phone_2, :string, :null => false, :default => ""
-    add_column :clients, :archived, :boolean, :default => false
+    add_column :clients, :archived, :boolean, :null => false, :default => false
     add_column :clients, :company, :string
   end
 
@@ -26,6 +26,6 @@ class ClientsMoreBasicFieldsAndNotes < ActiveRecord::Migration
     remove_column :clients, :last_contact_at
     remove_column :clients, :skype_id
     remove_column :clients, :website_url
-    drop_table :client_notes
+    drop_table :notes
   end
 end

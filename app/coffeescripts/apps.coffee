@@ -12,6 +12,13 @@ class BaseView extends Backbone.View
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
+class BaseCollection extends Backbone.Collection
+  initialize: () ->
+    Backbone.Collection.prototype.initialize.apply(this, arguments)
+    @comparator = (model) ->
+      model.get('id')
+
+
 class WithChildrenView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
@@ -254,7 +261,7 @@ class CrmModelView extends BaseView
       .removeClass('error')
       .find('span.help-inline').remove()
     @copyModelToForm()
-    @$el.find(':input:visible').first().focus() if @$el.is(':visible')
+    @$el.find(':input:visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
   render: () ->
@@ -367,7 +374,7 @@ class CollectionAppView extends WithChildrenView
     @move(@$(".models-list .list-item a.active").parent().prev())
 
   focusTopModelView: () ->
-    @$('.models-show-container .model-view:visible').find(':input:visible').first().focus()
+    @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
   show: (view) ->
     @$('.errors').hide()
@@ -379,7 +386,7 @@ class CollectionAppView extends WithChildrenView
 
     # rearrange stage (hide other model views, show this model view)
     @$('.models-show-container .model-view').hide()
-    @$('.models-show-container').append(view.el) if $.contains( @$('.models-show-container'), view.el)
+    @$('.models-show-container').append(view.el) if !$.contains( @$('.models-show-container').get(0), view.el)
     view.$el.show()
 
     # raise curtain and focus

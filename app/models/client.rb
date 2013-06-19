@@ -1,6 +1,7 @@
 class Client < ActiveRecord::Base
 
   belongs_to :business
+  has_many :notes
   has_many :users
   has_many :invitations
   has_many :invoices

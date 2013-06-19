@@ -25,7 +25,10 @@ class ClientView extends CrmModelView
 
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
-    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
+    @events = $.extend(@events,
+      'click a.invoices': 'showInvoices'
+      'click a.notes': 'showNotes'
+    )
 
   showInvoices: () ->
     if !@invoices?
@@ -36,6 +39,16 @@ class ClientView extends CrmModelView
     @invoicesAppView.render()
     @parent.childViewPushed(@invoicesAppView)
     @invoices.fetch()
+
+  showNotes: () ->
+    if !@notes?
+      @notes = new Notes()
+      @notes.client = @model
+
+    @notesAppView = new NoteAppView({id: "client-#{@model.get('id')}-notes", parent: @, collection: @notes})
+    @notesAppView.render()
+    @parent.childViewPushed(@notesAppView)
+    @notes.fetch()
 
   render: () ->
     node = $('.client_view_example form').clone()

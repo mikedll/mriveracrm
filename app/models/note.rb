@@ -1,5 +1,7 @@
-class ClientNote
+class Note < ActiveRecord::Base
   belongs_to :client
+
+  attr_accessible :recorded_at, :body
 
   before_create :_defaults
 

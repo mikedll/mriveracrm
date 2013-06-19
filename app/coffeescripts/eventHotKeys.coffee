@@ -25,7 +25,7 @@ class EventHotKeys
           text = $(el).text()
           for c, j in text
             if(c.toLowerCase() == k.toLowerCase())
-              $(el).html( text.substr(0, j-1) + '<span class="hotkey">' + c + '</span>' + text.substr(j + 1, text.length - j) )
+              $(el).html( text.substr(0, j) + '<span class="hotkey">' + c + '</span>' + text.substr(j + 1, text.length - j) )
               break
     )
     this
