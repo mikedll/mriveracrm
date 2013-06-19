@@ -20,7 +20,7 @@ en:
 
   invoice:
     cannot_pay: "cannot be paid in its current state"
-    uneditable: "is no longer open and not available for editing"
+    uneditable: "This invoice is no longer open and not available for editing"
     cannot_delete: 'cannot be deleted in its current state'
 
   payment_gateway_profile:

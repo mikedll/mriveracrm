@@ -1,5 +1,7 @@
 class Invitation < ActiveRecord::Base
 
+  include ActionView::Helpers::TranslationHelper
+
   belongs_to :business
   belongs_to :employee
   belongs_to :client
@@ -7,6 +9,7 @@ class Invitation < ActiveRecord::Base
   scope :cb, lambda { where('invitations.business_id = ?', Business.current.try(:id)) }
   scope :open, where('invitations.status = ?', :open)
 
+  before_validation { @_virtual_path = 'invitation' }
   before_validation :_capture_client_email
   before_validation :_capture_business
 
