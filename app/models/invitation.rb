@@ -12,6 +12,7 @@ class Invitation < ActiveRecord::Base
   before_validation { @_virtual_path = 'invitation' }
   before_validation :_capture_client_email
   before_validation :_capture_business
+  before_validation :_no_email_conflict
 
   validates :business_id, :presence => true
   validate :_employee_or_client
@@ -59,5 +60,12 @@ class Invitation < ActiveRecord::Base
       end
     end
   end
+
+  def _no_email_conflict
+    if self.business.users.where(:email => self.email).first
+      errors.add(:email, t('.errors.email_conflict'))
+    end
+  end
+
 
 end

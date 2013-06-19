@@ -16,6 +16,7 @@ en:
       one_user_per_employee: 'already has a user assigned'
   invitation:
     errors:
+      email_conflict: "is already in use by an existing user."
       only_one: 'must have either a client or an employee, and not both'
 
   invoice:
