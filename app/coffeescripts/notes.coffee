@@ -26,7 +26,7 @@ class NoteListItemView extends ListItemView
   className: 'note-list-item list-item'
 
   title: () ->
-    @model.get('recorded_at')
+    @parseDatetime('recorded_at')
 
 class NoteAppView extends CollectionAppView
   modelName: 'note'

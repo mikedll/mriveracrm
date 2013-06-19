@@ -12,6 +12,16 @@ class BaseView extends Backbone.View
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
+  parseDate: (field) ->
+    date = Date.parse(@model.get(field))
+    date.toString('ddd yyyy-MM-dd')
+
+  parseDatetime: (field) ->
+    v = @model.get(field)
+    return "" if !v?
+    date = Date.parse(v)
+    date.toString('ddd yyyy-MM-dd h:mmtt')
+
 class BaseCollection extends Backbone.Collection
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
@@ -159,14 +169,6 @@ class CrmModelView extends BaseView
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
-
-  parseDate: (field) ->
-    date = Date.parse(@model.get(field))
-    date.toString('ddd yyyy-MM-dd')
-
-  parseDatetime: (field) ->
-    date = Date.parse(@model.get(field))
-    date.toString('ddd yyyy-MM-dd h:mmtt')
 
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
