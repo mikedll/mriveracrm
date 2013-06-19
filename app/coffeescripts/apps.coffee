@@ -269,7 +269,7 @@ class CollectionAppView extends WithChildrenView
     )
 
   filtersChanged: (e) ->
-    @collection.each( (el) => @collection.remove(el) )
+    _.each( @collection.toArray(), (el) => @collection.remove(el) )
     data = {}
     _.each( @$('.collection-filter'), (el) ->
       el$ = $(el)
