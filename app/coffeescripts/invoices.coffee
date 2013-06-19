@@ -16,12 +16,10 @@ class InvoiceView extends CrmModelView
 
   render: () ->
     @$el.html($('.invoice_view_example form').clone())
-    @$('textarea[name="invoice[description]"]').val(@model.get('description'))
-    @$('input[name="invoice[total]"]').val(@model.get('total'))
-    @$('input[name="invoice[title]"]').val(@model.get('title'))
-    @$('input[name="invoice[date]"]').val(@model.get('date'))
-    @$('input[name="invoice[date]"]').datepicker(dateFormat: 'yy-mm-dd');
-    @$('input[name="invoice[status]"]').val( @model.get('status'))
+    @$('input[name="invoice[date]"]').datepicker(
+      dateFormat: 'D yy-mm-dd'
+    )
+    @copyModelToForm()
 
     if @model.get('status') == 'open'
       @$('.put_action[data-action="mark_pending"]').removeClass('disabled')

@@ -9,6 +9,7 @@
     = stylesheet_link_tag "https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/css/bootstrap-combined.min.css"
     = stylesheet_link_tag :defaults
     = stylesheet_link_tag 'vendor/jquery-ui/jquery-ui'
+    = stylesheet_link_tag 'vendor/timepicker/jquery-ui-timepicker-addon.css'
     
     = javascript_include_tag :defaults
     = javascript_include_tag "https://netdna.bootstrapcdn.com/twitter-bootstrap/2.3.1/js/bootstrap.min.js"
@@ -20,7 +21,10 @@
     = javascript_include_tag "generated/eventHotKeys.js"
     = javascript_include_tag "generated/main.js"
     = javascript_include_tag "generated/regexes.js"
+    = javascript_include_tag "vendor/datejs/date.js"
     = javascript_include_tag "vendor/jquery-ui/jquery-ui.js"
+    = javascript_include_tag "vendor/timepicker/jquery-ui-sliderAccess.js"
+    = javascript_include_tag "vendor/timepicker/jquery-ui-timepicker-addon"
 
     = yield :head
 

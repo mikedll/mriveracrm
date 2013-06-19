@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130318003712) do
+ActiveRecord::Schema.define(:version => 20130618212238) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.integer  "resource_id",   :null => false
@@ -52,13 +52,29 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "updated_at"
   end
 
-  create_table "clients", :force => true do |t|
-    t.integer  "business_id"
-    t.string   "first_name",  :default => "", :null => false
-    t.string   "last_name",   :default => "", :null => false
-    t.string   "email",       :default => "", :null => false
+  create_table "client_notes", :force => true do |t|
+    t.integer  "client_id"
+    t.datetime "recorded_at"
+    t.text     "body"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "clients", :force => true do |t|
+    t.integer  "business_id"
+    t.string   "first_name",      :default => "",    :null => false
+    t.string   "last_name",       :default => "",    :null => false
+    t.string   "email",           :default => "",    :null => false
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.string   "website_url",     :default => "",    :null => false
+    t.string   "skype_id",        :default => "",    :null => false
+    t.datetime "last_contact_at"
+    t.datetime "next_contact_at"
+    t.string   "phone",           :default => "",    :null => false
+    t.string   "phone_2",         :default => "",    :null => false
+    t.boolean  "archived",        :default => false
+    t.string   "company"
   end
 
   create_table "credentials", :force => true do |t|

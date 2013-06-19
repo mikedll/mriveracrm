@@ -139,6 +139,14 @@ class CrmModelView extends BaseView
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
 
+  parseDate: (field) ->
+    date = Date.parse(@model.get(field))
+    date.toString('ddd yyyy-MM-dd')
+
+  parseDatetime: (field) ->
+    date = Date.parse(@model.get(field))
+    date.toString('ddd yyyy-MM-dd h:mmtt')
+
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
@@ -169,9 +177,16 @@ class CrmModelView extends BaseView
 
   copyModelToForm: () ->
     _.each(@$(':input'), (el) =>
+      el$ = $(el)
       matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
-      attribute_key = matcher.exec($(el).prop('name'))
-      $(el).val(@model.get(attribute_key[1])) if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
+      attribute_key = matcher.exec(el$.prop('name'))
+      if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
+        v = @model.get(attribute_key[1])
+        if el$.hasClass('datetimepicker')
+          v = @parseDatetime(attribute_key[1])
+        else if el$.hasClass('hasDatepicker')
+          v = @parseDate(attribute_key[1])
+        el$.val(v)
     )
 
   save: () ->
