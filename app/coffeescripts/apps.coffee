@@ -62,12 +62,24 @@ class ListItemView extends BaseView
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
-    @listenTo(@model, 'destroy', @remove)
-    @listenTo(@model, 'remove', @remove)
+    @listenTo(@model, 'destroy', @onDestroy)
+    @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
+    @listenTo(@model, 'resorted', @onResorted)
 
-  remove: () ->
+  onRemove: () ->
+    @removeDom()
+
+  onDestroy: () ->
+    @removeDom()
+
+  onResorted: () ->
+    @removeDom()
+
+  removeDom: () ->
+    if @showview?
+      @showview.remove()
     @$el.remove() # remove DOM element
 
   show: (e) ->
@@ -133,8 +145,8 @@ class CrmModelView extends BaseView
 
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
-    @listenTo(@model, 'destroy', @remove)
-    @listenTo(@model, 'remove', @remove)
+    @listenTo(@model, 'destroy', @onDestroy)
+    @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
 
@@ -155,8 +167,14 @@ class CrmModelView extends BaseView
   putAction: (e, answer) ->
     @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
 
-  remove: () ->
-    @$el.remove()
+  onDestroy: () ->
+    @removeDom()
+
+  onRemove: () ->
+    @removeDom()
+
+  removeDom: () ->
+    @$el.remove() if @$el?
 
   destroy: (e, answer) ->
     @model.destroy({wait: true}) if answer
@@ -254,6 +272,7 @@ class CollectionAppView extends WithChildrenView
       'click .add-model': 'create'
       'click button.back': 'back'
       'click a.collection-filter': 'filtersChanged'
+      'click .collection-sorts': 'sortsChanged'
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
@@ -269,7 +288,7 @@ class CollectionAppView extends WithChildrenView
     )
 
   filtersChanged: (e) ->
-    _.each( @collection.toArray(), (el) => @collection.remove(el) )
+    _.each( @collection.toArray(), (model) => @collection.remove(model) )
     data = {}
     _.each( @$('.collection-filter'), (el) ->
       el$ = $(el)
@@ -283,6 +302,34 @@ class CollectionAppView extends WithChildrenView
           data[el$.data('filter')] = true
     )
     @collection.fetch(data: data)
+
+  sortsChanged: (e) ->
+    target = $(e.target)
+    attr     = target.data('sort_attribute')
+    dir      = target.data('sort_direction')
+    sorttype = target.data('sort_type')
+    @collection.comparator = (a,b) ->
+      aa = a
+      bb = b
+      if dir == 'desc'
+        aa = b
+        bb = a
+
+      aaval = aa.get(attr)
+      aaval = parseInt(aaval) if sorttype == 'int'
+      aaval = Date.parse(aaval) if sorttype == 'date'
+
+      bbval = bb.get(attr)
+      bbval = parseInt(bbval) if sorttype == 'int'
+      bbval = Date.parse(bbval) if sorttype == 'date'
+
+      return -1 if aaval < bbval
+      return 1  if aaval > bbval
+      0
+
+    @collection.sort()
+    @collection.each( (model) -> model.trigger('resorted') )
+    @addAll()
 
   addAll: () ->
     @collection.each(@addOne, @)

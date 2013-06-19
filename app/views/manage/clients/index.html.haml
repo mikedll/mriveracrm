@@ -12,7 +12,7 @@
       Clients
 
     .app-top
-      = render :partial => 'shared/app_top', :locals => { :filters => [['recently_modified', 'Recently Modified'], ['archived', 'Archived']] }
+      = render :partial => 'shared/app_top', :locals => { :filters => [['recently_modified', 'Recently Modified'], ['archived', 'Archived']], :sorts => [['id', 'asc', 'int', 'Id'], ['next_contact_at', 'asc', 'date', 'Next Contact At'], ['updated_at', 'desc', 'date', 'Updated At'], ['last_name', 'asc', 'string', 'Last Name']] }
 
     .row-fluid
 

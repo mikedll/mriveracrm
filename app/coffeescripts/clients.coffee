@@ -14,8 +14,11 @@ class Client extends Backbone.Model
 class Clients extends Backbone.Collection
   model: Client
   url: '/manage/clients'
-  comparator: (client) ->
-    client.get('id')
+  initialize: () ->
+    Backbone.Collection.prototype.initialize.apply(this, arguments)
+    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
+    @comparator = (client) ->
+      client.get('id')
 
 class ClientView extends CrmModelView
   modelName: 'client'
