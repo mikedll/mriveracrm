@@ -2,3 +2,9 @@
   %a.add-model.btn
     +New
 
+- if defined?(filters)
+  .btn-group
+    - filters.each do |filter|
+      %a.collection-filter.btn{ :class => 'filter_' + filter.first, :data => { :filter => filter.first, :toggle => "button" } }
+        = filter.last
+

@@ -26,7 +26,10 @@ class Manage::ClientsController < Manage::BaseController
   end
 
   def current_objects
-    @current_objects ||= current_model.unarchived.order("updated_at DESC")
+    top_scope = current_model
+    top_scope = top_scope.unarchived if params[:archived].blank?
+    top_scope = top_scope.recently_modified if params[:recently_modified].blank?
+    @current_objects ||= top_scope.order("updated_at DESC")
   end
 
   def archive

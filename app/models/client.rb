@@ -18,6 +18,7 @@ class Client < ActiveRecord::Base
 
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
   scope :unarchived, where('archived = ?', false)
+  scope :recently_modified, where('updated_at > ?', Time.now - 1.week)
 
   def archive!
     if archived?

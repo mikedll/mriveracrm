@@ -63,11 +63,12 @@ class ListItemView extends BaseView
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'destroy', @remove)
+    @listenTo(@model, 'remove', @remove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
 
   remove: () ->
-    @$el.remove()
+    @$el.remove() # remove DOM element
 
   show: (e) ->
     e.stopPropagation()
@@ -133,6 +134,7 @@ class CrmModelView extends BaseView
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'destroy', @remove)
+    @listenTo(@model, 'remove', @remove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
 
@@ -251,6 +253,7 @@ class CollectionAppView extends WithChildrenView
     @events =
       'click .add-model': 'create'
       'click button.back': 'back'
+      'click a.collection-filter': 'filtersChanged'
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
@@ -264,6 +267,22 @@ class CollectionAppView extends WithChildrenView
       'height': h + "px"
       'width': w + "px"
     )
+
+  filtersChanged: (e) ->
+    @collection.each( (el) => @collection.remove(el) )
+    data = {}
+    _.each( @$('.collection-filter'), (el) ->
+      el$ = $(el)
+      if e.target == el
+        # this button is about to change - we move faster than bootstrap
+        # should be improved so that this entire method fires after that stuff is all done
+        if !el$.hasClass('active')
+          data[el$.data('filter')] = true
+      else
+        if el$.hasClass('active')
+          data[el$.data('filter')] = true
+    )
+    @collection.fetch(data: data)
 
   addAll: () ->
     @collection.each(@addOne, @)
