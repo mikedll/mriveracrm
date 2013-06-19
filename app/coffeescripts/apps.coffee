@@ -1,3 +1,10 @@
+
+AppsConfig =
+  datetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
+  dateFormat: 'ddd yyyy-MM-dd'
+  datepickerDateformat: 'D yy-mm-dd'
+  datetimePickerTimeFormat: 'h:mmTT'
+
 class BaseView extends Backbone.View
   initialize: (options) ->
     @events = {}
@@ -14,13 +21,13 @@ class BaseView extends Backbone.View
 
   parseDate: (field) ->
     date = Date.parse(@model.get(field))
-    date.toString('ddd yyyy-MM-dd')
+    date.toString(AppsConfig.dateFormat)
 
   parseDatetime: (field) ->
     v = @model.get(field)
     return "" if !v?
     date = Date.parse(v)
-    date.toString('ddd yyyy-MM-dd h:mmtt')
+    date.toString(AppsConfig.datetimeFormat)
 
 class BaseCollection extends Backbone.Collection
   initialize: () ->

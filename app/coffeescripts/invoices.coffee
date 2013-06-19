@@ -17,7 +17,7 @@ class InvoiceView extends CrmModelView
   render: () ->
     @$el.html($('.invoice_view_example form').clone())
     @$('input[name="invoice[date]"]').datepicker(
-      dateFormat: 'D yy-mm-dd'
+      dateFormat: AppsConfig.datepickerDateformat
     )
     @copyModelToForm()
     @

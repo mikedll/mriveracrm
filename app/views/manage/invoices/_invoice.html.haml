@@ -1,6 +1,13 @@
 
 = simple_form_for invoice, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
 
+  = f.input :title, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
+  = f.input :date, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
+  = f.input :total, :input_html => invoice.persisted? ? {} : { :id => nil }
+  = f.input :description, :input_html => {:rows => 4}.merge( invoice.persisted? ? {} : { :id => nil } )
+
+  = f.input :status, :as => :string, :input_html => {:disabled => true}.merge( invoice.persisted? ? {} : { :id => nil } )
+
   .control-group
     .control-label
     .controls
@@ -15,13 +22,6 @@
       .btn-group.pull-right
         %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
           Delete
-
-  = f.input :title, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
-  = f.input :date, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
-  = f.input :total, :input_html => invoice.persisted? ? {} : { :id => nil }
-  = f.input :description, :input_html => {:rows => 4}.merge( invoice.persisted? ? {} : { :id => nil } )
-
-  = f.input :status, :as => :string, :input_html => {:disabled => true}.merge( invoice.persisted? ? {} : { :id => nil } )
   
 
 

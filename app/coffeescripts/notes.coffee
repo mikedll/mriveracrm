@@ -1,6 +1,7 @@
 
 class Note extends Backbone.Model
   defaults: () ->
+    recorded_at: Date.parse('now').toString(AppsConfig.datetimeFormat)
 
 class Notes extends BaseCollection
   model: Note
@@ -8,8 +9,12 @@ class Notes extends BaseCollection
     "#{@client.url()}/notes"
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
-    @comparator = (model) ->
-      model.get('datetime')
+    @comparator = (a, b) ->
+      aaval = Date.parse(a.get('recorded_at'))
+      bbval = Date.parse(b.get('recorded_at'))
+      return -1 if bbval < aaval
+      return 1 if bbval > aaval
+      return 0
 
 class NoteView extends CrmModelView
   modelName: 'note'

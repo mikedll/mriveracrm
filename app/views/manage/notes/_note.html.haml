@@ -1,6 +1,10 @@
 
 = simple_form_for note, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
 
+  = f.input :recorded_at, :as => :string, :input_html => {:class => 'datetimepicker'}.merge(note.persisted? ? {} : { :id => nil })
+
+  = f.input :body, :input_html => note.persisted? ? {} : { :id => nil }
+
   .control-group
     .control-label
     .controls
@@ -11,7 +15,3 @@
       .btn-group.pull-right
         %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
           Delete
-
-  = f.input :recorded_at, :as => :string, :input_html => {:class => 'datetimepicker'}.merge(note.persisted? ? {} : { :id => nil })
-
-  = f.input :body, :input_html => note.persisted? ? {} : { :id => nil }
