@@ -53,8 +53,6 @@ class ClientView extends CrmModelView
   render: () ->
     node = $('.client_view_example form').clone()
     @$el.html(node)
-    console.log(AppsConfig.datepickerDateformat)
-    console.log(AppsConfig.datetimePickerTimeFormat)
     @$('input.datetimepicker').datetimepicker(
       dateFormat: AppsConfig.datepickerDateformat,
       timeFormat: AppsConfig.datetimePickerTimeFormat
