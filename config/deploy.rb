@@ -7,7 +7,7 @@ set :repository,  "mrmike@ssh.mikedll.com:git/mikedll"
 
 set :scm, :git
 set :deploy_via, :remote_cache
-set :branch, "develop"
+set :branch, "master"
 set :keep_releases, 10
 set :user, "mrmike"
 set :scm_username, "mrmike"
