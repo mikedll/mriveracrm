@@ -8,10 +8,13 @@ class Invitation < ActiveRecord::Base
   scope :open, where('invitations.status = ?', :open)
 
   before_validation :_capture_client_email
+  before_validation :_capture_business
 
-  validate :_employee_or_contact
+  validates :business_id, :presence => true
+  validate :_employee_or_client
   validates :email, :format => { :with => Regexes::EMAIL }
 
+  attr_accessible :email
   state_machine :status, :initial => :open do
     event :accept do
       transition [:open] => :accepted
@@ -36,7 +39,7 @@ class Invitation < ActiveRecord::Base
 
   private
 
-  def _employee_or_contact
+  def _employee_or_client
     errors.add(:base, I18n.t('invitation.errors.only_one')) if (employee.nil? && client.nil?) || (!employee.nil? && !client.nil?)
   end
 
@@ -44,5 +47,14 @@ class Invitation < ActiveRecord::Base
     self.email = client.email if !client.nil? && email.blank?
   end
 
+  def _capture_business
+    if business.nil?
+      if !client.nil?
+        self.business = client.business
+      elsif !employee.nil?
+        self.business = employee.business
+      end
+    end
+  end
 
 end

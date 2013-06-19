@@ -46,6 +46,15 @@ class Client < ActiveRecord::Base
     end
   end
 
+  def invite
+    invitation = self.invitations.build
+    invitation.email = email
+    invitation.business = business
+    invitation.save!
+    invitation
+  end
+
+
   def display_name
     "#{first_name} #{last_name}"    
   end

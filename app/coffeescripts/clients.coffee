@@ -28,27 +28,17 @@ class ClientView extends CrmModelView
     @events = $.extend(@events,
       'click a.invoices': 'showInvoices'
       'click a.notes': 'showNotes'
+      'click a.invitations': 'showInvitations'
     )
 
   showInvoices: () ->
-    if !@invoices?
-      @invoices = new Invoices()
-      @invoices.client = @model
-
-    @invoicesAppView = new InvoiceAppView({id: "client-#{@model.get('id')}-invoices", parent: @, collection: @invoices})
-    @invoicesAppView.render()
-    @parent.childViewPushed(@invoicesAppView)
-    @invoices.fetch()
+    @showNestedCollectionApp('invoices', Invoices, InvoiceAppView)
 
   showNotes: () ->
-    if !@notes?
-      @notes = new Notes()
-      @notes.client = @model
+    @showNestedCollectionApp('notes', Notes, NoteAppView)
 
-    @notesAppView = new NoteAppView({id: "client-#{@model.get('id')}-notes", parent: @, collection: @notes})
-    @notesAppView.render()
-    @parent.childViewPushed(@notesAppView)
-    @notes.fetch()
+  showInvitations: () ->
+    @showNestedCollectionApp('invitations', Invitations, InvitationAppView)
 
   render: () ->
     node = $('.client_view_example form').clone()

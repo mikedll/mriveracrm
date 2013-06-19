@@ -2,6 +2,7 @@
 # See http://github.com/svenfuchs/rails-i18n/tree/master/rails%2Flocale for starting points.
 
 en:
+  delete_confirm: "Delete this?"
   client:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."

@@ -1,7 +1,7 @@
-class Manage::InvoicesController < Manage::BaseController
+class Manage::InvitationsController < Manage::BaseController
 
   make_resourceful do
-    actions :index, :show, :update, :create
+    actions :index, :show, :update, :create, :destroy
     belongs_to :client
     response_for :new do
       render :layout => nil
@@ -25,21 +25,8 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
-  def mark_pending
-    load_object
-    if current_object.update_attributes(object_parameters)
-      if current_object.mark_pending!
-        response_for :update
-      else
-        response_for :update_fails
-      end
-    else
-      response_for :update_fails
-    end
-  end
-
   def object_parameters
-    params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
+    params.slice(* Invitation.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
 end

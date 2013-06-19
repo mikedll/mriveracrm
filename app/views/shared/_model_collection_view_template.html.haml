@@ -1,0 +1,23 @@
+
+%div{:class => "#{model_name.pluralize}_view_example"}
+  %h2
+    = model_name.pluralize.titleize
+  .app-top
+    .btn-group
+      %button.back.btn
+        Back
+    = render :partial => 'shared/app_top'
+
+  .row-fluid
+    .span3
+      %ul.models-list{ :class => '#{model_name.pluralize}-list'}
+
+    .span9
+      .errors.alert.alert-error.hide
+      .models-show-container
+
+    .clear
+
+    .spinner-container.hide 
+      .spinner
+        = image_tag 'loading.gif'

@@ -32,6 +32,10 @@ class BaseView extends Backbone.View
 class BaseCollection extends Backbone.Collection
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
+    # underscore.string does not support pluralize
+    # if @parent?
+    #   @url = () ->
+    #     "#{@parent.url()}/#{_(@model).cain().pluralize().underscore().value()}"
     @comparator = (model) ->
       model.get('id')
 
@@ -211,6 +215,16 @@ class CrmModelView extends BaseView
     )
     updated
 
+  showNestedCollectionApp: (collectionName, collectionKlass, collectionAppViewKlass) ->
+    if !@[collectionName]?
+      @[collectionName] = new collectionKlass()
+      @[collectionName].parent = @model
+
+    @[collectionName + 'AppView'] = new collectionAppViewKlass({parent: @, collection: @[collectionName]})
+    @[collectionName + 'AppView'].render()
+    @parent.childViewPushed(@[collectionName + 'AppView'])
+    @[collectionName].fetch()
+
   copyModelToForm: () ->
     _.each(@$(':input'), (el) =>
       el$ = $(el)
@@ -224,7 +238,7 @@ class CrmModelView extends BaseView
           v = @parseDate(attribute_key[1])
         el$.val(v)
     )
-    _.each( @$('.put_action'), (el) =>
+    _.each( @$('.put_action, .destroy'), (el) =>
       el$ = $(el)
       enablerValue = @model.get(el$.data('attribute_enabler'))
       if enablerValue?
@@ -274,7 +288,12 @@ class CrmModelView extends BaseView
     @parent.rebindGlobalHotKeys()
 
   render: () ->
-    throw "Implement in subclass"
+    @$el.html($(".#{@modelName}_view_example form").clone())
+    @$('input.datepicker').datepicker(
+      dateFormat: AppsConfig.datepickerDateformat
+    )
+    @copyModelToForm()
+    @
 
 #
 # Override modelName, spawnListItemType

@@ -5,10 +5,10 @@ class Note extends Backbone.Model
 
 class Notes extends BaseCollection
   model: Note
-  url: () ->
-    "#{@client.url()}/notes"
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
+    @url = () =>
+      "#{@parent.url()}/notes"
     @comparator = (a, b) ->
       aaval = Date.parse(a.get('recorded_at'))
       bbval = Date.parse(b.get('recorded_at'))
@@ -42,7 +42,7 @@ class NoteAppView extends CollectionAppView
   className: 'notes-gui app-gui'
 
   title: () ->
-    "Notes for #{@collection.client.fullName()}"
+    "Notes for #{@collection.parent.fullName()}"
 
   render: () ->
     node = $('.templates .notes_view_example').children().clone()

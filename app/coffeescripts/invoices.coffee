@@ -4,23 +4,15 @@ class Invoice extends Backbone.Model
     total: 10.00
     description: 'Latest invoice'
 
-class Invoices extends Backbone.Collection
+class Invoices extends BaseCollection
   model: Invoice
-  comparator: (invoice) ->
-    invoice.get('id')
-  url: () ->
-    "#{@client.url()}/invoices"
+  initialize: () ->
+    BaseCollection.prototype.initialize.apply(this, arguments)
+    @url = () =>
+      "#{@parent.url()}/invoices"
 
 class InvoiceView extends CrmModelView
   modelName: 'invoice'
-
-  render: () ->
-    @$el.html($('.invoice_view_example form').clone())
-    @$('input[name="invoice[date]"]').datepicker(
-      dateFormat: AppsConfig.datepickerDateformat
-    )
-    @copyModelToForm()
-    @
 
 class InvoiceListItemView extends ListItemView
   modelName: 'invoice'
@@ -36,7 +28,7 @@ class InvoiceAppView extends CollectionAppView
   className: 'invoices-gui app-gui'
 
   title: () ->
-    "Invoices for #{@collection.client.fullName()}"
+    "Invoices for #{@collection.parent.fullName()}"
 
   render: () ->
     node = $('.templates .invoices_view_example').children().clone()
