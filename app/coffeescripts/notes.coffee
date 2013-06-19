@@ -1,12 +1,15 @@
 
 class Note extends Backbone.Model
   defaults: () ->
-    datetime: Date.parse('today').toString()
 
 class Notes extends BaseCollection
   model: Note
   url: () ->
     "#{@client.url()}/notes"
+  initialize: () ->
+    BaseCollection.prototype.initialize.apply(this, arguments)
+    @comparator = (model) ->
+      model.get('datetime')
 
 class NoteView extends CrmModelView
   modelName: 'note'
