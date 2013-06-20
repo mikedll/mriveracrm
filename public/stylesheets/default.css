@@ -248,6 +248,10 @@ ul#projects_list li {
   padding: 4px 4px 4px 0px;
 }
 
+.controls textarea {
+  width: 380px;
+}
+
 /* client/ */
 
 input.card_number  {
