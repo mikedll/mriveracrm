@@ -14,10 +14,6 @@ class ClientInvoiceView extends CrmModelView
   render: () ->
     @$el.html($('.invoice_view_example').children().clone()) if @$el.children().length == 0
     @copyModelToForm()
-    if @model.get('can_pay')
-      @$('.put_action[data-action="charge"]').removeClass('disabled')
-    else
-      @$('.put_action[data-action="charge"]').addClass('disabled')
     @renderErrors(@model.validationError) if @model.validationError?
     @
 

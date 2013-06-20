@@ -10,7 +10,7 @@
     .control-label
     .controls
       .btn-group
-        %a.put_action.btn{ :data => {:action => 'charge', :hotkey => 'p', :confirm => "Charge this now?"} }
+        %a.put_action.btn{ :data => {:action => 'charge', :hotkey => 'p', :attribute_enabler => "can_pay", :enabled_when => 'true', :confirm => "Charge this now?"} }
           Charge
 
 
