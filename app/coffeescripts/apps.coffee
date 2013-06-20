@@ -120,7 +120,7 @@ class ListItemView extends BaseView
 
   render: () ->
     @$el.html("<a href='#'></a>") if @$('a').length == 0
-    @$('a').text(@title())
+    @$('a').html(@title())
     @
 
   onRequest: () ->

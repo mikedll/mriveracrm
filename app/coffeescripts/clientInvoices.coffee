@@ -27,7 +27,9 @@ class InvoiceListItemView extends ListItemView
   className: 'invoice-list-item list-item'
 
   title: () ->
-    "#{@model.get('title')}"
+    title = @model.get('title')
+    title += ' <span class="label label-important">Pending</span>' if @model.get('status') == 'pending'
+    title
 
 class InvoicesAppView extends CollectionAppView
   modelName: 'invoice'
