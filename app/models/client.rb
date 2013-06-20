@@ -18,7 +18,7 @@ class Client < ActiveRecord::Base
 
   before_validation :_strip_fields
 
-  after_create :_require_payment_gateway_profile
+  after_create :require_payment_gateway_profile
 
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
   scope :unarchived, where('archived = ?', false)
@@ -62,7 +62,7 @@ class Client < ActiveRecord::Base
     "#{first_name} #{last_name}"    
   end
 
-  def _require_payment_gateway_profile
+  def require_payment_gateway_profile
     if payment_gateway_profile.nil?
       self.payment_gateway_profile = StripePaymentGatewayProfile.new
       self.payment_gateway_profile.save!

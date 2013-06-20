@@ -39,7 +39,7 @@ MikedllCrm::Application.routes.draw do
   end
 
   namespace "client" do
-    resource :payment_gateway_profile, :only => [:update, :show]
+    resource :payment_gateway_profile, :only => [:create, :update, :show]
 
     resources :invoices do
       member do
