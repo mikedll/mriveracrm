@@ -24,6 +24,11 @@ MikedllCrm::Application.routes.draw do
 
   namespace 'manage' do
     resources :clients do
+      put :archive
+      put :unarchive
+      resources :notes
+      resources :invitations
+      resources :users, :only => [:index, :show]
       resources :invoices do
         member do
           put :mark_pending
@@ -35,7 +40,7 @@ MikedllCrm::Application.routes.draw do
   end
 
   namespace "client" do
-    resource :payment_gateway_profile, :only => [:update, :show]
+    resource :payment_gateway_profile, :only => [:create, :update, :show]
 
     resources :invoices do
       member do

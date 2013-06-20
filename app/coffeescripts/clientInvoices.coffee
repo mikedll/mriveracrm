@@ -14,10 +14,6 @@ class ClientInvoiceView extends CrmModelView
   render: () ->
     @$el.html($('.invoice_view_example').children().clone()) if @$el.children().length == 0
     @copyModelToForm()
-    if @model.get('can_pay')
-      @$('.put_action[data-action="charge"]').removeClass('disabled')
-    else
-      @$('.put_action[data-action="charge"]').addClass('disabled')
     @renderErrors(@model.validationError) if @model.validationError?
     @
 
@@ -27,7 +23,9 @@ class InvoiceListItemView extends ListItemView
   className: 'invoice-list-item list-item'
 
   title: () ->
-    "#{@model.get('title')}"
+    title = @model.get('title')
+    title += ' <span class="label label-important">Pending</span>' if @model.get('status') == 'pending'
+    title
 
 class InvoicesAppView extends CollectionAppView
   modelName: 'invoice'

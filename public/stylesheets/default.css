@@ -235,6 +235,23 @@ ul#projects_list li {
 .models-show-container {
 }
 
+.model-view {
+  padding: 1em 0 0 0;
+}
+
+.btn-group-label {
+  margin-left: 12px;
+  font-size: 10pt;
+  font-weight: bold;
+  display: inline-block;
+  vertical-align:middle;
+  padding: 4px 4px 4px 0px;
+}
+
+.controls textarea {
+  width: 380px;
+}
+
 /* client/ */
 
 input.card_number  {

@@ -3,9 +3,9 @@
   = javascript_include_tag 'generated/apps'
   = javascript_include_tag 'generated/paymentGatewayProfile'
   = javascript_include_tag 'generated/clientInvoices'
-  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'payment_gateway_profile', :bootstrap => current_user.client.payment_gateway_profile.public }
+  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'payment_gateway_profile', :bootstrap => current_user.client.payment_gateway_profile.try(:public) }
 
-.container-fluid.gui-container  
+.container-fluid.gui-container
 
 .templates.hide
   .invoice_view_example

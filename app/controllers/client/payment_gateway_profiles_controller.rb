@@ -1,5 +1,7 @@
 class Client::PaymentGatewayProfilesController < Client::BaseController
 
+  before_filter :create_remote_if_doesnt_exist, :only => [:create, :update]
+
   make_resourceful do
     actions :update, :show
 
@@ -17,6 +19,16 @@ class Client::PaymentGatewayProfilesController < Client::BaseController
       response_for :update
     else
       response_for :update_fails
+    end
+  end
+
+  alias_method :create, :update
+
+  def create_remote_if_doesnt_exist
+    current_user.client.require_payment_gateway_profile if current_user.client.payment_gateway_profile.nil?
+    if current_user.client.payment_gateway_profile.nil?
+      render :status => :unprocessable_entity, :json => { :full_messages => [t('payment_gateway_profile.update_error')] }
+      return
     end
   end
 

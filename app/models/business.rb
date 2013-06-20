@@ -34,12 +34,7 @@ class Business < ActiveRecord::Base
       client.email = email
       client.save!
     end
-
-    invitation = self.invitations.build
-    invitation.email = email
-    invitation.client = client
-    invitation.save!
-    invitation
+    client.invite
   end
 
 end

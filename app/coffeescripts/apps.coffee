@@ -1,3 +1,10 @@
+
+AppsConfig =
+  datetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
+  dateFormat: 'ddd yyyy-MM-dd'
+  datepickerDateformat: 'D yy-mm-dd'
+  datetimePickerTimeFormat: 'h:mmTT'
+
 class BaseView extends Backbone.View
   initialize: (options) ->
     @events = {}
@@ -11,6 +18,27 @@ class BaseView extends Backbone.View
 
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
+
+  parseDate: (field) ->
+    date = Date.parse(@model.get(field))
+    date.toString(AppsConfig.dateFormat)
+
+  parseDatetime: (field) ->
+    v = @model.get(field)
+    return "" if !v?
+    date = Date.parse(v)
+    date.toString(AppsConfig.datetimeFormat)
+
+class BaseCollection extends Backbone.Collection
+  initialize: () ->
+    Backbone.Collection.prototype.initialize.apply(this, arguments)
+    # underscore.string does not support pluralize
+    # if @parent?
+    #   @url = () ->
+    #     "#{@parent.url()}/#{_(@model).cain().pluralize().underscore().value()}"
+    @comparator = (model) ->
+      model.get('id')
+
 
 class WithChildrenView extends BaseView
   initialize: (options) ->
@@ -62,12 +90,25 @@ class ListItemView extends BaseView
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
-    @listenTo(@model, 'destroy', @remove)
+    @listenTo(@model, 'destroy', @onDestroy)
+    @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
+    @listenTo(@model, 'resorted', @onResorted)
 
-  remove: () ->
-    @$el.remove()
+  onRemove: () ->
+    @removeDom()
+
+  onDestroy: () ->
+    @removeDom()
+
+  onResorted: () ->
+    @removeDom()
+
+  removeDom: () ->
+    if @showview?
+      @showview.remove()
+    @$el.remove() # remove DOM element
 
   show: (e) ->
     e.stopPropagation()
@@ -79,7 +120,7 @@ class ListItemView extends BaseView
 
   render: () ->
     @$el.html("<a href='#'></a>") if @$('a').length == 0
-    @$('a').text(@title())
+    @$('a').html(@title())
     @
 
   onRequest: () ->
@@ -132,7 +173,8 @@ class CrmModelView extends BaseView
 
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
-    @listenTo(@model, 'destroy', @remove)
+    @listenTo(@model, 'destroy', @onDestroy)
+    @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
 
@@ -145,8 +187,14 @@ class CrmModelView extends BaseView
   putAction: (e, answer) ->
     @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
 
-  remove: () ->
-    @$el.remove()
+  onDestroy: () ->
+    @removeDom()
+
+  onRemove: () ->
+    @removeDom()
+
+  removeDom: () ->
+    @$el.remove() if @$el?
 
   destroy: (e, answer) ->
     @model.destroy({wait: true}) if answer
@@ -167,11 +215,37 @@ class CrmModelView extends BaseView
     )
     updated
 
+  showNestedCollectionApp: (collectionName, collectionKlass, collectionAppViewKlass) ->
+    if !@[collectionName]?
+      @[collectionName] = new collectionKlass()
+      @[collectionName].parent = @model
+
+    @[collectionName + 'AppView'] = new collectionAppViewKlass({parent: @, collection: @[collectionName]})
+    @[collectionName + 'AppView'].render()
+    @parent.childViewPushed(@[collectionName + 'AppView'])
+    @[collectionName].fetch()
+
   copyModelToForm: () ->
     _.each(@$(':input'), (el) =>
+      el$ = $(el)
       matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
-      attribute_key = matcher.exec($(el).prop('name'))
-      $(el).val(@model.get(attribute_key[1])) if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
+      attribute_key = matcher.exec(el$.prop('name'))
+      if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
+        v = @model.get(attribute_key[1])
+        if el$.hasClass('datetimepicker')
+          v = @parseDatetime(attribute_key[1])
+        else if el$.hasClass('hasDatepicker')
+          v = @parseDate(attribute_key[1])
+        el$.val(v)
+    )
+    _.each( @$('.put_action, .destroy'), (el) =>
+      el$ = $(el)
+      enablerValue = @model.get(el$.data('attribute_enabler'))
+      if enablerValue?
+        if _.any( el$.data('enabled_when').toString().split(/,/), (val) -> val == enablerValue.toString())
+          el$.removeClass('disabled')
+        else
+          el$.addClass('disabled')
     )
 
   save: () ->
@@ -210,11 +284,16 @@ class CrmModelView extends BaseView
       .removeClass('error')
       .find('span.help-inline').remove()
     @copyModelToForm()
-    @$el.find(':input:visible').first().focus() if @$el.is(':visible')
+    @$el.find(':input:visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
   render: () ->
-    throw "Implement in subclass"
+    @$el.html($(".#{@modelName}_view_example form").clone())
+    @$('input.datepicker').datepicker(
+      dateFormat: AppsConfig.datepickerDateformat
+    )
+    @copyModelToForm()
+    @
 
 #
 # Override modelName, spawnListItemType
@@ -227,6 +306,8 @@ class CollectionAppView extends WithChildrenView
     @events =
       'click .add-model': 'create'
       'click button.back': 'back'
+      'click a.collection-filter': 'filtersChanged'
+      'click .collection-sorts': 'sortsChanged'
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
@@ -240,6 +321,50 @@ class CollectionAppView extends WithChildrenView
       'height': h + "px"
       'width': w + "px"
     )
+
+  filtersChanged: (e) ->
+    _.each( @collection.toArray(), (model) => @collection.remove(model) )
+    data = {}
+    _.each( @$('.collection-filter'), (el) ->
+      el$ = $(el)
+      if e.target == el
+        # this button is about to change - we move faster than bootstrap
+        # should be improved so that this entire method fires after that stuff is all done
+        if !el$.hasClass('active')
+          data[el$.data('filter')] = true
+      else
+        if el$.hasClass('active')
+          data[el$.data('filter')] = true
+    )
+    @collection.fetch(data: data)
+
+  sortsChanged: (e) ->
+    target = $(e.target)
+    attr     = target.data('sort_attribute')
+    dir      = target.data('sort_direction')
+    sorttype = target.data('sort_type')
+    @collection.comparator = (a,b) ->
+      aa = a
+      bb = b
+      if dir == 'desc'
+        aa = b
+        bb = a
+
+      aaval = aa.get(attr)
+      aaval = parseInt(aaval) if sorttype == 'int'
+      aaval = Date.parse(aaval) if sorttype == 'date'
+
+      bbval = bb.get(attr)
+      bbval = parseInt(bbval) if sorttype == 'int'
+      bbval = Date.parse(bbval) if sorttype == 'date'
+
+      return -1 if aaval < bbval
+      return 1  if aaval > bbval
+      0
+
+    @collection.sort()
+    @collection.each( (model) -> model.trigger('resorted') )
+    @addAll()
 
   addAll: () ->
     @collection.each(@addOne, @)
@@ -277,7 +402,7 @@ class CollectionAppView extends WithChildrenView
     @move(@$(".models-list .list-item a.active").parent().prev())
 
   focusTopModelView: () ->
-    @$('.models-show-container .model-view:visible').find(':input:visible').first().focus()
+    @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
   show: (view) ->
     @$('.errors').hide()
@@ -289,7 +414,7 @@ class CollectionAppView extends WithChildrenView
 
     # rearrange stage (hide other model views, show this model view)
     @$('.models-show-container .model-view').hide()
-    @$('.models-show-container').append(view.el) if $.contains( @$('.models-show-container'), view.el)
+    @$('.models-show-container').append(view.el) if !$.contains( @$('.models-show-container').get(0), view.el)
     view.$el.show()
 
     # raise curtain and focus

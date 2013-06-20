@@ -10,7 +10,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130318003712) do
+ActiveRecord::Schema.define(:version => 20130618212238) do
 
   create_table "active_admin_comments", :force => true do |t|
     t.integer  "resource_id",   :null => false
@@ -54,11 +54,24 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
 
   create_table "clients", :force => true do |t|
     t.integer  "business_id"
-    t.string   "first_name",  :default => "", :null => false
-    t.string   "last_name",   :default => "", :null => false
-    t.string   "email",       :default => "", :null => false
+    t.string   "first_name",      :default => "",    :null => false
+    t.string   "last_name",       :default => "",    :null => false
+    t.string   "email",           :default => "",    :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "website_url",     :default => "",    :null => false
+    t.string   "skype_id",        :default => "",    :null => false
+    t.datetime "last_contact_at"
+    t.datetime "next_contact_at"
+    t.string   "phone",           :default => "",    :null => false
+    t.string   "phone_2",         :default => "",    :null => false
+    t.boolean  "archived",        :default => false, :null => false
+    t.string   "company",         :default => "",    :null => false
+    t.string   "address_line_1",  :default => "",    :null => false
+    t.string   "address_line_2",  :default => "",    :null => false
+    t.string   "city",            :default => "",    :null => false
+    t.string   "state",           :default => "",    :null => false
+    t.string   "zip",             :default => "",    :null => false
   end
 
   create_table "credentials", :force => true do |t|
@@ -123,6 +136,14 @@ ActiveRecord::Schema.define(:version => 20130318003712) do
     t.datetime "date"
     t.integer  "client_id"
     t.string   "title"
+  end
+
+  create_table "notes", :force => true do |t|
+    t.integer  "client_id"
+    t.datetime "recorded_at"
+    t.text     "body"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|

@@ -7,36 +7,57 @@ class Client extends Backbone.Model
     "#{@get('first_name')} #{@get('last_name')}"
 
   validate: (attrs, options) ->
-    if (!EmailRegex.test(attrs.email))
+    if (attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
       return {email: "is invalid"}
     return
 
 class Clients extends Backbone.Collection
   model: Client
   url: '/manage/clients'
-  comparator: (client) ->
-    client.get('id')
+  initialize: () ->
+    Backbone.Collection.prototype.initialize.apply(this, arguments)
+    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
+    @comparator = (client) ->
+      client.get('id')
 
 class ClientView extends CrmModelView
   modelName: 'client'
 
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
-    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
+    @events = $.extend(@events,
+      'click a.invoices': 'showInvoices'
+      'click a.notes': 'showNotes'
+      'click a.invitations': 'showInvitations'
+      'click a.users': 'showUsers'
+      'click a.expand_address': 'toggleAddress'
+    )
+
+  toggleAddress: (e) ->
+    if $(e.target).hasClass('active')
+      @$('.address_info').hide()
+    else
+      @$('.address_info').show()
 
   showInvoices: () ->
-    if !@invoices?
-      @invoices = new Invoices()
-      @invoices.client = @model
+    @showNestedCollectionApp('invoices', Invoices, InvoiceAppView)
 
-    @invoicesAppView = new InvoiceAppView({id: "client-#{@model.get('id')}-invoices", parent: @, collection: @invoices})
-    @invoicesAppView.render()
-    @parent.childViewPushed(@invoicesAppView)
-    @invoices.fetch()
+  showNotes: () ->
+    @showNestedCollectionApp('notes', Notes, NoteAppView)
+
+  showInvitations: () ->
+    @showNestedCollectionApp('invitations', Invitations, InvitationAppView)
+
+  showUsers: () ->
+    @showNestedCollectionApp('users', Users, UserAppView)
 
   render: () ->
     node = $('.client_view_example form').clone()
     @$el.html(node)
+    @$('input.datetimepicker').datetimepicker(
+      dateFormat: AppsConfig.datepickerDateformat,
+      timeFormat: AppsConfig.datetimePickerTimeFormat
+    )
     @copyModelToForm()
     @renderErrors(@model.validationError) if @model.validationError?
     @

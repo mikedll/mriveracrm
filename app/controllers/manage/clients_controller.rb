@@ -1,5 +1,7 @@
 class Manage::ClientsController < Manage::BaseController
 
+  before_filter :_parent_name
+
   make_resourceful do
     actions :all
     belongs_to :business
@@ -25,6 +27,26 @@ class Manage::ClientsController < Manage::BaseController
     end
   end
 
+  def current_objects
+    top_scope = current_model
+    if params[:archived].blank?
+      top_scope = top_scope.unarchived 
+    else
+      top_scope = top_scope.archived
+    end
+    top_scope = top_scope.recently_modified if !params[:recently_modified].blank?
+
+    @current_objects ||= top_scope.order("updated_at DESC")
+  end
+
+  def archive
+    with_update_and_transition { current_object.archive! }
+  end
+
+  def unarchive
+    with_update_and_transition { current_object.unarchive! }
+  end
+
   def build_object
     @current_object = current_business.clients.build(object_parameters)
   end
@@ -36,5 +58,23 @@ class Manage::ClientsController < Manage::BaseController
   def parent_object
     @parent_object ||= Business.current
   end
+
+  def with_update_and_transition
+    load_object
+    if current_object.update_attributes(object_parameters)
+      if yield
+        response_for :update
+      else
+        response_for :update_fails
+      end
+    else
+      response_for :update_fails
+    end
+  end
+
+  def _parent_name
+    @parent_name = "business" # hack; parent_object isnt enough.
+  end
+
 
 end

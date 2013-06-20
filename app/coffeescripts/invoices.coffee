@@ -4,30 +4,15 @@ class Invoice extends Backbone.Model
     total: 10.00
     description: 'Latest invoice'
 
-class Invoices extends Backbone.Collection
+class Invoices extends BaseCollection
   model: Invoice
-  comparator: (invoice) ->
-    invoice.get('id')
-  url: () ->
-    "#{@client.url()}/invoices"
+  initialize: () ->
+    BaseCollection.prototype.initialize.apply(this, arguments)
+    @url = () =>
+      "#{@parent.url()}/invoices"
 
 class InvoiceView extends CrmModelView
   modelName: 'invoice'
-
-  render: () ->
-    @$el.html($('.invoice_view_example form').clone())
-    @$('textarea[name="invoice[description]"]').val(@model.get('description'))
-    @$('input[name="invoice[total]"]').val(@model.get('total'))
-    @$('input[name="invoice[title]"]').val(@model.get('title'))
-    @$('input[name="invoice[date]"]').val(@model.get('date'))
-    @$('input[name="invoice[date]"]').datepicker(dateFormat: 'yy-mm-dd');
-    @$('input[name="invoice[status]"]').val( @model.get('status'))
-
-    if @model.get('status') == 'open'
-      @$('.put_action[data-action="mark_pending"]').removeClass('disabled')
-    else
-      @$('.put_action[data-action="mark_pending"]').addClass('disabled')
-    @
 
 class InvoiceListItemView extends ListItemView
   modelName: 'invoice'
@@ -43,11 +28,11 @@ class InvoiceAppView extends CollectionAppView
   className: 'invoices-gui app-gui'
 
   title: () ->
-    "Invoices for #{@collection.client.fullName()}"
+    "Invoices for #{@collection.parent.fullName()}"
 
   render: () ->
     node = $('.templates .invoices_view_example').children().clone()
     @$el.html(node)
-    @$('h1').text(@title())
+    @$('h2').text(@title())
     @
 

@@ -1,0 +1,18 @@
+
+
+= simple_form_for invitation, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
+
+  = f.input :email, :input_html => {}.merge(invitation.persisted? ? {} : { :id => nil })
+
+  = f.input :status, :input_html => {:disabled => true}.merge(invitation.persisted? ? {} : { :id => nil })
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.save.btn.btn-primary
+          Save
+
+      .btn-group.pull-right
+        %a.destroy.btn.btn-danger{ :data => { :confirm => t('delete_confirm') } }
+          Delete
