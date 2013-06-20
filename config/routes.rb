@@ -28,6 +28,7 @@ MikedllCrm::Application.routes.draw do
       put :unarchive
       resources :notes
       resources :invitations
+      resources :users, :only => [:index, :show]
       resources :invoices do
         member do
           put :mark_pending

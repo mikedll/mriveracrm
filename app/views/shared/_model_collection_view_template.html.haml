@@ -6,7 +6,7 @@
     .btn-group
       %button.back.btn
         Back
-    = render :partial => 'shared/app_top'
+    = render :partial => 'shared/app_top', :locals => { :disable_create => defined?(disable_create) }
 
   .row-fluid
     .span3

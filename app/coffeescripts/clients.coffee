@@ -29,6 +29,7 @@ class ClientView extends CrmModelView
       'click a.invoices': 'showInvoices'
       'click a.notes': 'showNotes'
       'click a.invitations': 'showInvitations'
+      'click a.users': 'showUsers'
       'click a.expand_address': 'toggleAddress'
     )
 
@@ -46,6 +47,9 @@ class ClientView extends CrmModelView
 
   showInvitations: () ->
     @showNestedCollectionApp('invitations', Invitations, InvitationAppView)
+
+  showUsers: () ->
+    @showNestedCollectionApp('users', Users, UserAppView)
 
   render: () ->
     node = $('.client_view_example form').clone()

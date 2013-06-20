@@ -5,6 +5,7 @@
   = javascript_include_tag 'generated/invoices'
   = javascript_include_tag 'generated/notes'
   = javascript_include_tag 'generated/invitations'
+  = javascript_include_tag 'generated/users'
   = render 'bootstrap'
 
 
@@ -32,9 +33,10 @@
           = image_tag 'loading.gif'
 
 .templates.hide
-  - [Client, Invoice, Note, Invitation].each do |klass|
+  - [Client, Invoice, Note, Invitation, User].each do |klass|
     %div{ :class => "#{klass.to_s.underscore}_view_example"}
       = render klass.new
   = render :partial => 'shared/model_collection_view_template', :locals => { :model_name => 'invoice'}
   = render :partial => 'shared/model_collection_view_template', :locals => { :model_name => 'note'}
   = render :partial => 'shared/model_collection_view_template', :locals => { :model_name => 'invitation'}
+  = render :partial => 'shared/model_collection_view_template', :locals => { :model_name => 'user', :disable_create => true}
