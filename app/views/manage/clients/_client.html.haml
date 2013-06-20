@@ -31,11 +31,31 @@
 
   = f.input :phone, :input_html => client.persisted? ? {} : { :id => nil }
 
-  = f.input :phone_2, :input_html => client.persisted? ? {} : { :id => nil }
-
   = f.input :last_contact_at, :as => :string, :input_html => {:class => 'datetimepicker'}.merge(client.persisted? ? {} : { :id => nil })
 
   = f.input :next_contact_at, :as => :string, :input_html => {:class => 'datetimepicker'}.merge(client.persisted? ? {} : { :id => nil })
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.btn.expand_address{ :data => { :toggle => "button" }}
+          Address
+          %i.icon-chevron-down
+
+  .address_info.hide
+
+    = f.input :phone_2, :input_html => client.persisted? ? {} : { :id => nil }
+
+    = f.input :address_line_1, :input_html => client.persisted? ? {} : { :id => nil }
+
+    = f.input :address_line_2, :input_html => client.persisted? ? {} : { :id => nil }
+
+    = f.input :city, :input_html => client.persisted? ? {} : { :id => nil }
+
+    = f.input :state, :input_html => client.persisted? ? {} : { :id => nil }
+
+    = f.input :zip, :input_html => client.persisted? ? {} : { :id => nil }
 
   .control-group
     .control-label

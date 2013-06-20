@@ -107,7 +107,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
 
   def _create_remote
-    customer = Stripe::Customer.create(:description => client.id, :email => client.email)
+    customer = Stripe::Customer.create(:description => client.payment_profile_description, :email => client.email)
     self.vendor_id = customer.id
     _cache_customer(customer)
     save!

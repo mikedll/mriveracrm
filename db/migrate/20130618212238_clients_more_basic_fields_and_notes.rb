@@ -14,10 +14,20 @@ class ClientsMoreBasicFieldsAndNotes < ActiveRecord::Migration
     add_column :clients, :phone, :string, :null => false, :default => ""
     add_column :clients, :phone_2, :string, :null => false, :default => ""
     add_column :clients, :archived, :boolean, :null => false, :default => false
-    add_column :clients, :company, :string
+    add_column :clients, :company, :string, :null => false, :default => ""
+    add_column :clients, :address_line_1, :string, :null => false, :default => ""
+    add_column :clients, :address_line_2, :string, :null => false, :default => ""
+    add_column :clients, :city, :string, :null => false, :default => ""
+    add_column :clients, :state, :string, :null => false, :default => ""
+    add_column :clients, :zip, :string, :null => false, :default => ""
   end
 
   def self.down
+    remove_column :clients, :zip
+    remove_column :clients, :state
+    remove_column :clients, :city
+    remove_column :clients, :address_line_2
+    remove_column :clients, :address_line_1
     remove_column :clients, :company
     remove_column :clients, :archived
     remove_column :clients, :phone_2

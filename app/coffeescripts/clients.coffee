@@ -7,7 +7,7 @@ class Client extends Backbone.Model
     "#{@get('first_name')} #{@get('last_name')}"
 
   validate: (attrs, options) ->
-    if (!EmailRegex.test(attrs.email))
+    if (attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
       return {email: "is invalid"}
     return
 
@@ -29,7 +29,14 @@ class ClientView extends CrmModelView
       'click a.invoices': 'showInvoices'
       'click a.notes': 'showNotes'
       'click a.invitations': 'showInvitations'
+      'click a.expand_address': 'toggleAddress'
     )
+
+  toggleAddress: (e) ->
+    if $(e.target).hasClass('active')
+      @$('.address_info').hide()
+    else
+      @$('.address_info').show()
 
   showInvoices: () ->
     @showNestedCollectionApp('invoices', Invoices, InvoiceAppView)

@@ -66,7 +66,12 @@ ActiveRecord::Schema.define(:version => 20130618212238) do
     t.string   "phone",           :default => "",    :null => false
     t.string   "phone_2",         :default => "",    :null => false
     t.boolean  "archived",        :default => false, :null => false
-    t.string   "company"
+    t.string   "company",         :default => "",    :null => false
+    t.string   "address_line_1",  :default => "",    :null => false
+    t.string   "address_line_2",  :default => "",    :null => false
+    t.string   "city",            :default => "",    :null => false
+    t.string   "state",           :default => "",    :null => false
+    t.string   "zip",             :default => "",    :null => false
   end
 
   create_table "credentials", :force => true do |t|

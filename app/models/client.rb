@@ -8,12 +8,15 @@ class Client < ActiveRecord::Base
   has_one :payment_gateway_profile
 
 
-  attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone2, :archived, :updated_at
+  attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
 
   validates :business_id, :presence => true
-  validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }
+  validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }, :if => Proc.new { |c| !c.email.blank? }
+  validates :zip, :format => { :with => Regexes::ZIP }, :if => Proc.new { |c| !c.zip.blank? }
 
   validate :_static_business
+
+  before_validation :_strip_fields
 
   after_create :_require_payment_gateway_profile
 
@@ -70,5 +73,25 @@ class Client < ActiveRecord::Base
     raise "Clients cannot be destroyed."
   end
 
+  def payment_profile_description
+    if !company.blank?
+      company
+    elsif !display_name.blank?
+      display_name
+    else
+      id
+    end
+  end
+
+  def _strip_fields
+    self.zip.strip!
+    self.address_line_1.strip!
+    self.address_line_2.strip!
+    self.phone.strip!
+    self.phone_2.strip!
+    self.state.strip!
+    self.city.strip!
+    self.website_url.strip!
+  end
 
 end
