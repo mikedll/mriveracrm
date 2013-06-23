@@ -19,6 +19,10 @@
         %a.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
           Mark Pending
 
+      .btn-group
+        %a.put_action.btn{ :data => {:action => 'charge', :attribute_enabler => 'status', :enabled_when => 'pending', :confirm => "Has the client approved this in writing?"}}
+          Charge
+
       .btn-group.pull-right
         %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
           Delete

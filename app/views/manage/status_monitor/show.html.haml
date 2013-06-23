@@ -1,0 +1,39 @@
+
+- content_for :head do
+  = javascript_include_tag 'generated/apps'
+  = javascript_include_tag "generated/status_monitor"
+
+.container-fluid.gui-container  
+  .app-gui.status-monitor-gui.single-model
+    .section-title
+      Status Monitor
+
+    .row-fluid
+
+      .span12
+        .errors.alert.alert-error.hide
+        .models-show-container
+
+
+      .clear
+
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'
+
+.templates.hide
+  .status_monitor_view_example
+
+    = simple_form_for :status, :remote => true, :html => { :class => 'form-horizontal' } do |f|
+
+      .control-group.read-only-field{ :data => { :name => 'status' } }
+        .control-label
+          Status Result:
+        .controls
+
+      .control-group
+        .controls
+          .btn-group
+            %a.btn.check-status
+              Check
+
