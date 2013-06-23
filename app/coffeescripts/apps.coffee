@@ -238,6 +238,19 @@ class CrmModelView extends BaseView
           v = @parseDate(attribute_key[1])
         el$.val(v)
     )
+
+    _.each(@$('.read-only-field'), (el) =>
+      el$ = $(el)
+      attribute_key = el$.data('name')
+      if (attribute_key? && @model.get(attribute_key)?)
+        v = @model.get(attribute_key)
+        if el$.hasClass('datetimepicker')
+          v = @parseDatetime(attribute_key)
+        else if el$.hasClass('hasDatepicker')
+          v = @parseDate(attribute_key)
+        el$.find('.controls').text(v)
+    )
+
     _.each( @$('.put_action, .destroy'), (el) =>
       el$ = $(el)
       enablerValue = @model.get(el$.data('attribute_enabler'))
@@ -294,6 +307,13 @@ class CrmModelView extends BaseView
     )
     @copyModelToForm()
     @
+
+class SingleModelAppView extends WithChildrenView
+  focusTopModelView: () ->
+    @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
+
+  rebindGlobalHotKeys: (container) ->
+
 
 #
 # Override modelName, spawnListItemType

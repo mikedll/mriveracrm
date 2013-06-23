@@ -23,6 +23,9 @@ MikedllCrm::Application.routes.draw do
   end
 
   namespace 'manage' do
+
+    resource :status_monitor, :controller => :status_monitor,  :only => [:show]
+
     resources :clients do
       put :archive
       put :unarchive
@@ -32,6 +35,7 @@ MikedllCrm::Application.routes.draw do
       resources :invoices do
         member do
           put :mark_pending
+          put :charge
         end
       end
     end
