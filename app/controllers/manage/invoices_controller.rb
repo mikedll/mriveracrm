@@ -38,6 +38,15 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
+  def charge
+    load_object
+    if current_object.charge!
+      response_for :update
+    else
+      response_for :update_fails
+    end
+  end
+
   def object_parameters
     params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
