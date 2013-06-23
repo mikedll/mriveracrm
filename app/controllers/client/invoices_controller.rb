@@ -12,7 +12,7 @@ class Client::InvoicesController < Client::BaseController
       format.js { render :json => current_object.public }
     end
 
-    response_for(:update_fails, :destroy_fails) do |format|
+    response_for(:update_fails) do |format|
       format.js { render :status => :unprocessable_entity, :json => { :object => current_object.public, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
   end
