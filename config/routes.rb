@@ -11,8 +11,6 @@ MikedllCrm::Application.routes.draw do
     get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
   end
 
-  get "today", :to => 'today#show', :as => :todays
-
   resource :home, :controller => "home", :path => "", :only => [] do
     get :contact
     get :projects
