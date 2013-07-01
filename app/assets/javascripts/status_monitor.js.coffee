@@ -1,12 +1,12 @@
 
-class StatusMonitor extends Backbone.Model
+class window.StatusMonitor extends Backbone.Model
   defaults:
     status: ''
   initialize: () ->
     Backbone.Model.prototype.initialize.apply(this, arguments)
     @url = '/manage/status_monitor'
 
-class StatusMonitorView extends CrmModelView
+class window.StatusMonitorView extends CrmModelView
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
     @modelName = 'status_monitor'

@@ -1,14 +1,14 @@
 
-class Invoice extends Backbone.Model
+class window.Invoice extends Backbone.Model
 
-class Invoices extends Backbone.Collection
+class window.Invoices extends Backbone.Collection
   model: Invoice
   comparator: (invoice) ->
     invoice.get('id')
   url: () ->
     "/client/invoices"
 
-class ClientInvoiceView extends CrmModelView
+class window.ClientInvoiceView extends CrmModelView
   modelName: 'invoice'
 
   render: () ->
@@ -17,7 +17,7 @@ class ClientInvoiceView extends CrmModelView
     @renderErrors(@model.validationError) if @model.validationError?
     @
 
-class InvoiceListItemView extends ListItemView
+class window.InvoiceListItemView extends ListItemView
   modelName: 'invoice'
   spawnViewType: ClientInvoiceView
   className: 'invoice-list-item list-item'
@@ -27,7 +27,7 @@ class InvoiceListItemView extends ListItemView
     title += ' <span class="label label-important">Pending</span>' if @model.get('status') == 'pending'
     title
 
-class InvoicesAppView extends CollectionAppView
+class window.InvoicesAppView extends CollectionAppView
   modelName: 'invoice'
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui'
@@ -44,7 +44,7 @@ class InvoicesAppView extends CollectionAppView
     @$('.section-title').text(@title())
     @
 
-class PartitionedChildrenView extends WithChildrenView
+class window.PartitionedChildrenView extends WithChildrenView
   className: 'container-app app-gui'
 
   initialize: (options) ->

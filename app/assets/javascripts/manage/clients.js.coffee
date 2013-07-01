@@ -1,5 +1,5 @@
 
-class Client extends Backbone.Model
+class window.Client extends Backbone.Model
   defaults: () ->
     first_name: 'New'
     last_name: 'Client'
@@ -11,7 +11,7 @@ class Client extends Backbone.Model
       return {email: "is invalid"}
     return
 
-class Clients extends Backbone.Collection
+class window.Clients extends Backbone.Collection
   model: Client
   url: '/manage/clients'
   initialize: () ->
@@ -20,7 +20,7 @@ class Clients extends Backbone.Collection
     @comparator = (client) ->
       client.get('id')
 
-class ClientView extends CrmModelView
+class window.ClientView extends CrmModelView
   modelName: 'client'
 
   initialize: () ->
@@ -62,7 +62,7 @@ class ClientView extends CrmModelView
     @renderErrors(@model.validationError) if @model.validationError?
     @
 
-class ClientListItemView extends ListItemView
+class window.ClientListItemView extends ListItemView
   modelName: 'client'
   spawnViewType: ClientView
   className: 'client-list-item list-item'
@@ -76,7 +76,7 @@ class ClientListItemView extends ListItemView
     else
       "#{@model.get('first_name')} #{@model.get('last_name')}"
 
-class ClientAppView extends CollectionAppView
+class window.ClientAppView extends CollectionAppView
   modelName: 'client'
   spawnListItemType: ClientListItemView
   title: () ->

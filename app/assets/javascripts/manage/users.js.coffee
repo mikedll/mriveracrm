@@ -1,19 +1,19 @@
 
-class User extends Backbone.Model
+class window.User extends Backbone.Model
   fullName: () ->
     "#{@get('first_name')} #{@get('last_name')}"
 
-class Users extends BaseCollection
+class window.Users extends BaseCollection
   model: User
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
     @url = () =>
       "#{@parent.url()}/users"
 
-class UserView extends CrmModelView
+class window.UserView extends CrmModelView
   modelName: 'user'
 
-class UserListItemView extends ListItemView
+class window.UserListItemView extends ListItemView
   modelName: 'user'
   spawnViewType: UserView
   className: 'user-list-item list-item'
@@ -21,7 +21,7 @@ class UserListItemView extends ListItemView
   title: () ->
     @model.fullName()
 
-class UserAppView extends CollectionAppView
+class window.UserAppView extends CollectionAppView
   modelName: 'user'
   spawnListItemType: UserListItemView
   className: 'users-gui app-gui'

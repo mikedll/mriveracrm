@@ -1,9 +1,9 @@
 
-class Note extends Backbone.Model
+class window.Note extends Backbone.Model
   defaults: () ->
     recorded_at: Date.parse('now').toString(AppsConfig.datetimeFormat)
 
-class Notes extends BaseCollection
+class window.Notes extends BaseCollection
   model: Note
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
@@ -16,7 +16,7 @@ class Notes extends BaseCollection
       return 1 if bbval > aaval
       return 0
 
-class NoteView extends CrmModelView
+class window.NoteView extends CrmModelView
   modelName: 'note'
 
   render: () ->
@@ -28,7 +28,7 @@ class NoteView extends CrmModelView
     @copyModelToForm()
     @
 
-class NoteListItemView extends ListItemView
+class window.NoteListItemView extends ListItemView
   modelName: 'note'
   spawnViewType: NoteView
   className: 'note-list-item list-item'
@@ -36,7 +36,7 @@ class NoteListItemView extends ListItemView
   title: () ->
     @parseDatetime('recorded_at')
 
-class NoteAppView extends CollectionAppView
+class window.NoteAppView extends CollectionAppView
   modelName: 'note'
   spawnListItemType: NoteListItemView
   className: 'notes-gui app-gui'

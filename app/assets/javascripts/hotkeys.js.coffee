@@ -3,7 +3,7 @@
 #
 # Binding to the document's keyup is no handled here.
 #
-class Hotkeys
+class window.Hotkeys
 
   constructor: () ->
     @hotKeyRegistry = {}

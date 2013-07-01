@@ -1,5 +1,5 @@
 
-class Main
+class window.Main
 
   constructor: () ->
     @current = 0

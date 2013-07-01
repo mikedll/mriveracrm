@@ -1,20 +1,20 @@
 
-class Invoice extends Backbone.Model
+class window.Invoice extends Backbone.Model
   defaults: () ->
     total: 10.00
     description: 'Latest invoice'
 
-class Invoices extends BaseCollection
+class window.Invoices extends BaseCollection
   model: Invoice
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
     @url = () =>
       "#{@parent.url()}/invoices"
 
-class InvoiceView extends CrmModelView
+class window.InvoiceView extends CrmModelView
   modelName: 'invoice'
 
-class InvoiceListItemView extends ListItemView
+class window.InvoiceListItemView extends ListItemView
   modelName: 'invoice'
   spawnViewType: InvoiceView
   className: 'invoice-list-item list-item'
@@ -22,7 +22,7 @@ class InvoiceListItemView extends ListItemView
   title: () ->
     @model.get('title')
 
-class InvoiceAppView extends CollectionAppView
+class window.InvoiceAppView extends CollectionAppView
   modelName: 'invoice'
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui app-gui'

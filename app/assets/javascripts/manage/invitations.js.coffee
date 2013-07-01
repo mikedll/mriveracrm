@@ -1,18 +1,18 @@
 
-class Invitation extends Backbone.Model
+class window.Invitation extends Backbone.Model
   defaults: () ->
 
-class Invitations extends BaseCollection
+class window.Invitations extends BaseCollection
   model: Invitation
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
     @url = () =>
       "#{@parent.url()}/invitations"
 
-class InvitationView extends CrmModelView
+class window.InvitationView extends CrmModelView
   modelName: 'invitation'
 
-class InvitationListItemView extends ListItemView
+class window.InvitationListItemView extends ListItemView
   modelName: 'invitation'
   spawnViewType: InvitationView
   className: 'invitation-list-item list-item'
@@ -20,7 +20,7 @@ class InvitationListItemView extends ListItemView
   title: () ->
     @model.get('email')
 
-class InvitationAppView extends CollectionAppView
+class window.InvitationAppView extends CollectionAppView
   modelName: 'invitation'
   spawnListItemType: InvitationListItemView
   className: 'invitations-gui app-gui'

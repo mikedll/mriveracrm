@@ -4,7 +4,7 @@
 #
 # Branched from original hot keys which was causing too much trouble with window.location=
 #
-class EventHotKeys
+class window.EventHotKeys
 
   constructor: () ->
     @hotKeyRegistry = {}

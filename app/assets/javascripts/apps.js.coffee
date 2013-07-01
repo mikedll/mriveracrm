@@ -1,12 +1,12 @@
 
 
-AppsConfig =
+window.AppsConfig =
   datetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
   dateFormat: 'ddd yyyy-MM-dd'
   datepickerDateformat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
 
-class ComparatorBuilder
+class window.ComparatorBuilder
   build: (attr, dir, sortType) ->
     comparator = (a,b) ->
       aa = a
@@ -43,7 +43,7 @@ class ComparatorBuilder
 
     comparator
 
-class BaseView extends Backbone.View
+class window.BaseView extends Backbone.View
   initialize: (options) ->
     @events = {}
     @parent = options.parent
@@ -67,7 +67,7 @@ class BaseView extends Backbone.View
     date = Date.parse(v)
     date.toString(AppsConfig.datetimeFormat)
 
-class BaseCollection extends Backbone.Collection
+class window.BaseCollection extends Backbone.Collection
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
     # underscore.string does not support pluralize
@@ -78,7 +78,7 @@ class BaseCollection extends Backbone.Collection
       model.get('id')
 
 
-class WithChildrenView extends BaseView
+class window.WithChildrenView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
     $.extend(@events, 'click a,button': 'checkDisabled')
@@ -110,7 +110,7 @@ class WithChildrenView extends BaseView
 #
 # Implement title.
 #
-class ListItemView extends BaseView
+class window.ListItemView extends BaseView
   modelName: 'some_type'
   tagName: 'li'
   className: 'list-item'
@@ -191,7 +191,7 @@ class ListItemView extends BaseView
 #
 # implement render
 #
-class CrmModelView extends BaseView
+class window.CrmModelView extends BaseView
   className: 'model-view'
 
   id: () ->
@@ -346,7 +346,7 @@ class CrmModelView extends BaseView
     @copyModelToForm()
     @
 
-class SingleModelAppView extends WithChildrenView
+class window.SingleModelAppView extends WithChildrenView
   focusTopModelView: () ->
     @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
@@ -358,7 +358,7 @@ class SingleModelAppView extends WithChildrenView
 #
 # Optional override render.
 #
-class CollectionAppView extends WithChildrenView
+class window.CollectionAppView extends WithChildrenView
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
     @events =
@@ -485,7 +485,7 @@ class CollectionAppView extends WithChildrenView
 #
 # Stack of Views
 #
-class StackedChildrenView extends WithChildrenView
+class window.StackedChildrenView extends WithChildrenView
   delay: 300
 
   initialize: (options) ->
