@@ -14,7 +14,7 @@
 
   %body
     = render :partial => "shared/gain_layout"
-    %div{ 'data-asset-prefix' => asset_prefix, 'id' => 'header'}
+    %div{ 'data-asset-prefix' => absolute_asset_prefix, 'id' => 'header'}
 
     = yield
 
