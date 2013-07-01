@@ -67,8 +67,14 @@ class ClientListItemView extends ListItemView
   spawnViewType: ClientView
   className: 'client-list-item list-item'
 
-  title: () ->
+  display_name: () ->
     "#{@model.get('first_name')} #{@model.get('last_name')}"
+
+  title: () ->
+    if @model.get('company')? && @model.get('company').trim() != ""
+      @model.get('company')
+    else
+      "#{@model.get('first_name')} #{@model.get('last_name')}"
 
 class ClientAppView extends CollectionAppView
   modelName: 'client'
