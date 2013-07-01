@@ -1,7 +1,7 @@
 class Manage::InvoicesController < Manage::BaseController
 
   make_resourceful do
-    actions :index, :show, :update, :create
+    actions :index, :show, :update, :create, :destroy
     belongs_to :client
     response_for :new do
       render :layout => nil
