@@ -39,7 +39,6 @@ group :development do
   gem "barista"
   gem 'taps', '> 0.3.23'
   gem 'heroku_san'
-  gem "heroku"
   gem 'capistrano-unicorn', :require => false
   gem "capistrano"
   gem "rvm-capistrano"
