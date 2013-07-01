@@ -2,6 +2,6 @@
 
 // 
 //= require apps
-//= require_tree client
+//= require_tree ./client
 //
 

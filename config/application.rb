@@ -11,18 +11,15 @@ require Bundler.root.join('config', 'version')
 module MikedllCrm
   class Application < Rails::Application
 
-    unless Rails.env.development?
-      config.action_controller.asset_path = proc { |asset_path| 
-        "/version_#{MikedllCrm::VERSION}#{asset_path}" 
-      }
-    end
+    config.autoload_paths += %W( #{Rails.root}/app/observers )
 
     config.time_zone = "Pacific Time (US & Canada)"
 
     config.filter_parameters += [:password, :credit_card, :card_number]
 
-    config.assets.enabled = false
+    config.assets.enabled = true
     config.assets.precompile += ['application.js', 'application.css', 'home.css', 'home.js', 'client.js', 'manage.js']
+
   end
 
   class Credentials

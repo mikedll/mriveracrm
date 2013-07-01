@@ -1,5 +1,5 @@
 
 //
 //= require apps
-//= require_tree manage
+//= require_tree ./manage
 //
