@@ -1,9 +1,47 @@
 
+
 AppsConfig =
   datetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
   dateFormat: 'ddd yyyy-MM-dd'
   datepickerDateformat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
+
+class ComparatorBuilder
+  build: (attr, dir, sortType) ->
+    comparator = (a,b) ->
+      aa = a
+      bb = b
+      aaval = aa.get(attr)
+      bbval = bb.get(attr)
+
+      aNull = !aaval? || (typeof(aaval) == "string" && aaval.trim() == "")
+      bNull = !bbval? || (typeof(bbval) == "string" && bbval.trim() == "")
+      if aNull || bNull
+        # the direction determines whether 1 means "high" or "low"
+        # if ascending, then 1 means "high". if desc, -1 "high".
+        # null values must always be "higher" than non-null values.
+        return (if dir == 'asc' then -1 else 1) if !aNull and bNull # not null a is "greater" than null b regardless of asc or desc
+        return (if dir == 'asc' then 1 else -1) if aNull and !bNull # contrapositive of above
+        return 0 # both null, equivalent. will still get pushed down in a sort.
+
+      if dir == 'desc'
+        t = aaval
+        aaval = bbval
+        bbval = t
+
+      # Handles types other than string
+      if sortType == 'date'
+        aaval = Date.parse(aaval)
+        bbval = Date.parse(bbval)
+      else if sortType == 'int'
+        aaval = parseInt(aaval)
+        bbval = parseInt(bbval)
+
+      return 1  if aaval > bbval
+      return -1 if aaval < bbval
+      0
+
+    comparator
 
 class BaseView extends Backbone.View
   initialize: (options) ->
@@ -360,27 +398,8 @@ class CollectionAppView extends WithChildrenView
 
   sortsChanged: (e) ->
     target = $(e.target)
-    attr     = target.data('sort_attribute')
-    dir      = target.data('sort_direction')
-    sorttype = target.data('sort_type')
-    @collection.comparator = (a,b) ->
-      aa = a
-      bb = b
-      if dir == 'desc'
-        aa = b
-        bb = a
-
-      aaval = aa.get(attr)
-      aaval = parseInt(aaval) if sorttype == 'int'
-      aaval = Date.parse(aaval) if sorttype == 'date'
-
-      bbval = bb.get(attr)
-      bbval = parseInt(bbval) if sorttype == 'int'
-      bbval = Date.parse(bbval) if sorttype == 'date'
-
-      return -1 if aaval < bbval
-      return 1  if aaval > bbval
-      0
+    @collection.comparator = (new ComparatorBuilder())
+      .build(target.data('sort_attribute'), target.data('sort_direction'), target.data('sort_type'))
 
     @collection.sort()
     @collection.each( (model) -> model.trigger('resorted') )
