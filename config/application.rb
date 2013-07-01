@@ -21,6 +21,8 @@ module MikedllCrm
 
     config.filter_parameters += [:password, :credit_card, :card_number]
 
+    config.assets.enabled = false
+    config.assets.precompile += ['application.js', 'application.css', 'home.css', 'home.js', 'client.js', 'manage.js']
   end
 
   class Credentials

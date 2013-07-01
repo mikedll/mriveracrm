@@ -14,7 +14,11 @@ MikedllCrm::Application.configure do
 
   config.action_controller.asset_host = 'd3dvas2xyyj1e3.cloudfront.net'
 
-  Sass::Plugin.options[:never_update] = true
+  config.assets.digest = true # why do I have to set this? I shouldn't have to.
+  config.assets.compile = false
+  config.assets.js_compressor = :yui
+  config.assets.css_compressor = :yui
+  config.assets.compress = true
 
   HOST = 'www.mikedll.com'
 

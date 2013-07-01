@@ -2,11 +2,12 @@ source 'http://rubygems.org'
 
 # ruby '1.9.2'  # need to wait for cedar stack on heroku
 
-gem 'rails', '3.0.3'
+gem 'rails', '~> 3.2.0'
 
 # vital
 gem "rake", "~> 0.8.7"
-gem "pg"
+gem "pg", '~> 0.11'
+gem 'activerecord-postgresql-adapter'
 gem "haml"
 gem "haml-rails"
 gem "aws-s3"
@@ -30,13 +31,15 @@ gem 'activeadmin'
 
 
 # probably leaving
-gem 'sass'
 gem 'compass'
 gem "dynamic_form"
 
+
 group :development do
+  gem 'sass-rails', '~> 3.2.3'
+  gem 'coffee-rails', '~> 3.2.1'
+  gem 'uglifier', '>= 1.0.3'
   gem "right_aws"
-  gem "barista"
   gem 'taps', '> 0.3.23'
   gem 'heroku_san'
   gem 'capistrano-unicorn', :require => false
