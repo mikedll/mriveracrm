@@ -6,7 +6,16 @@ class Invoice < ActiveRecord::Base
 
   include ActionView::Helpers::TranslationHelper
 
+  #
+  # Open
+  # Pending
+  # { Failed Payment,    Cancelled }
+  # { Paid, Closed }
   state_machine :status, :initial => :open do
+
+    event :cancel do
+      transition [:pending] => [:cancelled]
+    end
 
     event :mark_pending do
       transition [:open] => [:pending]
@@ -24,6 +33,7 @@ class Invoice < ActiveRecord::Base
       transition [:pending, :failed_payment] => [:closed]
     end
 
+    # Delete, edit.
     state :open do
       def can_delete?
         true
@@ -44,14 +54,28 @@ class Invoice < ActiveRecord::Base
       end
     end
 
+    # Pay
     state :pending, :failed_payment do
       def can_pay?
         true
       end
     end
 
-    state :open, :paid, :closed do
+    state all - [:pending, :failed_payment] do
       def can_pay?
+        false
+      end
+    end
+
+    # Cancel
+    state :pending do
+      def can_cancel?
+        true
+      end
+    end
+
+    state all - [:pending] do
+      def can_cancel?
         false
       end
     end
@@ -69,7 +93,9 @@ class Invoice < ActiveRecord::Base
 
   before_destroy :_verify_destroyable
 
-  scope :pending_or_later, where('invoices.status != ?', :open)
+  scope :viewable_to_client, lambda {
+    where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
+  }
 
   def charge!
     if !can_pay?

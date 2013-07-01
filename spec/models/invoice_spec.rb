@@ -25,6 +25,44 @@ describe Invoice do
     end
   end
 
+  context "scopes" do
+    it "should not allow cancelled or open invoices to be shown to user." do
+      invoice = FactoryGirl.create(:invoice, :status => :open)
+      Invoice.count.should == 1
+      Invoice.viewable_to_client.count.should == 0
+
+      invoice = FactoryGirl.create(:invoice, :status => :cancelled)
+      Invoice.count.should == 2
+      Invoice.viewable_to_client.count.should == 0
+
+      invoice = FactoryGirl.create(:invoice, :status => :pending)
+      Invoice.viewable_to_client.count.should == 1
+
+      invoice.cancel!.should be_true
+      Invoice.count.should == 3
+      Invoice.viewable_to_client.count.should == 0
+
+
+      FactoryGirl.create(:invoice, :status => :pending)
+      FactoryGirl.create(:invoice, :status => :failed_payment)
+      FactoryGirl.create(:invoice, :status => :paid)
+      FactoryGirl.create(:invoice, :status => :closed)
+      Invoice.count.should == 7
+      Invoice.viewable_to_client.count.should == 4
+    end
+  end
+
+  context "cancel" do
+    it "should only work for pending invoices" do
+      invoice = FactoryGirl.create(:invoice, :status => :pending)
+      invoice.cancel!.should be_true
+      invoice.cancelled?.should be_true
+      
+      invoice = FactoryGirl.create(:invoice, :status => :open)
+      expect { invoice.cancel! }.to raise_error(StateMachine::InvalidTransition)
+    end
+  end
+
   context "destroy" do
     before(:each) { @invoice = FactoryGirl.create(:invoice) }
 

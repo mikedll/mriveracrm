@@ -38,6 +38,15 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
+  def cancel
+    load_object
+    if current_object.cancel!
+      response_for :update
+    else
+      response_for :update_fails
+    end
+  end
+
   def charge
     load_object
     if current_object.charge!
