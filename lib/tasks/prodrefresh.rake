@@ -18,7 +18,7 @@ namespace :prodrefresh do
     end
 
     StripePaymentGatewayProfile.find_each do |s|
-      s.vendor_id = "xxx"
+      s.vendor_id = "cus_23BHCAXiQa9sKD"
       s.save!
     end
   end
