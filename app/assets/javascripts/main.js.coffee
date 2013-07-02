@@ -9,7 +9,15 @@ class window.Main
 
   onDocLoad: () ->
     @current = Math.round(Math.random() * (@choices.length - 1))
-    $('#header').css('background', "top center url(/images/#{@choices[ @current ]}) no-repeat")
+
+    prefix = $('#header').data('asset-prefix')
+
+    if prefix? && prefix != ""
+      prefix = "http://#{prefix}"
+    else
+      prefix = "" # this may be redundant depending on what we got
+
+    $('#header').css('background', "top center url(#{prefix}/assets/#{@choices[ @current ]}) no-repeat")
 
     rotateImages = () =>
       $('#header').fadeOut(@fadeOut, () =>
@@ -18,14 +26,7 @@ class window.Main
           @next = Math.round(Math.random() * (@choices.length - 1))
         @current = @next
 
-        prefix = $('#header').data('asset-prefix')
-
-        if prefix? && prefix != ""
-          prefix = "http://#{prefix}"
-        else
-          prefix = "" # this may be redundant depending on what we got
-
-        $('#header').css('background', "top center url(#{prefix}/images/#{@choices[ @current ]}) no-repeat")
+        $('#header').css('background', "top center url(#{prefix}/assets/#{@choices[ @current ]}) no-repeat")
         $('#header').fadeIn(@fadeOut, () =>
           setTimeout(rotateImages, @interval)
         )

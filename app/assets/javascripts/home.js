@@ -1,5 +1,4 @@
 
 // 
 //= require hotkeys
-//= require main
 //
