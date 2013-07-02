@@ -14,3 +14,7 @@ public/javascripts/generated/
 public/stylesheets/active_admin.css
 
 dump.rdb
+
+
+public/assets/*
+

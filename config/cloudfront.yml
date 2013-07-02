@@ -6,4 +6,4 @@ test:
   bucket: none
 
 production:
-  bucket: www.mikedll.com
+  bucket: mikedllcrmassets

@@ -15,6 +15,8 @@ MikedllCrm::Application.configure do
   config.consider_all_requests_local       = true
   config.action_controller.perform_caching             = false
 
+  config.active_record.mass_assignment_sanitizer = :strict
+
   config.action_dispatch.show_exceptions = false
 
   # Disable request forgery protection in test environment
@@ -24,6 +26,8 @@ MikedllCrm::Application.configure do
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
   config.action_mailer.delivery_method = :test
+
+  config.assets.enabled = false
 
   config.active_support.deprecation = :stderr
 
