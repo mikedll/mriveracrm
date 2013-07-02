@@ -24,10 +24,6 @@ gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 
-# for cap deploys
-# unsure
-gem 'activeadmin'
-
 group :development do
   gem 'yui-compressor'
   gem 'sass-rails', '~> 3.2.3'
