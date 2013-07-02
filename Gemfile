@@ -31,7 +31,6 @@ group :development do
   gem 'uglifier', '>= 1.0.3'
   gem "right_aws"
   gem 'taps', '> 0.3.23'
-  gem 'heroku_san'
   gem 'capistrano-unicorn', :require => false
   gem "capistrano"
   gem "rvm-capistrano"

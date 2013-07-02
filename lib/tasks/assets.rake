@@ -1,23 +1,22 @@
 
 namespace :assets do
 
+
   desc "Deploy assets to prod - uses Rails.env or the FIRST selected heroku app"
   task :deploy => [:environment, 'assets:precompile'] do
 
     require 'aws/s3'
 
-    each_heroku_app do |stage|
-      environment = stage.name
-      s3_config = YAML.load( File.read( Rails.root.join("config", "cloudfront.yml") ) )[environment]
-      AWS::S3::Base.establish_connection!(
-                                          :access_key_id     => ENV['AMAZON_ACCESS_KEY_ID'],
-                                          :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
-                                          )
+    environment = @environment_config || Rails.env
+    s3_config = YAML.load( File.read( Rails.root.join("config", "cloudfront.yml") ) )[environment.to_s]
+    AWS::S3::Base.establish_connection!(
+                                        :access_key_id     => ENV['AMAZON_ACCESS_KEY_ID'],
+                                        :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
+                                        )
 
-      puts "Connected to S3..."      
-      bucket = AWS::S3::Bucket.find s3_config['bucket']
-      s3_upload_directory Rails.root.join("public"), bucket
-    end
+    puts "Connected to S3..."      
+    bucket = AWS::S3::Bucket.find s3_config['bucket']
+    s3_upload_directory Rails.root.join("public"), bucket
 
     Rake::Task['assets:clean'].execute
   end
