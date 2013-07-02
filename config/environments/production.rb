@@ -12,7 +12,7 @@ MikedllCrm::Application.configure do
 
   config.action_mailer.default_url_options = { :host => 'www.mikedll.com:80' }
 
-  config.action_controller.asset_host = 'd3dvas2xyyj1e3.cloudfront.net'
+  config.action_controller.asset_host = 'd1dmxqf6tri91s.cloudfront.net'
 
   config.assets.digest = true # why do I have to set this? I shouldn't have to.
   config.assets.compile = false
