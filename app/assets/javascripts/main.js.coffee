@@ -13,7 +13,7 @@ class window.Main
     prefix = $('#header').data('asset-prefix')
 
     if prefix? && prefix != ""
-      prefix = "http://#{prefix}"
+      prefix = "https://#{prefix}"
     else
       prefix = "" # this may be redundant depending on what we got
 
