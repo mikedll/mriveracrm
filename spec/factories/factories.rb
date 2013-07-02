@@ -103,6 +103,7 @@ FactoryGirl.define do
     client { FactoryGirl.create(:stubbed_client) }
     date { Time.now }
     total { 2500.00 }
+    status { "open" }
 
     factory :unstubbed_client_invoice do
       client { FactoryGirl.create(:client) }

@@ -1,7 +1,7 @@
 class Manage::InvoicesController < Manage::BaseController
 
   make_resourceful do
-    actions :index, :show, :update, :create
+    actions :index, :show, :update, :create, :destroy
     belongs_to :client
     response_for :new do
       render :layout => nil
@@ -33,6 +33,15 @@ class Manage::InvoicesController < Manage::BaseController
       else
         response_for :update_fails
       end
+    else
+      response_for :update_fails
+    end
+  end
+
+  def cancel
+    load_object
+    if current_object.cancel!
+      response_for :update
     else
       response_for :update_fails
     end

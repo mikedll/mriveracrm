@@ -23,6 +23,10 @@
         %a.put_action.btn{ :data => {:action => 'charge', :attribute_enabler => 'status', :enabled_when => 'pending', :confirm => "Has the client approved this in writing?"}}
           Charge
 
+      .btn-group
+        %a.put_action.btn{ :data => {:action => 'cancel', :attribute_enabler => 'status', :enabled_when => 'pending', :confirm => "This will cancel this invoice. It will be hidden from the client."}}
+          Cancel
+
       .btn-group.pull-right
         %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
           Delete
