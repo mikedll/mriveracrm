@@ -14,5 +14,6 @@
 //= require vendor/datejs/date
 //= require vendor/timepicker/jquery-ui-sliderAccess
 //= require vendor/timepicker/jquery-ui-timepicker-addon
+//= require main
 //
 
