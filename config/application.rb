@@ -16,7 +16,7 @@ module MikedllCrm
     config.filter_parameters += [:password, :credit_card, :card_number]
 
     config.assets.enabled = true
-    config.assets.precompile += ['application.js', 'application.css', 'home.css', 'home.js', 'client.js', 'manage.js', 'status_page']
+    config.assets.precompile += ['application.js', 'application.css', 'home.css', 'home.js', 'client.js', 'manage.js', 'status_page.js', 'contact_page.js', 'gallery.js']
 
   end
 
