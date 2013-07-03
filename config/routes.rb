@@ -32,6 +32,13 @@ MikedllCrm::Application.routes.draw do
           put :mark_pending
           put :cancel
           put :charge
+          put :mark_paid
+        end
+
+        resources :transactions do
+          member do
+            put :mark_successful
+          end
         end
       end
     end

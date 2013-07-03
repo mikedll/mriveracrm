@@ -9,7 +9,7 @@ class Invitation < ActiveRecord::Base
   scope :cb, lambda { where('invitations.business_id = ?', Business.current.try(:id)) }
   scope :open, where('invitations.status = ?', :open)
 
-  before_validation { @_virtual_path = 'invitation' }
+  before_validation { @virtual_path = 'invitation' }
   before_validation :_capture_client_email
   before_validation :_capture_business
   before_validation :_no_email_conflict
@@ -62,7 +62,7 @@ class Invitation < ActiveRecord::Base
   end
 
   def _no_email_conflict
-    if self.business.users.where(:email => self.email).first
+    if self.open? && self.business.users.where(:email => self.email).first
       errors.add(:email, t('.errors.email_conflict'))
     end
   end

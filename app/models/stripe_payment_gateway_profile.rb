@@ -23,7 +23,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       return false
     end
 
-    transaction = StripeTransaction.new(:payment_gateway_profile => self)
+    transaction = StripeTransaction.new
+    transaction.payment_gateway_profile = self
     transaction.invoice = invoice
     transaction.amount = invoice.total
     transaction.begin!

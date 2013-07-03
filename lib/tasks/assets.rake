@@ -33,19 +33,25 @@ namespace :assets do
     end
 
     puts "Uploaded #{number_uploaded}, Skipped #{uploadable.length - number_uploaded}"
-
-    live_keys = uploadable.map{ |file| s3_key_for file }
-    deleted = 0
-    to_delete = bucket.objects.select { |obj| !live_keys.include? obj.key }
-    puts "Found #{to_delete.count} object(s) to delete."
-    to_delete.each do |obj|
-      obj.delete 
-      puts "Deleting #{obj.key} from S3"
-      deleted += 1
-    end
-
-    puts "Deleted #{deleted} stale objects from S3"
   end
+
+  #
+  # This has to be updated to use the manifest.yml
+  #
+  def delete_old
+    # live_keys = uploadable.map{ |file| s3_key_for file }
+    # deleted = 0
+    # to_delete = bucket.objects.select { |obj| !live_keys.include? obj.key }
+    # puts "Found #{to_delete.count} object(s) to delete."
+    # to_delete.each do |obj|
+    #   obj.delete 
+    #   puts "Deleting #{obj.key} from S3"
+    #   deleted += 1
+    # end
+
+    # puts "Deleted #{deleted} stale objects from S3"    
+  end
+
 
   def s3_key_for(file_path)
     @root_path_length ||= Rails.root.join("public").to_s.length + "/".length

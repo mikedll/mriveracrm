@@ -9,6 +9,7 @@ class ApiStubs
   end
 
   def self.stripe_create_customer(customer_profile_id = '')
+    created_at = Time.now
     YAML.load load('stripe_create_customer').result( binding )
   end
 

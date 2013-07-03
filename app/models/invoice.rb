@@ -3,6 +3,8 @@ class Invoice < ActiveRecord::Base
   belongs_to :client
 
   has_many :transactions
+  has_many :outside_transactions
+  has_many :stripe_transactions
 
   include ActionView::Helpers::TranslationHelper
 
@@ -84,12 +86,14 @@ class Invoice < ActiveRecord::Base
 
   attr_accessible :description, :total, :date, :title
 
-  validates :client, :date, :total, :presence => true
-  validates :description, :length => { :minimum => 3 }
 
-  before_validation { @_virtual_path = 'invoice' }
+  before_validation { @virtual_path = 'invoice' }
   before_validation :_defaults
   before_validation :_verify_can_edit?
+
+  validates :client, :date, :total, :presence => true
+  validates :description, :length => { :minimum => 3 }
+  validate :_can_mark_paid
 
   before_destroy :_verify_destroyable
 
@@ -148,5 +152,10 @@ class Invoice < ActiveRecord::Base
     end    
   end
 
+  def _can_mark_paid
+    if status_changed? && status == 'paid' && self.transactions.successful.empty?
+      self.errors.add(:transactions, 'must include at least one successful transaction') 
+    end
+  end
 
 end

@@ -4,7 +4,7 @@ FactoryGirl.define do
 
   factory :business do
     name "my small business"
-    domain "www.domain" + SecureRandom.base64(8) + "yup.com"
+    domain { "www.domain" + SecureRandom.base64(8) + "yup.com" }
     after(:create) do |business|
       Business.current = business
     end
@@ -64,7 +64,11 @@ FactoryGirl.define do
     last_name "Watson"
 
     factory :stubbed_client do
-      before(:create) { |profile, evaluator| PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } }
+      before(:create) { |profile, evaluator| 
+        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } 
+
+        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
+      }
     end
   end
 
@@ -115,7 +119,22 @@ FactoryGirl.define do
   end
 
   factory :transaction do
-    invoice { FactoryGirl.create(:invoice) }
+    invoice { FactoryGirl.create(:pending_invoice) }
+
+    factory :outside_transaction, :class => OutsideTransaction do
+      outside_vendor { 'Paypal' }
+      outside_id { '3434334' }
+    end
+
+    factory :authorize_net_transaction, :class => AuthorizeNetTransaction do
+    end
+
+    factory :stripe_transaction, :class => StripeTransaction do
+      factory :paid_stripe_transaction do
+        status { "successful" }
+      end
+    end
+
   end
 
 end

@@ -58,8 +58,6 @@ class ApplicationController < ActionController::Base
         else
           client_invoices_path
         end
-      elsif resource.is_a?(AdminUser)
-        beezlebub_dashboard_path
       else
         signed_in_root_path(resource)
       end
@@ -69,7 +67,7 @@ class ApplicationController < ActionController::Base
 
   def force_www
     return if Rails.env.development? # doesnt work with port 3000
-    redirect_to :host => MikedllCrm::Application::HOST if request.host != MikedllCrm::Application::HOST
+    redirect_to :host => 'www.' + request.host if request.host !~ /^www\./
   end
 
   def ssl_required?
