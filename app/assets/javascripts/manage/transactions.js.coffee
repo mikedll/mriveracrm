@@ -15,7 +15,6 @@ class window.TransactionView extends CrmModelView
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(this, arguments)
-    console.log(@model.get('type'))
     if @model.get('type') == 'OutsideTransaction'
       @$('.outside_transaction_fields').show()
     else
