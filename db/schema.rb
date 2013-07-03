@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130702094742) do
+ActiveRecord::Schema.define(:version => 20130703080138) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",       :default => "", :null => false
@@ -146,6 +146,9 @@ ActiveRecord::Schema.define(:version => 20130702094742) do
     t.integer  "authorizenet_gateway_response_reason_code"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "type",                                                                                      :null => false
+    t.string   "outside_id"
+    t.string   "outside_vendor"
   end
 
   create_table "users", :force => true do |t|

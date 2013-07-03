@@ -16,6 +16,7 @@ describe Invoice do
       @invoice.save.should be_false
       @invoice.errors.full_messages.should == [I18n.t('invoice.uneditable')]
 
+      FactoryGirl.create(:paid_stripe_transaction, :invoice => @invoice)
       @invoice.reload
       @invoice.mark_paid!
       @invoice.description = "asdfsdfasfsdfsdfasfsfds"
@@ -80,4 +81,29 @@ describe Invoice do
       @invoice.errors.full_messages.should == [I18n.t('invoice.cannot_delete')]
     end
   end
+
+  context "typical pay cycle" do
+    it "should allow basic payable transactions under normal operations" do
+      i = FactoryGirl.create(:unstubbed_client_invoice)
+      i.mark_pending!
+      i.client.payment_gateway_profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+      i.charge!.should be_true
+    end
+  end
+
+  context "mark_paid", :current => true do
+    it "should fail if invoice doesnt have a successful transaction" do
+      invoice = FactoryGirl.create(:invoice)
+      invoice.mark_pending!
+
+      invoice.mark_paid.should be_false
+
+      t = FactoryGirl.create(:outside_transaction, :invoice => invoice)
+      t.begin!
+      t.succeed!
+
+      invoice.mark_paid.should be_true
+    end
+  end
+
 end
