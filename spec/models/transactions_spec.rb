@@ -17,14 +17,14 @@ describe Transaction do
 
   context "defaults" do
     it "should use invoice total if no amount is given" do
-      i = FactoryGirl.create(:invoice)
+      i = FactoryGirl.create(:pending_invoice)
       ot = i.outside_transactions.build
       ot.save!
 
       ot.amount.should == i.total
       ot.amount.should_not == 0.0
 
-      i = FactoryGirl.create(:invoice)
+      i = FactoryGirl.create(:pending_invoice)
       ot = i.outside_transactions.build
       ot.amount = 2.33
       ot.save!

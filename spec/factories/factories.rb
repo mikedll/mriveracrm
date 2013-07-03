@@ -119,7 +119,7 @@ FactoryGirl.define do
   end
 
   factory :transaction do
-    invoice { FactoryGirl.create(:invoice) }
+    invoice { FactoryGirl.create(:pending_invoice) }
 
     factory :outside_transaction, :class => OutsideTransaction do
       outside_vendor { 'Paypal' }
@@ -130,7 +130,11 @@ FactoryGirl.define do
     end
 
     factory :stripe_transaction, :class => StripeTransaction do
+      factory :paid_stripe_transaction do
+        status { "successful" }
+      end
     end
+
   end
 
 end
