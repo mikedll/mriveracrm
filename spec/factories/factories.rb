@@ -4,7 +4,7 @@ FactoryGirl.define do
 
   factory :business do
     name "my small business"
-    domain "www.domain" + SecureRandom.base64(8) + "yup.com"
+    domain { "www.domain" + SecureRandom.base64(8) + "yup.com" }
     after(:create) do |business|
       Business.current = business
     end
