@@ -90,4 +90,19 @@ describe Invoice do
     end
   end
 
+  context "mark_paid", :current => true do
+    it "should fail if invoice doesnt have a successful transaction" do
+      invoice = FactoryGirl.create(:invoice)
+      invoice.mark_pending!
+
+      invoice.mark_paid.should be_false
+
+      t = FactoryGirl.create(:outside_transaction, :invoice => invoice)
+      t.begin!
+      t.succeed!
+
+      invoice.mark_paid.should be_true
+    end
+  end
+
 end

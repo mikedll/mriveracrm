@@ -61,14 +61,12 @@ class Manage::TransactionsController < Manage::BaseController
   end
 
   def mark_successful
-    begin
-      Transaction.transaction do
-        current_object.begin!
-        current_object.succeed!
-      end
+    before :update
+
+    if current_object.begin && current_object.succeed
       response_for :update
-    rescue
-      current_object.add_transition_errors # have to call this since exception was raised and callbacks failed
+    else
+      current_object.add_transition_errors
       response_for :update_fails
     end
   end

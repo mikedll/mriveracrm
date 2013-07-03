@@ -56,6 +56,14 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
+  def mark_paid
+    if current_object.mark_paid
+      response_for :update
+    else
+      response_for :update_fails
+    end
+  end
+
   def object_parameters
     params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
   end

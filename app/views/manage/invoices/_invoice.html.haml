@@ -28,15 +28,19 @@
           Mark Pending
 
       .btn-group
-        %a.put_action.btn{ :data => {:action => 'charge', :attribute_enabler => 'status', :enabled_when => 'pending', :confirm => "Has the client approved this in writing?"}}
-          Charge
+        %a.put_action.btn{ :data => {:action => 'mark_paid', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will mark the invoice as paid. You must have created an outside transaction to do this."}}
+          Mark Paid
 
       .btn-group
-        %a.put_action.btn{ :data => {:action => 'cancel', :attribute_enabler => 'status', :enabled_when => 'pending', :confirm => "This will cancel this invoice. It will be hidden from the client."}}
+        %a.put_action.btn{ :data => {:action => 'cancel', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will cancel this invoice. It will be hidden from the client."}}
           Cancel
 
+      .btn-group
+        %a.put_action.btn.btn-warning{ :data => {:action => 'charge', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "Has the client approved this?"}}
+          Charge
+
       .btn-group.pull-right
-        %a.destroy.btn.btn-danger{ :data => { :confirm => "Delete this?" }}
+        %a.destroy.btn.btn-danger{ :data => { :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Delete this?" }}
           Delete
   
 

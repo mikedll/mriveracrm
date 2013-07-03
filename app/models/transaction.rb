@@ -40,6 +40,8 @@ class Transaction < ActiveRecord::Base
     end
   end
 
+  scope :successful, where(:status => :successful)
+
   def editable_type?
     (self.is_a?(OutsideTransaction))
   end
