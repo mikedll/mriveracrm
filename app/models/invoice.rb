@@ -87,7 +87,7 @@ class Invoice < ActiveRecord::Base
   validates :client, :date, :total, :presence => true
   validates :description, :length => { :minimum => 3 }
 
-  before_validation { @_virtual_path = 'invoice' }
+  before_validation { @virtual_path = 'invoice' }
   before_validation :_defaults
   before_validation :_verify_can_edit?
 

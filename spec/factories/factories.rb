@@ -64,7 +64,11 @@ FactoryGirl.define do
     last_name "Watson"
 
     factory :stubbed_client do
-      before(:create) { |profile, evaluator| PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } }
+      before(:create) { |profile, evaluator| 
+        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } 
+
+        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
+      }
     end
   end
 
