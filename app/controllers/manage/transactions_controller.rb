@@ -2,8 +2,6 @@ class Manage::TransactionsController < Manage::BaseController
 
   # Makes outside transactions by default
 
-  before_filter :_parent_name
-
   make_resourceful do
     actions :index, :show, :update, :create, :destroy
     belongs_to :invoice
@@ -46,10 +44,6 @@ class Manage::TransactionsController < Manage::BaseController
                          raise ActiveRecord::RecordNotFound if invoice.nil?
                          invoice
                        end 
-  end
-
-  def _parent_name
-    @parent_name = "invoice" # hack; parent_object isnt enough.
   end
 
   def mark_successful
