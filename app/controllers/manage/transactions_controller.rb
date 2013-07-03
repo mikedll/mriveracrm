@@ -29,14 +29,6 @@ class Manage::TransactionsController < Manage::BaseController
     end
   end
 
-  def before_create
-    head :forbidden if !current_object.is_a?(OutsideTransaction)
-  end
-
-  def before_update
-    head :forbidden if !current_object.is_a?(OutsideTransaction)
-  end
-
   def build_object
     # We only build OutsideTransaction, not other types. Those are built automatically.
     @current_object = parent_object.outside_transactions.build(object_parameters)
@@ -61,8 +53,6 @@ class Manage::TransactionsController < Manage::BaseController
   end
 
   def mark_successful
-    before :update
-
     if current_object.begin && current_object.succeed
       response_for :update
     else
