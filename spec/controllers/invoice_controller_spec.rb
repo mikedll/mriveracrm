@@ -3,23 +3,24 @@ require 'spec_helper'
 
 describe Manage::InvoicesController do
 
-  context "typical usage", :current => true do
+  context "typical usage" do
     before(:each) do
       @user = FactoryGirl.create(:employee_user)
       @client = FactoryGirl.create(:client, :business => @user.business)
       sign_in @user
       request.host = @user.employee.business.domain
     end
+
     it "should allow invoices to be created by employee" do
-      Invoice.count.should == 0
+      @client.invoices.count.should == 0
       post :create, {:format => 'js', :client_id => @client.id, "total" => 10, "description" => "Latest invoice"}
-      Invoice.count.should == 1
+      @client.invoices.count.should == 1
       response.should be_success
-      response.status.should == :created
+      response.status.should == 201
     end
   end
 
-  context "filters", :current => true do
+  context "filters" do
     it "should bounce a client if he tries to login to this view" do
       Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
 
@@ -30,7 +31,7 @@ describe Manage::InvoicesController do
       
       get :index, {:format => 'js', :client_id => @client.id}
 
-      response.should_redirect_to ''
+      response.should redirect_to new_user_session_path
       response.should_not be_success
     end
   end

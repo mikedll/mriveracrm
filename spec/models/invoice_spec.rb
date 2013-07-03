@@ -16,7 +16,6 @@ describe Invoice do
       @invoice.save.should be_false
       @invoice.errors.full_messages.should == [I18n.t('invoice.uneditable')]
 
-
       FactoryGirl.create(:paid_stripe_transaction, :invoice => @invoice)
       @invoice.reload
       @invoice.mark_paid!
