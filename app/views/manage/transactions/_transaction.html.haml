@@ -1,0 +1,32 @@
+
+= simple_form_for transaction, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
+
+  .control-group.read-only-field{ :data => { :name => 'type' } }
+    .control-label
+      Type:
+    .controls
+
+  .outside_transaction_fields
+    = f.input :outside_id, :label => "Outside Id", :input_html => {}.merge(transaction.persisted? ? {} : { :id => nil })
+
+    = f.input :outside_vendor, :collection => OutsideTransaction::OUTSIDE_VENDORS, :input_html => {}.merge(transaction.persisted? ? {} : { :id => nil })
+
+  = f.input :status, :input_html => {:disabled => true}.merge(transaction.persisted? ? {} : { :id => nil })
+
+  = f.input :amount, :input_html => {}.merge(transaction.persisted? ? {} : { :id => nil })
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.save.btn.btn-primary
+          Save
+ 
+      .btn-group
+        %a.put_action.btn{ :data => {:action => 'mark_successful', :attribute_enabler => 'succeedable', :enabled_when => 'true', :confirm => "Mark this transaction as successful?"}}
+          Mark Successful
+
+      .btn-group.pull-right
+        %a.destroy.btn.btn-danger{ :data => { :attribute_enabler => 'destroyable', :enabled_when => 'true', :confirm => t('delete_confirm') } }
+          Delete
+

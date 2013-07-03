@@ -120,6 +120,17 @@ FactoryGirl.define do
 
   factory :transaction do
     invoice { FactoryGirl.create(:invoice) }
+
+    factory :outside_transaction, :class => OutsideTransaction do
+      outside_vendor { 'Paypal' }
+      outside_id { '3434334' }
+    end
+
+    factory :authorize_net_transaction, :class => AuthorizeNetTransaction do
+    end
+
+    factory :stripe_transaction, :class => StripeTransaction do
+    end
   end
 
 end

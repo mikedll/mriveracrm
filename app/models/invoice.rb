@@ -3,6 +3,8 @@ class Invoice < ActiveRecord::Base
   belongs_to :client
 
   has_many :transactions
+  has_many :outside_transactions
+  has_many :stripe_transactions
 
   include ActionView::Helpers::TranslationHelper
 

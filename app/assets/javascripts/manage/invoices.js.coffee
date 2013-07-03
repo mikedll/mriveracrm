@@ -3,6 +3,8 @@ class window.Invoice extends Backbone.Model
   defaults: () ->
     total: 10.00
     description: 'Latest invoice'
+  title: () ->
+    @get('title')
 
 class window.Invoices extends BaseCollection
   model: Invoice
@@ -13,6 +15,14 @@ class window.Invoices extends BaseCollection
 
 class window.InvoiceView extends CrmModelView
   modelName: 'invoice'
+
+  initialize: () ->
+    CrmModelView.prototype.initialize.apply(this, arguments)
+    @events = $.extend(@events,
+      'click a.transactions': 'showTransactions'
+    )
+  showTransactions: () ->
+    @showNestedCollectionApp('transactions', Transactions, TransactionAppView)
 
 class window.InvoiceListItemView extends ListItemView
   modelName: 'invoice'

@@ -33,6 +33,12 @@ MikedllCrm::Application.routes.draw do
           put :cancel
           put :charge
         end
+
+        resources :transactions do
+          member do
+            put :mark_successful
+          end
+        end
       end
     end
 

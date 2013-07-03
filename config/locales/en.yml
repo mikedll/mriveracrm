@@ -19,6 +19,13 @@ en:
       email_conflict: "is already in use by an existing user."
       only_one: 'must have either a client or an employee, and not both'
 
+  transaction:
+    errors:
+      cannot_destroy_this_type: 'This type of transaction cannot be destroyed'
+      cannot_destroy_in_state: 'Failed or successful transactions cannot be destroyed'
+      uneditable: "This transaction is not editable due to its state or type"
+      status: "'%{status}' does not allow this operation."
+
   invoice:
     cannot_cancel: "cannot be cancelled in its current state. Only pending invoices can be cancelled."
     cannot_pay: "cannot be paid in its current state"

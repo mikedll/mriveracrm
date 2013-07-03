@@ -1,6 +1,14 @@
 
 = simple_form_for invoice, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
 
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.transactions.btn
+          %i.icon-book
+          Transactions
+
   = f.input :title, :as => :string, :input_html => invoice.persisted? ? {} : { :id => nil }
   = f.input :date, :as => :string, :input_html => {:class => 'datepicker'}.merge(invoice.persisted? ? {} : { :id => nil })
   = f.input :total, :input_html => invoice.persisted? ? {} : { :id => nil }
