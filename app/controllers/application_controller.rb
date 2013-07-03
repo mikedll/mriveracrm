@@ -58,8 +58,6 @@ class ApplicationController < ActionController::Base
         else
           client_invoices_path
         end
-      elsif resource.is_a?(AdminUser)
-        beezlebub_dashboard_path
       else
         signed_in_root_path(resource)
       end
