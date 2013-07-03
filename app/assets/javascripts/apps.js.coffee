@@ -133,6 +133,7 @@ class window.ListItemView extends BaseView
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'resorted', @onResorted)
+    @listenTo(@model, 'change', @onModelChanged)
 
   onRemove: () ->
     @removeDom()
@@ -142,6 +143,22 @@ class window.ListItemView extends BaseView
 
   onResorted: () ->
     @removeDom()
+
+  isDirtyForThisView: () ->
+    !$.isEmptyObject(@model.changedAttributes())
+
+  titleWithState: (e) ->
+    d = ""
+    if @isDirtyForThisView()
+      d = '<i class="icon-edit"></i>'
+    "#{@title()} #{d}"
+
+  onModelChanged: (e) ->
+    if @isDirtyForThisView()
+      @$el.addClass('changed')
+    else
+      @$el.removeClass('changed')
+    @$('a').html(@titleWithState())
 
   removeDom: () ->
     if @showview?
@@ -158,7 +175,7 @@ class window.ListItemView extends BaseView
 
   render: () ->
     @$el.html("<a href='#'></a>") if @$('a').length == 0
-    @$('a').html(@title())
+    @$('a').html(@titleWithState())
     @
 
   onRequest: () ->
@@ -203,11 +220,12 @@ class window.CrmModelView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
     @events =
-      'keypress input': 'onKeypress'
+      'keyup input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click a.save': 'save'
       'confirm:complete a.destroy': 'destroy'
       'confirm:complete a.put_action': 'putAction'
+
 
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
@@ -215,6 +233,9 @@ class window.CrmModelView extends BaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
+    @listenTo(@model, 'change', @onChange)
+
+    @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
@@ -237,19 +258,38 @@ class window.CrmModelView extends BaseView
   destroy: (e, answer) ->
     @model.destroy({wait: true}) if answer
 
-  onKeypress: (e) ->
+  onChange: (e) ->
+    # check if view is in editing mode or not
+
+  onInputChange: (e) ->
     if(e.ctrlKey == false && e.keyCode == 13)
       @save()
+      e.stopPropagation()
       return false
+
+    $el = $(e.target)
+    if $el.is(':input')
+      attribute_name = @attributeFromInput($el)
+      attrs = {}
+      attrs[attribute_name] = $el.val()
+      @model.set(attrs)
+
     return true
+
+  attributeFromInput: (elSelection) ->
+    matched = @attributeMatcher.exec(elSelection.prop('name'))
+    attribute_name = null
+    if matched? && matched.length == 2
+      attribute_name = matched[1]
+    return attribute_name
 
   fromForm: () ->
     updated = {}
     _.each(@$(':input'), (el) =>
-      matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
-      attribute_keys = matcher.exec($(el).prop('name'))
-      if attribute_keys? && attribute_keys.length == 2
-        updated[ attribute_keys[1] ] = $(el).val()
+      $el = $(el)
+      attribute_name = @attributeFromInput($el)
+      if attribute_name?
+        updated[ attribute_name ] = $(el).val()
     )
     updated
 

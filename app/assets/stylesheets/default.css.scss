@@ -205,6 +205,20 @@ ul#projects_list li {
   font-weight: bold;
   margin: 2px 0;
   padding: 1px;
+
+  a {
+    padding: 3px;
+    display: block;
+  }
+
+  a.active {
+    display: block;
+    font-weight: bold;
+  }
+
+  a:hover {
+    background: #ffffb0;
+  }
 }
 
 .models-list li.error {
@@ -217,19 +231,9 @@ ul#projects_list li {
   border: 1px dotted blue; 
 }
 
-.models-list li a {
-  padding: 3px;
-  display: block;
-}
-
-.models-list li a.active {
-  padding: 3px;
-  display: block;
-  background: #ffffb0;
-}
-
-.models-list li a:hover {
-  background: #ffffb0;
+.models-list li.changed {
+  background: rgb(255,145,145);
+  color: #000;
 }
 
 .models-show-container {
