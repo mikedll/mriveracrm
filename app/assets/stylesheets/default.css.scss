@@ -202,22 +202,25 @@ ul#projects_list li {
 }
 
 .models-list li {
-  font-weight: bold;
   margin: 2px 0;
   padding: 1px;
 
   a {
     padding: 3px;
     display: block;
+
+    i.icon-edit {
+      display: none;
+    }
   }
 
   a.active {
-    display: block;
     font-weight: bold;
+    color: #005580; // taken from bootstrap
   }
 
   a:hover {
-    background: #ffffb0;
+    font-weight: bold;
   }
 }
 
@@ -234,6 +237,10 @@ ul#projects_list li {
 .models-list li.changed {
   background: rgb(255,145,145);
   color: #000;
+
+  a i.icon-edit {
+    display: inline-block;
+  }
 }
 
 .models-show-container {

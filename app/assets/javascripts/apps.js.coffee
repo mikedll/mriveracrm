@@ -1,9 +1,10 @@
 
 
 window.AppsConfig =
-  datetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
-  dateFormat: 'ddd yyyy-MM-dd'
-  datepickerDateformat: 'D yy-mm-dd'
+  dateJsRubyDatetimeFormat: 'yyyy-MM-ddTHH:mm:ss'
+  dateJsReadableDatetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
+  dateJsReadableDateFormat: 'ddd yyyy-MM-dd'
+  datePickerDateFormat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
 
 class window.ComparatorBuilder
@@ -57,15 +58,20 @@ class window.BaseView extends Backbone.View
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
-  parseDate: (field) ->
-    date = Date.parse(@model.get(field))
-    date.toString(AppsConfig.dateFormat)
+  toRubyDatetime: (val) ->
+    d = Date.parse(val)
+    d.toString(AppsConfig.dateJsRubyDatetimeFormat) +
+      $.timepicker.timezoneOffsetString(-d.getTimezoneOffset(), true)
 
-  parseDatetime: (field) ->
+  toHumanReadableDateFormat: (field) ->
+    date = Date.parse(@model.get(field))
+    date.toString(AppsConfig.dateJsReadableDateFormat)
+
+  toHumanReadableDateTimeFormat: (field) ->
     v = @model.get(field)
     return "" if !v?
     date = Date.parse(v)
-    date.toString(AppsConfig.datetimeFormat)
+    date.toString(AppsConfig.dateJsReadableDatetimeFormat)
 
 class window.BaseCollection extends Backbone.Collection
   initialize: () ->
@@ -145,20 +151,19 @@ class window.ListItemView extends BaseView
     @removeDom()
 
   isDirtyForThisView: () ->
-    !$.isEmptyObject(@model.changedAttributes())
-
-  titleWithState: (e) ->
-    d = ""
-    if @isDirtyForThisView()
-      d = '<i class="icon-edit"></i>'
-    "#{@title()} #{d}"
+    attrs = @model.changedAttributes()
+    delete attrs['updated_at']
+    !$.isEmptyObject(attrs)
 
   onModelChanged: (e) ->
+    @decorateIfDirty()
+    @$('a .titleText').text(@title())
+
+  decorateIfDirty: () ->
     if @isDirtyForThisView()
       @$el.addClass('changed')
     else
       @$el.removeClass('changed')
-    @$('a').html(@titleWithState())
 
   removeDom: () ->
     if @showview?
@@ -174,8 +179,8 @@ class window.ListItemView extends BaseView
     false
 
   render: () ->
-    @$el.html("<a href='#'></a>") if @$('a').length == 0
-    @$('a').html(@titleWithState())
+    @$el.html("<a href='#'><span class='titleText'></span> <i class='icon-edit'></i></a>") if @$('a').length == 0
+    @$('a .titleText').text(@title())
     @
 
   onRequest: () ->
@@ -186,6 +191,7 @@ class window.ListItemView extends BaseView
     @$el.addClass('error')
 
   onSync: (model, resp, options) ->
+    @decorateIfDirty()
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @$el.removeClass('requesting')
     @$el.removeClass('error')
@@ -289,7 +295,10 @@ class window.CrmModelView extends BaseView
       $el = $(el)
       attribute_name = @attributeFromInput($el)
       if attribute_name?
-        updated[ attribute_name ] = $(el).val()
+        if $el.hasClass('datetimepicker') or $el.hasClass('datepicker')
+          updated[ attribute_name ] = @toRubyDatetime($el.val())
+        else
+          updated[ attribute_name ] = $el.val()
     )
     updated
 
@@ -311,9 +320,9 @@ class window.CrmModelView extends BaseView
       if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
         v = @model.get(attribute_key[1])
         if el$.hasClass('datetimepicker')
-          v = @parseDatetime(attribute_key[1])
+          v = @toHumanReadableDateTimeFormat(attribute_key[1])
         else if el$.hasClass('hasDatepicker')
-          v = @parseDate(attribute_key[1])
+          v = @toHumanReadableDateFormat(attribute_key[1])
         el$.val(v)
     )
 
@@ -323,9 +332,9 @@ class window.CrmModelView extends BaseView
       if (attribute_key? && @model.get(attribute_key)?)
         v = @model.get(attribute_key)
         if el$.hasClass('datetimepicker')
-          v = @parseDatetime(attribute_key)
+          v = @toHumanReadableDateTimeFormat(attribute_key)
         else if el$.hasClass('hasDatepicker')
-          v = @parseDate(attribute_key)
+          v = @toHumanReadableDateFormat(attribute_key)
         el$.find('.controls').text(v)
     )
 
@@ -381,7 +390,7 @@ class window.CrmModelView extends BaseView
   render: () ->
     @$el.html($(".#{@modelName}_view_example form").clone())
     @$('input.datepicker').datepicker(
-      dateFormat: AppsConfig.datepickerDateformat
+      dateFormat: AppsConfig.datePickerDateFormat
     )
     @copyModelToForm()
     @

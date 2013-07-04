@@ -1,7 +1,7 @@
 
 class window.Note extends Backbone.Model
   defaults: () ->
-    recorded_at: Date.parse('now').toString(AppsConfig.datetimeFormat)
+    recorded_at: Date.parse('now').toString(AppsConfig.dateJsReadableDatetimeFormat)
 
 class window.Notes extends BaseCollection
   model: Note
@@ -34,7 +34,7 @@ class window.NoteListItemView extends ListItemView
   className: 'note-list-item list-item'
 
   title: () ->
-    @parseDatetime('recorded_at')
+    @toHumanReadableDateTimeFormat('recorded_at')
 
 class window.NoteAppView extends CollectionAppView
   modelName: 'note'
