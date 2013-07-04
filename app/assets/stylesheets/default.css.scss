@@ -232,6 +232,9 @@ ul#projects_list li {
       float: left;
       margin: 2px 0 0 -21px;
     }
+    span.label {
+      display: none;
+    }
   }
 
   a.active {
@@ -265,6 +268,14 @@ ul#projects_list li {
       display: none;
     }
     i.icon-warning-sign { display: inline-block; }
+  }
+}
+
+.models-list li.labelled {
+  a {
+    span.label {
+      display: inline;
+    }
   }
 }
 

@@ -23,9 +23,24 @@ class window.InvoiceListItemView extends ListItemView
   className: 'invoice-list-item list-item'
 
   title: () ->
-    title = @model.get('title')
-    title += ' <span class="label label-important">Pending</span>' if @model.get('status') == 'pending'
-    title
+    @model.get('title')
+
+  onModelChanged: () ->
+    ListItemView.prototype.onModelChanged.apply(this, arguments)
+    @decoratePending()
+
+  decoratePending: () ->
+    if @model.get('status') == 'pending'
+      @$el.addClass('labelled')
+    else
+      @$el.removeClass('labelled')
+
+  render: () ->
+    ListItemView.prototype.render.apply(this, arguments)
+    @$('span.label-important').text('Pending')
+    @decoratePending()
+    @
+
 
 class window.InvoicesAppView extends CollectionAppView
   modelName: 'invoice'
