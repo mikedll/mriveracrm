@@ -656,15 +656,7 @@ class window.StackedChildrenView extends WithChildrenView
 
     $(document).on('keyup.stackedchildrenview', (e) =>
       if ((e.keyCode == 27) && @children.length > 1)
-        if !@noDirtyModels()
-          node = $('<div class="flash">This page has pending edits. Resolve them before leaving this page.</div>')
-          $('body').append(node)
-          setTimeout( () ->
-            node.fadeOut(AppsConfig.fadeDuration, () -> node.remove())
-          , AppsConfig.balloonDuration)
-          return
-        else
-          return @childViewPulled(@children[ @children.length - 1])
+        return @childViewPulled(@children[ @children.length - 1])
 
       if (e.ctrlKey)
         return @children[ @children.length - 1].previous() if( e.keyCode == 38)
@@ -719,6 +711,14 @@ class window.StackedChildrenView extends WithChildrenView
   #
   childViewPulled: (view) ->
     return if @children.length <= 1
+
+    if !@noDirtyModels()
+      node = $('<div class="flash">This page has pending edits. Resolve them before leaving this page.</div>')
+      $('body').append(node)
+      setTimeout( () ->
+        node.fadeOut(AppsConfig.fadeDuration, () -> node.remove())
+      , AppsConfig.balloonDuration)
+      return
 
     if @children.length > 1
       @children[ @children.length - 2 ].$el
