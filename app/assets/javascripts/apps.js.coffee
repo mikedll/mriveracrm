@@ -144,6 +144,29 @@ class window.WithChildrenView extends BaseView
       'margin-top': -(h / 2) + "px"
     )
 
+  disableWithShield: () ->
+    @$el.append($('<div class="click-shield"></div>'))
+    @$('.click-shield').bind('click', (e) ->
+      e.stopPropagation()
+      return false
+    )
+    @$('a,.btn,:input').each((i, el) ->
+      old = $(el).attr('tabIndex')
+      $(el).data('oldTabIndex', old) if old?
+      $(el).attr('tabIndex', '-1')
+    )
+
+  removeShield:() ->
+    @$('.click-shield').remove()
+    @$('a,.btn,:input').each((i, el) ->
+      old = $(el).data('oldTabIndex')
+      if old?
+        $(el).attr('tabIndex', old)
+      else
+        $(el).removeAttr('tabIndex')
+    )
+
+
   checkDisabled: (e) ->
     if $(e.target).hasClass('disabled')
       e.stopPropagation()
@@ -636,6 +659,7 @@ class window.StackedChildrenView extends WithChildrenView
 
   childViewPushed: (view) ->
     if @children.length > 0
+      @children[ @children.length - 1].disableWithShield()
       @children[ @children.length - 1].$el
         .css(@transforms['in'])
         .animate(@transforms['out'], @delay, 'easeOutCirc', () ->
@@ -669,6 +693,7 @@ class window.StackedChildrenView extends WithChildrenView
       .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
         view.remove()
         @children.pop()
+        @children[ @children.length - 1].removeShield()
         @children[ @children.length - 1].focusTopModelView()
         @rebindGlobalHotKeys()
       )
