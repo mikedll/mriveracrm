@@ -6,6 +6,8 @@ window.AppsConfig =
   dateJsReadableDateFormat: 'ddd yyyy-MM-dd'
   datePickerDateFormat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
+  fadeDuration: 1000
+  balloonDuration: 2000
 
 class window.ComparatorBuilder
   build: (attr, dir, sortType) ->
@@ -95,6 +97,12 @@ class window.BaseView extends Backbone.View
 
   childViewPulled: (view) ->
     @parent.childViewPulled(view)
+
+  registerDirty: (model) ->
+    @parent.registerDirty(model) if @parent?
+
+  unregisterDirty: (model) ->
+    @parent.unregisterDirty(model) if @parent?
 
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
@@ -226,8 +234,10 @@ class window.ListItemView extends BaseView
 
   decorateDirty: () ->
     if @model.isDirty()
+      @parent.registerDirty(@model)
       @$el.addClass('dirty')
     else
+      @parent.unregisterDirty(@model)
       @$el.removeClass('dirty')
 
   decorateRequesting: () ->
@@ -625,6 +635,7 @@ class window.StackedChildrenView extends WithChildrenView
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
     @children = []
+    @dirtyModels = []
     @eventHotKeys = new EventHotKeys()
     $(document).ajaxStart(() => @toBusy())
     $(document).ajaxStop(() => @toNotBusy())
@@ -644,13 +655,33 @@ class window.StackedChildrenView extends WithChildrenView
         opacity: '0.0'
 
     $(document).on('keyup.stackedchildrenview', (e) =>
-      return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
+      if ((e.keyCode == 27) && @children.length > 1)
+        if !@noDirtyModels()
+          node = $('<div class="flash">This page has pending edits. Resolve them before leaving this page.</div>')
+          $('body').append(node)
+          setTimeout( () ->
+            node.fadeOut(AppsConfig.fadeDuration, () -> node.remove())
+          , AppsConfig.balloonDuration)
+          return
+        else
+          return @childViewPulled(@children[ @children.length - 1])
 
       if (e.ctrlKey)
         return @children[ @children.length - 1].previous() if( e.keyCode == 38)
         return @children[ @children.length - 1].next() if( e.keyCode == 40)
         @eventHotKeys.handleKeyUp(e)
     )
+
+  registerDirty: (model) ->
+    i = _.indexOf(@dirtyModels[ @dirtyModels.length - 1 ], model)
+    @dirtyModels[ @dirtyModels.length - 1 ].push(model) if i == -1
+
+  unregisterDirty: (model) ->
+    i = _.indexOf(@dirtyModels[ @dirtyModels.length - 1 ], model)
+    @dirtyModels[ @dirtyModels.length - 1 ].splice(i, 1) if i != -1
+
+  noDirtyModels: () ->
+    @dirtyModels[ @dirtyModels.length - 1 ].length == 0
 
   rebindGlobalHotKeys: (container) ->
     return if @children.length == 0
@@ -674,6 +705,7 @@ class window.StackedChildrenView extends WithChildrenView
 
     @$el.append(view.el) if @$(view.id).length == 0
     @children.push( view )
+    @dirtyModels.push([])
     @children[ @children.length - 1 ].$el
       .css(@transforms['incoming'])
       .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
@@ -700,6 +732,11 @@ class window.StackedChildrenView extends WithChildrenView
       .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
         view.remove()
         @children.pop()
+
+        while @dirtyModels[ @dirtyModels.length - 1 ].length > 0
+          @dirtyModels[ @dirtyModels.length - 1 ].pop()
+        @dirtyModels.pop()
+
         @children[ @children.length - 1].removeShield()
         @children[ @children.length - 1].focusTopModelView()
         @rebindGlobalHotKeys()
