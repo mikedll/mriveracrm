@@ -664,6 +664,11 @@ class window.StackedChildrenView extends WithChildrenView
         @eventHotKeys.handleKeyUp(e)
     )
 
+    $(window).on('beforeunload', () =>
+      if _.any(@dirtyModels, (frame) -> frame.length > 0)
+        return 'You have unsaved changes on this page. Are you sure you want to leave?';
+    )
+
   registerDirty: (model) ->
     i = _.indexOf(@dirtyModels[ @dirtyModels.length - 1 ], model)
     @dirtyModels[ @dirtyModels.length - 1 ].push(model) if i == -1
