@@ -1,5 +1,5 @@
 
-class window.Note extends Backbone.Model
+class window.Note extends BaseModel
   defaults: () ->
     recorded_at: Date.parse('now').toString(AppsConfig.dateJsReadableDatetimeFormat)
 

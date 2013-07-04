@@ -1,5 +1,5 @@
 
-class window.Invoice extends Backbone.Model
+class window.Invoice extends BaseModel
 
 class window.Invoices extends Backbone.Collection
   model: Invoice

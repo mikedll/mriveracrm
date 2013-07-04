@@ -1,5 +1,5 @@
 
-class window.Client extends Backbone.Model
+class window.Client extends BaseModel
   defaults: () ->
     first_name: 'New'
     last_name: 'Client'

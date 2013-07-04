@@ -1,5 +1,5 @@
 
-class window.Transaction extends Backbone.Model
+class window.Transaction extends BaseModel
   title: () ->
     "Transaction #{@get('id')}"
 

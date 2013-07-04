@@ -1,5 +1,5 @@
 
-class window.Invoice extends Backbone.Model
+class window.Invoice extends BaseModel
   defaults: () ->
     total: 10.00
     description: 'Latest invoice'

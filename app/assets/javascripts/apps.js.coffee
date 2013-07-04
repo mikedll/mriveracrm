@@ -44,6 +44,47 @@ class window.ComparatorBuilder
 
     comparator
 
+class window.BaseModel extends Backbone.Model
+  initialize: () ->
+    Backbone.Model.prototype.initialize.apply(this, arguments)
+    @_isDirty = false
+    @_isInvalid = false
+    @_isRequesting = false
+
+    @_lastRequestError = null
+
+    @listenTo(@, 'change', @onChange)
+    @listenTo(@, 'request', @onRequest)
+    @listenTo(@, 'sync', @onSync)
+    @listenTo(@, 'error', @onError)
+
+  isDirty: () ->
+    return @_isDirty
+
+  isInvalid: () ->
+    return @_isInvalid
+
+  isRequesting: () ->
+    return @_isRequesting
+
+  onChange: () ->
+    attrs = @changedAttributes()
+    delete attrs['updated_at']
+    @_isDirty = !$.isEmptyObject(attrs)
+
+  onRequest: () ->
+    @_isRequesting = true
+
+  onSync: () ->
+    @_isRequesting = false
+    @_isInvalid = false
+    @_isDirty = false
+
+  onError: (model, resp, options) ->
+    @_isRequesting = false
+    @_isInvalid = true
+    @_lastRequestError = jQuery.parseJSON( xhr.responseText )
+
 class window.BaseView extends Backbone.View
   initialize: (options) ->
     @events = {}
@@ -59,6 +100,7 @@ class window.BaseView extends Backbone.View
     @parent.rebindGlobalHotKeys()
 
   toRubyDatetime: (val) ->
+    return null if val.trim() == ""
     d = Date.parse(val)
     d.toString(AppsConfig.dateJsRubyDatetimeFormat) +
       $.timepicker.timezoneOffsetString(-d.getTimezoneOffset(), true)
@@ -156,14 +198,26 @@ class window.ListItemView extends BaseView
     !$.isEmptyObject(attrs)
 
   onModelChanged: (e) ->
-    @decorateIfDirty()
+    @decorateDirty()
     @$('a .titleText').text(@title())
 
-  decorateIfDirty: () ->
-    if @isDirtyForThisView()
-      @$el.addClass('changed')
+  decorateDirty: () ->
+    if @model.isDirty()
+      @$el.addClass('dirty')
     else
-      @$el.removeClass('changed')
+      @$el.removeClass('dirty')
+
+  decorateRequesting: () ->
+    if @model.isRequesting()
+      @$el.addClass('requesting')
+    else
+      @$el.removeClass('requesting')
+
+  decorateError: () ->
+    if @model.isInvalid()
+      @$el.addClass('error')
+    else
+      @$el.removeClass('error')
 
   removeDom: () ->
     if @showview?
@@ -184,23 +238,23 @@ class window.ListItemView extends BaseView
     @
 
   onRequest: () ->
-    @$el.removeClass('error')
-    @$el.addClass('requesting')
+    @decorateError()
+    @decorateRequesting()
 
   onInvalid: () ->
-    @$el.addClass('error')
+    @decorateError()
+    @decorateRequesting()
 
   onSync: (model, resp, options) ->
-    @decorateIfDirty()
     @$el.prop('id', @id()) if @$el.prop('id') == ""
-    @$el.removeClass('requesting')
-    @$el.removeClass('error')
     @render()
+    @decorateDirty()
+    @decorateError()
+    @decorateRequesting()
 
   onError: (model, xhr, options) ->
-    @$el.removeClass('requesting')
-    response = jQuery.parseJSON( xhr.responseText )
-    @$el.addClass('error')
+    @decorateError()
+    @decorateRequesting()
 
   title: () ->
     @model.get('id')
@@ -226,8 +280,8 @@ class window.CrmModelView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
     @events =
-      'keyup input': 'onInputChange'
-      'change input': 'onInputChange'
+      'keyup input,textarea,select': 'onInputChange'
+      'change input,textarea,select': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click a.save': 'save'
       'confirm:complete a.destroy': 'destroy'
