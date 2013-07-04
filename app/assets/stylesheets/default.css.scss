@@ -144,6 +144,7 @@ ul#projects_list li {
   padding: 5px;
 }
 
+
 .login_failed {
   background: #fffff2;
   padding: 1em;
@@ -179,6 +180,13 @@ ul#projects_list li {
     height: 100%;
     opacity: 0;
   }
+}
+
+.gui-container.static-container {
+  font-size: 10pt;
+  top: 50px;
+  left: 50px;
+  position: absolute;
 }
 
 .app-gui {
