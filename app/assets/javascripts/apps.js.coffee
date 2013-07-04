@@ -80,7 +80,7 @@ class window.BaseModel extends Backbone.Model
     @_isInvalid = false
     @_isDirty = false
 
-  onError: (model, resp, options) ->
+  onError: (model, xhr, options) ->
     @_isRequesting = false
     @_isInvalid = true
     @_lastRequestError = jQuery.parseJSON( xhr.responseText )

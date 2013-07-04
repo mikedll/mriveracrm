@@ -244,11 +244,6 @@ ul#projects_list li {
   }
 }
 
-.models-list li.error {
-  background: rgb(255,145,145);
-  color: #000;
-}
-
 .models-list li.requesting {
   padding: 0px;
   background: rgb(193, 193, 238); 
@@ -258,14 +253,24 @@ ul#projects_list li {
 }
 
 .models-list li.dirty {
-  a i {
-    display: inline-block;
-  }
-
   a {
     color: #c09853;
+
+    i {
+    display: inline-block;
+    }
   }
 }
+
+.models-list li.error {
+  background: rgb(255,145,145);
+  color: #000;
+
+  a {
+    color: #000;
+  }
+}
+
 
 .models-show-container {
 }
