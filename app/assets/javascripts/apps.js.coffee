@@ -351,32 +351,39 @@ class window.CrmModelView extends BaseView
       e.stopPropagation()
       return false
 
-    $el = $(e.target)
-    if $el.is(':input')
-      attribute_name = @attributeFromInput($el)
+    nameAndValue = @nameAndValueFromInput($(e.target))
+    if nameAndValue?
       attrs = {}
-      attrs[attribute_name] = $el.val()
+      attrs[nameAndValue[0]] = nameAndValue[1]
       @model.set(attrs)
 
     return true
 
-  attributeFromInput: (elSelection) ->
+  #
+  # returns null if it can't get the attribute name and value
+  #
+  # returns [attribute_name, value] otherwise.
+  #
+  # e.g. ['company', 'Smith and Son']
+  #
+  nameAndValueFromInput: (elSelection) ->
     matched = @attributeMatcher.exec(elSelection.prop('name'))
     attribute_name = null
     if matched? && matched.length == 2
       attribute_name = matched[1]
-    return attribute_name
+      if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
+        val = @toRubyDatetime(elSelection.val())
+      else
+        val = elSelection.val()
+      return [attribute_name, val]
+    else
+      return null
 
   fromForm: () ->
     updated = {}
     _.each(@$(':input'), (el) =>
-      $el = $(el)
-      attribute_name = @attributeFromInput($el)
-      if attribute_name?
-        if $el.hasClass('datetimepicker') or $el.hasClass('datepicker')
-          updated[ attribute_name ] = @toRubyDatetime($el.val())
-        else
-          updated[ attribute_name ] = $el.val()
+      nameAndValue = @nameAndValueFromInput($(el))
+      updated[ nameAndValue[0] ] = nameAndValue[1] if nameAndValue?
     )
     updated
 
