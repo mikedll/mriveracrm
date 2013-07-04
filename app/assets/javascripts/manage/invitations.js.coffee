@@ -1,5 +1,5 @@
 
-class window.Invitation extends Backbone.Model
+class window.Invitation extends BaseModel
   defaults: () ->
 
 class window.Invitations extends BaseCollection

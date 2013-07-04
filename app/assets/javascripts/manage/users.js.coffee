@@ -1,5 +1,5 @@
 
-class window.User extends Backbone.Model
+class window.User extends BaseModel
   fullName: () ->
     "#{@get('first_name')} #{@get('last_name')}"
 

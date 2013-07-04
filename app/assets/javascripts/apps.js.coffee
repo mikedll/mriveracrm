@@ -1,10 +1,23 @@
 
 
 window.AppsConfig =
-  datetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
-  dateFormat: 'ddd yyyy-MM-dd'
-  datepickerDateformat: 'D yy-mm-dd'
+  dateJsRubyDatetimeFormat: 'yyyy-MM-ddTHH:mm:ss'
+  dateJsReadableDatetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
+  dateJsReadableDateFormat: 'ddd yyyy-MM-dd'
+  datePickerDateFormat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
+  fadeDuration: 1000
+  balloonDuration: 2000
+
+class window.Ballooner
+  constructor: () ->
+  show: (s) ->
+    node = $('.apps-general-templates .flash-template .flash').clone()
+    node.text(s)
+    $('body').append(node)
+    setTimeout( () ->
+      node.fadeOut(AppsConfig.fadeDuration, () -> node.remove())
+    , AppsConfig.balloonDuration)
 
 class window.ComparatorBuilder
   build: (attr, dir, sortType) ->
@@ -43,6 +56,47 @@ class window.ComparatorBuilder
 
     comparator
 
+class window.BaseModel extends Backbone.Model
+  initialize: () ->
+    Backbone.Model.prototype.initialize.apply(this, arguments)
+    @_isDirty = false
+    @_isInvalid = false
+    @_isRequesting = false
+
+    @_lastRequestError = null
+
+    @listenTo(@, 'change', @onChange)
+    @listenTo(@, 'request', @onRequest)
+    @listenTo(@, 'sync', @onSync)
+    @listenTo(@, 'error', @onError)
+
+  isDirty: () ->
+    return @_isDirty
+
+  isInvalid: () ->
+    return @_isInvalid
+
+  isRequesting: () ->
+    return @_isRequesting
+
+  onChange: () ->
+    attrs = @changedAttributes()
+    delete attrs['updated_at']
+    @_isDirty = !$.isEmptyObject(attrs)
+
+  onRequest: () ->
+    @_isRequesting = true
+
+  onSync: () ->
+    @_isRequesting = false
+    @_isInvalid = false
+    @_isDirty = false
+
+  onError: (model, xhr, options) ->
+    @_isRequesting = false
+    @_isInvalid = true
+    @_lastRequestError = jQuery.parseJSON( xhr.responseText )
+
 class window.BaseView extends Backbone.View
   initialize: (options) ->
     @events = {}
@@ -54,18 +108,30 @@ class window.BaseView extends Backbone.View
   childViewPulled: (view) ->
     @parent.childViewPulled(view)
 
+  registerDirty: (model) ->
+    @parent.registerDirty(model) if @parent?
+
+  unregisterDirty: (model) ->
+    @parent.unregisterDirty(model) if @parent?
+
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
-  parseDate: (field) ->
-    date = Date.parse(@model.get(field))
-    date.toString(AppsConfig.dateFormat)
+  toRubyDatetime: (val) ->
+    return null if val.trim() == ""
+    d = Date.parse(val)
+    d.toString(AppsConfig.dateJsRubyDatetimeFormat) +
+      $.timepicker.timezoneOffsetString(-d.getTimezoneOffset(), true)
 
-  parseDatetime: (field) ->
+  toHumanReadableDateFormat: (field) ->
+    date = Date.parse(@model.get(field))
+    date.toString(AppsConfig.dateJsReadableDateFormat)
+
+  toHumanReadableDateTimeFormat: (field) ->
     v = @model.get(field)
     return "" if !v?
     date = Date.parse(v)
-    date.toString(AppsConfig.datetimeFormat)
+    date.toString(AppsConfig.dateJsReadableDatetimeFormat)
 
 class window.BaseCollection extends Backbone.Collection
   initialize: () ->
@@ -95,6 +161,29 @@ class window.WithChildrenView extends BaseView
       'margin-left': -(w / 2) + "px"
       'margin-top': -(h / 2) + "px"
     )
+
+  disableWithShield: () ->
+    @$el.append($('<div class="click-shield"></div>'))
+    @$('.click-shield').bind('click', (e) ->
+      e.stopPropagation()
+      return false
+    )
+    @$('a,.btn,:input').each((i, el) ->
+      old = $(el).attr('tabIndex')
+      $(el).data('oldTabIndex', old) if old?
+      $(el).attr('tabIndex', '-1')
+    )
+
+  removeShield:() ->
+    @$('.click-shield').remove()
+    @$('a,.btn,:input').each((i, el) ->
+      old = $(el).data('oldTabIndex')
+      if old?
+        $(el).attr('tabIndex', old)
+      else
+        $(el).removeAttr('tabIndex')
+    )
+
 
   checkDisabled: (e) ->
     if $(e.target).hasClass('disabled')
@@ -133,6 +222,7 @@ class window.ListItemView extends BaseView
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'resorted', @onResorted)
+    @listenTo(@model, 'change', @onModelChanged)
 
   onRemove: () ->
     @removeDom()
@@ -142,6 +232,35 @@ class window.ListItemView extends BaseView
 
   onResorted: () ->
     @removeDom()
+
+  isDirtyForThisView: () ->
+    attrs = @model.changedAttributes()
+    delete attrs['updated_at']
+    !$.isEmptyObject(attrs)
+
+  onModelChanged: (e) ->
+    @decorateDirty()
+    @$('a .titleText').text(@title())
+
+  decorateDirty: () ->
+    if @model.isDirty()
+      @parent.registerDirty(@model)
+      @$el.addClass('dirty')
+    else
+      @parent.unregisterDirty(@model)
+      @$el.removeClass('dirty')
+
+  decorateRequesting: () ->
+    if @model.isRequesting()
+      @$el.addClass('requesting')
+    else
+      @$el.removeClass('requesting')
+
+  decorateError: () ->
+    if @model.isInvalid()
+      @$el.addClass('error')
+    else
+      @$el.removeClass('error')
 
   removeDom: () ->
     if @showview?
@@ -157,27 +276,28 @@ class window.ListItemView extends BaseView
     false
 
   render: () ->
-    @$el.html("<a href='#'></a>") if @$('a').length == 0
-    @$('a').html(@title())
+    @$el.html($('.list-item-view-title-template a').clone()) if @$('a').length == 0
+    @$('a .titleText').text(@title())
     @
 
   onRequest: () ->
-    @$el.removeClass('error')
-    @$el.addClass('requesting')
+    @decorateError()
+    @decorateRequesting()
 
   onInvalid: () ->
-    @$el.addClass('error')
+    @decorateError()
+    @decorateRequesting()
 
   onSync: (model, resp, options) ->
     @$el.prop('id', @id()) if @$el.prop('id') == ""
-    @$el.removeClass('requesting')
-    @$el.removeClass('error')
     @render()
+    @decorateDirty()
+    @decorateError()
+    @decorateRequesting()
 
   onError: (model, xhr, options) ->
-    @$el.removeClass('requesting')
-    response = jQuery.parseJSON( xhr.responseText )
-    @$el.addClass('error')
+    @decorateError()
+    @decorateRequesting()
 
   title: () ->
     @model.get('id')
@@ -203,11 +323,13 @@ class window.CrmModelView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
     @events =
-      'keypress input': 'onKeypress'
+      'keyup :input': 'onInputChange'
+      'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click a.save': 'save'
       'confirm:complete a.destroy': 'destroy'
       'confirm:complete a.put_action': 'putAction'
+
 
     @parent = options.parent
     @listenTo(@model, 'sync', @onSync)
@@ -215,6 +337,9 @@ class window.CrmModelView extends BaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
+    @listenTo(@model, 'change', @onChange)
+
+    @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
@@ -237,19 +362,48 @@ class window.CrmModelView extends BaseView
   destroy: (e, answer) ->
     @model.destroy({wait: true}) if answer
 
-  onKeypress: (e) ->
+  onChange: (e) ->
+    # check if view is in editing mode or not
+
+  onInputChange: (e) ->
     if(e.ctrlKey == false && e.keyCode == 13)
       @save()
+      e.stopPropagation()
       return false
+
+    nameAndValue = @nameAndValueFromInput($(e.target))
+    if nameAndValue?
+      attrs = {}
+      attrs[nameAndValue[0]] = nameAndValue[1]
+      @model.set(attrs)
+
     return true
+
+  #
+  # returns null if it can't get the attribute name and value
+  #
+  # returns [attribute_name, value] otherwise.
+  #
+  # e.g. ['company', 'Smith and Son']
+  #
+  nameAndValueFromInput: (elSelection) ->
+    matched = @attributeMatcher.exec(elSelection.prop('name'))
+    attribute_name = null
+    if matched? && matched.length == 2
+      attribute_name = matched[1]
+      if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
+        val = @toRubyDatetime(elSelection.val())
+      else
+        val = elSelection.val()
+      return [attribute_name, val]
+    else
+      return null
 
   fromForm: () ->
     updated = {}
     _.each(@$(':input'), (el) =>
-      matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
-      attribute_keys = matcher.exec($(el).prop('name'))
-      if attribute_keys? && attribute_keys.length == 2
-        updated[ attribute_keys[1] ] = $(el).val()
+      nameAndValue = @nameAndValueFromInput($(el))
+      updated[ nameAndValue[0] ] = nameAndValue[1] if nameAndValue?
     )
     updated
 
@@ -271,9 +425,9 @@ class window.CrmModelView extends BaseView
       if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
         v = @model.get(attribute_key[1])
         if el$.hasClass('datetimepicker')
-          v = @parseDatetime(attribute_key[1])
+          v = @toHumanReadableDateTimeFormat(attribute_key[1])
         else if el$.hasClass('hasDatepicker')
-          v = @parseDate(attribute_key[1])
+          v = @toHumanReadableDateFormat(attribute_key[1])
         el$.val(v)
     )
 
@@ -283,9 +437,9 @@ class window.CrmModelView extends BaseView
       if (attribute_key? && @model.get(attribute_key)?)
         v = @model.get(attribute_key)
         if el$.hasClass('datetimepicker')
-          v = @parseDatetime(attribute_key)
+          v = @toHumanReadableDateTimeFormat(attribute_key)
         else if el$.hasClass('hasDatepicker')
-          v = @parseDate(attribute_key)
+          v = @toHumanReadableDateFormat(attribute_key)
         el$.find('.controls').text(v)
     )
 
@@ -341,7 +495,7 @@ class window.CrmModelView extends BaseView
   render: () ->
     @$el.html($(".#{@modelName}_view_example form").clone())
     @$('input.datepicker').datepicker(
-      dateFormat: AppsConfig.datepickerDateformat
+      dateFormat: AppsConfig.datePickerDateFormat
     )
     @copyModelToForm()
     @
@@ -381,6 +535,11 @@ class window.CollectionAppView extends WithChildrenView
     )
 
   filtersChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing filters.')
+      return false
+
     _.each( @collection.toArray(), (model) => @collection.remove(model) )
     data = {}
     _.each( @$('.collection-filter'), (el) ->
@@ -397,6 +556,11 @@ class window.CollectionAppView extends WithChildrenView
     @collection.fetch(data: data)
 
   sortsChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing sort order.')
+      return false
+
     target = $(e.target)
     @collection.comparator = (new ComparatorBuilder())
       .build(target.data('sort_attribute'), target.data('sort_direction'), target.data('sort_type'))
@@ -491,6 +655,7 @@ class window.StackedChildrenView extends WithChildrenView
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
     @children = []
+    @dirtyModels = []
     @eventHotKeys = new EventHotKeys()
     $(document).ajaxStart(() => @toBusy())
     $(document).ajaxStop(() => @toNotBusy())
@@ -510,13 +675,30 @@ class window.StackedChildrenView extends WithChildrenView
         opacity: '0.0'
 
     $(document).on('keyup.stackedchildrenview', (e) =>
-      return @childViewPulled(@children[ @children.length - 1]) if ((e.keyCode == 27) && @children.length > 1)
+      if ((e.keyCode == 27) && @children.length > 1)
+        return @childViewPulled(@children[ @children.length - 1])
 
       if (e.ctrlKey)
         return @children[ @children.length - 1].previous() if( e.keyCode == 38)
         return @children[ @children.length - 1].next() if( e.keyCode == 40)
         @eventHotKeys.handleKeyUp(e)
     )
+
+    $(window).on('beforeunload', () =>
+      if _.any(@dirtyModels, (frame) -> frame.length > 0)
+        return 'You have unsaved changes on this page. Are you sure you want to leave?';
+    )
+
+  registerDirty: (model) ->
+    i = _.indexOf(@dirtyModels[ @dirtyModels.length - 1 ], model)
+    @dirtyModels[ @dirtyModels.length - 1 ].push(model) if i == -1
+
+  unregisterDirty: (model) ->
+    i = _.indexOf(@dirtyModels[ @dirtyModels.length - 1 ], model)
+    @dirtyModels[ @dirtyModels.length - 1 ].splice(i, 1) if i != -1
+
+  noDirtyModels: () ->
+    @dirtyModels[ @dirtyModels.length - 1 ].length == 0
 
   rebindGlobalHotKeys: (container) ->
     return if @children.length == 0
@@ -532,6 +714,7 @@ class window.StackedChildrenView extends WithChildrenView
 
   childViewPushed: (view) ->
     if @children.length > 0
+      @children[ @children.length - 1].disableWithShield()
       @children[ @children.length - 1].$el
         .css(@transforms['in'])
         .animate(@transforms['out'], @delay, 'easeOutCirc', () ->
@@ -539,6 +722,7 @@ class window.StackedChildrenView extends WithChildrenView
 
     @$el.append(view.el) if @$(view.id).length == 0
     @children.push( view )
+    @dirtyModels.push([])
     @children[ @children.length - 1 ].$el
       .css(@transforms['incoming'])
       .animate(@transforms['in'], @delay, 'easeOutCirc', () =>
@@ -553,6 +737,10 @@ class window.StackedChildrenView extends WithChildrenView
   childViewPulled: (view) ->
     return if @children.length <= 1
 
+    if !@noDirtyModels()
+      new Ballooner().show('This page has pending edits. Resolve them before leaving this page.')
+      return
+
     if @children.length > 1
       @children[ @children.length - 2 ].$el
         .css(@transforms['out'])
@@ -565,6 +753,12 @@ class window.StackedChildrenView extends WithChildrenView
       .animate(@transforms['incoming'], @delay, 'easeOutCirc', () =>
         view.remove()
         @children.pop()
+
+        while @dirtyModels[ @dirtyModels.length - 1 ].length > 0
+          @dirtyModels[ @dirtyModels.length - 1 ].pop()
+        @dirtyModels.pop()
+
+        @children[ @children.length - 1].removeShield()
         @children[ @children.length - 1].focusTopModelView()
         @rebindGlobalHotKeys()
       )

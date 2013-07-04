@@ -1,5 +1,5 @@
 
-class window.Client extends Backbone.Model
+class window.Client extends BaseModel
   defaults: () ->
     first_name: 'New'
     last_name: 'Client'
@@ -55,7 +55,7 @@ class window.ClientView extends CrmModelView
     node = $('.client_view_example form').clone()
     @$el.html(node)
     @$('input.datetimepicker').datetimepicker(
-      dateFormat: AppsConfig.datepickerDateformat,
+      dateFormat: AppsConfig.datePickerDateFormat,
       timeFormat: AppsConfig.datetimePickerTimeFormat
     )
     @copyModelToForm()
