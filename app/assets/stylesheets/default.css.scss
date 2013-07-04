@@ -256,18 +256,22 @@ ul#projects_list li {
   a {
     color: #c09853;
 
-    i {
-    display: inline-block;
+    i.icon-edit {
+      display: inline-block;
     }
   }
 }
 
 .models-list li.error {
-  background: rgb(255,145,145);
+  background: rgb(251, 154, 154); 
   color: #000;
 
   a {
     color: #000;
+    i.icon-edit {
+      display: none;
+    }
+    i.icon-warning-sign { display: inline-block; }
   }
 }
 

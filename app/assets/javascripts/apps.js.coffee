@@ -256,7 +256,7 @@ class window.ListItemView extends BaseView
     false
 
   render: () ->
-    @$el.html("<a href='#'><span class='titleText'></span> <i class='icon-edit'></i></a>") if @$('a').length == 0
+    @$el.html("<a href='#'><span class='titleText'></span> <i class='icon-edit'></i><i class='icon-warning-sign'></i></a>") if @$('a').length == 0
     @$('a .titleText').text(@title())
     @
 
