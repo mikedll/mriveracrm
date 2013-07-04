@@ -227,6 +227,7 @@ class window.CrmModelView extends BaseView
     BaseView.prototype.initialize.apply(@, arguments)
     @events =
       'keyup input': 'onInputChange'
+      'change input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click a.save': 'save'
       'confirm:complete a.destroy': 'destroy'
