@@ -9,6 +9,16 @@ window.AppsConfig =
   fadeDuration: 1000
   balloonDuration: 2000
 
+class window.Ballooner
+  constructor: () ->
+  show: (s) ->
+    node = $('.apps-general-templates .flash-template .flash').clone()
+    node.text(s)
+    $('body').append(node)
+    setTimeout( () ->
+      node.fadeOut(AppsConfig.fadeDuration, () -> node.remove())
+    , AppsConfig.balloonDuration)
+
 class window.ComparatorBuilder
   build: (attr, dir, sortType) ->
     comparator = (a,b) ->
@@ -525,6 +535,11 @@ class window.CollectionAppView extends WithChildrenView
     )
 
   filtersChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing filters.')
+      return false
+
     _.each( @collection.toArray(), (model) => @collection.remove(model) )
     data = {}
     _.each( @$('.collection-filter'), (el) ->
@@ -541,6 +556,11 @@ class window.CollectionAppView extends WithChildrenView
     @collection.fetch(data: data)
 
   sortsChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing sort order.')
+      return false
+
     target = $(e.target)
     @collection.comparator = (new ComparatorBuilder())
       .build(target.data('sort_attribute'), target.data('sort_direction'), target.data('sort_type'))
@@ -718,11 +738,7 @@ class window.StackedChildrenView extends WithChildrenView
     return if @children.length <= 1
 
     if !@noDirtyModels()
-      node = $('<div class="flash">This page has pending edits. Resolve them before leaving this page.</div>')
-      $('body').append(node)
-      setTimeout( () ->
-        node.fadeOut(AppsConfig.fadeDuration, () -> node.remove())
-      , AppsConfig.balloonDuration)
+      new Ballooner().show('This page has pending edits. Resolve them before leaving this page.')
       return
 
     if @children.length > 1
