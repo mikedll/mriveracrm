@@ -245,14 +245,6 @@ ul#projects_list li {
   }
 }
 
-.models-list li.requesting {
-  padding: 0px;
-  background: rgb(193, 193, 238); 
-  a {
-    color: #000;
-  }
-}
-
 .models-list li.dirty {
   a {
     color: #c09853;
@@ -273,6 +265,19 @@ ul#projects_list li {
       display: none;
     }
     i.icon-warning-sign { display: inline-block; }
+  }
+}
+
+.models-list li.requesting {
+  padding: 0px;
+  background: rgb(193, 193, 238); 
+  a {
+    color: #000;
+    i.icon-edit { display: none; }
+    i.icon-warning-sign { display: none; }
+    i.icon-requesting {
+      display: inline-block;
+    }
   }
 }
 
