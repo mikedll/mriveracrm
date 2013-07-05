@@ -266,7 +266,7 @@ class window.ListItemView extends BaseView
 
   setTitle: () ->
     s = @title()
-    @$('a .titleText').text(if s.trim() != "" then s else "-")
+    @$('a .titleText').text(if s? && s.trim() != "" then s else "-")
 
   onModelChanged: (e) ->
     @decorateDirty()
