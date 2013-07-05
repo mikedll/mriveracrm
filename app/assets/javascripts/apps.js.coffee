@@ -65,6 +65,7 @@ class window.BaseModel extends Backbone.Model
 
     @_lastRequestError = null
     @_attributesSinceSync = {}
+    @listenTo(@, 'invalid', @onInvalid)
     @listenTo(@, 'change', @onChange)
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
@@ -79,6 +80,9 @@ class window.BaseModel extends Backbone.Model
   isRequesting: () ->
     return @_isRequesting
 
+  onInvalid: () ->
+    @_isInvalid = true
+
   onChange: () ->
     attrs = @changedAttributes()
 
@@ -92,6 +96,8 @@ class window.BaseModel extends Backbone.Model
         delete @_attributesSinceSync[attribute_name]
     )
     @_isDirty = !$.isEmptyObject(@_attributesSinceSync)
+    @validate(@attributes)
+    @_isInvalid = false if !@validationError?
 
   changedAttributesSinceSync: () ->
     _.clone(@_attributesSinceSync)
@@ -255,6 +261,7 @@ class window.ListItemView extends BaseView
 
   onModelChanged: (e) ->
     @decorateDirty()
+    @decorateError()
     @setTitle()
 
   decorateDirty: () ->
@@ -413,7 +420,22 @@ class window.CrmModelView extends BaseView
 
 
   onModelChanged: (e) ->
+    # since this is the primary editing area of this model,
+    # we really don't update it just because the model changes.
+    # in the event another editing area updates this,
+    # more code needs to be written here.
+    #
+    # we assume that 1 view will update the model,
+    # and other views will really utilize the validate
+    # method of this.
+    #
+    # we do recorate the form, though.
+    #
     @decorateDirty()
+    if @model.validationError?
+      @renderErrors(@model.validationError)
+    else
+      @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
     if(e.ctrlKey == false && e.keyCode == 13)
@@ -512,12 +534,12 @@ class window.CrmModelView extends BaseView
     if answer
       @clearErrors()
       @model.set(@model.changedAttributesSinceSync())
-      @decorateDirty()
+      @copyModelToForm()
 
   save: () ->
     return if !@model.isDirty()
     @clearErrors()
-    @model.save(@fromForm())
+    @model.save()
 
   renderErrors: (errors) ->
     _.each(errors, (value, key, list) =>
@@ -532,10 +554,17 @@ class window.CrmModelView extends BaseView
   onInvalid: () ->
     @renderErrors(@model.validationError) if @model.validationError?
 
-  clearErrors: () ->
-    @$el
-      .removeClass('error')
-      .find('span.help-inline').remove()
+  clearErrors: (changedAttributesw) ->
+    toFix = @inputsCache
+
+    if arguments.length > 0 and changedAttributes?
+      toFix = toFix.filter((el) => _.has(changedAttributes, @nameFromInput($(el))))
+
+    toFix
+      .closest('.control-group')
+        .removeClass('error')
+        .find('span.help-inline').remove()
+
 
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )
@@ -547,11 +576,10 @@ class window.CrmModelView extends BaseView
 
   onSync: (model, resp, options) ->
     @$el.prop('id', @id()) if @$el.prop('id') == ""
-    @$el.find('.control-group')
-      .removeClass('error')
-      .find('span.help-inline').remove()
+    @clearErrors()
     @copyModelToForm()
     @decorateDirty()
+    @renderErrors(@model.validationError) if @model.validationError?
     @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
