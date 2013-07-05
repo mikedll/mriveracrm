@@ -19,15 +19,6 @@ class window.Notes extends BaseCollection
 class window.NoteView extends CrmModelView
   modelName: 'note'
 
-  render: () ->
-    @$el.html($('.note_view_example form').clone())
-    @$('input.datetimepicker').datetimepicker(
-      dateFormat: 'D yy-mm-dd',
-      timeFormat: 'h:mmTT'
-    )
-    @copyModelToForm()
-    @
-
 class window.NoteListItemView extends ListItemView
   modelName: 'note'
   spawnViewType: NoteView

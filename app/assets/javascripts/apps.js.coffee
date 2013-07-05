@@ -64,7 +64,7 @@ class window.BaseModel extends Backbone.Model
     @_isRequesting = false
 
     @_lastRequestError = null
-
+    @_attributesSinceSync = {}
     @listenTo(@, 'change', @onChange)
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
@@ -81,13 +81,26 @@ class window.BaseModel extends Backbone.Model
 
   onChange: () ->
     attrs = @changedAttributes()
+
+    # todo: should check if we are out of date
     delete attrs['updated_at']
-    @_isDirty = !$.isEmptyObject(attrs)
+
+    _.each(attrs, (value, attribute_name) =>
+      if not _.has(@_attributesSinceSync, attribute_name)
+        @_attributesSinceSync[attribute_name] = @previous(attribute_name)
+      else if @_attributesSinceSync[attribute_name] == @get(attribute_name)
+        delete @_attributesSinceSync[attribute_name]
+    )
+    @_isDirty = !$.isEmptyObject(@_attributesSinceSync)
+
+  changedAttributesSinceSync: () ->
+    _.clone(@_attributesSinceSync)
 
   onRequest: () ->
     @_isRequesting = true
 
   onSync: () ->
+    @_attributesSinceSync = {}
     @_isRequesting = false
     @_isInvalid = false
     @_isDirty = false
@@ -234,9 +247,7 @@ class window.ListItemView extends BaseView
     @removeDom()
 
   isDirtyForThisView: () ->
-    attrs = @model.changedAttributes()
-    delete attrs['updated_at']
-    !$.isEmptyObject(attrs)
+    @model.isDirty()
 
   onModelChanged: (e) ->
     @decorateDirty()
@@ -337,9 +348,12 @@ class window.CrmModelView extends BaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
-    @listenTo(@model, 'change', @onChange)
+    @listenTo(@model, 'change', @onModelChanged)
 
     @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
+
+    @inputsCache = []
+    @readonlyInputsCache = []
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
@@ -362,8 +376,31 @@ class window.CrmModelView extends BaseView
   destroy: (e, answer) ->
     @model.destroy({wait: true}) if answer
 
-  onChange: (e) ->
-    # check if view is in editing mode or not
+  decorateDirty: () ->
+    changed = @model.changedAttributesSinceSync()
+    @inputsCache.each((i, domEl)  =>
+      el$ = $(domEl)
+      attribute_name = @nameFromInput( el$ )
+      if attribute_name?
+        if @model.isDirty() and _.has(changed, attribute_name)
+          el$.closest('.control-group').addClass('warning')
+        else
+          el$.closest('.control-group').removeClass('warning')
+      else
+        # this may not be an input related to our model
+    )
+
+    @$('.read-only-field').each((i, domEl) =>
+      el$ = $(domEl)
+      attribute_name = el$.data('name')
+      if attribute_name? and @model.isDirty() and _.has(changed, attribute_name)
+        $el.closest('.control-group').addClass('warning')
+      else
+        $el.closest('.control-group').removeClass('warning')
+    )
+
+  onModelChanged: (e) ->
+    @decorateDirty()
 
   onInputChange: (e) ->
     if(e.ctrlKey == false && e.keyCode == 13)
@@ -379,6 +416,13 @@ class window.CrmModelView extends BaseView
 
     return true
 
+  nameFromInput: (elSelection) ->
+    matched = @attributeMatcher.exec(elSelection.prop('name'))
+    attribute_name = null
+    if matched? && matched.length == 2
+      attribute_name = matched[1]
+    attribute_name
+
   #
   # returns null if it can't get the attribute name and value
   #
@@ -387,10 +431,8 @@ class window.CrmModelView extends BaseView
   # e.g. ['company', 'Smith and Son']
   #
   nameAndValueFromInput: (elSelection) ->
-    matched = @attributeMatcher.exec(elSelection.prop('name'))
-    attribute_name = null
-    if matched? && matched.length == 2
-      attribute_name = matched[1]
+    attribute_name = @nameFromInput(elSelection)
+    if attribute_name?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
       else
@@ -418,28 +460,27 @@ class window.CrmModelView extends BaseView
     @[collectionName].fetch()
 
   copyModelToForm: () ->
-    _.each(@$(':input'), (el) =>
+    @inputsCache.each((i, el) =>
       el$ = $(el)
-      matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
-      attribute_key = matcher.exec(el$.prop('name'))
-      if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
-        v = @model.get(attribute_key[1])
+      attribute_name = @nameFromInput(el$)
+      if attribute_name? && @model.get(attribute_name)?
+        v = @model.get(attribute_name)
         if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_key[1])
+          v = @toHumanReadableDateTimeFormat(attribute_name)
         else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_key[1])
+          v = @toHumanReadableDateFormat(attribute_name)
         el$.val(v)
     )
 
-    _.each(@$('.read-only-field'), (el) =>
+    @readonlyInputsCache.each((i, el) =>
       el$ = $(el)
-      attribute_key = el$.data('name')
-      if (attribute_key? && @model.get(attribute_key)?)
-        v = @model.get(attribute_key)
+      attribute_name = el$.data('name')
+      if (attribute_name? && @model.get(attribute_name)?)
+        v = @model.get(attribute_name)
         if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_key)
+          v = @toHumanReadableDateTimeFormat(attribute_name)
         else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_key)
+          v = @toHumanReadableDateFormat(attribute_name)
         el$.find('.controls').text(v)
     )
 
@@ -489,15 +530,23 @@ class window.CrmModelView extends BaseView
       .removeClass('error')
       .find('span.help-inline').remove()
     @copyModelToForm()
-    @$el.find(':input:visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
+    @decorateDirty()
+    @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
   render: () ->
-    @$el.html($(".#{@modelName}_view_example form").clone())
-    @$('input.datepicker').datepicker(
+    @$el.html($(".#{@modelName}_view_example form").clone()) if @$el.children().length == 0
+    @inputsCache = @$(':input')
+    @readonlyInputsCache = @$('.read-only-field')
+    @inputsCache.filter('input.datepicker').datepicker(
       dateFormat: AppsConfig.datePickerDateFormat
     )
+    @inputsCache.filter('input.datetimepicker').datetimepicker(
+      dateFormat: AppsConfig.datePickerDateFormat,
+      timeFormat: AppsConfig.datetimePickerTimeFormat
+    )
     @copyModelToForm()
+    @renderErrors(@model.validationError) if @model.validationError?
     @
 
 class window.SingleModelAppView extends WithChildrenView

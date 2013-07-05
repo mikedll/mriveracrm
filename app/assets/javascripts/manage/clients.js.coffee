@@ -51,17 +51,6 @@ class window.ClientView extends CrmModelView
   showUsers: () ->
     @showNestedCollectionApp('users', Users, UserAppView)
 
-  render: () ->
-    node = $('.client_view_example form').clone()
-    @$el.html(node)
-    @$('input.datetimepicker').datetimepicker(
-      dateFormat: AppsConfig.datePickerDateFormat,
-      timeFormat: AppsConfig.datetimePickerTimeFormat
-    )
-    @copyModelToForm()
-    @renderErrors(@model.validationError) if @model.validationError?
-    @
-
 class window.ClientListItemView extends ListItemView
   modelName: 'client'
   spawnViewType: ClientView
