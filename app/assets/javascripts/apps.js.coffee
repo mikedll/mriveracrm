@@ -249,9 +249,13 @@ class window.ListItemView extends BaseView
   isDirtyForThisView: () ->
     @model.isDirty()
 
+  setTitle: () ->
+    s = @title()
+    @$('a .titleText').text(if s.trim() != "" then s else "-")
+
   onModelChanged: (e) ->
     @decorateDirty()
-    @$('a .titleText').text(@title())
+    @setTitle()
 
   decorateDirty: () ->
     if @model.isDirty()
@@ -288,7 +292,7 @@ class window.ListItemView extends BaseView
 
   render: () ->
     @$el.html($('.list-item-view-title-template a').clone()) if @$('a').length == 0
-    @$('a .titleText').text(@title())
+    @setTitle()
     @
 
   onRequest: () ->
@@ -563,6 +567,7 @@ class window.CrmModelView extends BaseView
       timeFormat: AppsConfig.datetimePickerTimeFormat
     )
     @copyModelToForm()
+    @decorateDirty()
     @renderErrors(@model.validationError) if @model.validationError?
     @
 
