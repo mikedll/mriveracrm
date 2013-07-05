@@ -64,14 +64,12 @@
   .control-group
     .control-label
     .controls
-      .btn-group
-        %a.save.btn.btn-primary
-          Save
+      = render :partial => 'shared/model_view_basic_buttons'
 
       .btn-group.pull-right
-        %a.archive.put_action.btn.btn-danger{ :data => {:action => 'archive', :attribute_enabler => 'archived', :enabled_when => 'false', :confirm => t('client.archive_confirm') } }
+        %button.archive.put_action.btn.btn-danger{ :data => {:action => 'archive', :attribute_enabler => 'archived', :enabled_when => 'false', :confirm => t('client.archive_confirm') } }
           Archive
-        %a.unarchive.put_action.btn.btn-danger{ :data => {:action => 'unarchive', :attribute_enabler => 'archived', :enabled_when => 'true', :confirm => t('client.unarchive_confirm')}}
+        %button.unarchive.put_action.btn.btn-danger{ :data => {:action => 'unarchive', :attribute_enabler => 'archived', :enabled_when => 'true', :confirm => t('client.unarchive_confirm')}}
           Unarchive
 
 

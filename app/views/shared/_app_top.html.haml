@@ -1,6 +1,6 @@
 - unless (defined?(disable_create) && disable_create)
   .btn-group
-    %a.add-model.btn
+    %button.add-model.btn
       %i.icon-plus
       New
 
@@ -9,7 +9,7 @@
     Filters:
   .btn-group.collection-filters
     - filters.each do |filter|
-      %a.collection-filter.btn{ :class => 'filter_' + filter.first, :data => { :filter => filter.first, :toggle => "button" } }
+      %button.collection-filter.btn{ :class => 'filter_' + filter.first, :data => { :filter => filter.first, :toggle => "button" } }
         = filter.last
 
 - if defined?(sorts)
@@ -17,7 +17,7 @@
     Sort By:
   .btn-group.collection-sorts{ :data => { :toggle => "buttons-radio" } }
     - sorts.each do |sort|
-      %a.collection-sort.btn{ :class => ['sort_' + sort.first, (sort.first == sorts.first.first ? "active" : nil) ].compact, :data => { :sort_attribute => sort.first, :sort_direction => sort[1], :sort_type => sort[2] } }
+      %button.collection-sort.btn{ :class => ['sort_' + sort.first, (sort.first == sorts.first.first ? "active" : nil) ].compact, :data => { :sort_attribute => sort.first, :sort_direction => sort[1], :sort_type => sort[2] } }
         = sort.last
 
 %hr

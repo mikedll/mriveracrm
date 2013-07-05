@@ -337,9 +337,10 @@ class window.CrmModelView extends BaseView
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
-      'click a.save': 'save'
-      'confirm:complete a.destroy': 'destroy'
-      'confirm:complete a.put_action': 'putAction'
+      'click .btn.save': 'save'
+      'confirm:complete .btn.revert': 'revert'
+      'confirm:complete button.destroy': 'destroy'
+      'confirm:complete button.put_action': 'putAction'
 
 
     @parent = options.parent
@@ -398,6 +399,14 @@ class window.CrmModelView extends BaseView
       else
         $el.closest('.control-group').removeClass('warning')
     )
+
+    if @model.isDirty()
+      @$('.save').removeClass('disabled')
+      @$('.revert').removeClass('disabled')
+    else
+      @$('.save').addClass('disabled')
+      @$('.revert').addClass('disabled')
+
 
   onModelChanged: (e) ->
     @decorateDirty()
@@ -494,7 +503,15 @@ class window.CrmModelView extends BaseView
           el$.addClass('disabled')
     )
 
+  revert: (e, answer) ->
+    return if !@model.isDirty()
+    if answer
+      @clearErrors()
+      @model.set(@model.changedAttributesSinceSync())
+      @decorateDirty()
+
   save: () ->
+    return if !@model.isDirty()
     @clearErrors()
     @model.save(@fromForm())
 
@@ -567,7 +584,7 @@ class window.CollectionAppView extends WithChildrenView
     @events =
       'click .add-model': 'create'
       'click button.back': 'back'
-      'click a.collection-filter': 'filtersChanged'
+      'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
 
     @listenTo(@collection, 'reset', @addAll)

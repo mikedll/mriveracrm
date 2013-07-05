@@ -298,6 +298,11 @@ ul#projects_list li {
 
 .model-view {
   padding: 1em 0 0 0;
+
+  .btn-group.sensitive {
+    margin-left: 50px;
+    margin-right: 50px;
+  }
 }
 
 .btn-group-label {
