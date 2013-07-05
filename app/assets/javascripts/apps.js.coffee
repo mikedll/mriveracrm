@@ -133,6 +133,9 @@ class window.BaseView extends Backbone.View
   unregisterDirty: (model) ->
     @parent.unregisterDirty(model) if @parent?
 
+  clearHighlightedModelErrors: () ->
+    @parent.clearHighlightedModelErrors() if @parent?
+
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
@@ -533,6 +536,7 @@ class window.CrmModelView extends BaseView
     return if !@model.isDirty()
     if answer
       @clearErrors()
+      @clearHighlightedModelErrors()
       @model.set(@model.changedAttributesSinceSync())
       @copyModelToForm()
 
@@ -728,6 +732,9 @@ class window.CollectionAppView extends WithChildrenView
     @$("##{@modelName}-view-" + id)
 
   onSync: (model, resp, options) ->
+    @clearHighlightedModelErrors()
+
+  clearHighlightedModelErrors: () ->
     @$('.errors').hide()
 
   render: () ->
