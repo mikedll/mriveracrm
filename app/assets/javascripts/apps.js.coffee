@@ -451,7 +451,7 @@ class window.CrmModelView extends BaseView
       @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
-    if(e.ctrlKey == false && e.keyCode == 13)
+    if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
       @save()
       e.stopPropagation()
       return false
