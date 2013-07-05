@@ -11,12 +11,6 @@ class window.Invoices extends Backbone.Collection
 class window.ClientInvoiceView extends CrmModelView
   modelName: 'invoice'
 
-  render: () ->
-    @$el.html($('.invoice_view_example').children().clone()) if @$el.children().length == 0
-    @copyModelToForm()
-    @renderErrors(@model.validationError) if @model.validationError?
-    @
-
 class window.InvoiceListItemView extends ListItemView
   modelName: 'invoice'
   spawnViewType: ClientInvoiceView

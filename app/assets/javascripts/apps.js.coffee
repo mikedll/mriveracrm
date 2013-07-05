@@ -64,7 +64,8 @@ class window.BaseModel extends Backbone.Model
     @_isRequesting = false
 
     @_lastRequestError = null
-
+    @_attributesSinceSync = {}
+    @listenTo(@, 'invalid', @onInvalid)
     @listenTo(@, 'change', @onChange)
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
@@ -79,15 +80,39 @@ class window.BaseModel extends Backbone.Model
   isRequesting: () ->
     return @_isRequesting
 
+  onInvalid: () ->
+    @_isInvalid = true
+
   onChange: () ->
     attrs = @changedAttributes()
+
+    # todo: should check if we are out of date
     delete attrs['updated_at']
-    @_isDirty = !$.isEmptyObject(attrs)
+
+    _.each(attrs, (value, attribute_name) =>
+      if not _.has(@_attributesSinceSync, attribute_name)
+        @_attributesSinceSync[attribute_name] = @previous(attribute_name)
+      else if @_attributesSinceSync[attribute_name] == @get(attribute_name)
+        delete @_attributesSinceSync[attribute_name]
+    )
+    @_isDirty = !$.isEmptyObject(@_attributesSinceSync)
+    if @_isDirty
+      if @validate?
+        @validate(@attributes)
+      @_isInvalid = false if !@validationError?
+    else
+      @validationError = null
+      @_isInvalid = false
+
+
+  changedAttributesSinceSync: () ->
+    _.clone(@_attributesSinceSync)
 
   onRequest: () ->
     @_isRequesting = true
 
   onSync: () ->
+    @_attributesSinceSync = {}
     @_isRequesting = false
     @_isInvalid = false
     @_isDirty = false
@@ -114,6 +139,9 @@ class window.BaseView extends Backbone.View
   unregisterDirty: (model) ->
     @parent.unregisterDirty(model) if @parent?
 
+  clearHighlightedModelErrors: () ->
+    @parent.clearHighlightedModelErrors() if @parent?
+
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
@@ -134,8 +162,9 @@ class window.BaseView extends Backbone.View
     date.toString(AppsConfig.dateJsReadableDatetimeFormat)
 
 class window.BaseCollection extends Backbone.Collection
-  initialize: () ->
+  initialize: (models, options) ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
+    @parent = options['parent'] if _.has(options, 'parent')
     # underscore.string does not support pluralize
     # if @parent?
     #   @url = () ->
@@ -234,13 +263,16 @@ class window.ListItemView extends BaseView
     @removeDom()
 
   isDirtyForThisView: () ->
-    attrs = @model.changedAttributes()
-    delete attrs['updated_at']
-    !$.isEmptyObject(attrs)
+    @model.isDirty()
+
+  setTitle: () ->
+    s = @title()
+    @$('a .titleText').text(if s? && s.trim() != "" then s else "-")
 
   onModelChanged: (e) ->
     @decorateDirty()
-    @$('a .titleText').text(@title())
+    @decorateError()
+    @setTitle()
 
   decorateDirty: () ->
     if @model.isDirty()
@@ -277,8 +309,12 @@ class window.ListItemView extends BaseView
 
   render: () ->
     @$el.html($('.list-item-view-title-template a').clone()) if @$('a').length == 0
-    @$('a .titleText').text(@title())
+    @setTitle()
     @
+
+  clearHighlightedModelErrors: () ->
+    @$el.removeClass('error')
+    @parent.clearHighlightedModelErrors() if @parent?
 
   onRequest: () ->
     @decorateError()
@@ -326,9 +362,10 @@ class window.CrmModelView extends BaseView
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
-      'click a.save': 'save'
-      'confirm:complete a.destroy': 'destroy'
-      'confirm:complete a.put_action': 'putAction'
+      'click .btn.save': 'save'
+      'confirm:complete .btn.revert': 'revert'
+      'confirm:complete button.destroy': 'destroy'
+      'confirm:complete button.put_action': 'putAction'
 
 
     @parent = options.parent
@@ -337,9 +374,12 @@ class window.CrmModelView extends BaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
-    @listenTo(@model, 'change', @onChange)
+    @listenTo(@model, 'change', @onModelChanged)
 
     @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
+
+    @inputsCache = []
+    @readonlyInputsCache = []
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
@@ -362,11 +402,57 @@ class window.CrmModelView extends BaseView
   destroy: (e, answer) ->
     @model.destroy({wait: true}) if answer
 
-  onChange: (e) ->
-    # check if view is in editing mode or not
+  decorateDirty: () ->
+    changed = @model.changedAttributesSinceSync()
+    @inputsCache.each((i, domEl)  =>
+      el$ = $(domEl)
+      attribute_name = @nameFromInput( el$ )
+      if attribute_name?
+        if @model.isDirty() and _.has(changed, attribute_name)
+          el$.closest('.control-group').addClass('warning')
+        else
+          el$.closest('.control-group').removeClass('warning')
+      else
+        # this may not be an input related to our model
+    )
+
+    @$('.read-only-field').each((i, domEl) =>
+      el$ = $(domEl)
+      attribute_name = el$.data('name')
+      if attribute_name? and @model.isDirty() and _.has(changed, attribute_name)
+        el$.closest('.control-group').addClass('warning')
+      else
+        el$.closest('.control-group').removeClass('warning')
+    )
+
+    if @model.isDirty()
+      @$('.save').removeClass('disabled')
+      @$('.revert').removeClass('disabled')
+    else
+      @$('.save').addClass('disabled')
+      @$('.revert').addClass('disabled')
+
+
+  onModelChanged: (e) ->
+    # since this is the primary editing area of this model,
+    # we really don't update it just because the model changes.
+    # in the event another editing area updates this,
+    # more code needs to be written here.
+    #
+    # we assume that 1 view will update the model,
+    # and other views will really utilize the validate
+    # method of this.
+    #
+    # we do recorate the form, though.
+    #
+    @decorateDirty()
+    if @model.validationError?
+      @renderErrors(@model.validationError)
+    else
+      @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
-    if(e.ctrlKey == false && e.keyCode == 13)
+    if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
       @save()
       e.stopPropagation()
       return false
@@ -379,6 +465,13 @@ class window.CrmModelView extends BaseView
 
     return true
 
+  nameFromInput: (elSelection) ->
+    matched = @attributeMatcher.exec(elSelection.prop('name'))
+    attribute_name = null
+    if matched? && matched.length == 2
+      attribute_name = matched[1]
+    attribute_name
+
   #
   # returns null if it can't get the attribute name and value
   #
@@ -387,10 +480,8 @@ class window.CrmModelView extends BaseView
   # e.g. ['company', 'Smith and Son']
   #
   nameAndValueFromInput: (elSelection) ->
-    matched = @attributeMatcher.exec(elSelection.prop('name'))
-    attribute_name = null
-    if matched? && matched.length == 2
-      attribute_name = matched[1]
+    attribute_name = @nameFromInput(elSelection)
+    if attribute_name?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
       else
@@ -409,8 +500,7 @@ class window.CrmModelView extends BaseView
 
   showNestedCollectionApp: (collectionName, collectionKlass, collectionAppViewKlass) ->
     if !@[collectionName]?
-      @[collectionName] = new collectionKlass()
-      @[collectionName].parent = @model
+      @[collectionName] = new collectionKlass([], parent: @model)
 
     @[collectionName + 'AppView'] = new collectionAppViewKlass({parent: @, collection: @[collectionName]})
     @[collectionName + 'AppView'].render()
@@ -418,28 +508,27 @@ class window.CrmModelView extends BaseView
     @[collectionName].fetch()
 
   copyModelToForm: () ->
-    _.each(@$(':input'), (el) =>
+    @inputsCache.each((i, el) =>
       el$ = $(el)
-      matcher = new RegExp(@modelName + "\\[(\\w+)\\]")
-      attribute_key = matcher.exec(el$.prop('name'))
-      if (attribute_key? && attribute_key.length == 2 && @model.get(attribute_key[1])?)
-        v = @model.get(attribute_key[1])
+      attribute_name = @nameFromInput(el$)
+      if attribute_name? && @model.get(attribute_name)?
+        v = @model.get(attribute_name)
         if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_key[1])
+          v = @toHumanReadableDateTimeFormat(attribute_name)
         else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_key[1])
+          v = @toHumanReadableDateFormat(attribute_name)
         el$.val(v)
     )
 
-    _.each(@$('.read-only-field'), (el) =>
+    @readonlyInputsCache.each((i, el) =>
       el$ = $(el)
-      attribute_key = el$.data('name')
-      if (attribute_key? && @model.get(attribute_key)?)
-        v = @model.get(attribute_key)
+      attribute_name = el$.data('name')
+      if (attribute_name? && @model.get(attribute_name)?)
+        v = @model.get(attribute_name)
         if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_key)
+          v = @toHumanReadableDateTimeFormat(attribute_name)
         else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_key)
+          v = @toHumanReadableDateFormat(attribute_name)
         el$.find('.controls').text(v)
     )
 
@@ -453,16 +542,25 @@ class window.CrmModelView extends BaseView
           el$.addClass('disabled')
     )
 
+  revert: (e, answer) ->
+    return if !@model.isDirty()
+    if answer
+      @model.set(@model.changedAttributesSinceSync())
+      @copyModelToForm()
+      @clearErrors()
+      @clearHighlightedModelErrors()
+
   save: () ->
+    return if !@model.isDirty()
     @clearErrors()
-    @model.save(@fromForm())
+    @model.save()
 
   renderErrors: (errors) ->
     _.each(errors, (value, key, list) =>
       @$el
         .find(".control-group.#{@modelName}_#{key}")
         .addClass('error')
-          .find('.controls').append('<span class="help-inline">' + value + '</span>')
+          .find('.controls').find('span.help-inline').remove().end().append('<span class="help-inline">' + value + '</span>')
           .end()
         .end()
       )
@@ -470,10 +568,17 @@ class window.CrmModelView extends BaseView
   onInvalid: () ->
     @renderErrors(@model.validationError) if @model.validationError?
 
-  clearErrors: () ->
-    @$el
-      .removeClass('error')
-      .find('span.help-inline').remove()
+  clearErrors: (changedAttributesw) ->
+    toFix = @inputsCache
+
+    if arguments.length > 0 and changedAttributes?
+      toFix = toFix.filter((el) => _.has(changedAttributes, @nameFromInput($(el))))
+
+    toFix
+      .closest('.control-group')
+        .removeClass('error')
+        .find('span.help-inline').remove()
+
 
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )
@@ -485,19 +590,27 @@ class window.CrmModelView extends BaseView
 
   onSync: (model, resp, options) ->
     @$el.prop('id', @id()) if @$el.prop('id') == ""
-    @$el.find('.control-group')
-      .removeClass('error')
-      .find('span.help-inline').remove()
+    @clearErrors()
     @copyModelToForm()
-    @$el.find(':input:visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
+    @decorateDirty()
+    @renderErrors(@model.validationError) if @model.validationError?
+    @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
   render: () ->
-    @$el.html($(".#{@modelName}_view_example form").clone())
-    @$('input.datepicker').datepicker(
+    @$el.html($(".#{@modelName}_view_example form").clone()) if @$el.children().length == 0
+    @inputsCache = @$(':input')
+    @readonlyInputsCache = @$('.read-only-field')
+    @inputsCache.filter('input.datepicker').datepicker(
       dateFormat: AppsConfig.datePickerDateFormat
     )
+    @inputsCache.filter('input.datetimepicker').datetimepicker(
+      dateFormat: AppsConfig.datePickerDateFormat,
+      timeFormat: AppsConfig.datetimePickerTimeFormat
+    )
     @copyModelToForm()
+    @decorateDirty()
+    @renderErrors(@model.validationError) if @model.validationError?
     @
 
 class window.SingleModelAppView extends WithChildrenView
@@ -518,7 +631,7 @@ class window.CollectionAppView extends WithChildrenView
     @events =
       'click .add-model': 'create'
       'click button.back': 'back'
-      'click a.collection-filter': 'filtersChanged'
+      'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
 
     @listenTo(@collection, 'reset', @addAll)
@@ -629,6 +742,9 @@ class window.CollectionAppView extends WithChildrenView
     @$("##{@modelName}-view-" + id)
 
   onSync: (model, resp, options) ->
+    @clearHighlightedModelErrors()
+
+  clearHighlightedModelErrors: () ->
     @$('.errors').hide()
 
   render: () ->

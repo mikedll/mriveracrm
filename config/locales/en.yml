@@ -3,6 +3,7 @@
 
 en:
   delete_confirm: "Delete this?"
+  revert_confirm: "Are you sure you want to revert all your changes?"
   client:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."

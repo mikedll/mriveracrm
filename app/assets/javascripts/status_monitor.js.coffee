@@ -32,10 +32,6 @@ class window.StatusMonitorView extends CrmModelView
   onError: () ->
     @onComplete()
 
-  render: () ->
-    CrmModelView.prototype.render.apply(this, arguments)
-    @
-
 $(() ->
   guiContaner = $('.gui-container')
 
