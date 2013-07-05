@@ -358,6 +358,7 @@ class window.CrmModelView extends BaseView
 
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
+    @useDirty = true
     @events =
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
@@ -403,6 +404,7 @@ class window.CrmModelView extends BaseView
     @model.destroy({wait: true}) if answer
 
   decorateDirty: () ->
+    return if !@useDirty
     changed = @model.changedAttributesSinceSync()
     @inputsCache.each((i, domEl)  =>
       el$ = $(domEl)
@@ -597,8 +599,11 @@ class window.CrmModelView extends BaseView
     @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
     @parent.rebindGlobalHotKeys()
 
-  render: () ->
+  buildDom: () ->
     @$el.html($(".#{@modelName}_view_example form").clone()) if @$el.children().length == 0
+
+  render: () ->
+    @buildDom()
     @inputsCache = @$(':input')
     @readonlyInputsCache = @$('.read-only-field')
     @inputsCache.filter('input.datepicker').datepicker(
