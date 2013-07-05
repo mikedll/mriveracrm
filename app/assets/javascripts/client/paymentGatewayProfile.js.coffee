@@ -8,23 +8,27 @@ class window.PaymentGatewayProfileView extends CrmModelView
 
   initialize: (options) ->
     CrmModelView.prototype.initialize.apply(this, arguments)
+    @useDirty = false
     @events =
       'ajax:beforeSend form': 'noSubmit'
-      'click a.save': 'save'
+      'click .save': 'save'
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
+
+  save: () ->
+    @clearErrors()
+    @model.save(@fromForm())
 
   onSync: () ->
     CrmModelView.prototype.onSync.apply(this, arguments)
     @$('.errors').hide()
     @$(':input').val('')
+
+  copyModelToForm: () ->
     @$('input[name="authorize_net_payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
 
-  render: () ->
+  buildDom: () ->
     @$el.html($('.templates .payment-gateway-profile-view-example').children().clone()) if @$el.children().length == 0
-    @$('input[name="authorize_net_payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
-    @renderErrors(@model.validationError) if @model.validationError?
-    @
 
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )
