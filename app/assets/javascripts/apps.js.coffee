@@ -162,8 +162,9 @@ class window.BaseView extends Backbone.View
     date.toString(AppsConfig.dateJsReadableDatetimeFormat)
 
 class window.BaseCollection extends Backbone.Collection
-  initialize: () ->
+  initialize: (models, options) ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
+    @parent = options['parent'] if _.has(options, 'parent')
     # underscore.string does not support pluralize
     # if @parent?
     #   @url = () ->
@@ -499,8 +500,7 @@ class window.CrmModelView extends BaseView
 
   showNestedCollectionApp: (collectionName, collectionKlass, collectionAppViewKlass) ->
     if !@[collectionName]?
-      @[collectionName] = new collectionKlass()
-      @[collectionName].parent = @model
+      @[collectionName] = new collectionKlass([], parent: @model)
 
     @[collectionName + 'AppView'] = new collectionAppViewKlass({parent: @, collection: @[collectionName]})
     @[collectionName + 'AppView'].render()
