@@ -96,7 +96,7 @@ class window.BaseModel extends Backbone.Model
         delete @_attributesSinceSync[attribute_name]
     )
     @_isDirty = !$.isEmptyObject(@_attributesSinceSync)
-    @validate(@attributes)
+    @validate(@attributes) if @validate?
     @_isInvalid = false if !@validationError?
 
   changedAttributesSinceSync: () ->
