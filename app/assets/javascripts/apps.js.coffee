@@ -419,9 +419,9 @@ class window.CrmModelView extends BaseView
       el$ = $(domEl)
       attribute_name = el$.data('name')
       if attribute_name? and @model.isDirty() and _.has(changed, attribute_name)
-        $el.closest('.control-group').addClass('warning')
+        el$.closest('.control-group').addClass('warning')
       else
-        $el.closest('.control-group').removeClass('warning')
+        el$.closest('.control-group').removeClass('warning')
     )
 
     if @model.isDirty()
