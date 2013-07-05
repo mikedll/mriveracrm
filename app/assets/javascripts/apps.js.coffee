@@ -554,7 +554,7 @@ class window.CrmModelView extends BaseView
       @$el
         .find(".control-group.#{@modelName}_#{key}")
         .addClass('error')
-          .find('.controls').append('<span class="help-inline">' + value + '</span>')
+          .find('.controls').find('span.help-inline').remove().end().append('<span class="help-inline">' + value + '</span>')
           .end()
         .end()
       )
