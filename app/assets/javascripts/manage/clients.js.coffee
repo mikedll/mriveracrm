@@ -7,7 +7,7 @@ class window.Client extends BaseModel
     "#{@get('first_name')} #{@get('last_name')}"
 
   validate: (attrs, options) ->
-    if (attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
+    if (attrs.email? && attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
       return {email: "is invalid"}
     return
 
