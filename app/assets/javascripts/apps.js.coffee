@@ -305,6 +305,10 @@ class window.ListItemView extends BaseView
     @setTitle()
     @
 
+  clearHighlightedModelErrors: () ->
+    @$el.removeClass('error')
+    @parent.clearHighlightedModelErrors() if @parent?
+
   onRequest: () ->
     @decorateError()
     @decorateRequesting()
@@ -535,10 +539,10 @@ class window.CrmModelView extends BaseView
   revert: (e, answer) ->
     return if !@model.isDirty()
     if answer
-      @clearErrors()
-      @clearHighlightedModelErrors()
       @model.set(@model.changedAttributesSinceSync())
       @copyModelToForm()
+      @clearErrors()
+      @clearHighlightedModelErrors()
 
   save: () ->
     return if !@model.isDirty()
