@@ -7,7 +7,9 @@
     = link_to "Home", root_path, :tabIndex => '-1'
     |
     - if current_user.employee
-      = link_to 'Manage Clients', manage_clients_path, :tabIndex => '-1'
+      = link_to 'Products', manage_products_path, :tabIndex => '-1'
+      |
+      = link_to 'Clients', manage_clients_path, :tabIndex => '-1'
       |
       = link_to 'System Status', manage_status_monitor_path, :tabIndex => '-1'
     - else

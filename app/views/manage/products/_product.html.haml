@@ -1,0 +1,17 @@
+
+= simple_form_for product, :remote => true, :url => manage_products_path(product), :html => { :class => 'form-horizontal'} do |f|
+
+  = f.input :name, :input_html => product.persisted? ? {} : { :id => nil }
+
+  = f.input :active, :input_html => product.persisted? ? {} : { :id => nil }
+
+  .control-group
+    .control-label
+      Images
+    .controls
+      .images_drag_and_drop
+
+  .control-group
+    .control-label
+    .controls
+      = render :partial => 'shared/model_view_basic_buttons'

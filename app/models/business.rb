@@ -8,6 +8,7 @@ class Business < ActiveRecord::Base
   cattr_accessor :current
 
   has_many :clients, :dependent => :destroy
+  has_many :products, :dependent => :destroy
   has_many :employees, :dependent => :destroy
 
   has_many :invitations, :dependent => :destroy

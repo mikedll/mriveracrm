@@ -21,6 +21,9 @@ MikedllCrm::Application.routes.draw do
 
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
+    resources :products do
+    end
+
     resources :clients do
       put :archive
       put :unarchive

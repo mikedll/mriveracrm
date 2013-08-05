@@ -134,7 +134,15 @@ FactoryGirl.define do
         status { "successful" }
       end
     end
+  end
 
+  factory :product do
+    business { FactoryGirl.create(:business) }
+    name { "Widget " + SecureRandom.base64(3) }
+    active { true }
+  end
+
+  factory :general_image do
   end
 
 end
