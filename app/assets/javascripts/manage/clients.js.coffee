@@ -16,7 +16,6 @@ class window.Clients extends Backbone.Collection
   url: '/manage/clients'
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
-    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
     @comparator = (client) ->
       client.get('id')
 
