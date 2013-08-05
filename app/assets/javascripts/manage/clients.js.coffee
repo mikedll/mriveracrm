@@ -70,14 +70,3 @@ class window.ClientAppView extends CollectionAppView
   title: () ->
     'Clients'
 
-
-$(() ->
-  guiContaner = $('.gui-container')
-  stack = new StackedChildrenView(el: guiContaner)
-
-  clients = new Clients()
-  clientApp = new ClientAppView(el: guiContaner.find('.clients-gui'), collection: clients, parent: stack)
-  clientApp.render()
-  stack.childViewPushed(clientApp)
-  clients.reset(__clients)
-  )

@@ -5,11 +5,11 @@
   = title
 
 .app-top
-  = render :partial => 'shared/app_top' if app_top
+  = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => defined?(disable_create) && disable_create } if app_top
 
 .row-fluid
   .span3
-    %ul.invoices-list.models-list
+    %ul.models-list{:class => "#{app_class}-list" }
 
   .span9
     .errors.alert.alert-error.hide
