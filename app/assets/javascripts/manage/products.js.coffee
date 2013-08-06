@@ -5,16 +5,15 @@ class window.Product extends BaseModel
   fullName: () ->
     @get('name')
 
+  initialize: () ->
+    BaseModel.prototype.initialize.apply(this, arguments)
+    @images = new RelatedImages(@get('images'), parent: @)
+    @unset('images', silent: true)
+
   validate: (attrs, options) ->
     if (attrs.email? && attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
       return {email: "is invalid"}
     return
-
-  addImageIfNotSynched: (image) ->
-    existing = _.find(@get('images'), (i) -> i.id == image.id)
-    if existing?
-      return false
-    @get('images').push(image)
 
 class window.Products extends Backbone.Collection
   model: Product
@@ -32,32 +31,19 @@ class window.ProductView extends CrmModelView
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(this, arguments)
-    @$('.images_existing').empty()
-    _.each(@model.get('images'), (image) =>
-      node = $(".image_view_example .image").clone()
-      node.find('img').attr('src', image.data.thumb.url)
-      @$('.images_existing').append(node)
-    )
 
   render: () ->
-    $this = this
     CrmModelView.prototype.render.apply(this, arguments)
 
-    dropzone = new Dropzone(@$('.images_drag_and_drop').get(0),
-      url: "/manage/products/#{@model.get('id')}/images"
-      paramName: 'data',
-      parallelUploads: 3,
-      uploadMultiple: '' # should enable this at some point, but appends [] to param name
-    )
-    dropzone.on('sending', (file, xhr, formData) =>
-      formData.append('authenticity_token', @$('input[name=authenticity_token]').val())
-    )
-    dropzone.on('uploadprogress', (file, progress, bytesSent) =>
-    )
-    dropzone.on('success', (file, data, xhrProgressEvent) =>
-      @model.addImageIfNotSynched(data)
-      @copyModelToForm()
-    )
+    # should i do something different if render has already been called,
+    # and imagesView already exists? what if this render() call did not
+    # delete the existing .image-collection-container dom element?
+    # why start from scratch?
+
+    @imagesView = new RelatedImagesCollectionView(el: @$('.image-collection-container'), collection: @model.images, parent: @)
+    @imagesView.render()
+    @
+
 
 class window.ProductListItemView extends ListItemView
   modelName: 'product'
