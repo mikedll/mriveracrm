@@ -28,8 +28,6 @@ $(() ->
 
   if typeof(anchorSelector) != "undefined"
     config = anchorSelectorsToAppConfigs[anchorSelector]
-    console.log(anchorSelector)
-    console.log(config)
     rootViewAnchor = guiContaner.find(anchorSelector)
     modelCollectionKlass = config.modelCollectionKlass
     rootAppViewKlass = config.rootAppViewKlass
