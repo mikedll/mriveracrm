@@ -11,7 +11,7 @@ class Business < ActiveRecord::Base
   has_many :employees, :dependent => :destroy
 
   has_many :invitations, :dependent => :destroy
-  has_many :general_images, :dependent => :destroy
+  has_many :images, :dependent => :destroy
 
   def invite_employee(email)
     employee = employees.find_by_email(email)

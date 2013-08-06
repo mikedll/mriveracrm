@@ -40,6 +40,17 @@ Spork.prefork do
       DatabaseCleaner.clean
     end
 
+
+    # Cleanup carrierwave images
+    # config.after(:all) do      
+    #   if Rails.env.test? || Rails.env.cucumber?
+    #     tmp = Factory(:general_image)
+    #     store_path = File.dirname(File.dirname(tmp.data.url))
+    #     temp_path = tmp.logo.cache_dir
+    #     FileUtils.rm_rf(Dir["#{Rails.root}/public/#{store_path}/[^.]*"])
+    #     FileUtils.rm_rf(Dir["#{temp_path}/[^.]*"])
+    #   end
+    # end
   end
 end
 

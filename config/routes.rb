@@ -21,10 +21,9 @@ MikedllCrm::Application.routes.draw do
 
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
-    resources :general_images, :path => 'images' do
-    end
 
     resources :products do
+      resources :images
     end
 
     resources :clients do

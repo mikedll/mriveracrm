@@ -78,23 +78,17 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
     t.datetime "updated_at"
   end
 
-  create_table "general_images", :force => true do |t|
-    t.integer  "business_id"
-    t.string   "data"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
-  end
-
-  create_table "general_images_products", :id => false, :force => true do |t|
-    t.integer "general_image_id"
-    t.integer "product_id"
-  end
-
   create_table "images", :force => true do |t|
     t.string   "data"
     t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "business_id"
+  end
+
+  create_table "images_products", :id => false, :force => true do |t|
+    t.integer "image_id"
+    t.integer "product_id"
   end
 
   create_table "invitations", :force => true do |t|

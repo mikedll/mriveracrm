@@ -142,7 +142,7 @@ FactoryGirl.define do
     active { true }
   end
 
-  factory :general_image do
+  factory :image do
     business { FactoryGirl.create(:business) }
   end
 

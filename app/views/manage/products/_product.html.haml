@@ -9,9 +9,7 @@
     .control-label
       Images
     .controls
-      .images_existing
-        - product.general_images.each do |i|
-          = i.data
+      .images_existing.image-list
       .images_drag_and_drop.dropzone
         .dz-default.dz-message
           %span

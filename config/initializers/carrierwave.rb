@@ -3,7 +3,7 @@ CarrierWave.configure do |config|
 
   s3store = YAML.load( File.read(Rails.root.join('config', 's3store.yml')))[Rails.env]
 
-  config.root = Rails.root.join('tmp')
+  config.root = Rails.root.join('public')
   config.fog_credentials = {
     :provider               => 'AWS',       # required
     :aws_access_key_id      => ENV['AMAZON_ACCESS_KEY_ID'],
@@ -15,4 +15,9 @@ CarrierWave.configure do |config|
 
   config.s3_use_ssl = true
   config.fog_host     = "https://#{config.fog_directory}.s3.amazonaws.com"            # optional, defaults to nil
+
+
+  if Rails.env.test?
+    config.enable_processing = false
+  end
 end

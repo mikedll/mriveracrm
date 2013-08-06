@@ -11,19 +11,19 @@ class Manage::ProductsController < Manage::BaseController
 
     response_for(:index) do |format|
       format.html
-      format.js { render :json => current_objects }
+      format.js { render :json => current_objects.to_json(:include => :images) }
     end
 
     response_for(:show, :update, :destroy) do |format|
-      format.json { render :json => current_object }
+      format.json { render :json => current_object.to_json(:include => :images) }
     end
 
     response_for(:create) do |format|
-      format.js { render :status => :created, :json => current_object }
+      format.js { render :status => :created, :json => current_object.to_json(:include => :images) }
     end
 
     response_for(:update_fails, :create_fails) do |format|
-      format.js { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
+      format.js { render :status => :unprocessable_entity, :json => { :object => current_object.to_json(:include => :images), :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
   end
 
