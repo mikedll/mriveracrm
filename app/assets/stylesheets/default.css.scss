@@ -309,6 +309,12 @@ ul#projects_list li {
   }
 }
 
+.dropzone {
+  min-height: 200px;
+  border: dashed 3px #cccccc;
+  text-align: center;
+}
+
 .btn-group-label {
   margin-left: 12px;
   font-size: 10pt;

@@ -1,7 +1,6 @@
 class Business < ActiveRecord::Base
 
   has_many :projects
-
   has_many :users, :dependent => :destroy
   has_many :credentials # used validations in credential. destroyed by users, not here.
 
@@ -12,6 +11,7 @@ class Business < ActiveRecord::Base
   has_many :employees, :dependent => :destroy
 
   has_many :invitations, :dependent => :destroy
+  has_many :general_images, :dependent => :destroy
 
   def invite_employee(email)
     employee = employees.find_by_email(email)

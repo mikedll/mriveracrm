@@ -1,4 +1,4 @@
-
+Dropzone.autoDiscover = false;
 
 window.AppsConfig =
   dateJsRubyDatetimeFormat: 'yyyy-MM-ddTHH:mm:ss'

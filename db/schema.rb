@@ -79,9 +79,10 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
   end
 
   create_table "general_images", :force => true do |t|
+    t.integer  "business_id"
     t.string   "data"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
   end
 
   create_table "general_images_products", :id => false, :force => true do |t|

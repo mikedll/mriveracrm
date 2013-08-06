@@ -1,6 +1,7 @@
 // 
 //= require jquery
 //= require jquery_ujs
+//= require vendor/dropzone
 //= require vendor/jquery-ui/jquery-ui
 //= require jquery-ui-bootstrapconflicts.js
 //= require jquery.easing-1.3.pack

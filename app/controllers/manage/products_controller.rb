@@ -15,7 +15,7 @@ class Manage::ProductsController < Manage::BaseController
     end
 
     response_for(:show, :update, :destroy) do |format|
-      format.js { render :json => current_object }
+      format.json { render :json => current_object }
     end
 
     response_for(:create) do |format|

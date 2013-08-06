@@ -9,6 +9,7 @@ class Products < ActiveRecord::Migration
     end
 
     create_table :general_images do |t|
+      t.integer :business_id
       t.string :data
       t.timestamps
     end

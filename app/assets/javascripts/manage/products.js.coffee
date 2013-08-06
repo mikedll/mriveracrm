@@ -24,6 +24,25 @@ class window.ProductView extends CrmModelView
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
 
+  render: () ->
+    $this = this
+    CrmModelView.prototype.render.apply(this, arguments)
+
+    dropzone = new Dropzone(@$('.images_drag_and_drop').get(0),
+      url: '/manage/images'
+      paramName: 'data',
+      parallelUploads: 3,
+      uploadMultiple: '' # should enable this at some point, but appends [] to param name
+    )
+    dropzone.on('sending', (file, xhr, formData) =>
+      formData.append('authenticity_token', @$('input[name=authenticity_token]').val())
+    )
+    dropzone.on('uploadprogress', (file, progress, bytesSent) =>
+    )
+    dropzone.on('success', (file) =>
+      @$('.images_existing').append($('<span>' + file + '</span>'))
+    )
+
 class window.ProductListItemView extends ListItemView
   modelName: 'product'
   spawnViewType: ProductView

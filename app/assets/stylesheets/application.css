@@ -1,7 +1,8 @@
 /*
  *
- *= require default
+ *= require vendor/dropzone
  *= require vendor/jquery-ui/jquery-ui
  *= require vendor/timepicker/jquery-ui-timepicker-addon
+ *= require default
  *
  */
