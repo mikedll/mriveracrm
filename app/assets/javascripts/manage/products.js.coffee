@@ -12,7 +12,7 @@ class window.Product extends BaseModel
 
   onSync: () ->
     BaseModel.prototype.onSync.apply(this, arguments)
-    @images.reset(@get('images')) # need to fix reset event on collection
+    # @images.reset(@get('images')) # need to fix reset event on collection
     @unset('images', silent: true)
 
   validate: (attrs, options) ->
