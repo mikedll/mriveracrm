@@ -34,7 +34,7 @@ class window.RelatedImagesCollectionView extends BaseView
   initialize: () ->
     BaseView.prototype.initialize.apply(this, arguments)
 
-    @listenTo(@collection, 'reset', @addAll)
+    @listenTo(@collection, 'reset', @onReset)
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
@@ -49,6 +49,10 @@ class window.RelatedImagesCollectionView extends BaseView
 
   clearHighlightedModelErrors: () ->
     @$('.errors').hide()
+
+  onReset: () ->
+    _.each( @collection.toArray(), (model) => @collection.remove(model) )
+    @addAll()
 
   addAll: () ->
     @collection.each(@addOne, @)

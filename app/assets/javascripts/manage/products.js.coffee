@@ -10,6 +10,11 @@ class window.Product extends BaseModel
     @images = new RelatedImages(@get('images'), parent: @)
     @unset('images', silent: true)
 
+  onSync: () ->
+    BaseModel.prototype.onSync.apply(this, arguments)
+    @images.reset(@get('images')) # need to fix reset event on collection
+    @unset('images', silent: true)
+
   validate: (attrs, options) ->
     if (attrs.email? && attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
       return {email: "is invalid"}
