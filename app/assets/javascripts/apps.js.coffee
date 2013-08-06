@@ -401,7 +401,10 @@ class window.CrmModelView extends BaseView
     @$el.remove() if @$el?
 
   destroy: (e, answer) ->
+    e.preventDefault()
+    e.stopPropagation()
     @model.destroy({wait: true}) if answer
+    return false
 
   decorateDirty: () ->
     return if !@useDirty

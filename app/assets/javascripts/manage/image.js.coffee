@@ -18,11 +18,12 @@ class ImageView extends CrmModelView
     CrmModelView.prototype.initialize.apply(@, arguments)
 
     $.extend(@events,
-      'click img': 'destroyNow'
+      'change input.active': 'toggleActive'
     )
 
-  destroyNow: () ->
-    @model.destroy({wait:true})
+  toggleActive: (e) ->
+    @model.set('active', $(e.target).is(':checked'))
+    @save()
 
   buildDom: () ->
     @$el.html($(".image_view_example .image").children().clone()) if @$el.children().length == 0
