@@ -88,5 +88,6 @@ class window.RelatedImagesCollectionView extends BaseView
     dropzone.on('uploadprogress', (file, progress, bytesSent) =>
     )
     dropzone.on('success', (file, data, xhrProgressEvent) =>
+      file.previewElement.remove()
       @collection.add(new Image(data))
     )
