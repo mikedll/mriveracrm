@@ -2,8 +2,11 @@
 .image
   %img{:src => '', :class => 'product-image'}
 
+  .clearfix
+  %a.destroy.btn.btn-mini.pull-right{ :data => { :confirm => t('delete_confirm') } }
+    %i.icon-trash
+
   %label.checkbox
     = check_box_tag 'product_image[active]', 'true', false, :class => 'active boolean'
     Active
 
-  %input.destroy.btn.btn-mini.btn-danger{ :type => 'button', :data => { :confirm => t('delete_confirm') }, :value => 'Delete' }
