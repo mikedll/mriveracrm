@@ -5,7 +5,22 @@
 
   = f.input :price, :input_html => product.persisted? ? {} : { :id => nil, :class => ["currency"] }
 
+  = f.input :weight, :input_html => product.persisted? ? {} : { :id => nil }
+
+  = f.input :weight_units, :input_html => product.persisted? ? {} : { :id => nil }
+
   = f.input :active, :input_html => product.persisted? ? {} : { :id => nil }
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.btn.expand_more{ :data => { :toggle => "button" }}
+          %i.icon-chevron-down
+          Description
+
+  .more_info.hide
+    = f.input :description, :as => :text, :input_html => {}.merge(product.persisted? ? {} : { :id => nil })
 
   .control-group
     .control-label
@@ -14,10 +29,11 @@
       .models-list.image-collection-container
         .errors
         .images_existing.image-list
-        .images_drag_and_drop.dropzone.dz-clickable
+        .images_drag_and_drop.dropzone
 
   .control-group
     .control-label
     .controls
       = render :partial => 'shared/model_view_basic_buttons'
+      = render :partial => 'shared/model_view_delete_button'
   

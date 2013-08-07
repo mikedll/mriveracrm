@@ -5,6 +5,6 @@ class Product < ActiveRecord::Base
   has_many :product_images
   has_many :images, :through => :product_images
 
-  attr_accessible :name, :price, :active
+  attr_accessible :name, :price, :weight, :active, :weight_units, :description
 
 end

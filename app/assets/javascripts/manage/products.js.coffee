@@ -2,6 +2,11 @@
 class window.Product extends BaseModel
   defaults: () ->
     name: 'New Product'
+    description: ""
+    price: null
+    weight: null
+    weight_units: ""
+    active: false
   fullName: () ->
     @get('name')
 
@@ -33,6 +38,15 @@ class window.ProductView extends CrmModelView
 
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
+    @events = $.extend(@events,
+      'click a.expand_more': 'expandMore'
+    )
+
+  expandMore: (e) ->
+    if $(e.target).hasClass('active')
+      @$('.more_info').hide()
+    else
+      @$('.more_info').show()
 
   render: () ->
     CrmModelView.prototype.render.apply(this, arguments)

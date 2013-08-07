@@ -34,6 +34,14 @@ body {
 
 }
 
+/* reset */
+
+input[type=number]::-webkit-inner-spin-button,
+input[type=number]::-webkit-outer-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
 /* util */
 
 .clear {
@@ -323,6 +331,14 @@ ul#projects_list li {
   min-height: 100px;
   border: dashed 3px #cccccc;
   text-align: center;
+}
+
+.dropzone .dz-default.dz-message {
+  background-image: none;
+}
+
+.dropzone .dz-default.dz-message span {
+  display: inline;
 }
 
 .btn-group-label {

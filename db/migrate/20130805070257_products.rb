@@ -2,8 +2,11 @@ class Products < ActiveRecord::Migration
   def up
     create_table :products do |t|
       t.integer :business_id
-      t.string  :name
+      t.string  :name, :null => false, :default => ""
+      t.text    :description, :null => false, :default => ""
       t.decimal :price
+      t.float   :weight
+      t.string  :weight_units, :null => false, :default => ""
       t.boolean :active
       t.timestamps
     end

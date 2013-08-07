@@ -498,6 +498,16 @@ class window.CrmModelView extends BaseView
     if attribute_name?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
+      else if elSelection.hasClass('float')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = parseFloat(elSelection.val())
+      else if elSelection.hasClass('decimal')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = elSelection.val() # don't bother converting to number - may lose precision
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
