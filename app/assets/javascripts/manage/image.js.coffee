@@ -10,7 +10,7 @@ class window.RelatedImages extends BaseCollection
       "#{@parent.url()}/images"
 
 class ImageView extends CrmModelView
-  modelName: 'image'
+  modelName: 'product_image'
   tagName: 'div'
   className: 'image'
 
