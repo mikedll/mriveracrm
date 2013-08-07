@@ -4,5 +4,6 @@
  *= require vendor/jquery-ui/jquery-ui
  *= require vendor/timepicker/jquery-ui-timepicker-addon
  *= require default
+ *= require_tree ./manage
  *
  */

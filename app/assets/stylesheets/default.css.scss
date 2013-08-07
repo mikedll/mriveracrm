@@ -321,9 +321,14 @@ ul#projects_list li {
     margin: 20px;
 
     img {
+      padding: 4px;
       width: 160px;
       height: 133p;
-    }    
+    }
+
+    .controls {
+      margin-left: 0;
+    }
   }
 }
 

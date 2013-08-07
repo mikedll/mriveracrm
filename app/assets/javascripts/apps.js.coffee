@@ -366,7 +366,8 @@ class window.CrmModelView extends BaseView
       'click .btn.save': 'save'
       'confirm:complete .btn.revert': 'revert'
       'confirm:complete .btn.destroy': 'destroy'
-      'confirm:complete .btn.put_action': 'putAction'
+      'confirm:complete .btn.put_action': 'putActionConfirmed'
+      'click .btn.put_action:not([data-confirm])': 'putAction'
 
 
     @parent = options.parent
@@ -388,8 +389,11 @@ class window.CrmModelView extends BaseView
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
-  putAction: (e, answer) ->
-    @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
+  putAction: (e) ->
+    @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true)
+
+  putActionConfirmed: (e, answer) ->
+     @putAction(e) if answer
 
   onDestroy: () ->
     @removeDom()

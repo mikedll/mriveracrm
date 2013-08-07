@@ -31,6 +31,11 @@ class ImageView extends CrmModelView
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
     @$('img').attr('src', @model.get('image').data.thumb.url)
+    @$el.parent().children().removeClass('primary')
+    if @model.get('primary')
+      @$el.addClass('primary')
+    else
+      @$el.removeClass('primary')
 
 class window.RelatedImagesCollectionView extends BaseView
   initialize: () ->

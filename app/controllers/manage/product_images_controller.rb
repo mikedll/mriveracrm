@@ -70,6 +70,25 @@ class Manage::ProductImagesController < Manage::BaseController
     end
   end
 
+  def make_primary
+    ProductImage.transaction do
+      old_primary = parent_object.product_images.primary.first
+
+      if old_primary && !old_primary.update_attributes(:primary => false)
+        current_object.errors.add(:base, 'failed to remove primary status on old image')
+        response_for :update_fails
+      end
+      
+      current_object.primary = true
+      if current_object.save
+        response_for :update        
+      else
+        response_for :update_fails
+      end
+    end
+  end
+
+
   def parent_object
     @parent_object ||= Business.current.products.find params[:product_id]
   end

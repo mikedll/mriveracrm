@@ -15,6 +15,7 @@ class Products < ActiveRecord::Migration
       t.integer :image_id
       t.integer :product_id
       t.boolean :active, :default => false
+      t.boolean :primary, :default => false
       t.timestamps
     end
 
