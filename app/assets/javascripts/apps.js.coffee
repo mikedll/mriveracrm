@@ -721,7 +721,7 @@ class window.CollectionAppView extends WithChildrenView
 
   addAll: () ->
     @collection.each(@addOne, @)
-    @$(".models-list .list-item a").first().trigger('click')
+    @modelsListCache.find(".list-item a").first().trigger('click')
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
