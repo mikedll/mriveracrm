@@ -475,10 +475,15 @@ class window.CrmModelView extends BaseView
     return true
 
   nameFromInput: (elSelection) ->
-    matched = @attributeMatcher.exec(elSelection.prop('name'))
     attribute_name = null
-    if matched? && matched.length == 2
-      attribute_name = matched[1]
+
+    if elSelection.hasClass('read-only-field')
+      if elSelection.data('name')?
+        attribute_name = elSelection.data('name')
+    else
+      matched = @attributeMatcher.exec(elSelection.prop('name'))
+      if matched? && matched.length == 2
+        attribute_name = matched[1]
     attribute_name
 
   #
