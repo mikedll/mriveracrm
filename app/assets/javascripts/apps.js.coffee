@@ -527,8 +527,6 @@ class window.CrmModelView extends BaseView
           v = @toHumanReadableDateTimeFormat(attribute_name)
         else if el$.hasClass('hasDatepicker')
           v = @toHumanReadableDateFormat(attribute_name)
-        else if el$.hasClass('currency')
-          el$.val(Number(v).toFixed(2))
         else if el$.is('[type=checkbox]')
           el$.prop('checked', (v != "false" && v != false))
         else
