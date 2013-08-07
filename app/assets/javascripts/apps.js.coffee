@@ -365,8 +365,8 @@ class window.CrmModelView extends BaseView
       'ajax:beforeSend form': 'noSubmit'
       'click .btn.save': 'save'
       'confirm:complete .btn.revert': 'revert'
-      'confirm:complete button.destroy': 'destroy'
-      'confirm:complete button.put_action': 'putAction'
+      'confirm:complete .btn.destroy': 'destroy'
+      'confirm:complete .btn.put_action': 'putAction'
 
 
     @parent = options.parent
