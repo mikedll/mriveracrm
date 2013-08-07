@@ -489,6 +489,8 @@ class window.CrmModelView extends BaseView
     if attribute_name?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
+      else if elSelection.is('[type=checkbox]')
+        val = if elSelection.is(':checked') then elSelection.val() else null
       else
         val = elSelection.val()
       return [attribute_name, val]
@@ -499,7 +501,7 @@ class window.CrmModelView extends BaseView
     updated = {}
     _.each(@$(':input'), (el) =>
       nameAndValue = @nameAndValueFromInput($(el))
-      updated[ nameAndValue[0] ] = nameAndValue[1] if nameAndValue?
+      updated[ nameAndValue[0] ] = nameAndValue[1] if (nameAndValue? && nameAndValue[1]?)
     )
     updated
 
@@ -522,7 +524,12 @@ class window.CrmModelView extends BaseView
           v = @toHumanReadableDateTimeFormat(attribute_name)
         else if el$.hasClass('hasDatepicker')
           v = @toHumanReadableDateFormat(attribute_name)
-        el$.val(v)
+        else if el$.hasClass('currency')
+          el$.val(Number(v).toFixed(2))
+        else if el$.is('[type=checkbox]')
+          el$.prop('checked', (v != "false" && v != false))
+        else
+          el$.val(v)
     )
 
     @readonlyInputsCache.each((i, el) =>
