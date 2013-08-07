@@ -721,11 +721,14 @@ class window.CollectionAppView extends WithChildrenView
 
   addAll: () ->
     @collection.each(@addOne, @)
-    @modelsListCache.find(".list-item a").first().trigger('click')
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
     @modelsListCache.append(listItemView.render().el)
+
+    # just adde first model, so we need to focus it.
+    if @modelsListCache.children().length == 1
+      @modelsListCache.find(".list-item a").first().trigger('click')
 
   create: () ->
     @collection.create({},
