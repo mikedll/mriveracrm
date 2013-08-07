@@ -457,6 +457,10 @@ class window.CrmModelView extends BaseView
       @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
+    inputOwnedByMe = @inputsCache.filter(e.target)
+    if inputOwnedByMe.length == 0
+      return true
+
     if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
       @save()
       e.stopPropagation()
