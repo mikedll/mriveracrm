@@ -37,6 +37,7 @@ class window.InvoiceListItemView extends ListItemView
 
 
 class window.InvoicesAppView extends CollectionAppView
+  modelNamePlural: 'invoices'
   modelName: 'invoice'
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui'
@@ -48,9 +49,8 @@ class window.InvoicesAppView extends CollectionAppView
     "Invoices"
 
   render: () ->
-    @$el.html($('.templates .invoices-app-example').children().clone())
+    CollectionAppView.prototype.render.apply(@, arguments)
     @addAll()
-    @$('.section-title').text(@title())
     @
 
 class window.PartitionedChildrenView extends WithChildrenView

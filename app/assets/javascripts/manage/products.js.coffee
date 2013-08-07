@@ -73,6 +73,7 @@ class window.ProductListItemView extends ListItemView
     @model.get('name')
 
 class window.ProductAppView extends CollectionAppView
+  modelNamePlural: 'products'
   modelName: 'product'
   spawnListItemType: ProductListItemView
   title: () ->

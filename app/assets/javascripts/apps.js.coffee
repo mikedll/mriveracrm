@@ -656,7 +656,7 @@ class window.SingleModelAppView extends WithChildrenView
 
 
 #
-# Override modelName, spawnListItemType
+# Override modelName, modelNamePlural, spawnListItemType
 #
 # Optional override render.
 #
@@ -723,7 +723,7 @@ class window.CollectionAppView extends WithChildrenView
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
-    @$('.models-list').append(listItemView.render().el)
+    @modelsListCache.append(listItemView.render().el)
 
   create: () ->
     @collection.create({},
@@ -732,7 +732,7 @@ class window.CollectionAppView extends WithChildrenView
     )
 
   modelListItemLink: (model) ->
-    @$(".models-list #list-item-#{model.get('id')} a")
+    @modelsListCache.find("#list-item-#{model.get('id')} a")
 
   afterSave: (model, response, options) ->
     @modelListItemLink(model).trigger('click')
@@ -747,17 +747,17 @@ class window.CollectionAppView extends WithChildrenView
     listItem.find('a').trigger('click') if listItem.length > 0
 
   next: () ->
-    @move(@$(".models-list .list-item a.active").parent().next())
+    @move(@modelsListCache.find(".list-item a.active").parent().next())
 
   previous: () ->
-    @move(@$(".models-list .list-item a.active").parent().prev())
+    @move(@modelsListCache.find(".list-item a.active").parent().prev())
 
   focusTopModelView: () ->
     @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
   show: (view) ->
     @$('.errors').hide()
-    @$(".models-list .list-item a").removeClass('active')
+    @modelsListCache.find(".list-item a").removeClass('active')
     @modelListItemLink(view.model).addClass('active')
 
     # lower curtain
@@ -782,8 +782,16 @@ class window.CollectionAppView extends WithChildrenView
   clearHighlightedModelErrors: () ->
     @$('.errors').hide()
 
+  buildDom: () ->
+    @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
+
+  cacheInitialDom: () ->
+    @modelsListCache = @$('.models-list').first()
+
   render: () ->
-    @$('h2').text(@title)
+    @buildDom()
+    @cacheInitialDom()
+    @$('.section-title').text(@title())
     @
 
   onError: (model, xhr, options) ->

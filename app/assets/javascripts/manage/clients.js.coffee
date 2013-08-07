@@ -65,6 +65,7 @@ class window.ClientListItemView extends ListItemView
       "#{@model.get('first_name')} #{@model.get('last_name')}"
 
 class window.ClientAppView extends CollectionAppView
+  modelNamePlural: 'clients'
   modelName: 'client'
   spawnListItemType: ClientListItemView
   title: () ->

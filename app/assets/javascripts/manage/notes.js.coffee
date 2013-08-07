@@ -28,16 +28,11 @@ class window.NoteListItemView extends ListItemView
     @toHumanReadableDateTimeFormat('recorded_at')
 
 class window.NoteAppView extends CollectionAppView
+  modelNamePlural: 'notes'
   modelName: 'note'
   spawnListItemType: NoteListItemView
   className: 'notes-gui app-gui'
 
   title: () ->
     "Notes for #{@collection.parent.fullName()}"
-
-  render: () ->
-    node = $('.templates .notes_view_example').children().clone()
-    @$el.html(node)
-    @$('h2').text(@title())
-    @
 

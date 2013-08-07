@@ -21,16 +21,11 @@ class window.InvitationListItemView extends ListItemView
     @model.get('email')
 
 class window.InvitationAppView extends CollectionAppView
+  modelNamePlural: 'invitations'
   modelName: 'invitation'
   spawnListItemType: InvitationListItemView
   className: 'invitations-gui app-gui'
 
   title: () ->
     "User Invitations for #{@collection.parent.fullName()}"
-
-  render: () ->
-    node = $('.templates .invitations_view_example').children().clone()
-    @$el.html(node)
-    @$('h2').text(@title())
-    @
 
