@@ -533,7 +533,9 @@ class window.CrmModelView extends BaseView
 
     @[collectionName + 'AppView'] = new collectionAppViewKlass({parent: @, collection: @[collectionName]})
     @[collectionName + 'AppView'].render()
+
     @parent.childViewPushed(@[collectionName + 'AppView'])
+    @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
 
   copyModelToForm: () ->
