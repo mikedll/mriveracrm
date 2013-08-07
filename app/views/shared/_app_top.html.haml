@@ -4,7 +4,7 @@
       %i.icon-plus
       New
 
-- if defined?(filters)
+- if defined?(filters) && !filters.blank?
   .btn-group-label
     Filters:
   .btn-group.collection-filters
@@ -12,7 +12,7 @@
       %button.collection-filter.btn{ :class => 'filter_' + filter.first, :data => { :filter => filter.first, :toggle => "button" } }
         = filter.last
 
-- if defined?(sorts)
+- if defined?(sorts) && !filters.blank?
   .btn-group-label
     Sort By:
   .btn-group.collection-sorts{ :data => { :toggle => "buttons-radio" } }
