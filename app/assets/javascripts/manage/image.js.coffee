@@ -1,8 +1,8 @@
 
-class window.Image extends BaseModel
+class window.ProductImage extends BaseModel
 
 class window.RelatedImages extends BaseCollection
-  model: Image
+  model: ProductImage
   url: '/manage/images'
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
@@ -29,7 +29,8 @@ class ImageView extends CrmModelView
     @$el.html($(".image_view_example .image").children().clone()) if @$el.children().length == 0
 
   copyModelToForm: () ->
-    @$('img').attr('src', @model.get('data').thumb.url)
+    CrmModelView.prototype.copyModelToForm.apply(@, arguments)
+    @$('img').attr('src', @model.get('image').data.thumb.url)
 
 class window.RelatedImagesCollectionView extends BaseView
   initialize: () ->
@@ -79,7 +80,7 @@ class window.RelatedImagesCollectionView extends BaseView
 
     dropzone = new Dropzone(@$('.images_drag_and_drop').get(0),
       url: @collection.url(),
-      paramName: 'data',
+      paramName: 'image[data]',
       parallelUploads: 3,
       uploadMultiple: false # should enable this at some point, but appends [] to param name
     )
@@ -90,5 +91,5 @@ class window.RelatedImagesCollectionView extends BaseView
     )
     dropzone.on('success', (file, data, xhrProgressEvent) =>
       file.previewElement.remove()
-      @collection.add(new Image(data))
+      @collection.add(new ProductImage(data))
     )

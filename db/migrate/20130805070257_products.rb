@@ -8,9 +8,11 @@ class Products < ActiveRecord::Migration
       t.timestamps
     end
 
-    create_table :images_products, :id => false do |t|
+    create_table :product_images do |t|
       t.integer :image_id
       t.integer :product_id
+      t.boolean :active, :default => false
+      t.timestamps
     end
 
     add_column :images, :business_id, :integer
@@ -21,7 +23,7 @@ class Products < ActiveRecord::Migration
 
   def down
     remove_column :images, :business_id
-    drop_table :images_products
+    drop_table :product_images
     drop_table :products
   end
 end

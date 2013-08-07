@@ -23,7 +23,7 @@ MikedllCrm::Application.routes.draw do
 
 
     resources :products do
-      resources :images
+      resources :product_images, :path => "images"
     end
 
     resources :clients do

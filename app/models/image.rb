@@ -3,7 +3,8 @@ class Image < ActiveRecord::Base
   belongs_to :business
   belongs_to :project
 
-  has_and_belongs_to_many :products
+  has_many :product_images
+  has_many :products, :through => :product_images
 
   mount_uploader :data, ImageUploader
 

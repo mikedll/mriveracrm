@@ -86,11 +86,6 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
     t.integer  "business_id"
   end
 
-  create_table "images_products", :id => false, :force => true do |t|
-    t.integer "image_id"
-    t.integer "product_id"
-  end
-
   create_table "invitations", :force => true do |t|
     t.integer  "business_id"
     t.integer  "employee_id"
@@ -129,6 +124,14 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
     t.string   "card_brand"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "product_images", :force => true do |t|
+    t.integer  "image_id"
+    t.integer  "product_id"
+    t.boolean  "active",     :default => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
   end
 
   create_table "products", :force => true do |t|

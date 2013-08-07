@@ -7,13 +7,13 @@ class window.Product extends BaseModel
 
   initialize: () ->
     BaseModel.prototype.initialize.apply(this, arguments)
-    @images = new RelatedImages(@get('images'), parent: @)
-    @unset('images', silent: true)
+    @images = new RelatedImages(@get('product_images'), parent: @)
+    @unset('product_images', silent: true)
 
   onSync: () ->
     BaseModel.prototype.onSync.apply(this, arguments)
-    # @images.reset(@get('images')) # need to fix reset event on collection
-    @unset('images', silent: true)
+    # @images.reset(@get('product_images')) # need to fix reset event on collection
+    @unset('product_images', silent: true)
 
   validate: (attrs, options) ->
     if (attrs.email? && attrs.email.trim() != "" && !EmailRegex.test(attrs.email.trim()))
@@ -33,9 +33,6 @@ class window.ProductView extends CrmModelView
 
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
-
-  copyModelToForm: () ->
-    CrmModelView.prototype.copyModelToForm.apply(this, arguments)
 
   render: () ->
     CrmModelView.prototype.render.apply(this, arguments)

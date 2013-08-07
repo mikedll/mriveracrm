@@ -21,7 +21,7 @@ describe Product do
       product2.images.push(image2)
       product2.images.push(image)
 
-      res = Image.connection.execute "select * from images_products"
+      res = Image.connection.execute "select * from product_images"
       res.count.should == 3
       res.first.tap do |r|
         r['image_id'].to_i.should == image2.id
@@ -32,7 +32,7 @@ describe Product do
       p = reloaded_image2.products.first
       reloaded_image2.products.delete(p)
 
-      res = Image.connection.execute "select * from images_products"
+      res = Image.connection.execute "select * from product_images"
       res.count.should == 2
       Image.count.should == 2
       Product.count.should == 2

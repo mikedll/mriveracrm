@@ -4,7 +4,7 @@
 
 .container-fluid.gui-container  
   .products-gui.app-gui
-    = render :partial => 'shared/app', :locals => { :app_top => true, :app_class => 'products', :title => "Products", :bootstrap => current_objects.to_json(:include => :images) }
+    = render :partial => 'shared/app', :locals => { :app_top => true, :app_class => 'products', :title => "Products", :bootstrap => current_objects.to_json(:include => { :product_images => { :include => :image } }) }
 
 .templates.hide
   - [Product, Image].each do |klass|

@@ -1,8 +1,10 @@
 class Product < ActiveRecord::Base
 
   belongs_to :business
-  has_and_belongs_to_many :images
 
-  attr_accessible :name, :price
+  has_many :product_images
+  has_many :images, :through => :product_images
+
+  attr_accessible :name, :price, :active
 
 end
