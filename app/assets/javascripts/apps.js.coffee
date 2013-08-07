@@ -542,13 +542,13 @@ class window.CrmModelView extends BaseView
       attribute_name = @nameFromInput(el$)
       if attribute_name? && @model.get(attribute_name)?
         v = @model.get(attribute_name)
-        if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_name)
-        else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_name)
-        else if el$.is('[type=checkbox]')
+        if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
         else
+          if el$.hasClass('datetimepicker')
+            v = @toHumanReadableDateTimeFormat(attribute_name)
+          else if el$.hasClass('hasDatepicker')
+            v = @toHumanReadableDateFormat(attribute_name)
           el$.val(v)
     )
 
