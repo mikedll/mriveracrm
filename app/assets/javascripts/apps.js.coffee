@@ -111,6 +111,11 @@ class window.BaseModel extends Backbone.Model
   onRequest: () ->
     @_isRequesting = true
 
+  #
+  # Use this if we're certain that a change
+  # brings this model into sync with the database,
+  # even though we're not going to do a fetch to verify that.
+  #
   setButIgnoreHistory: (attrs) ->
     @set(attrs)
     _.each(attrs, (v, k) =>
