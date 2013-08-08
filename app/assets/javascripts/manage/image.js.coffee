@@ -32,11 +32,14 @@ class ImageView extends CrmModelView
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
     @$('img').attr('src', @model.get('image').data.thumb.url)
-    @$el.parent().children().removeClass('primary')
+
     if @model.get('primary')
       @$el.addClass('primary')
+      @$('.btn[data-action=make_primary]').addClass('btn-success')
     else
       @$el.removeClass('primary')
+      @$('.btn[data-action=make_primary]').removeClass('btn-success')
+
 
 class window.RelatedImagesCollectionView extends BaseView
   initialize: () ->
@@ -46,6 +49,7 @@ class window.RelatedImagesCollectionView extends BaseView
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
+    @childViews = []
 
   copyModelsToForm: () ->
     # todo: make this more intelligent to not double-render views?
@@ -53,13 +57,23 @@ class window.RelatedImagesCollectionView extends BaseView
     @addAll()
 
   onSync: (model, resp, options) ->
+    BaseView.prototype.onSync.apply(@, arguments)
     @clearHighlightedModelErrors()
+
+    # understands that only 1 of these images can be primary.
+    if model.get('primary')
+      _.each(@childViews, (view) =>
+        if model != view.model
+          view.$el.removeClass('primary')
+          view.$('.btn[data-action=make_primary]').removeClass('btn-success')
+      )
 
   clearHighlightedModelErrors: () ->
     @$('.errors').hide()
 
   onReset: () ->
     _.each( @collection.toArray(), (model) => @collection.remove(model) )
+    @childViews = []
     @addAll()
 
   addAll: () ->
@@ -78,6 +92,7 @@ class window.RelatedImagesCollectionView extends BaseView
 
   addOne: (model) ->
     imageView = new ImageView(model: model, parent: @)
+    @childViews.push(imageView)
     @$('.images_existing').append(imageView.render().el)
 
   render: () ->

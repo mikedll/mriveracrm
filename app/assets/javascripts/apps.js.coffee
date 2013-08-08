@@ -163,6 +163,9 @@ class window.BaseView extends Backbone.View
     date = Date.parse(v)
     date.toString(AppsConfig.dateJsReadableDatetimeFormat)
 
+  onSync: (model, resp, options) ->
+
+
 class window.ModelBaseView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
