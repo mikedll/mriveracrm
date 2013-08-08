@@ -111,6 +111,12 @@ class window.BaseModel extends Backbone.Model
   onRequest: () ->
     @_isRequesting = true
 
+  setButIgnoreHistory: (attrs) ->
+    @set(attrs)
+    _.each(attrs, (v, k) =>
+      delete @_attributesSinceSync[k]
+    )
+
   onSync: () ->
     @_attributesSinceSync = {}
     @_isRequesting = false
@@ -269,14 +275,15 @@ class window.ListItemView extends ModelBaseView
     @events =
       'click a': 'show'
     @parent = options.parent
-    @listenTo(@model, 'sync', @onSync)
+    # these two should be in ModelBaseView
+    # @listenTo(@model, 'sync', @onSync)
+    # @listenTo(@model, 'change', @onModelChanged)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'resorted', @onResorted)
-    @listenTo(@model, 'change', @onModelChanged)
 
   onRemove: () ->
     @removeDom()

@@ -63,9 +63,9 @@ class window.RelatedImagesCollectionView extends BaseView
     # understands that only 1 of these images can be primary.
     if model.get('primary')
       _.each(@childViews, (view) =>
-        if model != view.model
-          view.$el.removeClass('primary')
-          view.$('.btn[data-action=toggle_primary]').removeClass('btn-success')
+        if model != view.model && view.model.get('primary')
+          view.model.setButIgnoreHistory({'primary': false})
+          view.copyModelToForm()
       )
 
   clearHighlightedModelErrors: () ->
