@@ -18,6 +18,8 @@ class ProductImage < ActiveRecord::Base
     elsif active_changed? && !active?
       self.primary = false
     end
+
+    true
   end
 
   def _only_one_primary
