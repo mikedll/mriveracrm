@@ -2,6 +2,16 @@
 .model-view {
   .image-list {
 
+    .image label {
+      display: inline;
+      padding-left: 4px;
+    }
+
+    .image label input[type=checkbox] {
+      margin-left: 0px;
+    }
+
+
     .image .image-container {
       padding: 3px;
     }
