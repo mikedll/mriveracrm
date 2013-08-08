@@ -390,10 +390,12 @@ class window.CrmModelView extends BaseView
     @parent.rebindGlobalHotKeys()
 
   putAction: (e) ->
+    return false if @buttonsCache.filter(e.target).length == 0
     @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true)
 
   putActionConfirmed: (e, answer) ->
-     @putAction(e) if answer
+    return false if @buttonsCache.filter(e.target).length == 0
+    @putAction(e) if answer
 
   onDestroy: () ->
     @removeDom()
@@ -405,6 +407,7 @@ class window.CrmModelView extends BaseView
     @$el.remove() if @$el?
 
   destroy: (e, answer) ->
+    return false if @buttonsCache.filter(e.target).length == 0
     e.preventDefault()
     e.stopPropagation()
     @model.destroy({wait: true}) if answer
@@ -461,9 +464,7 @@ class window.CrmModelView extends BaseView
       @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
-    inputOwnedByMe = @inputsCache.filter(e.target)
-    if inputOwnedByMe.length == 0
-      return true
+    return true if @inputsCache.filter(e.target).length == 0
 
     if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
       @save()
@@ -581,6 +582,8 @@ class window.CrmModelView extends BaseView
     )
 
   revert: (e, answer) ->
+    return false if @buttonsCache.filter(e.target).length == 0
+
     return if !@model.isDirty()
     if answer
       @model.set(@model.changedAttributesSinceSync())
@@ -640,6 +643,7 @@ class window.CrmModelView extends BaseView
 
   render: () ->
     @buildDom()
+    @buttonsCache = @$('.btn')
     @inputsCache = @$(':input')
     @readonlyInputsCache = @$('.read-only-field')
     @inputsCache.filter('input.datepicker').datepicker(
