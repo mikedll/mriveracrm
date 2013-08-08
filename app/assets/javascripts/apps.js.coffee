@@ -124,6 +124,8 @@ class window.BaseModel extends Backbone.Model
 
 class window.BaseView extends Backbone.View
   initialize: (options) ->
+    @useDirty = true
+
     @events = {}
     @parent = options.parent
 
@@ -160,6 +162,26 @@ class window.BaseView extends Backbone.View
     return "" if !v?
     date = Date.parse(v)
     date.toString(AppsConfig.dateJsReadableDatetimeFormat)
+
+class window.ModelBaseView extends BaseView
+  initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
+    @listenTo(@model, 'change', @onModelChanged)
+    @listenTo(@model, 'sync', @onSync)
+
+  dirtyRegistration: () ->
+    return if !@useDirty
+    if @model.isDirty()
+      @parent.registerDirty(@model)
+    else
+      @parent.unregisterDirty(@model)
+
+  onModelChanged: (e) ->
+    @dirtyRegistration()
+
+  onSync: (model, resp, options) ->
+    @dirtyRegistration()
+
 
 class window.BaseCollection extends Backbone.Collection
   initialize: (models, options) ->
@@ -228,7 +250,7 @@ class window.WithChildrenView extends BaseView
 #
 # Implement title.
 #
-class window.ListItemView extends BaseView
+class window.ListItemView extends ModelBaseView
   modelName: 'some_type'
   tagName: 'li'
   className: 'list-item'
@@ -240,7 +262,7 @@ class window.ListItemView extends BaseView
       ""
 
   initialize: (options) ->
-    BaseView.prototype.initialize.apply(@, arguments)
+    ModelBaseView.prototype.initialize.apply(@, arguments)
     @events =
       'click a': 'show'
     @parent = options.parent
@@ -270,16 +292,15 @@ class window.ListItemView extends BaseView
     @$('a .titleText').text(if s? && s.trim() != "" then s else "-")
 
   onModelChanged: (e) ->
+    ModelBaseView.prototype.onModelChanged.apply(@, arguments)
     @decorateDirty()
     @decorateError()
     @setTitle()
 
   decorateDirty: () ->
     if @model.isDirty()
-      @parent.registerDirty(@model)
       @$el.addClass('dirty')
     else
-      @parent.unregisterDirty(@model)
       @$el.removeClass('dirty')
 
   decorateRequesting: () ->
@@ -325,6 +346,7 @@ class window.ListItemView extends BaseView
     @decorateRequesting()
 
   onSync: (model, resp, options) ->
+    ModelBaseView.prototype.onSync.apply(@, arguments)
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @render()
     @decorateDirty()
@@ -347,7 +369,7 @@ class window.ListItemView extends BaseView
 #
 # implement render
 #
-class window.CrmModelView extends BaseView
+class window.CrmModelView extends ModelBaseView
   className: 'model-view'
 
   id: () ->
@@ -357,8 +379,7 @@ class window.CrmModelView extends BaseView
       ""
 
   initialize: (options) ->
-    BaseView.prototype.initialize.apply(@, arguments)
-    @useDirty = true
+    ModelBaseView.prototype.initialize.apply(@, arguments)
     @events =
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
@@ -457,6 +478,7 @@ class window.CrmModelView extends BaseView
     #
     # we do recorate the form, though.
     #
+    ModelBaseView.prototype.onModelChanged.apply(@, arguments)
     @decorateDirty()
     if @model.validationError?
       @renderErrors(@model.validationError)
@@ -630,6 +652,7 @@ class window.CrmModelView extends BaseView
     false
 
   onSync: (model, resp, options) ->
+    ModelBaseView.prototype.onSync.apply(@, arguments)
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @clearErrors()
     @copyModelToForm()
