@@ -343,7 +343,8 @@ ul#projects_list li {
 }
 
 .dropzone .dz-default.dz-message span {
-  display: inline;
+  display: inline-block;
+  margin-top: 2em;
 }
 
 .btn-group-label {
