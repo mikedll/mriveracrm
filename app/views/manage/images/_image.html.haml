@@ -1,6 +1,7 @@
 
 .image
-  %img{:src => '', :class => 'product-image'}
+  .image-container
+    %img{:src => '', :class => 'product-image'}
 
   %label.checkbox
     = check_box_tag 'product_image[active]', 'true', false, :class => 'active boolean'

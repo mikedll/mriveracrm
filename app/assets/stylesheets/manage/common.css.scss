@@ -1,6 +1,10 @@
 
 .model-view {
-  .image-list .image.primary img {
-    border: 3px dotted green;
+  .image-list .image .image-container {
+    padding: 3px;
+  }
+  .image-list .image.primary .image-container {
+    padding: 0;
+    border: 3px dashed green;
   }
 }
