@@ -13,7 +13,11 @@ class ProductImage < ActiveRecord::Base
   before_save :_only_one_primary
 
   def _primary_implies_active
-    self.active = true if primary?
+    if (primary_changed? || new_record?) && primary?
+      self.active = true
+    elsif active_changed? && !active?
+      self.primary = false
+    end
   end
 
   def _only_one_primary
