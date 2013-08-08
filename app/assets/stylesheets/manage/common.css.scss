@@ -1,19 +1,46 @@
 
+/* product images */
+
 .model-view {
   .image-list {
 
-    .image label {
-      display: inline;
-      padding-left: 4px;
+    .image-container {
+      position: relative;
     }
 
-    .image label input[type=checkbox] {
-      margin-left: 0px;
+    .image {
+      .icon-requesting {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        margin-top: -0.5em;
+        margin-left: -0.5em;
+        display: none;
+      }
+
+      label {
+        display: inline;
+        padding-left: 4px;
+      }
+
+      label input[type=checkbox] {
+        margin-left: 0px;
+      }
+
+      .image-container {
+        padding: 3px;
+      }
     }
 
+    .image.requesting {
 
-    .image .image-container {
-      padding: 3px;
+      .icon-requesting {
+        display: inline-block;
+      }
+
+      img.product-image {
+        opacity: 0.5;
+      }
     }
 
     .image.primary .image-container {

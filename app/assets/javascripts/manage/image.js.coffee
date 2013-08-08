@@ -26,12 +26,26 @@ class ImageView extends CrmModelView
     @model.set('active', $(e.target).is(':checked'))
     @save()
 
+  decorateRequesting: () ->
+    if @model.isRequesting()
+      @$el.addClass('requesting')
+    else
+      @$el.removeClass('requesting')
+
+  onRequest: (e) ->
+    CrmModelView.prototype.onRequest.apply(@, arguments)
+    @decorateRequesting()
+
+  onSync: () ->
+    CrmModelView.prototype.onSync.apply(@, arguments)
+    @decorateRequesting()
+
   buildDom: () ->
     @$el.html($(".image_view_example .image").children().clone()) if @$el.children().length == 0
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
-    @$('img').attr('src', @model.get('image').data.thumb.url)
+    @$('img.product-image').attr('src', @model.get('image').data.thumb.url)
 
     if @model.get('primary')
       @$el.addClass('primary')

@@ -407,6 +407,7 @@ class window.CrmModelView extends ModelBaseView
 
 
     @parent = options.parent
+    @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
@@ -665,6 +666,9 @@ class window.CrmModelView extends ModelBaseView
 
   noSubmit: (e) ->
     false
+
+  onRequest: (e) ->
+
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
