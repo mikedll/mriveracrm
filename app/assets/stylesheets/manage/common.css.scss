@@ -1,10 +1,15 @@
 
 .model-view {
-  .image-list .image .image-container {
-    padding: 3px;
+  .image-list {
+
+    .image .image-container {
+      padding: 3px;
+    }
+
+    .image.primary .image-container {
+      padding: 0;
+      border: 3px solid green;
+    }
   }
-  .image-list .image.primary .image-container {
-    padding: 0;
-    border: 3px solid green;
-  }
+
 }
