@@ -7,15 +7,15 @@ class Products < ActiveRecord::Migration
       t.decimal :price
       t.float   :weight
       t.string  :weight_units, :null => false, :default => ""
-      t.boolean :active
+      t.boolean :active, :null => false, :default => false
       t.timestamps
     end
 
     create_table :product_images do |t|
       t.integer :image_id
       t.integer :product_id
-      t.boolean :active, :default => false
-      t.boolean :primary, :default => false
+      t.boolean :active, :default => false, :null => false
+      t.boolean :primary, :default => false, :null => false
       t.timestamps
     end
 

@@ -129,22 +129,22 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
   create_table "product_images", :force => true do |t|
     t.integer  "image_id"
     t.integer  "product_id"
-    t.boolean  "active",     :default => false
-    t.boolean  "primary",    :default => false
+    t.boolean  "active",     :default => false, :null => false
+    t.boolean  "primary",    :default => false, :null => false
     t.datetime "created_at",                    :null => false
     t.datetime "updated_at",                    :null => false
   end
 
   create_table "products", :force => true do |t|
     t.integer  "business_id"
-    t.string   "name",         :default => "", :null => false
-    t.text     "description",  :default => "", :null => false
+    t.string   "name",         :default => "",    :null => false
+    t.text     "description",  :default => "",    :null => false
     t.decimal  "price"
     t.float    "weight"
-    t.string   "weight_units", :default => "", :null => false
-    t.boolean  "active"
-    t.datetime "created_at",                   :null => false
-    t.datetime "updated_at",                   :null => false
+    t.string   "weight_units", :default => "",    :null => false
+    t.boolean  "active",       :default => false, :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
   end
 
   create_table "projects", :force => true do |t|
