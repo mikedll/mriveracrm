@@ -70,8 +70,8 @@ class Manage::ProductImagesController < Manage::BaseController
     end
   end
 
-  def make_primary
-    current_object.update_attributes(:primary => true)
+  def toggle_primary
+    current_object.update_attributes(:primary => !current_object.primary)
     if current_object.save
       response_for :update        
     else

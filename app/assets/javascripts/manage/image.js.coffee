@@ -35,10 +35,10 @@ class ImageView extends CrmModelView
 
     if @model.get('primary')
       @$el.addClass('primary')
-      @$('.btn[data-action=make_primary]').addClass('btn-success')
+      @$('.btn[data-action=toggle_primary]').addClass('btn-success')
     else
       @$el.removeClass('primary')
-      @$('.btn[data-action=make_primary]').removeClass('btn-success')
+      @$('.btn[data-action=toggle_primary]').removeClass('btn-success')
 
 
 class window.RelatedImagesCollectionView extends BaseView
@@ -65,7 +65,7 @@ class window.RelatedImagesCollectionView extends BaseView
       _.each(@childViews, (view) =>
         if model != view.model
           view.$el.removeClass('primary')
-          view.$('.btn[data-action=make_primary]').removeClass('btn-success')
+          view.$('.btn[data-action=toggle_primary]').removeClass('btn-success')
       )
 
   clearHighlightedModelErrors: () ->

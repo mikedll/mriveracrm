@@ -25,7 +25,7 @@ MikedllCrm::Application.routes.draw do
     resources :products do
       resources :product_images, :path => "images" do
         member do
-          put :make_primary
+          put :toggle_primary
         end
       end
     end
