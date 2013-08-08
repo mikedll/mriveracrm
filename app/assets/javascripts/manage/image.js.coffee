@@ -16,6 +16,7 @@ class ImageView extends CrmModelView
 
   initialize: () ->
     CrmModelView.prototype.initialize.apply(@, arguments)
+    @useDirty = false
 
     $.extend(@events,
       'change input.active': 'toggleActive'
