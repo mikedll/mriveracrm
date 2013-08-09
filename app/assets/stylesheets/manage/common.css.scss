@@ -4,10 +4,6 @@
 .model-view {
   .image-list {
 
-    .image-container {
-      position: relative;
-    }
-
     .image {
       float: left;
       margin: 20px;
@@ -31,7 +27,11 @@
       }
 
       .image-container {
+        position: relative;
         padding: 3px;
+      }
+
+      .image-preview-container {
       }
     }
 

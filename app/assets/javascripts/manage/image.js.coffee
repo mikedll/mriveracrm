@@ -1,5 +1,16 @@
 
 class window.ProductImage extends BaseModel
+  defaults: () ->
+    primary: false
+    active: false
+
+  initialize: (attrs, options) ->
+    BaseModel.prototype.initialize.apply(@, arguments)
+    @fileUpload = if ('fileUpload' of options) then options.fileUpload else null
+
+  onChange: () ->
+    BaseModel.prototype.onChange.apply(@, arguments)
+    @fileUpload = null if @fileUpload? && (typeof(@get('image')) != "undefined" && @get('image')?)
 
 class window.RelatedImages extends BaseCollection
   model: ProductImage
@@ -45,7 +56,10 @@ class ImageView extends CrmModelView
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
-    @$('img.product-image').attr('src', @model.get('image').data.thumb.url)
+    if @model.get('image')
+      @$('img.product-image').attr('src', @model.get('image').data.thumb.url)
+    else if (@model.fileUpload? && ('dataUrl' of @model.fileUpload))
+      @$('img.product-image').attr('src', @model.fileUpload.dataUrl)
 
     if @model.get('primary')
       @$el.addClass('primary')
@@ -53,6 +67,11 @@ class ImageView extends CrmModelView
     else
       @$el.removeClass('primary')
       @$('.btn[data-action=toggle_primary]').removeClass('btn-success')
+
+  onModelChanged: () ->
+    CrmModelView.prototype.onModelChanged.apply(@, arguments)
+    @copyModelToForm()
+
 
 
 class window.RelatedImagesCollectionView extends BaseView
@@ -64,6 +83,8 @@ class window.RelatedImagesCollectionView extends BaseView
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
     @childViews = []
+    @filesToModels = {}
+    @uploadedFilesIds = 0
 
   copyModelsToForm: () ->
     # todo: make this more intelligent to not double-render views?
@@ -119,7 +140,22 @@ class window.RelatedImagesCollectionView extends BaseView
       url: @collection.url(),
       paramName: 'image[data]',
       parallelUploads: 3,
+      thumbnailWidth: 160,
+      thumbnailHeight: 133,
+      previewsContainer: @$('.discarded_dropzone_previews').get(0),
       uploadMultiple: false # should enable this at some point, but appends [] to param name
+    )
+    dropzone.on('addedfile', (file) =>
+      file._relatedImageCollectionViewId = @uploadedFilesIds++
+      file.previewElement.remove() # we're not going to use dropzone's preview. remove from dom.
+
+      if ! (file._relatedImageCollectionViewId of @filesToModels)
+        @filesToModels[file._relatedImageCollectionViewId] = new ProductImage({}, {fileUpload: file}) # we'll use this in the 'success' event
+      @collection.add(@filesToModels[file._relatedImageCollectionViewId])
+    )
+    dropzone.on('thumbnail', (file, dataUrl) =>
+      file.dataUrl = dataUrl
+      @filesToModels[file._relatedImageCollectionViewId].trigger('change')
     )
     dropzone.on('sending', (file, xhr, formData) =>
       formData.append('authenticity_token', @$el.closest('form').find('input[name=authenticity_token]').val())
@@ -127,6 +163,11 @@ class window.RelatedImagesCollectionView extends BaseView
     dropzone.on('uploadprogress', (file, progress, bytesSent) =>
     )
     dropzone.on('success', (file, data, xhrProgressEvent) =>
-      file.previewElement.remove()
-      @collection.add(new ProductImage(data))
+      if @filesToModels[file._relatedImageCollectionViewId]?
+        @filesToModels[file._relatedImageCollectionViewId].setAndAssumeSync(data)
+      else
+        # where did our image go? scary. this is probably a bug.
+        @collection.add(new ProductImage(data))
+
+      delete @filesToModels[file._relatedImageCollectionViewId] # we dont need a ref to this file anymore.
     )

@@ -1,20 +1,26 @@
 
 .image
   .image-container
-    %img{:src => '', :class => 'product-image'}
+    %img{:src => '', :class => 'product-image', :data => { 'dz-thumbnail' => ''}}
     %i.icon-requesting
       = image_tag 'arrow-spinner.gif'
-
-  %label.checkbox
-    = check_box_tag 'product_image[active]', 'true', false, :class => 'active boolean'
-    Active
-
+  .image-uploading-container
+    .dz-progress
+      %span.dz-upload{ :data => { 'dz-uploadprogress' => '' } }
+    .dz-error-message
+      %span{ :data => { 'dz-errormessage' => '' } }
   .control-group
     .controls
-      %input.btn.btn-mini.put_action{ :type => 'button', :value => 'Make Primary', :data => { :action => 'toggle_primary' } }
+      .pull-left
+        %label.checkbox
+          = check_box_tag 'product_image[active]', 'true', false, :class => 'active boolean'
+          Active
 
-      %a.destroy.btn.btn-mini.pull-right{ :data => { :confirm => t('delete_confirm') } }
-        %i.icon-trash
+        %br
+        %input.btn.btn-mini.put_action{ :type => 'button', :value => 'Make Primary', :data => { :action => 'toggle_primary' } }
 
+      .pull-right
+        %a.destroy.btn.btn-mini.pull-right{ :data => { :confirm => t('delete_confirm') } }
+          %i.icon-trash
 
-
+      .clearfix
