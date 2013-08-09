@@ -112,15 +112,16 @@ class window.BaseModel extends Backbone.Model
     @_isRequesting = true
 
   #
-  # Use this if we're certain that a change
-  # brings this model into sync with the database,
-  # even though we're not going to do a fetch to verify that.
+  # Use this if we're certain that a change brings this model into
+  # sync with the database, even though we're not going to do a
+  # sync(...)  or fetch to verify that.
   #
-  setButIgnoreHistory: (attrs) ->
+  # Can be used if one is confident that a change elsewhere on a view
+  # has forced a change to this model in the database (rate).
+  #
+  setAndAssumeSync: (attrs) ->
     @set(attrs)
-    _.each(attrs, (v, k) =>
-      delete @_attributesSinceSync[k]
-    )
+    @trigger('sync', @, null, {})
 
   onSync: () ->
     @_attributesSinceSync = {}

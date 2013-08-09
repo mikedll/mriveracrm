@@ -78,8 +78,10 @@ class window.RelatedImagesCollectionView extends BaseView
     if model.get('primary')
       _.each(@childViews, (view) =>
         if model != view.model && view.model.get('primary')
-          view.model.setButIgnoreHistory({'primary': false})
-          view.copyModelToForm()
+          # we have to not emit sync if this model isn't in an errorneous
+          # state, or we risk infinite recursion, since this sync
+          # will be triggered.
+          view.model.setAndAssumeSync({'primary': false})
       )
 
   clearHighlightedModelErrors: () ->
