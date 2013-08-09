@@ -1,4 +1,8 @@
 
+#
+# The fileUpload attribute on this model is not
+# a part of the attributes.
+#
 class window.ProductImage extends BaseModel
   defaults: () ->
     primary: false
@@ -60,6 +64,12 @@ class ImageView extends CrmModelView
       @$('img.product-image').attr('src', @model.get('image').data.thumb.url)
     else if (@model.fileUpload? && ('dataUrl' of @model.fileUpload))
       @$('img.product-image').attr('src', @model.fileUpload.dataUrl)
+
+    if @model.fileUpload?
+      @$el.addClass('uploading')
+      @$('.progress .bar').css('width', @model.fileUpload.upload.progress + '%')
+    else
+      @$el.removeClass('uploading')
 
     if @model.get('primary')
       @$el.addClass('primary')
@@ -161,6 +171,7 @@ class window.RelatedImagesCollectionView extends BaseView
       formData.append('authenticity_token', @$el.closest('form').find('input[name=authenticity_token]').val())
     )
     dropzone.on('uploadprogress', (file, progress, bytesSent) =>
+      @filesToModels[file._relatedImageCollectionViewId].trigger('change')
     )
     dropzone.on('success', (file, data, xhrProgressEvent) =>
       if @filesToModels[file._relatedImageCollectionViewId]?

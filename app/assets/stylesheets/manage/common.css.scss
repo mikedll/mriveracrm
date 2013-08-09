@@ -31,7 +31,22 @@
         padding: 3px;
       }
 
-      .image-preview-container {
+      .image-uploading-container {
+        display: none;
+      }
+
+      .progress {
+        height: 9px;
+      }
+    }
+
+    .image.uploading {
+
+      .image-uploading-container {
+        display: block;
+      }
+      .image-controls {
+        display: none;
       }
     }
 
