@@ -13,8 +13,10 @@
         top: 50%;
         left: 50%;
         margin-top: -0.5em;
-        margin-left: -0.5em;
+        margin-left: -40px;
+        width: 80px;   // the width is just to allow text
         display: none;
+        text-align: center;
       }
 
       label {
@@ -51,13 +53,21 @@
     }
 
     .image.requesting {
-
       .icon-requesting {
         display: inline-block;
       }
-
       img.product-image {
         opacity: 0.5;
+      }
+    }
+
+     // uploading trumps requesting
+    .image.requesting.uploading {
+      .icon-requesting {
+        display: none;
+      }
+      img.product-image {
+        opacity: 1;
       }
     }
 

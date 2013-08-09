@@ -14,7 +14,8 @@ class window.ProductImage extends BaseModel
 
   onChange: () ->
     BaseModel.prototype.onChange.apply(@, arguments)
-    @fileUpload = null if @fileUpload? && (typeof(@get('image')) != "undefined" && @get('image')?)
+    if @fileUpload? && (typeof(@get('image')) != "undefined" && @get('image')?)
+      @fileUpload = null
 
 class window.RelatedImages extends BaseCollection
   model: ProductImage
@@ -65,7 +66,7 @@ class ImageView extends CrmModelView
     else if (@model.fileUpload? && ('dataUrl' of @model.fileUpload))
       @$('img.product-image').attr('src', @model.fileUpload.dataUrl)
 
-    if @model.fileUpload?
+    if @model.fileUpload? && @model.fileUpload.upload.progress < 100
       @$el.addClass('uploading')
       @$('.progress .bar').css('width', @model.fileUpload.upload.progress + '%')
     else
@@ -81,6 +82,7 @@ class ImageView extends CrmModelView
   onModelChanged: () ->
     CrmModelView.prototype.onModelChanged.apply(@, arguments)
     @copyModelToForm()
+    @decorateRequesting()
 
 
 
@@ -161,6 +163,7 @@ class window.RelatedImagesCollectionView extends BaseView
 
       if ! (file._relatedImageCollectionViewId of @filesToModels)
         @filesToModels[file._relatedImageCollectionViewId] = new ProductImage({}, {fileUpload: file}) # we'll use this in the 'success' event
+        @filesToModels[file._relatedImageCollectionViewId].trigger('request')
       @collection.add(@filesToModels[file._relatedImageCollectionViewId])
     )
     dropzone.on('thumbnail', (file, dataUrl) =>
