@@ -84,6 +84,8 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "business_id"
+    t.string   "data_original_filename"
+    t.string   "data_unique_id"
   end
 
   create_table "invitations", :force => true do |t|
