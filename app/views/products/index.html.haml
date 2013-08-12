@@ -1,0 +1,25 @@
+
+- content_for :head do
+  = javascript_include_tag 'products'
+
+
+.container-fluid.gui-container
+
+  .search
+    .form-horizontal
+      .control-group
+        .label
+          = text_field_tag 'query', ''
+        .controls
+          .btn
+            Search
+
+
+  .results
+
+
+.templates.hide
+  .products_view_example
+  .product_view_template
+    = render Product.new
+

@@ -17,6 +17,12 @@ MikedllCrm::Application.routes.draw do
     put :accept
   end
 
+  resources :products, :only => [:index] do
+    collection do
+      get :search
+    end
+  end
+
   namespace 'manage' do
 
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
