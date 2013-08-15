@@ -38,4 +38,16 @@ describe Product do
       Product.count.should == 2
     end
   end
+
+  context "search" do
+    it "should search in product's name", :current => true do
+      Product.create(:name => "Cat Food")
+      Product.create(:name => "Dog Food")
+      Product.create(:name => "Forks")
+      Product.create(:name => "Luxury Knives")
+      
+      p = Product.search("knive")
+      p.count.should == 1
+    end
+  end
 end

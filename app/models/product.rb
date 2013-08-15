@@ -7,4 +7,8 @@ class Product < ActiveRecord::Base
 
   attr_accessible :name, :price, :weight, :active, :weight_units, :description
 
+  def self.search(query)
+    where('UPPER(products.name) LIKE (?)', "%#{query}%")
+  end
+
 end

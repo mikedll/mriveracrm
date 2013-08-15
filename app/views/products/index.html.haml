@@ -1,25 +1,35 @@
 
 - content_for :head do
-  = javascript_include_tag 'products'
-
+  = javascript_include_tag 'public'
 
 .container-fluid.gui-container
 
-  .search
-    .form-horizontal
-      .control-group
-        .label
-          = text_field_tag 'query', ''
-        .controls
-          .btn
-            Search
-
-
-  .results
-
-
 .templates.hide
   .products_view_example
+    .section-title
+    .app-top
+      - if defined?(back_button)
+        .btn-group
+          %button.back.btn
+            Back
+      .search
+        .form-horizontal
+          .control-group
+            .label
+              = text_field_tag 'query', ''
+            .controls
+              .btn
+                Search
+
+      = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => true }
+
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'
+
+    .results
+      %ul.models-list.products-list
+
   .product_view_template
     = render Product.new
 

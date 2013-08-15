@@ -1,3 +1,22 @@
+
+
+#
+# When making practically any app, you have to have this nest:
+#
+# .container-fluid.gui-container  # 1
+#   .container-app.app-gui        # 2
+#
+# The outer div (1) provides absolute styling frame of reference, and is usually
+# the StackAppView, and the inner (2) app-gui provides something the user
+# can actually see, the box that represents a slice of the app.
+#
+#
+#
+# Inside of this there can be as many views as you want.
+#
+#
+
+
 Dropzone.autoDiscover = false;
 
 window.AppsConfig =
