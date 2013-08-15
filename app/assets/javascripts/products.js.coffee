@@ -13,6 +13,10 @@ class window.SearchableProducts extends Backbone.Collection
 class window.SearchableProductView extends CrmModelView
   modelName: 'product'
 
+  copyModelToForm: () ->
+    CrmModelView.prototype.copyModelToForm.apply(@, arguments)
+    @$('.name').text(@model.get('name'))
+
   buildDom: () ->
     @$el.html($(".#{@modelName}_view_example").children().clone()) if @$el.children().length == 0
 

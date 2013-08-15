@@ -11,4 +11,9 @@ class Product < ActiveRecord::Base
     where('UPPER(products.name) LIKE (?)', "%#{query}%")
   end
 
+  def primary_product_image
+    self.product_images.primary.first
+  end
+
+
 end
