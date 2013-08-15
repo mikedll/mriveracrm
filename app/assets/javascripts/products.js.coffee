@@ -11,11 +11,14 @@ class window.SearchableProducts extends Backbone.Collection
       product.get('id')
 
 class window.SearchableProductView extends CrmModelView
+  tagName: 'li'
   modelName: 'product'
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
     @$('.name').text(@model.get('name'))
+    if @model.get('primary_product_image')?
+      @$('img').attr('src', @model.get('primary_product_image').image.data.thumb.url)
 
   buildDom: () ->
     @$el.html($(".#{@modelName}_view_example").children().clone()) if @$el.children().length == 0
@@ -28,7 +31,7 @@ class SearchableProductsView extends SearchAndListView
   initialize: () ->
     SearchAndListView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
-      'change input[name=query]': 'search'
+      'keyup input[name=query]': 'search'
     )
 
   search: () ->

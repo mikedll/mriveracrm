@@ -1,6 +1,7 @@
 
 - content_for :head do
   = javascript_include_tag 'public'
+  = stylesheet_link_tag 'public'
 
 .container-fluid.gui-container
 
@@ -14,10 +15,9 @@
             Back
       .search
         .form-horizontal
-          .control-group
-            .label
-              = text_field_tag 'query', ''
+          .control-group.string
             .controls
+              = text_field_tag 'query', ''
               .btn
                 Search
 
