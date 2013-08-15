@@ -728,6 +728,101 @@ class window.SingleModelAppView extends WithChildrenView
 
 
 #
+# Needs to have its behavior refactored
+#
+class window.SearchAndListView extends BaseView
+  initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
+    @events =
+      'click .collection-filter': 'filtersChanged'
+      'click .collection-sorts': 'sortsChanged'
+
+    @listenTo(@collection, 'reset', @addAll)
+    @listenTo(@collection, 'add', @addOne)
+    @listenTo(@collection, 'sync', @onSync)
+    @listenTo(@collection, 'error', @onError)
+
+  filtersChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing filters.')
+      return false
+
+    _.each( @collection.toArray(), (model) => @collection.remove(model) )
+    data = {}
+    _.each( @$('.collection-filter'), (el) ->
+      el$ = $(el)
+      if e.target == el
+        # this button is about to change - we move faster than bootstrap
+        # should be improved so that this entire method fires after that stuff is all done
+        if !el$.hasClass('active')
+          data[el$.data('filter')] = true
+      else
+        if el$.hasClass('active')
+          data[el$.data('filter')] = true
+    )
+    @collection.fetch(data: data)
+
+  sortsChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing sort order.')
+      return false
+
+    target = $(e.target)
+    @collection.comparator = (new ComparatorBuilder())
+      .build(target.data('sort_attribute'), target.data('sort_direction'), target.data('sort_type'))
+
+    @collection.sort()
+    @collection.each( (model) -> model.trigger('resorted') )
+    @addAll()
+
+  addAll: () ->
+    @collection.each(@addOne, @)
+
+  addOne: (model) ->
+    itemView = new @searchResultItemViewType({'model':model, 'parent': @})
+    @modelsListCache.append(itemView.render().el)
+
+    # just adde first model, so we need to focus it.
+    if @modelsListCache.children().length == 1
+      @modelsListCache.find(".list-item a").first().trigger('click')
+
+  remove: () ->
+    @$el.remove()
+
+  next: () ->
+    # noop
+  previous: () ->
+    # noop
+
+  focusTopModelView: () ->
+    # noop
+
+  buildDom: () ->
+    @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
+
+  cacheInitialDom: () ->
+    @modelsListCache = @$('.models-list').first()
+
+  render: () ->
+    @buildDom()
+    @cacheInitialDom()
+    @$('.section-title').text(@title())
+    @
+
+  onError: (model, xhr, options) ->
+    response = jQuery.parseJSON( xhr.responseText )
+    s = ""
+    _.chain(response.full_messages).filter((m) ->
+      /\w/.test(m)
+    ).each((m) ->
+      s = "#{s} #{m}"
+      s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
+    )
+    @$('.errors').text(s).show()
+
+#
 # Override modelName, modelNamePlural, spawnListItemType
 #
 # Optional override render.

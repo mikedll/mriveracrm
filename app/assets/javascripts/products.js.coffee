@@ -14,23 +14,26 @@ class window.SearchableProductView extends CrmModelView
   modelName: 'product'
 
   buildDom: () ->
-    @$el.html($(".#{@modelName}_view_example li").clone()) if @$el.children().length == 0
+    @$el.html($(".#{@modelName}_view_example").children().clone()) if @$el.children().length == 0
 
-class window.SearchableProductListItemView extends ListItemView
-  modelName: 'searchable-product'
-  spawnViewType: SearchableProductView
-  className: 'searchable-product-list-item list-item'
-
-  display_name: () ->
-    @model.get('name')
-
-  title: () ->
-    @model.get('name')
-
-class SearchableProductsView extends CollectionAppView
+class SearchableProductsView extends SearchAndListView
+  searchResultItemViewType: SearchableProductView
   modelNamePlural: 'products'
   modelName: 'product'
-  spawnListItemType: SearchableProductListItemView
+
+  initialize: () ->
+    SearchAndListView.prototype.initialize.apply(@, arguments)
+    @events = $.extend(@events,
+      'change input[name=query]': 'search'
+    )
+
+  search: () ->
+    _.each( @collection.toArray(), (model) => @collection.remove(model) )
+    @collection.fetch(
+      data:
+        query: @$('input[name=query]').val()
+    )
+
   title: () ->
     "Products"
 
