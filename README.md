@@ -2,7 +2,7 @@
 
 
 
-# Deploying
+# Deploying to production
 
     # move to release branch
     
@@ -12,7 +12,7 @@
     # git merge to master
     # git push
     
-    rake assets:deploy
+    RAILS_ENV=production rake assets:deploy
 
 
     # without migrations
