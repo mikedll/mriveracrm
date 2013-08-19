@@ -25,9 +25,8 @@ class ProductsController < ApplicationController
     current_object.to_json(json_config)
   end
 
-  def search
-    Product.search params[:query]
-    response_for :index
+  def current_objects
+    @current_objects ||= Product.index_or_search(params.slice(:query, :max_price))
   end
 
 end
