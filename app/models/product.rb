@@ -9,7 +9,7 @@ class Product < ActiveRecord::Base
 
   scope :active, where('active = ?', true)
   scope :max_price, lambda { |p| where('price is null or price <= ?', p) }
-  scope :string_search, lambda { |s| where('UPPER(products.name) LIKE (?)', "%#{s}%") }
+  scope :string_search, lambda { |s| where('UPPER(products.name) LIKE ?', "%#{s.upcase}%") }
 
   def self.index_or_search(params)
     query = self.active

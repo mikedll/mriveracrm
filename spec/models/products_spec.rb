@@ -41,12 +41,13 @@ describe Product do
 
   context "search" do
     it "should search in product's name", :current => true do
-      Product.create(:name => "Cat Food")
-      Product.create(:name => "Dog Food")
-      Product.create(:name => "Forks")
-      Product.create(:name => "Luxury Knives")
+      FactoryGirl.create(:product, :name => "Cat Food")
+      FactoryGirl.create(:product, :name => "Dog Food")
+      FactoryGirl.create(:product, :name => "Forks")
+      FactoryGirl.create(:product, :name => "Luxury Knives")
       
-      p = Product.search("knive")
+      p = Product.index_or_search(:query => "knive").all
+
       p.count.should == 1
     end
   end
