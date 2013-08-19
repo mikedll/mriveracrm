@@ -4,19 +4,33 @@
 
 # Deploying to production
 
-    # move to release branch
+Cut a release.
+
+    g f release start v1.x
+
+Fix any bugs. Do assets compilation and deploy.
     
     RAILS_ENV=production rake assets:deploy  # this does an assets:precompile, too.
 
-    # git commit manifest file that was just generated.
-    # git merge to master
-    # git push
+Commit manifest.
 
+    # whatever you git commit manuver is
 
-    # without migrations
-    cap production deploy
+Don't mess up your dev machine.
 
-    # if you have migrations
+    rake assets:clean
+
+Fix any bugs....are you sure? Then finish release.
+
+    g f release finish v1.x
+    g push
+    
+Both dev and master should go upstream.
+
     cap production deploy:migrations
 
-    rake assets:clean  # don't mess up your dev machine.
+That's it. If you're sure you don't have migrations:
+
+    cap production deploy
+
+
