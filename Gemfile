@@ -24,11 +24,16 @@ gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 
-group :development do
+gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
+
+group :assets do
   gem 'yui-compressor'
   gem 'sass-rails', '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
   gem 'uglifier', '>= 1.0.3'
+end
+
+group :development do
   gem "right_aws"
   gem 'taps', '> 0.3.23'
   gem 'capistrano-unicorn', :require => false

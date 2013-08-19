@@ -1,7 +1,11 @@
 class Image < ActiveRecord::Base
 
+  belongs_to :business
   belongs_to :project
 
-  mount_uploader :data, PortfolioImageUploader
+  has_many :product_images, :dependent => :destroy
+  has_many :products, :through => :product_images
+
+  mount_uploader :data, ImageUploader
 
 end

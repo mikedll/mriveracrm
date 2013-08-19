@@ -134,7 +134,38 @@ FactoryGirl.define do
         status { "successful" }
       end
     end
+  end
 
+  factory :product do
+    business { FactoryGirl.create(:business) }
+    name { "Widget " + SecureRandom.base64(3) }
+    active { true }
+  end
+
+  factory :image do
+    business { FactoryGirl.create(:business) }
+    data { File.new(Rails.root.join('spec', 'support', 'testphoto.jpg'), 'r') }
+  end
+
+  factory :product_image do 
+    ignore do
+      seed_business { FactoryGirl.create(:business) }
+    end
+
+    active { false }
+    primary { false }
+
+    before(:create) do |record, evaluator|
+      sb = if record.image
+             record.image.business
+           elsif record.product
+             record.product.business
+           else
+             evaluator.seed_business
+           end
+      record.image = FactoryGirl.create(:image, :business => sb) if record.image.nil?
+      record.product = FactoryGirl.create(:product, :business => sb) if record.product.nil?
+    end
   end
 
 end

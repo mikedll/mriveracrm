@@ -11,6 +11,9 @@ en:
     unexpected_internal_error: "Unexpected internal system error"
     no_access: "You tried to access a resource that you don't have access to. You've been redirected."
 
+  product_image:
+    unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
+
   employment:
     errors:
       user_unique_in_business_employment: 'is already employed as anothe employee at this business'

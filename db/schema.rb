@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130703080138) do
+ActiveRecord::Schema.define(:version => 20130805070257) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",       :default => "", :null => false
@@ -83,6 +83,9 @@ ActiveRecord::Schema.define(:version => 20130703080138) do
     t.integer  "project_id"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "business_id"
+    t.string   "data_original_filename"
+    t.string   "data_unique_id"
   end
 
   create_table "invitations", :force => true do |t|
@@ -123,6 +126,27 @@ ActiveRecord::Schema.define(:version => 20130703080138) do
     t.string   "card_brand"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "product_images", :force => true do |t|
+    t.integer  "image_id"
+    t.integer  "product_id"
+    t.boolean  "active",     :default => false, :null => false
+    t.boolean  "primary",    :default => false, :null => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
+  end
+
+  create_table "products", :force => true do |t|
+    t.integer  "business_id"
+    t.string   "name",         :default => "",    :null => false
+    t.text     "description",  :default => "",    :null => false
+    t.decimal  "price"
+    t.float    "weight"
+    t.string   "weight_units", :default => "",    :null => false
+    t.boolean  "active",       :default => false, :null => false
+    t.datetime "created_at",                      :null => false
+    t.datetime "updated_at",                      :null => false
   end
 
   create_table "projects", :force => true do |t|

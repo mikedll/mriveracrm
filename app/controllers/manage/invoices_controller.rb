@@ -64,6 +64,11 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
+  def parent_object
+    @parent_object ||= Business.current.clients.find params[:client_id]
+  end
+
+
   def object_parameters
     params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
   end

@@ -1,0 +1,36 @@
+
+- content_for :head do
+  = javascript_include_tag 'public'
+  = stylesheet_link_tag 'public'
+
+.container-fluid.gui-container
+
+.templates.hide
+  .products_view_example
+    .section-title
+    .app-top
+      - if defined?(back_button)
+        .btn-group
+          %button.back.btn
+            Back
+      .search
+        %form.product-search-form.form-search
+          .input-append
+            = text_field_tag 'query', '', :placeholder => 'Search', :class => "search-query"
+            %button{ :type => 'submit', :class => "btn" } Search
+          .form-spacer
+          %label Max Price:
+          = text_field_tag 'max_price', '', :type => "number", :class => "input-mini"
+
+      = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => true }
+
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'
+
+    .results
+      %ul.models-list.products-list
+
+  .product_view_example
+    = render Product.new
+

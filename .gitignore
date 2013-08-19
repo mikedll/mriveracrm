@@ -17,6 +17,8 @@ dump.rdb
 
 
 public/assets/*
+public/uploads/*
+public/test/uploads/*
 
 .sass-cache
 

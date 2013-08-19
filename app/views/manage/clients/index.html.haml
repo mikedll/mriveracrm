@@ -1,31 +1,10 @@
 
 - content_for :head do
   = javascript_include_tag 'manage'
-  = render 'bootstrap'
-
 
 .container-fluid.gui-container  
   .clients-gui.app-gui
-    .section-title
-      Clients
-
-    .app-top
-      = render :partial => 'shared/app_top', :locals => { :filters => [['recently_modified', 'Recently Modified'], ['archived', 'Archived']], :sorts => [['id', 'asc', 'int', 'Id'], ['next_contact_at', 'asc', 'date', 'Next Contact At'], ['updated_at', 'desc', 'date', 'Updated At'], ['last_name', 'asc', 'string', 'Last Name']] }
-
-    .row-fluid
-
-      .span3
-        %ul.clients-list.models-list
-
-      .span9
-        .errors.alert.alert-error.hide
-        .models-show-container
-
-      .clear
-
-      .spinner-container.hide 
-        .spinner
-          = image_tag 'loading.gif'
+    = render :partial => 'shared/app', :locals => { :app_top => true, :app_class => 'clients', :title => "Clients", :filters => [['recently_modified', 'Recently Modified'], ['archived', 'Archived']], :sorts => [['id', 'asc', 'int', 'Id'], ['next_contact_at', 'asc', 'date', 'Next Contact At'], ['updated_at', 'desc', 'date', 'Updated At'], ['last_name', 'asc', 'string', 'Last Name']], :bootstrap => current_objects }
 
 .templates.hide
   - [Client, Invoice, Note, Invitation, User, Transaction].each do |klass|

@@ -1,0 +1,20 @@
+
+
+.results .models-list {
+  .model-view {
+    float: left;
+    margin: 20px;
+    width: 300px;
+
+    .preview {
+      float: left;
+      margin-right: 10px;
+    }
+
+    .summary {
+      float: left;
+      margin-left: 10px;
+    }
+  }
+}
+

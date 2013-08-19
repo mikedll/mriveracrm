@@ -22,16 +22,11 @@ class window.UserListItemView extends ListItemView
     @model.fullName()
 
 class window.UserAppView extends CollectionAppView
+  modelNamePlural: 'users'
   modelName: 'user'
   spawnListItemType: UserListItemView
   className: 'users-gui app-gui'
 
   title: () ->
     "Users for #{@collection.parent.fullName()}"
-
-  render: () ->
-    node = $('.templates .users_view_example').children().clone()
-    @$el.html(node)
-    @$('h2').text(@title())
-    @
 

@@ -16,7 +16,6 @@ class window.Clients extends Backbone.Collection
   url: '/manage/clients'
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
-    @events = $.extend(@events, 'click a.invoices': 'showInvoices')
     @comparator = (client) ->
       client.get('id')
 
@@ -66,19 +65,9 @@ class window.ClientListItemView extends ListItemView
       "#{@model.get('first_name')} #{@model.get('last_name')}"
 
 class window.ClientAppView extends CollectionAppView
+  modelNamePlural: 'clients'
   modelName: 'client'
   spawnListItemType: ClientListItemView
   title: () ->
     'Clients'
 
-
-$(() ->
-  guiContaner = $('.gui-container')
-  stack = new StackedChildrenView(el: guiContaner)
-
-  clients = new Clients()
-  clientApp = new ClientAppView(el: guiContaner.find('.clients-gui'), collection: clients, parent: stack)
-  clientApp.render()
-  stack.childViewPushed(clientApp)
-  clients.reset(__clients)
-  )

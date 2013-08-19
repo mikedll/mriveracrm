@@ -1,5 +1,24 @@
 
 
+#
+# When making practically any app, you have to have this nest:
+#
+# .container-fluid.gui-container  # 1
+#   .container-app.app-gui        # 2
+#
+# The outer div (1) provides absolute styling frame of reference, and is usually
+# the StackAppView, and the inner (2) app-gui provides something the user
+# can actually see, the box that represents a slice of the app.
+#
+#
+#
+# Inside of this there can be as many views as you want.
+#
+#
+
+
+Dropzone.autoDiscover = false;
+
 window.AppsConfig =
   dateJsRubyDatetimeFormat: 'yyyy-MM-ddTHH:mm:ss'
   dateJsReadableDatetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
@@ -111,6 +130,18 @@ class window.BaseModel extends Backbone.Model
   onRequest: () ->
     @_isRequesting = true
 
+  #
+  # Use this if we're certain that a change brings this model into
+  # sync with the database, even though we're not going to do a
+  # sync(...)  or fetch to verify that.
+  #
+  # Can be used if one is confident that a change elsewhere on a view
+  # has forced a change to this model in the database (rate).
+  #
+  setAndAssumeSync: (attrs) ->
+    @set(attrs)
+    @trigger('sync', @, null, {})
+
   onSync: () ->
     @_attributesSinceSync = {}
     @_isRequesting = false
@@ -124,6 +155,8 @@ class window.BaseModel extends Backbone.Model
 
 class window.BaseView extends Backbone.View
   initialize: (options) ->
+    @useDirty = true
+
     @events = {}
     @parent = options.parent
 
@@ -160,6 +193,29 @@ class window.BaseView extends Backbone.View
     return "" if !v?
     date = Date.parse(v)
     date.toString(AppsConfig.dateJsReadableDatetimeFormat)
+
+  onSync: (model, resp, options) ->
+
+
+class window.ModelBaseView extends BaseView
+  initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
+    @listenTo(@model, 'change', @onModelChanged)
+    @listenTo(@model, 'sync', @onSync)
+
+  dirtyRegistration: () ->
+    return if !@useDirty
+    if @model.isDirty()
+      @parent.registerDirty(@model)
+    else
+      @parent.unregisterDirty(@model)
+
+  onModelChanged: (e) ->
+    @dirtyRegistration()
+
+  onSync: (model, resp, options) ->
+    @dirtyRegistration()
+
 
 class window.BaseCollection extends Backbone.Collection
   initialize: (models, options) ->
@@ -228,7 +284,7 @@ class window.WithChildrenView extends BaseView
 #
 # Implement title.
 #
-class window.ListItemView extends BaseView
+class window.ListItemView extends ModelBaseView
   modelName: 'some_type'
   tagName: 'li'
   className: 'list-item'
@@ -240,18 +296,19 @@ class window.ListItemView extends BaseView
       ""
 
   initialize: (options) ->
-    BaseView.prototype.initialize.apply(@, arguments)
+    ModelBaseView.prototype.initialize.apply(@, arguments)
     @events =
       'click a': 'show'
     @parent = options.parent
-    @listenTo(@model, 'sync', @onSync)
+    # these two should be in ModelBaseView
+    # @listenTo(@model, 'sync', @onSync)
+    # @listenTo(@model, 'change', @onModelChanged)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'resorted', @onResorted)
-    @listenTo(@model, 'change', @onModelChanged)
 
   onRemove: () ->
     @removeDom()
@@ -270,16 +327,15 @@ class window.ListItemView extends BaseView
     @$('a .titleText').text(if s? && s.trim() != "" then s else "-")
 
   onModelChanged: (e) ->
+    ModelBaseView.prototype.onModelChanged.apply(@, arguments)
     @decorateDirty()
     @decorateError()
     @setTitle()
 
   decorateDirty: () ->
     if @model.isDirty()
-      @parent.registerDirty(@model)
       @$el.addClass('dirty')
     else
-      @parent.unregisterDirty(@model)
       @$el.removeClass('dirty')
 
   decorateRequesting: () ->
@@ -325,6 +381,7 @@ class window.ListItemView extends BaseView
     @decorateRequesting()
 
   onSync: (model, resp, options) ->
+    ModelBaseView.prototype.onSync.apply(@, arguments)
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @render()
     @decorateDirty()
@@ -347,7 +404,7 @@ class window.ListItemView extends BaseView
 #
 # implement render
 #
-class window.CrmModelView extends BaseView
+class window.CrmModelView extends ModelBaseView
   className: 'model-view'
 
   id: () ->
@@ -357,19 +414,20 @@ class window.CrmModelView extends BaseView
       ""
 
   initialize: (options) ->
-    BaseView.prototype.initialize.apply(@, arguments)
-    @useDirty = true
+    ModelBaseView.prototype.initialize.apply(@, arguments)
     @events =
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click .btn.save': 'save'
       'confirm:complete .btn.revert': 'revert'
-      'confirm:complete button.destroy': 'destroy'
-      'confirm:complete button.put_action': 'putAction'
+      'confirm:complete .btn.destroy': 'destroy'
+      'confirm:complete .btn.put_action': 'putActionConfirmed'
+      'click .btn.put_action:not([data-confirm])': 'putAction'
 
 
     @parent = options.parent
+    @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
@@ -388,8 +446,13 @@ class window.CrmModelView extends BaseView
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
-  putAction: (e, answer) ->
-    @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true) if answer
+  putAction: (e) ->
+    return false if @buttonsCache.filter(e.target).length == 0
+    @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true)
+
+  putActionConfirmed: (e, answer) ->
+    return false if @buttonsCache.filter(e.target).length == 0
+    @putAction(e) if answer
 
   onDestroy: () ->
     @removeDom()
@@ -401,7 +464,11 @@ class window.CrmModelView extends BaseView
     @$el.remove() if @$el?
 
   destroy: (e, answer) ->
+    return false if @buttonsCache.filter(e.target).length == 0
+    e.preventDefault()
+    e.stopPropagation()
     @model.destroy({wait: true}) if answer
+    return false
 
   decorateDirty: () ->
     return if !@useDirty
@@ -447,6 +514,7 @@ class window.CrmModelView extends BaseView
     #
     # we do recorate the form, though.
     #
+    ModelBaseView.prototype.onModelChanged.apply(@, arguments)
     @decorateDirty()
     if @model.validationError?
       @renderErrors(@model.validationError)
@@ -454,6 +522,8 @@ class window.CrmModelView extends BaseView
       @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
+    return true if @inputsCache.filter(e.target).length == 0
+
     if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
       @save()
       e.stopPropagation()
@@ -468,10 +538,15 @@ class window.CrmModelView extends BaseView
     return true
 
   nameFromInput: (elSelection) ->
-    matched = @attributeMatcher.exec(elSelection.prop('name'))
     attribute_name = null
-    if matched? && matched.length == 2
-      attribute_name = matched[1]
+
+    if elSelection.hasClass('read-only-field')
+      if elSelection.data('name')?
+        attribute_name = elSelection.data('name')
+    else
+      matched = @attributeMatcher.exec(elSelection.prop('name'))
+      if matched? && matched.length == 2
+        attribute_name = matched[1]
     attribute_name
 
   #
@@ -486,6 +561,21 @@ class window.CrmModelView extends BaseView
     if attribute_name?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
+      else if elSelection.hasClass('float')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = parseFloat(elSelection.val())
+      else if elSelection.hasClass('decimal')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = elSelection.val() # don't bother converting to number - may lose precision
+      else if elSelection.is('[type=checkbox]')
+        if elSelection.hasClass('boolean')
+          val = if elSelection.prop('checked') then true else false
+        else
+          val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() -> $(this).val()).toArray()
       else
         val = elSelection.val()
       return [attribute_name, val]
@@ -506,7 +596,9 @@ class window.CrmModelView extends BaseView
 
     @[collectionName + 'AppView'] = new collectionAppViewKlass({parent: @, collection: @[collectionName]})
     @[collectionName + 'AppView'].render()
+
     @parent.childViewPushed(@[collectionName + 'AppView'])
+    @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
 
   copyModelToForm: () ->
@@ -515,11 +607,14 @@ class window.CrmModelView extends BaseView
       attribute_name = @nameFromInput(el$)
       if attribute_name? && @model.get(attribute_name)?
         v = @model.get(attribute_name)
-        if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_name)
-        else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_name)
-        el$.val(v)
+        if el$.is('[type=checkbox]') && el$.hasClass('boolean')
+          el$.prop('checked', (v != "false" && v != false))
+        else
+          if el$.hasClass('datetimepicker')
+            v = @toHumanReadableDateTimeFormat(attribute_name)
+          else if el$.hasClass('hasDatepicker')
+            v = @toHumanReadableDateFormat(attribute_name)
+          el$.val(v)
     )
 
     @readonlyInputsCache.each((i, el) =>
@@ -545,6 +640,8 @@ class window.CrmModelView extends BaseView
     )
 
   revert: (e, answer) ->
+    return false if @buttonsCache.filter(e.target).length == 0
+
     return if !@model.isDirty()
     if answer
       @model.set(@model.changedAttributesSinceSync())
@@ -590,7 +687,11 @@ class window.CrmModelView extends BaseView
   noSubmit: (e) ->
     false
 
+  onRequest: (e) ->
+
+
   onSync: (model, resp, options) ->
+    ModelBaseView.prototype.onSync.apply(@, arguments)
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @clearErrors()
     @copyModelToForm()
@@ -604,6 +705,7 @@ class window.CrmModelView extends BaseView
 
   render: () ->
     @buildDom()
+    @buttonsCache = @$('.btn')
     @inputsCache = @$(':input')
     @readonlyInputsCache = @$('.read-only-field')
     @inputsCache.filter('input.datepicker').datepicker(
@@ -626,7 +728,102 @@ class window.SingleModelAppView extends WithChildrenView
 
 
 #
-# Override modelName, spawnListItemType
+# Needs to have its behavior refactored
+#
+class window.SearchAndListView extends BaseView
+  initialize: (options) ->
+    BaseView.prototype.initialize.apply(@, arguments)
+    @events =
+      'click .collection-filter': 'filtersChanged'
+      'click .collection-sorts': 'sortsChanged'
+
+    @listenTo(@collection, 'reset', @addAll)
+    @listenTo(@collection, 'add', @addOne)
+    @listenTo(@collection, 'sync', @onSync)
+    @listenTo(@collection, 'error', @onError)
+
+  filtersChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing filters.')
+      return false
+
+    _.each( @collection.toArray(), (model) => @collection.remove(model) )
+    data = {}
+    _.each( @$('.collection-filter'), (el) ->
+      el$ = $(el)
+      if e.target == el
+        # this button is about to change - we move faster than bootstrap
+        # should be improved so that this entire method fires after that stuff is all done
+        if !el$.hasClass('active')
+          data[el$.data('filter')] = true
+      else
+        if el$.hasClass('active')
+          data[el$.data('filter')] = true
+    )
+    @collection.fetch(data: data)
+
+  sortsChanged: (e) ->
+    if @collection.any( (model) -> model.isDirty() )
+      e.stopPropagation()
+      new Ballooner().show('This page has pending edits. Resolve them before changing sort order.')
+      return false
+
+    target = $(e.target)
+    @collection.comparator = (new ComparatorBuilder())
+      .build(target.data('sort_attribute'), target.data('sort_direction'), target.data('sort_type'))
+
+    @collection.sort()
+    @collection.each( (model) -> model.trigger('resorted') )
+    @addAll()
+
+  addAll: () ->
+    @collection.each(@addOne, @)
+
+  addOne: (model) ->
+    itemView = new @searchResultItemViewType({'model':model, 'parent': @})
+    @modelsListCache.append(itemView.render().el)
+
+    # just adde first model, so we need to focus it.
+    if @modelsListCache.children().length == 1
+      @modelsListCache.find(".list-item a").first().trigger('click')
+
+  remove: () ->
+    @$el.remove()
+
+  next: () ->
+    # noop
+  previous: () ->
+    # noop
+
+  focusTopModelView: () ->
+    # noop
+
+  buildDom: () ->
+    @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
+
+  cacheInitialDom: () ->
+    @modelsListCache = @$('.models-list').first()
+
+  render: () ->
+    @buildDom()
+    @cacheInitialDom()
+    @$('.section-title').text(@title())
+    @
+
+  onError: (model, xhr, options) ->
+    response = jQuery.parseJSON( xhr.responseText )
+    s = ""
+    _.chain(response.full_messages).filter((m) ->
+      /\w/.test(m)
+    ).each((m) ->
+      s = "#{s} #{m}"
+      s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
+    )
+    @$('.errors').text(s).show()
+
+#
+# Override modelName, modelNamePlural, spawnListItemType
 #
 # Optional override render.
 #
@@ -689,11 +886,14 @@ class window.CollectionAppView extends WithChildrenView
 
   addAll: () ->
     @collection.each(@addOne, @)
-    @$(".models-list .list-item a").first().trigger('click')
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
-    @$('.models-list').append(listItemView.render().el)
+    @modelsListCache.append(listItemView.render().el)
+
+    # just adde first model, so we need to focus it.
+    if @modelsListCache.children().length == 1
+      @modelsListCache.find(".list-item a").first().trigger('click')
 
   create: () ->
     @collection.create({},
@@ -702,7 +902,7 @@ class window.CollectionAppView extends WithChildrenView
     )
 
   modelListItemLink: (model) ->
-    @$(".models-list #list-item-#{model.get('id')} a")
+    @modelsListCache.find("#list-item-#{model.get('id')} a")
 
   afterSave: (model, response, options) ->
     @modelListItemLink(model).trigger('click')
@@ -717,17 +917,17 @@ class window.CollectionAppView extends WithChildrenView
     listItem.find('a').trigger('click') if listItem.length > 0
 
   next: () ->
-    @move(@$(".models-list .list-item a.active").parent().next())
+    @move(@modelsListCache.find(".list-item a.active").parent().next())
 
   previous: () ->
-    @move(@$(".models-list .list-item a.active").parent().prev())
+    @move(@modelsListCache.find(".list-item a.active").parent().prev())
 
   focusTopModelView: () ->
     @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
   show: (view) ->
     @$('.errors').hide()
-    @$(".models-list .list-item a").removeClass('active')
+    @modelsListCache.find(".list-item a").removeClass('active')
     @modelListItemLink(view.model).addClass('active')
 
     # lower curtain
@@ -752,8 +952,16 @@ class window.CollectionAppView extends WithChildrenView
   clearHighlightedModelErrors: () ->
     @$('.errors').hide()
 
+  buildDom: () ->
+    @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
+
+  cacheInitialDom: () ->
+    @modelsListCache = @$('.models-list').first()
+
   render: () ->
-    @$('h2').text(@title)
+    @buildDom()
+    @cacheInitialDom()
+    @$('.section-title').text(@title())
     @
 
   onError: (model, xhr, options) ->

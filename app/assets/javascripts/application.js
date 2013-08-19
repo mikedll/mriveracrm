@@ -1,6 +1,9 @@
 // 
 //= require jquery
 //= require jquery_ujs
+//= require bootstrap
+//= require twitter/bootstrap
+//= require vendor/dropzone
 //= require vendor/jquery-ui/jquery-ui
 //= require jquery-ui-bootstrapconflicts.js
 //= require jquery.easing-1.3.pack
@@ -15,5 +18,6 @@
 //= require vendor/timepicker/jquery-ui-sliderAccess
 //= require vendor/timepicker/jquery-ui-timepicker-addon
 //= require main
+//= require products
 //
 

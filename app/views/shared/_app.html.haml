@@ -1,17 +1,22 @@
-- content_for :head do
-  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => app_class, :bootstrap => bootstrap }
+- if defined?(bootstrap)
+  - content_for :head do
+    = render :partial => 'shared/app_bootstrap', :locals => { :app_class => app_class, :bootstrap => bootstrap }
 
 .section-title
   = title
 
 .app-top
-  = render :partial => 'shared/app_top' if app_top
+  - if defined?(back_button)
+    .btn-group
+      %button.back.btn
+        Back
+  = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => defined?(disable_create) && disable_create } if app_top
 
 .row-fluid
-  .span3
-    %ul.invoices-list.models-list
+  .span2
+    %ul.models-list{:class => "#{app_class}-list" }
 
-  .span9
+  .span10
     .errors.alert.alert-error.hide
     .models-show-container
 

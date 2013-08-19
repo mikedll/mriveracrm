@@ -33,16 +33,10 @@ class window.InvoiceListItemView extends ListItemView
     @model.get('title')
 
 class window.InvoiceAppView extends CollectionAppView
+  modelNamePlural: 'invoices'
   modelName: 'invoice'
   spawnListItemType: InvoiceListItemView
   className: 'invoices-gui app-gui'
 
   title: () ->
     "Invoices for #{@collection.parent.fullName()}"
-
-  render: () ->
-    node = $('.templates .invoices_view_example').children().clone()
-    @$el.html(node)
-    @$('h2').text(@title())
-    @
-

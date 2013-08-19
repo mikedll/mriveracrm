@@ -29,16 +29,11 @@ class window.TransactionListItemView extends ListItemView
     @model.title()
 
 class window.TransactionAppView extends CollectionAppView
+  modelNamePlural: 'transactions'
   modelName: 'transaction'
   spawnListItemType: TransactionListItemView
   className: 'transactions-gui app-gui'
 
   title: () ->
     "Transactions for #{@collection.parent.title()}"
-
-  render: () ->
-    node = $('.templates .transactions_view_example').children().clone()
-    @$el.html(node)
-    @$('h2').text(@title())
-    @
 
