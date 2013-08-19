@@ -1,5 +1,7 @@
 class ProductsController < ApplicationController
 
+  skip_before_filter :authenticate_user!
+
   make_resourceful do
     actions :index, :show
 
