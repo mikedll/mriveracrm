@@ -28,6 +28,8 @@ namespace :assets do
     puts "Uploading #{upload_target} to #{bucket.name}"
 
     uploadable = Dir.glob(upload_target.join("**", "*")).select { |f| !File.directory?(f) }.map(&:to_s)
+    uploadable.reject! { |f| f =~ /public\/uploads/ }
+    uploadable.reject! { |f| f !~ /public\/assets/ }
     uploadable.each do |file|
       number_uploaded += 1 if s3_update_asset( bucket, file, :access => :public_read )
     end
