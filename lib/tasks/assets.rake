@@ -17,8 +17,6 @@ namespace :assets do
     puts "Connected to S3..."      
     bucket = AWS::S3::Bucket.find s3_config['bucket']
     s3_upload_directory Rails.root.join("public"), bucket
-
-    Rake::Task['assets:clean'].execute
   end
 
 
