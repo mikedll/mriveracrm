@@ -1,6 +1,8 @@
 // 
 //= require jquery
 //= require jquery_ujs
+//= require bootstrap
+//= require twitter/bootstrap
 //= require vendor/dropzone
 //= require vendor/jquery-ui/jquery-ui
 //= require jquery-ui-bootstrapconflicts.js

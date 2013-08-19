@@ -25,6 +25,7 @@ gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 
 group :development do
+  gem 'twitter-bootstrap-rails'
   gem 'yui-compressor'
   gem 'sass-rails', '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
