@@ -44,6 +44,7 @@ class SearchableProductsView extends SearchAndListView
       'keyup input': 'search'
       'click .btn': 'btnSearch'
     )
+    @search()
 
   btnSearch: (e) ->
     @search()
