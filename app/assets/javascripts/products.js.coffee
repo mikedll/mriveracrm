@@ -31,14 +31,20 @@ class SearchableProductsView extends SearchAndListView
   initialize: () ->
     SearchAndListView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
-      'keyup input[name=query]': 'search'
+      'keyup input': 'search'
+      'click .btn': 'btnSearch'
     )
+
+  btnSearch: (e) ->
+    @search()
+    e.stopPropagation()
+    e.preventDefault()
+    return false
 
   search: () ->
     _.each( @collection.toArray(), (model) => @collection.remove(model) )
     @collection.fetch(
-      data:
-        query: @$('input[name=query]').val()
+      data: @$('form.product-search-form').serializeArray()
     )
 
   title: () ->

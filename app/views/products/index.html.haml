@@ -14,12 +14,13 @@
           %button.back.btn
             Back
       .search
-        .form-horizontal
-          .control-group.string
-            .controls
-              = text_field_tag 'query', ''
-              .btn
-                Search
+        %form.product-search-form.form-search
+          .input-append
+            = text_field_tag 'query', '', :placeholder => 'Search', :class => "search-query"
+            %button{ :type => 'submit', :class => "btn" } Search
+          .form-spacer
+          %label Max Price:
+          = text_field_tag 'max_price', '', :type => "number", :class => "input-mini"
 
       = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => true }
 
