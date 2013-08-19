@@ -19,7 +19,14 @@ class window.SearchableProductView extends CrmModelView
 
     # refactor into "apps"
     @$('.name').text(@model.get('name'))
-    @$('.price').text(@model.get('price')) if @model.get('price')
+
+    if @model.get('price')
+      i = @model.get('price').indexOf('.')
+      if i > 0
+        p = @model.get('price').substring(0, i + 2 + 1)
+      else
+        p = @model.get('price')
+      @$('.price').text("$#{p}")
     if @model.get('primary_product_image')?
       @$('img').attr('src', @model.get('primary_product_image').image.data.thumb.url)
 
