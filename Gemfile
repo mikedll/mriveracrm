@@ -24,8 +24,9 @@ gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 
-group :development, :assets do
-  gem 'twitter-bootstrap-rails'
+gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
+
+group :assets do
   gem 'yui-compressor'
   gem 'sass-rails', '~> 3.2.3'
   gem 'coffee-rails', '~> 3.2.1'
