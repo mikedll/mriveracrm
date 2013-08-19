@@ -16,7 +16,10 @@ class window.SearchableProductView extends CrmModelView
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
+
+    # refactor into "apps"
     @$('.name').text(@model.get('name'))
+    @$('.price').text(@model.get('price')) if @model.get('price')
     if @model.get('primary_product_image')?
       @$('img').attr('src', @model.get('primary_product_image').image.data.thumb.url)
 
