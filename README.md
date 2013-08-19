@@ -33,4 +33,6 @@ That's it. If you're sure you don't have migrations:
 
     cap production deploy
 
+## To restart without deploying:
 
+    cap unicorn:restart
