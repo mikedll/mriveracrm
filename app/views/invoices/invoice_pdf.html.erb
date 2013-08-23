@@ -10,19 +10,35 @@
   </head>
   <body>
     <h1>
-      Invoice from <%= invoice.client.business.name %>
+      <%= invoice.client.business.name %>
     </h1>
 
     <hr/>
 
-    <strong>Title:</strong> <%= invoice.title %>    
-    <br/>
-    <strong>Date:</strong> <%= invoice.pretty_date %>
-    <br/>
-    <strong>Total:</strong> $<%= invoice.total %>
-    <br/>
-    <strong>Description:</strong>
-    <%= invoice.description %>
+
+      <br/>
+
+    <div>
+      <%= invoice.title %>    
+      <br/>
+      <%= invoice.pretty_date %>
+    </div>
+
+
+    <div>
+      <strong>Description:</strong>
+    </div>
+
+    <div class="simpler text">
+<%= invoice.description %>
+    </div>
+
+    <div>
+      <strong>Total:</strong>
+      <%= invoice.pretty_total %>
+      <br/>
+    </div>
+    
   </body>
 </html
 

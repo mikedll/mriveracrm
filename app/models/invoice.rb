@@ -6,6 +6,7 @@ class Invoice < ActiveRecord::Base
   has_many :stripe_transactions
 
   include ActionView::Helpers::TranslationHelper
+  include ActionView::Helpers::NumberHelper
 
   mount_uploader :pdf_file, PdfUploader
 
@@ -107,7 +108,11 @@ class Invoice < ActiveRecord::Base
   default_scope { order('created_at asc') }
 
   def pretty_date
-    I18n.l(self.date, :format => 'long')
+    I18n.l(date, :format => :dateonly)
+  end
+
+  def pretty_total
+    number_to_currency(total)
   end
 
 
