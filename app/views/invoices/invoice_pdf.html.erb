@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Invoice from <%= invoice.client.business.name %></title>
+  </head>
+  <body>
+    <h1>
+      Invoice from <%= invoice.client.business.name %>
+    </h1>
+
+    <br/>
+
+    <strong>Title:</strong> <%= invoice.title %>    
+    <br/>
+    <strong>Date:</strong> <%= invoice.pretty_date %>
+    <br/>
+    <strong>Total:</strong> $<%= invoice.total %>
+    <br/>
+    <strong>Description:</strong>
+    <%= invoice.description %>
+  </body>
+</html
+

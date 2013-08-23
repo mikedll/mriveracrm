@@ -106,4 +106,12 @@ describe Invoice do
     end
   end
 
+  context "pdf_gen", :current => true do
+    it "should generate pdf" do
+      invoice = FactoryGirl.create(:pending_invoice)      
+      invoice.generate_pdf
+
+    end    
+  end
+
 end

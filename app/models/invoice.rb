@@ -1,5 +1,4 @@
 class Invoice < ActiveRecord::Base
-  belongs_to :business
   belongs_to :client
 
   has_many :transactions
@@ -7,6 +6,8 @@ class Invoice < ActiveRecord::Base
   has_many :stripe_transactions
 
   include ActionView::Helpers::TranslationHelper
+
+  mount_uploader :pdf_file, PdfUploader
 
   #
   # Open
@@ -100,6 +101,37 @@ class Invoice < ActiveRecord::Base
   scope :viewable_to_client, lambda {
     where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
   }
+
+  
+  def generate_pdf
+    if can_edit?
+      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
+      return false
+    end
+
+    invoice = self
+    pdf_root = Rails.root.join("tmp/pdfs")
+    html = ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding)
+    filename = pdf_root.join("invoice#{self.id}.html")
+    pdf_filename = "#{File.dirname(filename)}/#{File.basename(filename, ".*")}.pdf"
+
+    File.open(filename, "w") { |f| f.write html }
+    Dir.chdir(pdf_root) do
+      cmd = "xhtml2pdf #{filename}"
+      result = %x[#{cmd}]
+    end
+    
+    self.pdf_file = File.new(filename)
+    result = save
+    # FileUtils.rm_rf(filename)
+    # FileUtils.rm_rf(pdf_filename)
+    result
+  end
+
+  def pretty_date
+    I18n.l(self.date, :format => 'long')
+  end
+
 
   def charge!
     if !can_pay?
