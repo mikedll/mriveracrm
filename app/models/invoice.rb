@@ -165,7 +165,11 @@ class Invoice < ActiveRecord::Base
   end
 
   def regenerate_pdf
-    generate_and_assign_pdf
+    if !can_edit?
+      file = generate_pdf # have to do this to allow us to remove the File object
+      self.pdf_file = file
+      FileUtils.rm_rf(file)
+    end
     save
   end
 
