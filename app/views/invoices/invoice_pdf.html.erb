@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Invoice from <%= invoice.client.business.name %></title>
+    <style>
+      body h1 {
+        color: blue;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>
+      <%= invoice.client.business.name %>
+    </h1>
+
+    <hr/>
+
+
+      <br/>
+
+    <div>
+      <%= invoice.title %>    
+      <br/>
+      <%= invoice.pretty_date %>
+    </div>
+
+
+    <div>
+      <strong>Description:</strong>
+    </div>
+
+    <div class="simpler text">
+<%= invoice.description %>
+    </div>
+
+    <div>
+      <strong>Total:</strong>
+      <%= invoice.pretty_total %>
+      <br/>
+    </div>
+    
+  </body>
+</html
+

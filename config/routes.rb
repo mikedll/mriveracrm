@@ -45,6 +45,7 @@ MikedllCrm::Application.routes.draw do
       resources :invoices do
         member do
           put :mark_pending
+          put :regenerate_pdf
           put :cancel
           put :charge
           put :mark_paid

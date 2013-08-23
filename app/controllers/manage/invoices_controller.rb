@@ -38,6 +38,15 @@ class Manage::InvoicesController < Manage::BaseController
     end
   end
 
+  def regenerate_pdf
+    load_object
+    if current_object.regenerate_pdf
+      response_for :update
+    else
+      response_for :update_fails
+    end
+  end
+
   def cancel
     load_object
     if current_object.cancel!

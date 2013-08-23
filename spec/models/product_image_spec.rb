@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe ProductImage do
   context "primary" do
-    it "should imply active, and be true for at most one of a product's images", :current => true do
+    it "should imply active, and be true for at most one of a product's images" do
       @product = FactoryGirl.create(:product)
       @product_image = FactoryGirl.create(:product_image, :product => @product, :primary => true)
       @product_image2 = FactoryGirl.create(:product_image, :product => @product, :primary => true)

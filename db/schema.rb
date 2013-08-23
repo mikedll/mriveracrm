@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130805070257) do
+ActiveRecord::Schema.define(:version => 20130823091235) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",       :default => "", :null => false
@@ -107,6 +107,9 @@ ActiveRecord::Schema.define(:version => 20130805070257) do
     t.datetime "date"
     t.integer  "client_id"
     t.string   "title"
+    t.string   "pdf_file"
+    t.string   "pdf_file_unique_id"
+    t.string   "pdf_file_original_filename"
   end
 
   create_table "notes", :force => true do |t|

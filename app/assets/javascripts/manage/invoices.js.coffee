@@ -24,6 +24,14 @@ class window.InvoiceView extends CrmModelView
   showTransactions: () ->
     @showNestedCollectionApp('transactions', Transactions, TransactionAppView)
 
+  copyModelToForm: () ->
+    CrmModelView.prototype.copyModelToForm.apply(@, arguments)
+    if @model.get('pdf_file') && @model.get('pdf_file').url
+      @$('.pdf_link a').attr('href', @model.get('pdf_file').url)
+      @$('.pdf_link').show()
+    else
+      @$('.pdf_link').hide()
+
 class window.InvoiceListItemView extends ListItemView
   modelName: 'invoice'
   spawnViewType: InvoiceView
