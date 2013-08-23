@@ -10,6 +10,9 @@ describe Image do
       @image = FactoryGirl.create(:image, :data => File.new(@testfilepath, 'r'))
     end
 
+    it "should create file at path using model class, instance id, and uuid filename" do
+      File.exists?(Rails.root.join("public/test/uploads/image/data/#{@image.id}/#{@uuid}.jpg")).should be_true
+    end
     it "should create UUIDs to use in urls, to hide image name" do
       @image.data.url.should =~ Regexp.new("#{@uuid}.jpg$")
       @image.data.url.should_not =~ /testphoto.jpg/
