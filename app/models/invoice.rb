@@ -96,7 +96,7 @@ class Invoice < ActiveRecord::Base
   validates :description, :length => { :minimum => 3 }
   validate :_can_mark_paid
 
-  before_save :_generate_and_store_pdf
+  before_save :generate_and_assign_pdf
 
   before_destroy :_verify_destroyable
 
@@ -144,11 +144,11 @@ class Invoice < ActiveRecord::Base
       return nil
     end
 
-    invoice = self
     pdf_root = Rails.root.join("tmp/pdfs")
     html_filename = pdf_root.join("invoice#{self.id}.html")
     pdf_filename = "#{File.dirname(html_filename)}/#{File.basename(html_filename, ".*")}.pdf"
 
+    invoice = self
     File.open(html_filename, "w") do |f| 
       f.write ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding) 
     end
@@ -160,6 +160,19 @@ class Invoice < ActiveRecord::Base
 
     FileUtils.rm_rf(html_filename)
     File.new(pdf_filename, "r")
+  end
+
+  def regenerate_pdf
+    generate_and_assign_pdf
+    save
+  end
+
+  def generate_and_assign_pdf
+    if !pdf_file? && !can_edit?
+      file = generate_pdf # have to do this to allow us to remove the File object
+      self.pdf_file = file
+      FileUtils.rm_rf(file)
+    end
   end
 
   private
@@ -191,11 +204,4 @@ class Invoice < ActiveRecord::Base
     end
   end
 
-  def _generate_and_store_pdf
-    if !pdf_file? && !can_edit?
-      file = generate_pdf # have to do this to allow us to remove the File object
-      self.pdf_file = file
-      FileUtils.rm_rf(file)
-    end
-  end
 end

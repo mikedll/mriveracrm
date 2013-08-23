@@ -18,12 +18,25 @@
 
   .control-group
     .control-label
+      PDF Copy
+    .controls
+      .pdf_link.hide
+        %a{:href => '#'}
+          %i.icon-download-alt
+          Download
+
+  .control-group
+    .control-label
     .controls
       = render :partial => 'shared/model_view_basic_buttons'
 
       .btn-group
         %button.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
           Mark Pending
+
+      .btn-group
+        %button.put_action.btn{ :data => {:action => 'regenerate_pdf', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment,paid,closed,cancelled'}}
+          Regenerate PDF
 
       .btn-group
         %button.put_action.btn{ :data => {:action => 'mark_paid', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will mark the invoice as paid. You must have created an outside transaction to do this."}}
