@@ -104,6 +104,8 @@ class Invoice < ActiveRecord::Base
     where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
   }
 
+  default_scope { order('created_at asc') }
+
   def pretty_date
     I18n.l(self.date, :format => 'long')
   end
