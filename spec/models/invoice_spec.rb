@@ -91,7 +91,7 @@ describe Invoice do
     end
   end
 
-  context "mark_paid", :current => true do
+  context "mark_paid" do
     it "should fail if invoice doesnt have a successful transaction" do
       invoice = FactoryGirl.create(:invoice)
       invoice.mark_pending!
@@ -107,10 +107,34 @@ describe Invoice do
   end
 
   context "pdf_gen", :current => true do
-    it "should generate pdf" do
-      invoice = FactoryGirl.create(:pending_invoice)      
-      invoice.generate_pdf
+    before do
+      @uuid = SecureRandom.uuid
+      SecureRandom.stub(:uuid) { @uuid }
+      @invoice = FactoryGirl.create(:invoice)      
+    end
 
+    it "should generate pdf when invoice moves to pending" do
+      @invoice.pdf_file?.should be_false
+      @invoice.mark_pending.should be_true
+      @invoice.pdf_file?.should be_true
+    end
+
+    it "should not double-generate pdfs after passing pending if pdf already exists" do
+      @invoice.mark_pending.should be_true
+      Invoice.any_instance.should_not_receive(:generate_pdf)
+      FactoryGirl.create(:paid_stripe_transaction, :invoice => @invoice)
+      @invoice.mark_paid.should be_true
+    end
+
+    it "should create file at path using model class, instance id, and uuid filename" do
+      p = Rails.root.join("public/test/uploads/invoice/pdf_file/#{@invoice.id}/#{@uuid}.pdf")
+      File.exists?(p).should be_false
+      @invoice.mark_pending.should be_true
+      File.exists?(p).should be_true
+    end
+
+    it "should fail if pdf isnt done being edited (passed pending)" do
+      @invoice.generate_pdf.should be_false
     end    
   end
 

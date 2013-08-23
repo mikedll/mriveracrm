@@ -96,37 +96,13 @@ class Invoice < ActiveRecord::Base
   validates :description, :length => { :minimum => 3 }
   validate :_can_mark_paid
 
+  before_save :_generate_and_store_pdf
+
   before_destroy :_verify_destroyable
 
   scope :viewable_to_client, lambda {
     where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
   }
-
-  
-  def generate_pdf
-    if can_edit?
-      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
-      return false
-    end
-
-    invoice = self
-    pdf_root = Rails.root.join("tmp/pdfs")
-    html = ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding)
-    filename = pdf_root.join("invoice#{self.id}.html")
-    pdf_filename = "#{File.dirname(filename)}/#{File.basename(filename, ".*")}.pdf"
-
-    File.open(filename, "w") { |f| f.write html }
-    Dir.chdir(pdf_root) do
-      cmd = "xhtml2pdf #{filename}"
-      result = %x[#{cmd}]
-    end
-    
-    self.pdf_file = File.new(filename)
-    result = save
-    # FileUtils.rm_rf(filename)
-    # FileUtils.rm_rf(pdf_filename)
-    result
-  end
 
   def pretty_date
     I18n.l(self.date, :format => 'long')
@@ -162,6 +138,30 @@ class Invoice < ActiveRecord::Base
     }    
   end
 
+  def generate_pdf
+    if can_edit?
+      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
+      return nil
+    end
+
+    invoice = self
+    pdf_root = Rails.root.join("tmp/pdfs")
+    html_filename = pdf_root.join("invoice#{self.id}.html")
+    pdf_filename = "#{File.dirname(html_filename)}/#{File.basename(html_filename, ".*")}.pdf"
+
+    File.open(html_filename, "w") do |f| 
+      f.write ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding) 
+    end
+
+    Dir.chdir(pdf_root) do
+      cmd = "xhtml2pdf #{html_filename}"
+      result = %x[#{cmd}]
+    end
+
+    FileUtils.rm_rf(html_filename)
+    File.new(pdf_filename, "r")
+  end
+
   private
 
   def _defaults
@@ -174,7 +174,8 @@ class Invoice < ActiveRecord::Base
   end
 
   def _verify_can_edit?
-    errors.add(:base, t('.uneditable')) if !new_record? && (changed.reject { |attr| attr == "status"}.count > 0) && !can_edit?
+    internal_attributes = ["status", "pdf_file", "pdf_file_unique_id", "pdf_file_original_filename"]
+    errors.add(:base, t('.uneditable')) if !new_record? && (changed.reject { |attr| internal_attributes.include?(attr) }.count > 0) && !can_edit?
   end
 
   def _verify_destroyable
@@ -190,4 +191,11 @@ class Invoice < ActiveRecord::Base
     end
   end
 
+  def _generate_and_store_pdf
+    if !pdf_file? && !can_edit?
+      file = generate_pdf # have to do this to allow us to remove the File object
+      self.pdf_file = file
+      FileUtils.rm_rf(file)
+    end
+  end
 end

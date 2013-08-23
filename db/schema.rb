@@ -108,6 +108,8 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
     t.integer  "client_id"
     t.string   "title"
     t.string   "pdf_file"
+    t.string   "pdf_file_unique_id"
+    t.string   "pdf_file_original_filename"
   end
 
   create_table "notes", :force => true do |t|
