@@ -12,7 +12,7 @@ set :keep_releases, 10
 set :user, "mrmike"
 set :scm_username, "mrmike"
 set :use_sudo, false
-set :rvm_ruby_string, '1.9.2@mikedllcrm'
+set :rvm_ruby_string, '2.0.0@mikedllcrm'
 set :rvm_type, :user
 
 namespace :deploy do
@@ -26,6 +26,7 @@ namespace :deploy do
     run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     run "ln -nfs #{shared_path}/config/credentials.yml #{release_path}/config/credentials.yml"
     run "ln -nfs #{shared_path}/sockets #{release_path}/tmp/sockets"
+    run "ln -nfs #{shared_path}/pdfs #{release_path}/tmp/pdfs"
   end
 end
 

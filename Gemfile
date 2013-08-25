@@ -1,16 +1,16 @@
 source 'http://rubygems.org'
 
-# ruby '1.9.2'  # need to wait for cedar stack on heroku
+ruby '2.0.0'
 
 gem 'rails', '~> 3.2.0'
 
 # vital
-gem "rake", "~> 0.8.7"
+gem "rake", ">= 10.0.0"
 gem "pg", '~> 0.11'
 gem 'activerecord-postgresql-adapter'
 gem "haml"
 gem "haml-rails"
-gem "aws-s3"
+gem "aws-s3", '>= 0.6.3'
 gem "simple_form"
 gem 'state_machine'
 gem 'devise'
