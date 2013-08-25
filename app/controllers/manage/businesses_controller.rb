@@ -5,7 +5,7 @@ class Manage::BusinessesController < Manage::BaseController
 
     response_for(:show, :update) do |format|
       format.html
-      format.json { render :json => current_object.to_editor }
+      format.json { render :json => current_object }
     end
 
     response_for(:update_fails) do |format|
