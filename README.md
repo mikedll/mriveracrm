@@ -7,7 +7,7 @@ Cut a release.
 
     g f release start v1.x
 
-Fix any bugs. Do assets compilation and deploy.
+Fix any bugs. Do assets compilation and deploy, if assets have changed.
     
     RAILS_ENV=production rake assets:deploy  # this does an assets:precompile, too.
 
