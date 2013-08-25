@@ -13,6 +13,8 @@ class Business < ActiveRecord::Base
   has_many :invitations, :dependent => :destroy
   has_many :images, :dependent => :destroy
 
+  # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
+
   def invite_employee(email)
     employee = employees.find_by_email(email)
     if employee.nil?

@@ -25,6 +25,7 @@ MikedllCrm::Application.routes.draw do
 
   namespace 'manage' do
 
+    resource :business, :only => [:show, :update]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
 

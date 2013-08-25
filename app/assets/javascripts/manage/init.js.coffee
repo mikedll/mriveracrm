@@ -10,6 +10,14 @@ $(() ->
     '.products-gui':
       modelCollectionKlass: Products
       rootAppViewKlass: ProductAppView
+    '.business-gui':
+      modelKlass: Business
+      modelViewKlass: BusinessView
+      rootAppViewKlass: SingleModelAppView
+    '.status-monitor-gui':
+      modelKlass: StatusMonitor
+      modelViewKlass: StatusMonitorView
+      rootAppViewKlass: SingleModelAppView
 
   lazyGetBootstrap = (selector) ->
     # prevent undefined reference. can be removed if we make __XXX generic
@@ -18,6 +26,8 @@ $(() ->
       return __clients
     else if selector == '.products-gui'
       return __products
+    else if selector == '.business-gui'
+      return __business
     else
       # something went wrong here.
       return []
@@ -29,14 +39,35 @@ $(() ->
   if typeof(anchorSelector) != "undefined"
     config = anchorSelectorsToAppConfigs[anchorSelector]
     rootViewAnchor = guiContaner.find(anchorSelector)
-    modelCollectionKlass = config.modelCollectionKlass
     rootAppViewKlass = config.rootAppViewKlass
-    rootCollectionBootstrap = lazyGetBootstrap(anchorSelector)
 
-    rootCollection = new modelCollectionKlass()
-    rootApp = new rootAppViewKlass(el: rootViewAnchor, collection: rootCollection, parent: stack)
-    rootApp.render()
-    stack.childViewPushed(rootApp)
-    rootCollection.reset(rootCollectionBootstrap)
+    rootApp = null
+    if config.modelCollectionKlass?
+      modelCollectionKlass = config.modelCollectionKlass
+      rootCollectionBootstrap = lazyGetBootstrap(anchorSelector)
+      rootCollection = new modelCollectionKlass()
+      rootApp = new rootAppViewKlass(el: rootViewAnchor, collection: rootCollection, parent: stack)
+    else if config.modelKlass?
+      modelBootstrap = lazyGetBootstrap(anchorSelector)
+      model = new config.modelKlass()
+      modelView = new config.modelViewKlass(model: model)
+      rootApp = new rootAppViewKlass(el: rootViewAnchor, parent: stack)
+      rootApp.show(modelView)
+    else
+      AppsLogger.log("no model klass and no model collection class to load.")
+      return
+
+    if rootApp?
+      rootApp.render()
+      stack.childViewPushed(rootApp)
+      if config.modelCollectionKlass?
+        rootCollection.reset(rootCollectionBootstrap)
+      else if config.modelKlass?
+        model.setAndAssumeSync(modelBootstrap) if modelBootstrap? && modelBootstrap != [] # some pages dont have one
+      else
+        # exception. handled above.
+
+    else
+      AppsLogger.log("No rootApp found.")
 
   )
