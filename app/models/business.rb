@@ -15,6 +15,10 @@ class Business < ActiveRecord::Base
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
+  def self.all
+    raise "Should never be calling this in prod." if Rails.env.production?
+  end
+
   def invite_employee(email)
     employee = employees.find_by_email(email)
     if employee.nil?

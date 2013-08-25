@@ -17,6 +17,11 @@ class Manage::BusinessesController < Manage::BaseController
     @current_object ||= @current_business
   end
 
+  def current_objects
+    raise "Should not be attempting to load all businesses."
+    @current_objects = []
+  end
+
   def update
     before :update
     begin

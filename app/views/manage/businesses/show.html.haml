@@ -1,7 +1,7 @@
 
 - content_for :head do
   = javascript_include_tag 'manage'
-  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'business', :bootstrap => current_objects.to_json }
+  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'business', :bootstrap => current_object.to_json }
 
 .gui-container.container-fluid
   .business-gui.app-gui.single-model
