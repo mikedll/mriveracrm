@@ -20,6 +20,8 @@ class ApplicationController < ActionController::Base
 
   before_filter :require_business_and_current_user_belongs_to_it
 
+  around_filter :business_keys
+
   def current_business
     @current_business ||= Business.find_by_domain (Rails.env.development? ? 'www.mikedll.com' : request.host )
   end
@@ -34,6 +36,22 @@ class ApplicationController < ActionController::Base
       end
     end
   end
+
+  def business_keys
+    if @current_business
+      Devise.omniauth :google_oauth2, @current_business.google_oauth2_client_id, @current_business.google_oauth2_client_secret, {
+        # :scope => 'userinfo.email,userinfo.profile,https://mail.google.com/mail/feed/atom,https://www.google.com/m8/feeds/',
+        :scope => 'userinfo.email,userinfo.profile',
+        :approval_prompt => "auto",
+        :require => "omniauth-google-oauth2"
+      }
+    end
+
+    yield
+
+    Devise.omniauth_configs.delete(:google_oauth2)
+  end
+
 
   def require_employee
     if current_user.employee.nil?

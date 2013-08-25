@@ -192,7 +192,7 @@ Devise.setup do |config|
   # ==> OmniAuth
   # Add a new OmniAuth provider. Check the wiki for more information on setting
   # up on your models and hooks.
-  config.omniauth :google_oauth2, MikedllCrm::GOOGLE_OAUTH2_CLIENT_ID, MikedllCrm::GOOGLE_OAUTH2_CLIENT_SECRET, {
+  config.omniauth :google_oauth2, 'replaceatruntime', 'replaceatruntime', {
     # :scope => 'userinfo.email,userinfo.profile,https://mail.google.com/mail/feed/atom,https://www.google.com/m8/feeds/',
     :scope => 'userinfo.email,userinfo.profile',
     :approval_prompt => "auto",

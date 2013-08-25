@@ -23,9 +23,9 @@ ActiveRecord::Schema.define(:version => 20130825053339) do
     t.string   "google_oauth2_client_id",         :default => "",    :null => false
     t.string   "google_oauth2_client_secret",     :default => "",    :null => false
     t.string   "authorizenet_payment_gateway_id", :default => "",    :null => false
-    t.string   "api_login_id",                    :default => "",    :null => false
-    t.string   "transaction_key",                 :default => "",    :null => false
-    t.boolean  "test",                            :default => false, :null => false
+    t.string   "authorizenet_api_login_id",       :default => "",    :null => false
+    t.string   "authorizenet_transaction_key",    :default => "",    :null => false
+    t.boolean  "authorizenet_test",               :default => false, :null => false
   end
 
   create_table "clients", :force => true do |t|
