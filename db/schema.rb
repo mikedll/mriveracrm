@@ -14,18 +14,18 @@
 ActiveRecord::Schema.define(:version => 20130825053339) do
 
   create_table "businesses", :force => true do |t|
-    t.string   "name",                            :default => "", :null => false
-    t.string   "domain",                          :default => "", :null => false
+    t.string   "name",                            :default => "",    :null => false
+    t.string   "domain",                          :default => "",    :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.string   "stripe_secret_key"
-    t.string   "stripe_publishable_key"
-    t.string   "google_oauth2_client_id"
-    t.string   "google_oauth2_client_secret"
-    t.string   "authorizenet_payment_gateway_id"
-    t.string   "api_login_id"
-    t.string   "transaction_key"
-    t.boolean  "test"
+    t.string   "stripe_secret_key",               :default => "",    :null => false
+    t.string   "stripe_publishable_key",          :default => "",    :null => false
+    t.string   "google_oauth2_client_id",         :default => "",    :null => false
+    t.string   "google_oauth2_client_secret",     :default => "",    :null => false
+    t.string   "authorizenet_payment_gateway_id", :default => "",    :null => false
+    t.string   "api_login_id",                    :default => "",    :null => false
+    t.string   "transaction_key",                 :default => "",    :null => false
+    t.boolean  "test",                            :default => false, :null => false
   end
 
   create_table "clients", :force => true do |t|
