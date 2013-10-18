@@ -4,7 +4,14 @@ FactoryGirl.define do
 
   factory :business do
     name "my small business"
-    domain { "www.domain" + SecureRandom.base64(8) + "yup.com" }
+    domain { "www.domain" + SecureRandom.hex(8) + "yup.com" }
+
+    google_oauth2_client_id "google_oauth2_client_idxxx"
+    google_oauth2_client_secret "google_oauth2_client_secretxxx"
+
+    stripe_secret_key "sk_test_SoDXR6QkygrYnlnFhDWKNbB2"
+    stripe_publishable_key "pk_test_rPvMBvyuzsgRIXZFCW2xMmxz"
+
     after(:create) do |business|
       Business.current = business
     end
@@ -114,7 +121,7 @@ FactoryGirl.define do
     end
 
     factory :pending_invoice do
-      status "pending"
+      status { "pending" }
     end
   end
 
