@@ -18,9 +18,7 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
 	def google_oauth2
-    middleware.call(request.env)
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{request.env["omniauth.auth"]}"
+    status, headers, response = middleware.call(request.env)
 
     @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user)
 
