@@ -11,13 +11,21 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130823091235) do
+ActiveRecord::Schema.define(:version => 20130825053339) do
 
   create_table "businesses", :force => true do |t|
-    t.string   "name",       :default => "", :null => false
-    t.string   "domain",     :default => "", :null => false
+    t.string   "name",                            :default => "",    :null => false
+    t.string   "domain",                          :default => "",    :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "stripe_secret_key",               :default => "",    :null => false
+    t.string   "stripe_publishable_key",          :default => "",    :null => false
+    t.string   "google_oauth2_client_id",         :default => "",    :null => false
+    t.string   "google_oauth2_client_secret",     :default => "",    :null => false
+    t.string   "authorizenet_payment_gateway_id", :default => "",    :null => false
+    t.string   "authorizenet_api_login_id",       :default => "",    :null => false
+    t.string   "authorizenet_transaction_key",    :default => "",    :null => false
+    t.boolean  "authorizenet_test",               :default => false, :null => false
   end
 
   create_table "clients", :force => true do |t|

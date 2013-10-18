@@ -9,6 +9,7 @@ class window.StatusMonitor extends BaseModel
 class window.StatusMonitorView extends CrmModelView
   initialize: () ->
     CrmModelView.prototype.initialize.apply(this, arguments)
+    @useDirty = false
     @modelName = 'status_monitor'
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'error', @onError)
@@ -32,10 +33,3 @@ class window.StatusMonitorView extends CrmModelView
   onError: () ->
     @onComplete()
 
-$(() ->
-  guiContaner = $('.gui-container')
-
-  appView = new SingleModelAppView(el: guiContaner.find('.status-monitor-gui')).render()
-
-  modelView = new StatusMonitorView(el: guiContaner.find('.models-show-container'), model: new StatusMonitor(), parent: appView).render()
-  )

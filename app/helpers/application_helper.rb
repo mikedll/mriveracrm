@@ -8,5 +8,9 @@ module ApplicationHelper
     s
   end
 
+  def user_omniauth_authorize_path(provider)
+    omniauth_authorize_path(provider)
+  end
+
 
 end

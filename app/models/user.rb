@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
 
   has_many :credentials, :dependent => :destroy
 
-  devise :omniauthable
+  devise :trackable
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
 

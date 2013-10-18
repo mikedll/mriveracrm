@@ -20,6 +20,8 @@ class ApplicationController < ActionController::Base
 
   before_filter :require_business_and_current_user_belongs_to_it
 
+  around_filter :business_keys
+
   def current_business
     @current_business ||= Business.find_by_domain (Rails.env.development? ? 'www.mikedll.com' : request.host )
   end
@@ -34,6 +36,13 @@ class ApplicationController < ActionController::Base
       end
     end
   end
+
+  # Supposed to be used for business key loading/unloading,
+  # but we're doing that in the controllers now.
+  def business_keys
+    yield
+  end
+
 
   def require_employee
     if current_user.employee.nil?

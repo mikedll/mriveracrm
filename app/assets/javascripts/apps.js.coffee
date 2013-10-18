@@ -28,6 +28,13 @@ window.AppsConfig =
   fadeDuration: 1000
   balloonDuration: 2000
 
+
+class window.AppsLog
+  log: (s) ->
+    console.log("apps: #{s}")
+
+window.AppsLogger = new AppsLog()
+
 class window.Ballooner
   constructor: () ->
   show: (s) ->
@@ -158,7 +165,7 @@ class window.BaseView extends Backbone.View
     @useDirty = true
 
     @events = {}
-    @parent = options.parent
+    @parent = options.parent if options
 
   childViewPushed: (view) ->
     @parent.childViewPushed(view)
@@ -404,6 +411,8 @@ class window.ListItemView extends ModelBaseView
 #
 # implement render
 #
+# set useDirty = false if you don't want dirty records support.
+#
 class window.CrmModelView extends ModelBaseView
   className: 'model-view'
 
@@ -461,7 +470,8 @@ class window.CrmModelView extends ModelBaseView
     @removeDom()
 
   removeDom: () ->
-    @$el.remove() if @$el?
+    @parent = null # remove pointer to parent.
+    @$el.remove() if @$el? # isn't this event redundant? review with onDestroy event. http://backbonejs.org/#View-remove
 
   destroy: (e, answer) ->
     return false if @buttonsCache.filter(e.target).length == 0
@@ -721,11 +731,50 @@ class window.CrmModelView extends ModelBaseView
     @
 
 class window.SingleModelAppView extends WithChildrenView
+
+  initialize: (options) ->
+    WithChildrenView.prototype.initialize.apply(@, arguments)
+    @modelView = null
+    @modelShowContainer = null
+
+  resizeView: () ->
+    # Override to prevent drastic resizing
+    h = Math.max( 200, parseInt( $(window).height() * 0.8 ))
+    w = Math.max(200, parseInt( $(window).width() * 0.8 ))
+    @$el.css(
+      'height': h + "px"
+      'width': w + "px"
+    )
+
   focusTopModelView: () ->
-    @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
+    @modelShowContainer.find('.model-view:visible :input:visible').not('.datetimepicker, .datepicker').first().focus()
 
   rebindGlobalHotKeys: (container) ->
 
+  showModelView: () ->
+    @modelShowContainer.append(@modelView.render().el) if @modelShowContainer? && @modelShowContainer.length > 0 && !$.contains( @modelShowContainer.get(0), @modelView.el)
+
+  #
+  # Become the parent of the view and show it.
+  #
+  # It's possible to show a view before this view has been rendered.
+  #
+  show: (view) ->
+    if !@modelView?
+      @modelView = view
+      @modelView.parent = @
+    else if @modelView != view
+      @modelView.remove()
+      @modelView = view
+      @modelView.parent = @
+
+    @showModelView()
+
+  render: () ->
+    WithChildrenView.prototype.render.apply(@, arguments)
+    @modelShowContainer = @$('.models-show-container').first()
+    @showModelView()
+    @
 
 #
 # Needs to have its behavior refactored

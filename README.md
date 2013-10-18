@@ -1,5 +1,21 @@
 
 
+# Typical Views
+
+  We have a gui-container class which is typically tied to a Stacked view,
+  which knows how to animate different stacked views. These must
+  resize width, height, and margins when the page resizes.
+  
+  Inside of that are many app-view classes. These must resize width,
+  height, but unlike the above, not margin-left or margin-top, when
+  the page resizes. These also hold shadow decorations.
+  
+  Almost every single page in the app, even if it only holds a single model,
+  will use this framework.
+  
+  Future uses will allowed the Stack gui-container to have all kinds
+  of creative animations, beyond what is shown here.
+
 
 # Deploying to production
 

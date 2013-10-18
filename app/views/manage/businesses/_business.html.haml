@@ -1,0 +1,10 @@
+
+= simple_form_for :business, :url => manage_business_path, :html => { :class => 'form-horizontal' } do |f|
+
+  = f.input :name
+  = f.input :stripe_secret_key
+  = f.input :stripe_publishable_key
+  = f.input :google_oauth2_client_id
+  = f.input :google_oauth2_client_secret
+
+  = render :partial => 'shared/model_view_basic_buttons'
