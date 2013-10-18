@@ -37,19 +37,10 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  # Supposed to be used for business key loading/unloading,
+  # but we're doing that in the controllers now.
   def business_keys
-    if @current_business
-      Devise.omniauth :google_oauth2, @current_business.google_oauth2_client_id, @current_business.google_oauth2_client_secret, {
-        # :scope => 'userinfo.email,userinfo.profile,https://mail.google.com/mail/feed/atom,https://www.google.com/m8/feeds/',
-        :scope => 'userinfo.email,userinfo.profile',
-        :approval_prompt => "auto",
-        :require => "omniauth-google-oauth2"
-      }
-    end
-
     yield
-
-    Devise.omniauth_configs.delete(:google_oauth2)
   end
 
 
