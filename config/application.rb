@@ -20,14 +20,20 @@ module MikedllCrm
 
   end
 
-  class Credentials
+  class Configuration
 
     def self.config 
-      @config ||= if File.exists? Rails.root.join('config', 'credentials.yml')
+      return @config if @config
+      @config = {
+        # :google_oauth2_scope => 'userinfo.email,userinfo.profile,https://mail.google.com/mail/feed/atom,https://www.google.com/m8/feeds/'
+        :google_oauth2_scope => 'userinfo.email,userinfo.profile'
+      }
+      config = if File.exists? Rails.root.join('config', 'credentials.yml')
                     YAML.load( File.read( Rails.root.join('config', 'credentials.yml'))).with_indifferent_access 
-                  else
-                    {}
-                  end
+                 else
+                   {}
+                 end
+      @config.merge!(config)
     end
 
     def self.get(path)
@@ -52,11 +58,11 @@ module MikedllCrm
     end
   end
  
-  GOOGLE_OAUTH2_CLIENT_ID = Credentials.get('google.oauth2_client_id')
-  GOOGLE_OAUTH2_CLIENT_SECRET = Credentials.get('google.oauth2_client_secret')
+  GOOGLE_OAUTH2_CLIENT_ID = Configuration.get('google.oauth2_client_id')
+  GOOGLE_OAUTH2_CLIENT_SECRET = Configuration.get('google.oauth2_client_secret')
 
-  AUTHNET_LOGIN = Credentials.get('authorizenet.api_login_id')
-  AUTHNET_PASSWORD = Credentials.get('authorizenet.transaction_key')
-  AUTHNET_TEST = (Credentials.get('authorizenet.test') == true)
+  AUTHNET_LOGIN = Configuration.get('authorizenet.api_login_id')
+  AUTHNET_PASSWORD = Configuration.get('authorizenet.transaction_key')
+  AUTHNET_TEST = (Configuration.get('authorizenet.test') == true)
 
 end

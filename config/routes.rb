@@ -1,23 +1,26 @@
 
 MikedllCrm::Application.routes.draw do
 
-  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" } 
-
-  [:google_auth2].tap do |omniauth_providers|
-    match "users/:provider",
-    :constraints => { :provider => omniauth_providers },
-    :to => "users/omniauth_callbacks#authorize",
-    :as => :omniauth_authorize,
-    :via => [:get, :post]
-
-    match "users/:action/callback",
-    :constraints => { :action => omniauth_providers },
-    :to => "users/omniauth_callbacks#authorize",
-    :as => :omniauth_callback,
-    :via => [:get, :post]
-  end
+  devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" }, :skip_helpers => "omniauth_callback"
 
   devise_scope :user do
+    [:google_oauth2].tap do |omniauth_providers|
+
+      providers = Regexp.union(omniauth_providers.map(&:to_s))
+
+      match "users/auth/:provider",
+      :constraints => { :provider => providers },
+      :to => "users/omniauth_callbacks#authorize",
+      :as => :omniauth_authorize,
+      :via => [:get, :post]
+
+      match "users/auth/:action/callback",
+      :constraints => { :action => providers },
+      :to => "users/omniauth_callbacks",
+      :as => :omniauth_callback,
+      :via => [:get, :post]
+    end
+
     get 'sign_in', :to => 'users/sessions#new', :as => :new_user_session
     get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
   end

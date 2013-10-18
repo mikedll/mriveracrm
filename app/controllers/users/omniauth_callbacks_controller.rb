@@ -7,26 +7,21 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
   end
 
   def authorize
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{@current_business}"
+    status, headers, response = middleware.call(request.env)
 
-    middleware = OmniAuth::Strategies::GoogleOAuth2.new(NoopApp, @current_business.google_oauth2_client_id, @current_business.google_oauth2_client_secret, {
-      # :scope => 'userinfo.email,userinfo.profile,https://mail.google.com/mail/feed/atom,https://www.google.com/m8/feeds/',
-      :scope => 'userinfo.email,userinfo.profile',
-      :approval_prompt => "auto",
-      :require => "omniauth-google-oauth2"
-    })
+    response.status = status
+    headers.each do |k,v|
+      response.headers[k] = v
+    end
 
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{request.env["omniauth.auth"]}"
-
-    middleware.call(request.env)
-
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{request.env["omniauth.auth"]}"
+    redirect_to headers["Location"]
   end
 
 	def google_oauth2
+    middleware.call(request.env)
+    puts "*************** #{__FILE__} #{__LINE__} *************"
+    puts "#{request.env["omniauth.auth"]}"
+
     @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user)
 
     if @user && @user.persisted?
@@ -37,5 +32,14 @@ class Users::OmniauthCallbacksController < Devise::OmniauthCallbacksController
       redirect_to new_user_session_path
     end
 	end
+
+  def middleware
+    OmniAuth::Strategies::GoogleOauth2.new(NoopApp.new, @current_business.google_oauth2_client_id, @current_business.google_oauth2_client_secret, {
+                                                          :path_prefix => '/users/auth',
+                                                          :scope => MikedllCrm::Configuration.get('google_oauth2_scope'),
+                                                          :approval_prompt => "auto"
+    })    
+  end
+
 
 end
