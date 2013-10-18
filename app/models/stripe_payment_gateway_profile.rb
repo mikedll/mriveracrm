@@ -115,6 +115,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
 
   def _create_remote
+    customer = nil
     _with_stripe_key do
       customer = Stripe::Customer.create(:description => client.payment_profile_description, :email => client.email)
     end
