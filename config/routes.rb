@@ -3,6 +3,20 @@ MikedllCrm::Application.routes.draw do
 
   devise_for :users, :controllers => { :omniauth_callbacks => "users/omniauth_callbacks" } 
 
+  [:google_auth2].tap do |omniauth_providers|
+    match "users/:provider",
+    :constraints => { :provider => omniauth_providers },
+    :to => "users/omniauth_callbacks#authorize",
+    :as => :omniauth_authorize,
+    :via => [:get, :post]
+
+    match "users/:action/callback",
+    :constraints => { :action => omniauth_providers },
+    :to => "users/omniauth_callbacks#authorize",
+    :as => :omniauth_callback,
+    :via => [:get, :post]
+  end
+
   devise_scope :user do
     get 'sign_in', :to => 'users/sessions#new', :as => :new_user_session
     get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
