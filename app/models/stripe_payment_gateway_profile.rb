@@ -134,6 +134,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
   def _with_stripe_key
     begin
+      raise "Stripe api key was not blank. Probably a bug." if Stripe.api_key != ""
+
       Stripe.api_key = self.client.business.stripe_secret_key
       yield
     ensure
