@@ -19,6 +19,7 @@ class ApplicationController < ActionController::Base
   before_filter :authenticate_user!
 
   before_filter :require_business_and_current_user_belongs_to_it
+  before_filter :configure_theme
 
   around_filter :business_keys
 
@@ -36,6 +37,11 @@ class ApplicationController < ActionController::Base
       end
     end
   end
+
+  def configure_theme
+    # @theme = "standard" if !@current_business.nil?
+  end
+
 
   # Supposed to be used for business key loading/unloading,
   # but we're doing that in the controllers now.

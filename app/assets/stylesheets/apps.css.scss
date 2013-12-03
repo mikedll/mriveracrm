@@ -1,0 +1,193 @@
+
+/* apps. A lot of this is bootstrap customiztion for our front end crm framework.  */
+
+.form-search .form-spacer {
+  display: inline-block;
+  width: 20px;
+  margin: 20px;
+}
+
+.gui-container {
+  font-size: 10pt;
+  top: 45%;
+  left: 45%;
+  position: absolute;
+
+  .click-shield {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
+  }
+}
+
+.gui-container.static-container {
+  font-size: 10pt;
+  top: 50px;
+  left: 50px;
+  position: absolute;
+}
+
+.app-gui {
+  left: 0;
+  top: 0;
+  background: #fffff2;
+  position: absolute;
+
+  overflow-x: hidden;
+
+  padding: 2em;
+  border: 2px solid #444;
+  box-shadow: 3px 3px 3px #000;
+  border-top-left-radius: 10px;
+}
+
+.pane {
+  float: left;
+  margin: 1em;
+  overflow: auto;
+}
+
+.app-top {
+  margin-bottom: 1em;
+}
+
+.section-title {
+  font-size: 16pt;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.models-list li {
+  margin: 2px 0;
+  padding: 1px;
+
+  a {
+    padding: 3px;
+    display: block;
+
+    i {
+      display: none;
+      float: left;
+      margin: 2px 0 0 -21px;
+    }
+    span.label {
+      display: none;
+    }
+  }
+
+  a.active {
+    font-weight: bold;
+    color: #005580; // taken from bootstrap
+    font-size: 12pt;
+  }
+
+  a:hover {
+    font-weight: bold;
+  }
+}
+
+.models-list li.dirty {
+  a {
+    color: #c09853;
+
+    i.icon-edit {
+      display: inline-block;
+    }
+  }
+}
+
+.models-list li.error {
+  background: rgb(251, 154, 154); 
+  color: #000;
+
+  a {
+    color: #000;
+    i.icon-edit {
+      display: none;
+    }
+    i.icon-warning-sign { display: inline-block; }
+  }
+}
+
+.models-list li.labelled {
+  a {
+    span.label {
+      display: inline;
+    }
+  }
+}
+
+.models-list li.requesting {
+  padding: 0px;
+  background: rgb(193, 193, 238); 
+  a {
+    color: #000;
+    i.icon-edit { display: none; }
+    i.icon-warning-sign { display: none; }
+    i.icon-requesting {
+      display: inline-block;
+    }
+  }
+}
+
+
+.models-show-container {
+}
+
+.model-view {
+  padding: 1em 0 0 0;
+
+  .btn-group.sensitive {
+    margin-left: 50px;
+    margin-right: 50px;
+  }
+
+  .control-group.warning textarea {
+    color: #000;
+  }
+
+  .image-list .image {
+
+    img.product-image {
+      padding: 4px;
+      width: 160px;
+      height: 133px;
+    }
+
+    .controls {
+      margin-left: 0;
+    }
+  }
+}
+
+.dropzone {
+  min-height: 100px;
+  border: dashed 3px #cccccc;
+  text-align: center;
+}
+
+.dropzone .dz-default.dz-message {
+  background-image: none;
+}
+
+.dropzone .dz-default.dz-message span {
+  display: inline-block;
+  margin-top: 2em;
+}
+
+.btn-group-label {
+  margin-left: 12px;
+  font-size: 10pt;
+  font-weight: bold;
+  display: inline-block;
+  vertical-align:middle;
+  padding: 4px 4px 4px 0px;
+}
+
+.controls textarea {
+  width: 380px;
+}
+
