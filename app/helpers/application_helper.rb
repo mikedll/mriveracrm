@@ -12,5 +12,12 @@ module ApplicationHelper
     omniauth_authorize_path(provider)
   end
 
+  def page_title
+    if @title
+      @title += " - #{@current_business.name}"
+    else
+      @title = @current_business.name 
+    end
+  end
 
 end

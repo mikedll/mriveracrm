@@ -1,6 +1,10 @@
 
 MikedllCrm::Application.routes.draw do
 
+  resource :business, :path => "", :only => [:show]
+
+  resources :businesses, :only => [:new, :create]
+
   devise_for :users
 
   devise_scope :user do
@@ -25,7 +29,7 @@ MikedllCrm::Application.routes.draw do
     get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
   end
 
-  resource :home, :controller => "home", :path => "", :only => [] do
+  resource :home, :controller => "home", :only => [:show] do
     get :contact
     get :projects
   end
@@ -39,6 +43,7 @@ MikedllCrm::Application.routes.draw do
       get :search
     end
   end
+
 
   namespace 'manage' do
 
@@ -90,6 +95,6 @@ MikedllCrm::Application.routes.draw do
     end
   end
 
-  root :to => "home#index"
+  root :to => "business#show"
 
 end
