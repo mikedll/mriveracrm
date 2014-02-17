@@ -5,8 +5,6 @@ MikedllCrm::Application.routes.draw do
 
   resource :business, :path => "", :only => [:show]
 
-  resources :businesses, :only => [:new, :create]
-
   resource :home, :controller => "home", :only => [:show] do
     get :contact
     get :projects
