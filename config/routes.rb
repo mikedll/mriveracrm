@@ -1,11 +1,20 @@
 
 MikedllCrm::Application.routes.draw do
 
+  # marketing
+
   resource :business, :path => "", :only => [:show]
 
   resources :businesses, :only => [:new, :create]
 
-  devise_for :users
+  resource :home, :controller => "home", :only => [:show] do
+    get :contact
+    get :projects
+  end
+
+
+  ######################################## custom domain
+  devise_for :users, :controllers => { :registrations => "users/registrations" }
 
   devise_scope :user do
     [:google_oauth2].tap do |omniauth_providers|
@@ -29,10 +38,6 @@ MikedllCrm::Application.routes.draw do
     get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
   end
 
-  resource :home, :controller => "home", :only => [:show] do
-    get :contact
-    get :projects
-  end
 
   resources :invitations, :only => [:show] do
     put :accept
@@ -94,6 +99,11 @@ MikedllCrm::Application.routes.draw do
       end
     end
   end
+
+
+
+  ################################################ generic usage
+
 
   root :to => "business#show"
 

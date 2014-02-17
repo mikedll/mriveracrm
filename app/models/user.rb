@@ -1,4 +1,12 @@
 class User < ActiveRecord::Base
+  # Include default devise modules. Others available are:
+  # :token_authenticatable, :confirmable,
+  # :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable
+
+  # Setup accessible (or protected) attributes for your model
+  attr_accessible :email, :password, :password_confirmation, :remember_me
 
   belongs_to :business
   belongs_to :employee
@@ -6,7 +14,7 @@ class User < ActiveRecord::Base
 
   has_many :credentials, :dependent => :destroy
 
-  devise :trackable
+  devise :registerable, :rememberable, :trackable, :confirmable
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
 
