@@ -228,6 +228,10 @@ en:
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 
+  business: 
+    errors:
+      handle_format: can only contain letters and numbers
+
   employment:
     errors:
       user_unique_in_business_employment: 'is already employed as anothe employee at this business'

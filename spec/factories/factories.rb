@@ -4,7 +4,8 @@ FactoryGirl.define do
 
   factory :business do
     name "my small business"
-    domain { "www.domain" + SecureRandom.hex(8) + "yup.com" }
+    handle { "handle#{SecureRandom.hex(8)}yup" }
+    domain { "www.#{handle}.com" }
 
     google_oauth2_client_id "google_oauth2_client_idxxx"
     google_oauth2_client_secret "google_oauth2_client_secretxxx"

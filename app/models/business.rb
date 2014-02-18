@@ -13,6 +13,17 @@ class Business < ActiveRecord::Base
   has_many :invitations, :dependent => :destroy
   has_many :images, :dependent => :destroy
 
+  before_validation :_format_handle
+
+  validates :handle, :presence => true
+  validates :handle, :length => { :minimum => 3 }, :allow_blank => true
+  validates :handle, :format => { :with => Regexes::BUSINESS_HANDLE, :message => I18n.t('business.errors.handle_format')}, :allow_blank => true
+
+  validates :handle, :allow_blank => true, :uniqueness => true
+
+  validates :domain, :uniqueness => true, :allow_blank => true
+  
+
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
   def self.all
@@ -42,6 +53,13 @@ class Business < ActiveRecord::Base
       client.save!
     end
     client.invite
+  end
+
+  private
+
+  def _format_handle
+    self.handle.strip!
+    self.handle.downcase!
   end
 
 end

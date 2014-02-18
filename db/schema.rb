@@ -26,6 +26,7 @@ ActiveRecord::Schema.define(:version => 20140217204106) do
     t.string   "authorizenet_api_login_id",       :default => "",    :null => false
     t.string   "authorizenet_transaction_key",    :default => "",    :null => false
     t.boolean  "authorizenet_test",               :default => false, :null => false
+    t.string   "handle",                          :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
