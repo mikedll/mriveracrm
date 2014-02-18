@@ -1,0 +1,25 @@
+
+
+.container.padded
+  %h2
+    = t('sign_up')
+
+  = simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => ["form-horizontal"] }) do |f|
+    = devise_error_messages!
+
+    .control-group.required
+      %label.control-label.required
+        Business Handle
+      .controls
+        %input{:name => 'business[handle]', :id => "business_handle", :type => "text", :class => ["string required"]}
+
+    = f.input :email
+
+    = f.input :password
+
+    = f.input :password_confirmation
+
+    = f.submit t('sign_up')
+
+
+  = render "devise/shared/links"
