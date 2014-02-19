@@ -9,4 +9,7 @@ class Employee < ActiveRecord::Base
 
   scope :cb, lambda { where('employees.business_id = ?', Business.current.try(:id)) }
 
+  module Roles
+    OWNER = 'owner'
+  end
 end

@@ -20,6 +20,7 @@ class ApplicationController < ActionController::Base
 
   before_filter :require_business_and_current_user_belongs_to_it
   before_filter :configure_theme
+  before_filter :_detect_business_via_mfe
 
   around_filter :business_keys
 
@@ -78,6 +79,14 @@ class ApplicationController < ActionController::Base
       end
   end
 
+  def url_options
+    if @business_via_mfe
+      { :business_handle => @current_business.handle }.merge(super)
+    else
+      super
+    end
+  end
+
   protected 
 
   def force_www
@@ -96,6 +105,10 @@ class ApplicationController < ActionController::Base
       flash.keep
       return false
     end
+  end
+
+  def _detect_business_via_mfe
+    @business_via_mfe = true if @current_business && params[:business_handle]
   end
 
 
