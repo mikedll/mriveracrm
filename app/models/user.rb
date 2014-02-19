@@ -23,6 +23,8 @@ class User < ActiveRecord::Base
   #
   # validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
 
+  before_validation :_handle_new_business_owner
+
   validates :first_name, :last_name, :business, :presence => true
   validate :_employee_or_client
   before_validation :_defaults, :if => :new_record?
@@ -75,6 +77,16 @@ class User < ActiveRecord::Base
   def _employee_or_client
     errors.add(:base, 'must be associated with employee or client of this business') if (self.employee.nil? && self.client.nil?)
   end
+
+  def _handle_new_business_owner
+    if employee && employee.new_record? && employee.business && employee.business.new_record?
+      employee.role = Employee::Roles::OWNER
+      if !employee.business.save || !employee.save
+        errors.add(:base, I18n.t('users.new_business_failed'))
+      end
+    end
+  end
+
 
   
 end
