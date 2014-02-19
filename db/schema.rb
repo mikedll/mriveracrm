@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140217204106) do
+ActiveRecord::Schema.define(:version => 20140219212056) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -120,6 +120,14 @@ ActiveRecord::Schema.define(:version => 20140217204106) do
     t.string   "pdf_file"
     t.string   "pdf_file_unique_id"
     t.string   "pdf_file_original_filename"
+  end
+
+  create_table "marketing_front_ends", :force => true do |t|
+    t.string   "domain",                      :default => "", :null => false
+    t.string   "google_oauth2_client_id",     :default => "", :null => false
+    t.string   "google_oauth2_client_secret", :default => "", :null => false
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
   end
 
   create_table "notes", :force => true do |t|
