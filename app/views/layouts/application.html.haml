@@ -23,9 +23,11 @@
 
     = render :partial => 'shared/apps_general_templates'
 
-    .container.padded
-      .created.support
-        Created by 
-        = link_to "Mike De La Loza", 'http://www.mikedll.com', :target => "_blank"
-        |
-        Support: mikedll -AT- mikedll -dot- com
+    - if @current_business.nil?
+      .container.padded
+        .created.support
+          %hr
+          Mikedll CRM Created by 
+          = link_to "Mike De La Loza", 'http://www.mikedll.com', :target => "_blank"
+          |
+          Support: mikedll -AT- mikedll -dot- com
