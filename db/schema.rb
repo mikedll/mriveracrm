@@ -123,6 +123,7 @@ ActiveRecord::Schema.define(:version => 20140219212056) do
   end
 
   create_table "marketing_front_ends", :force => true do |t|
+    t.string   "title",                       :default => "", :null => false
     t.string   "domain",                      :default => "", :null => false
     t.string   "google_oauth2_client_id",     :default => "", :null => false
     t.string   "google_oauth2_client_secret", :default => "", :null => false

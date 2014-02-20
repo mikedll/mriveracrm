@@ -57,6 +57,22 @@ class Business < ActiveRecord::Base
     client.invite
   end
 
+  def projects_for_gallery
+    projects.map do |p|
+      {
+        :title => p.title,
+        :tech => p.tech,
+        :desc => p.description,
+        :images => p.images
+      }.merge(p.images.count == 0 ? {} : {
+                :thumb => p.images.first.data.thumb.url,
+                :medium => p.images.first.data.large.url,
+                :small => p.images.first.data.small.url
+              })
+    end    
+  end
+
+
   private
 
   def _format_handle

@@ -118,18 +118,27 @@ class ApplicationController < ActionController::Base
     if @current_business.nil?
       @current_mfe = MarketingFrontEnd.find_by_domain request.host
       if @current_mfe
-        RequestSettings.host = @current_mfe.host
+        RequestSettings.host = @current_mfe.domain
+
         if params[:business_handle]
           @current_business = Business.find_by_handle params[:business_handle] 
-          @business_via_mfe = true if @current_business
+           if @current_business.nil?
+             head :not_found
+             return
+           end
+
+          @business_via_mfe = true
         end
       else
         RequestSettings.host = nil
-        head :forbidden
+        head :not_found
+        return
       end
     else
-      RequestSettings.host = @current_business.host
+      RequestSettings.host = @current_business.domain
     end
+
+    raise "Programmer error: neither mfe or business found." if (!current_business && !current_mfe)
   end
 
 

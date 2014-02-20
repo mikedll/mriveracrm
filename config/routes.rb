@@ -1,15 +1,8 @@
 
 MikedllCrm::Application.routes.draw do
 
-  # marketing
-
+  # marketing / custom domain
   resource :business, :path => "", :only => [:show]
-
-  resource :home, :controller => "home", :only => [:show] do
-    get :contact
-    get :projects
-  end
-
 
   ######################################## custom domain
   devise_for :users, :controllers => { :registrations => "users/registrations" }
@@ -107,6 +100,8 @@ MikedllCrm::Application.routes.draw do
   ################################################ when running rake routes, since its almosta dup of above
   
   scope "b/(:business_handle)", :constraints => { :business_handle => Regexes::BUSINESS_HANDLE_ROUTING } do
+    resource :business, :path => "", :only => [:show]
+
     devise_for :users, :controllers => { :skip => [:registrations] }
 
     devise_scope :user do

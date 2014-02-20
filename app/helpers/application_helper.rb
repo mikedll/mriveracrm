@@ -16,7 +16,7 @@ module ApplicationHelper
     if @title
       @title += " - #{@current_business.name}"
     else
-      @title = @current_business.name 
+      @title = !@current_mfe.nil? ? @current_mfe.title : @current_business.name
     end
   end
 
