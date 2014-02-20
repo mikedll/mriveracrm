@@ -2,3 +2,9 @@
 - if !flash[:error].blank?
   .flash
     = flash[:error]
+- elsif !flash[:alert].blank?
+  .flash
+    = flash[:alert]
+- elsif !flash[:notice].blank?
+  .flash
+    = flash[:notice]
