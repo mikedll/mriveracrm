@@ -19,4 +19,4 @@
     |
     = link_to 'Logout', destroy_user_session_path, :tabIndex => '-1'
   - else
-    = link_to 'Login', user_omniauth_authorize_path(:google_oauth2)
+    = link_to 'Login', user_omniauth_authorize_path(:provider => :google_oauth2)
