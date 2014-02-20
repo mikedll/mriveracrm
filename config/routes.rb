@@ -4,6 +4,11 @@ MikedllCrm::Application.routes.draw do
   # raw marketing / custom domain
   resource :business, :path => "", :only => [:show]
 
+  resource :home, :path => "", :controller => :home, :only => [] do
+    member do
+      get :contact
+    end
+  end
 
   ######################################## custom domain
   devise_for :users, :controllers => { :sessions => "users/sessions", :registrations => "users/registrations", :confirmations => "users/confirmations" }
@@ -100,6 +105,12 @@ MikedllCrm::Application.routes.draw do
   
   scope "b/(:business_handle)", :as => 'bhandle', :constraints => { :business_handle => Regexes::BUSINESS_HANDLE_ROUTING } do
     resource :business, :path => "", :only => [:show]
+
+    resource :home, :path => "", :controller => :home, :only => [] do
+      member do
+        get :contact
+      end
+    end
 
     devise_for :users, :controllers => { :sessions => "users/sessions", :confirmations => "users/confirmations" }, :skip => [:registrations, :passwords]
 

@@ -3,8 +3,8 @@
   - if user_signed_in?
     Logged In:
     = current_user.login_name
-
-    = link_to "Home", root_path, :tabIndex => '-1'
+      
+    = link_to "Home", business_path, :tabIndex => '-1'
     |
     - if current_user.employee
       = link_to 'Products', manage_products_path, :tabIndex => '-1'

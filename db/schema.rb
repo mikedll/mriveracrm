@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140219212056) do
+ActiveRecord::Schema.define(:version => 20140220081939) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -27,6 +27,8 @@ ActiveRecord::Schema.define(:version => 20140219212056) do
     t.string   "authorizenet_transaction_key",    :default => "",    :null => false
     t.boolean  "authorizenet_test",               :default => false, :null => false
     t.string   "handle",                          :default => "",    :null => false
+    t.text     "splash_html",                     :default => "",    :null => false
+    t.text     "contact_text",                    :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
