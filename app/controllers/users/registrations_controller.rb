@@ -1,6 +1,7 @@
 class Users::RegistrationsController < Devise::RegistrationsController
 
   skip_before_filter :authenticate_user!
+  skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :create]
 
   def new
     @business = Business.new
