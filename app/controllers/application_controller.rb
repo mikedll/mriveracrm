@@ -15,10 +15,10 @@ class ApplicationController < ActionController::Base
 
   before_filter :force_www
   before_filter :_enforce_ssl
+  before_filter :_require_business_or_mfe
 
   before_filter :authenticate_user!
 
-  before_filter :_require_business_or_mfe
   before_filter :require_business_and_current_user_belongs_to_it
   before_filter :configure_theme
 
@@ -66,12 +66,20 @@ class ApplicationController < ActionController::Base
 
 
   def after_sign_in_path_for(resource)
-    stored_location_for(resource) ||
+    # stored_location_for(resource) ||
       if resource.is_a?(User)
         if resource.employee
-          manage_clients_path
+          if @business_via_mfe
+            bhandle_manage_clients_path
+          else
+            manage_clients_path
+          end
         else
-          client_invoices_path
+          if @business_via_mfe
+            bhandle_client_invoices_path
+          else
+            client_invoices_path
+          end
         end
       else
         signed_in_root_path(resource)
@@ -104,9 +112,6 @@ class ApplicationController < ActionController::Base
       flash.keep
       return false
     end
-  end
-
-  def _detect_business_via_mfe
   end
 
   def _require_business_or_mfe
