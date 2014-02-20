@@ -1,14 +1,17 @@
 
 
-.container-fluid.gui-container.static-container
+.container.padded
   .app-view.login_failed
     %p
-      If you're here, your login probably failed.
+      %strong
+        = button_to 'Login via Google', user_omniauth_authorize_path(:provider => :google_oauth2), :class => "btn"
 
     %p
-      Either you denied us permission, or there is no invitation
-      for you to join the orginizaton.
+      Or, use your username and password with that you may have created:
 
-    %p
-      = link_to "Home", root_path
+      = simple_form_for(resource, :as => resource_name, :url => session_path(resource_name)) do |f|
+        = devise_error_messages!
 
+        = f.input :email
+        = f.input :password
+        = f.submit I18n.t('sign_in'), :class => "btn"

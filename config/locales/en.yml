@@ -4,6 +4,7 @@
 en:
 
   sign_up: "Sign Up"
+  sign_in: "Login"
 
   delete_confirm: "Delete this?"
   revert_confirm: "Are you sure you want to revert all your changes?"
