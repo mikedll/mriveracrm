@@ -1,11 +1,12 @@
 
 MikedllCrm::Application.routes.draw do
 
-  # marketing / custom domain
+  # raw marketing / custom domain
   resource :business, :path => "", :only => [:show]
 
+
   ######################################## custom domain
-  devise_for :users, :controllers => { :registrations => "users/registrations", :confirmations => "users/confirmations" }
+  devise_for :users, :controllers => { :sessions => "users/sessions", :registrations => "users/registrations", :confirmations => "users/confirmations" }
 
   devise_scope :user do
     [:google_oauth2].tap do |omniauth_providers|
@@ -25,8 +26,7 @@ MikedllCrm::Application.routes.draw do
       :via => [:get, :post]
     end
 
-    get 'sign_in', :to => 'users/sessions#new', :as => :new_user_session
-    get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
+    get 'forbidden', :to => 'users/sessions#forbidden', :as => :forbidden_user_session
   end
 
 
@@ -92,17 +92,16 @@ MikedllCrm::Application.routes.draw do
   end
 
 
-
-  ################################################ This is NOT exactly the same as above.
+  ################################################ Business via MFE
   ################################################ 
-  ################################################ Access from a marketing front end
+  ################################################ This is NOT exactly the same as down below.
   ################################################ sometimes its useful to comment this out
   ################################################ when running rake routes, since its almosta dup of above
   
-  scope "b/(:business_handle)", :constraints => { :business_handle => Regexes::BUSINESS_HANDLE_ROUTING } do
+  scope "b/(:business_handle)", :as => 'bhandle', :constraints => { :business_handle => Regexes::BUSINESS_HANDLE_ROUTING } do
     resource :business, :path => "", :only => [:show]
 
-    devise_for :users, :controllers => { :skip => [:registrations, :confirmations] }
+    devise_for :users, :controllers => { :sessions => "users/sessions", :confirmations => "users/confirmations" }, :skip => [:registrations, :passwords]
 
     devise_scope :user do
       [:google_oauth2].tap do |omniauth_providers|
@@ -121,9 +120,6 @@ MikedllCrm::Application.routes.draw do
         :as => :omniauth_callback,
         :via => [:get, :post]
       end
-
-      get 'sign_in', :to => 'users/sessions#new', :as => :new_user_session
-      get 'sign_out', :to => 'users/sessions#destroy', :as => :destroy_user_session
     end
 
 
@@ -188,6 +184,7 @@ MikedllCrm::Application.routes.draw do
       end
     end
   end
+
 
   root :to => "business#show"
 
