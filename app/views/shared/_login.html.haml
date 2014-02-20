@@ -17,6 +17,6 @@
     - else
       = link_to 'Invoices', client_invoices_path, :tabIndex => '-1'
     |
-    = link_to 'Logout', destroy_user_session_path, :tabIndex => '-1'
+    = link_to 'Logout', destroy_user_session_path, :tabIndex => '-1', :method => :delete
   - else
     = link_to 'Login', new_user_session_path
