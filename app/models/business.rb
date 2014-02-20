@@ -30,6 +30,7 @@ class Business < ActiveRecord::Base
 
   def self.all
     raise "Should never be calling this in prod." if Rails.env.production?
+    super
   end
 
   def invite_employee(email)
