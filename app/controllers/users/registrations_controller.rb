@@ -36,4 +36,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
       render "users/registrations/new"
     end
   end
+
+  def signed_in_root_path
+    business_path
+  end
+
 end
