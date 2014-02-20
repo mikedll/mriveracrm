@@ -155,6 +155,10 @@ FactoryGirl.define do
     data { File.new(Rails.root.join('spec', 'support', 'testphoto.jpg'), 'r') }
   end
 
+  factory :marketing_front_end do
+    domain { "mfe#{SecureRandom.hex(8)}" }
+  end
+
   factory :product_image do 
     ignore do
       seed_business { FactoryGirl.create(:business) }

@@ -22,6 +22,8 @@ class Business < ActiveRecord::Base
   validates :handle, :allow_blank => true, :uniqueness => true
 
   validates :domain, :uniqueness => true, :allow_blank => true
+
+  validate :_no_mfe_conflict
   
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
@@ -61,5 +63,10 @@ class Business < ActiveRecord::Base
     self.handle.strip!
     self.handle.downcase!
   end
+
+  def _no_mfe_conflict
+    errors.add(:domain, I18n.t('business.mfe_domain_conflict')) if MarketingFrontEnd.find_by_domain domain
+  end
+
 
 end

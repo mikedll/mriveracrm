@@ -7,14 +7,18 @@
   = simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => ["form-horizontal"] }) do |f|
     = devise_error_messages!
 
-    - f.fields_for @business do |bf|
-      = bf.input :handle
+    = simple_fields_for @business do |bf|
+      = bf.input :handle, :label => t('business.signup_handle')
 
-    = f.input :email
+    = f.input :first_name, :required => true
 
-    = f.input :password
+    = f.input :last_name, :required => true
 
-    = f.input :password_confirmation
+    = f.input :email, :required => true
+
+    = f.input :password, :required => true
+
+    = f.input :password_confirmation, :required => true
 
     = f.submit t('sign_up')
 

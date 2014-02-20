@@ -1,0 +1,10 @@
+
+%p
+  Thank you for signing up for Mikedll CRM.
+
+%p
+  Confirm your email here to begin using the app:
+
+%p
+  = link_to 'Confirm my account', confirmation_url(:host => RequestSettings.host, @resource, :confirmation_token => @resource.confirmation_token)
+

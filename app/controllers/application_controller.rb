@@ -18,18 +18,17 @@ class ApplicationController < ActionController::Base
 
   before_filter :authenticate_user!
 
+  before_filter :_require_business_or_mfe
   before_filter :require_business_and_current_user_belongs_to_it
   before_filter :configure_theme
-  before_filter :_detect_business_via_mfe
 
   around_filter :business_keys
 
-  def current_business
-    @current_business ||= Business.find_by_domain (Rails.env.development? ? 'www.mikedll.com' : request.host )
-  end
+  attr_accessor :current_business, :current_mfe
 
   def require_business_and_current_user_belongs_to_it
     if current_business.nil?
+      Business.current = nil
       head :forbidden
     else
       Business.current = current_business
@@ -108,7 +107,29 @@ class ApplicationController < ActionController::Base
   end
 
   def _detect_business_via_mfe
-    @business_via_mfe = true if @current_business && params[:business_handle]
+  end
+
+  def _require_business_or_mfe
+    Business.current = nil
+    RequestSettings.host = nil    
+
+    @current_business = Business.find_by_domain request.host
+
+    if @current_business.nil?
+      @current_mfe = MarketingFrontEnd.find_by_domain request.host
+      if @current_mfe
+        RequestSettings.host = @current_mfe.host
+        if params[:business_handle]
+          @current_business = Business.find_by_handle params[:business_handle] 
+          @business_via_mfe = true if @current_business
+        end
+      else
+        RequestSettings.host = nil
+        head :forbidden
+      end
+    else
+      RequestSettings.host = @current_business.host
+    end
   end
 
 

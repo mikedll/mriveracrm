@@ -6,7 +6,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name
 
   belongs_to :business
   belongs_to :employee
@@ -80,8 +80,11 @@ class User < ActiveRecord::Base
 
   def _handle_new_business_owner
     if employee && employee.new_record? && employee.business && employee.business.new_record?
+      employee.email = email
       employee.role = Employee::Roles::OWNER
       if !employee.business.save || !employee.save
+        employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
+        employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
         errors.add(:base, I18n.t('users.new_business_failed'))
       end
     end

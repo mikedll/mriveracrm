@@ -30,6 +30,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
         respond_with resource, :location => after_inactive_sign_up_path_for(resource)
       end
     else
+      @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
       clean_up_passwords resource
       render "users/registrations/new"
     end

@@ -18,7 +18,9 @@ en:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 
   business: 
+    signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
+    mfe_domain_conflict: is not available.
     errors:
       handle_format: can only contain letters and numbers
 
@@ -259,6 +261,10 @@ en:
   # remove these aliases after 'activemodel' and 'activerecord' namespaces are removed from Rails repository
 
   activemodel:
+    models:
+      business: 'Business'
+      employee: 'Employee'
+
     errors:
       <<: *errors
   activerecord:
