@@ -24,10 +24,10 @@ class User < ActiveRecord::Base
   # validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
 
   before_validation :_handle_new_business_owner
+  before_validation :_defaults, :if => :new_record?
 
   validates :first_name, :last_name, :business, :presence => true
   validate :_employee_or_client
-  before_validation :_defaults, :if => :new_record?
 
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
@@ -70,7 +70,7 @@ class User < ActiveRecord::Base
   end
 
   def _defaults
-    self.business = Business.current
+    self.business = Business.current if business.nil?
     self.timezone = 'Pacific Time (US & Canada)' if timezone.nil?
   end
 
@@ -86,6 +86,8 @@ class User < ActiveRecord::Base
         employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
         employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
         errors.add(:base, I18n.t('users.new_business_failed'))
+      else
+        self.business = employee.business
       end
     end
   end

@@ -5,7 +5,7 @@ MikedllCrm::Application.routes.draw do
   resource :business, :path => "", :only => [:show]
 
   ######################################## custom domain
-  devise_for :users, :controllers => { :registrations => "users/registrations" }
+  devise_for :users, :controllers => { :registrations => "users/registrations", :confirmations => "users/confirmations" }
 
   devise_scope :user do
     [:google_oauth2].tap do |omniauth_providers|
@@ -102,7 +102,7 @@ MikedllCrm::Application.routes.draw do
   scope "b/(:business_handle)", :constraints => { :business_handle => Regexes::BUSINESS_HANDLE_ROUTING } do
     resource :business, :path => "", :only => [:show]
 
-    devise_for :users, :controllers => { :skip => [:registrations] }
+    devise_for :users, :controllers => { :skip => [:registrations, :confirmations] }
 
     devise_scope :user do
       [:google_oauth2].tap do |omniauth_providers|

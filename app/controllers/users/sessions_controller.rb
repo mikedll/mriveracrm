@@ -1,6 +1,7 @@
 class Users::SessionsController < ApplicationController
 
   skip_before_filter :authenticate_user!, :only => [:new, :authorize, :google_oauth2]
+  skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :authorize, :google_oauth2]
 
   class NoopApp
     def call(env); end;

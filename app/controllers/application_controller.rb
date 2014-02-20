@@ -111,7 +111,7 @@ class ApplicationController < ActionController::Base
 
   def _require_business_or_mfe
     Business.current = nil
-    RequestSettings.host = nil    
+    RequestSettings.reset
 
     @current_business = Business.find_by_domain request.host
 
@@ -130,13 +130,16 @@ class ApplicationController < ActionController::Base
           @business_via_mfe = true
         end
       else
-        RequestSettings.host = nil
+        RequestSettings.reset
         head :not_found
         return
       end
     else
       RequestSettings.host = @current_business.domain
     end
+
+    RequestSettings.port = 3000 if Rails.env.development? # yeek.
+
 
     raise "Programmer error: neither mfe or business found." if (!current_business && !current_mfe)
   end
