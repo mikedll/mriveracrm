@@ -10,6 +10,15 @@
     = simple_fields_for @business do |bf|
       = bf.input :handle, :label => t('business.signup_handle')
 
+    .control-group
+      %label
+      .controls
+
+        The business handle is an alphanumeric string that will be
+        used in web URLs here on the CRM.  It must consist only of
+        lower case letters and numbers. Example 'rocketfoodies',
+        'mikedll', 'sexieryou'.
+
     = f.input :first_name, :required => true
 
     = f.input :last_name, :required => true
