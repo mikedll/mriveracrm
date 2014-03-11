@@ -4,7 +4,7 @@ FactoryGirl.define do
 
   factory :business do
     name "my small business"
-    handle { "handle#{SecureRandom.hex(8)}yup" }
+    handle { "handle#{SecureRandom.hex(4)}yup" }
     host { "www.#{handle}.com" }
 
     google_oauth2_client_id "google_oauth2_client_idxxx"
@@ -164,7 +164,7 @@ FactoryGirl.define do
   end
 
   factory :marketing_front_end do
-    host { "mfe#{SecureRandom.hex(8)}" }
+    host { "www.mfe#{SecureRandom.hex(4)}.com" }
   end
 
   factory :product_image do 
