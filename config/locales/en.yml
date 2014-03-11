@@ -8,13 +8,10 @@ en:
 
   delete_confirm: "Delete this?"
   revert_confirm: "Are you sure you want to revert all your changes?"
+
   client:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."
-  errors:
-    not_found_back_to_entry: "You tried to access a location that was not recognized. Redirecting you to your entry page."
-    unexpected_internal_error: "Unexpected internal system error"
-    no_access: "You tried to access a resource that you don't have access to. You've been redirected."
 
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
@@ -153,6 +150,10 @@ en:
       second: Seconds
       year: Year
   errors: &errors
+    not_found_redirect_home: "You tried to access a location that was not recognized. Redirecting you to your entry page."
+    unexpected_internal_error: "Unexpected internal system error"
+    no_access: "You tried to access a resource that you don't have access to. You've been redirected."
+
     format: ! '%{attribute} %{message}'
     messages:
       accepted: must be accepted

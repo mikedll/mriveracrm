@@ -31,9 +31,10 @@ class ApplicationController < ActionController::Base
       Business.current = nil
 
       if current_user
-        # theyre in the wrong place, but logged in. We can send
+        # theyre in the wrong place, but a route trigger. raise
+        # not found.
         # them somewhere useful.
-        flash[:notice] = I18n.t('errors.not_found_back_to_entry')
+        flash[:notice] = I18n.t('errors.not_found_redirect_home')
         redirect_to after_sign_in_path_for(current_user)
       else
         # not logged in and no business. nothing here.
