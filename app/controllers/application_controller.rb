@@ -34,8 +34,13 @@ class ApplicationController < ActionController::Base
         # theyre in the wrong place, but a route trigger. raise
         # not found.
         # them somewhere useful.
-        flash[:notice] = I18n.t('errors.not_found_redirect_home')
-        redirect_to after_sign_in_path_for(current_user)
+        respond_to do |format|
+          format.html do
+            flash[:notice] = I18n.t('errors.not_found_redirect_home')
+            redirect_to after_sign_in_path_for(current_user)
+          end
+          format.js { head :not_found }        
+        end
       else
         # not logged in and no business. nothing here.
         respond_to do |format|
