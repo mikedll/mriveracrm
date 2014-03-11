@@ -19,6 +19,8 @@ class AddDeviseToUsers < ActiveRecord::Migration
 
     end
 
+    execute "update users set confirmed_at = now()"
+
     add_index :users, :email,                :unique => true
     add_index :users, :reset_password_token, :unique => true
     add_index :users, :confirmation_token,   :unique => true

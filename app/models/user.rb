@@ -41,6 +41,7 @@ class User < ActiveRecord::Base
              user.email = auth[:info][:email]
              user.first_name = auth[:info][:first_name]
              user.last_name = auth[:info][:last_name]    
+             user.confirmed_at = Time.now  # google users are auto-confirmed
              user
            else
              current_user
