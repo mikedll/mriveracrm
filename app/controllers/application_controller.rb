@@ -64,22 +64,18 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
   def after_sign_in_path_for(resource)
-    # stored_location_for(resource) ||
+    stored_location_for(resource) ||
       if resource.is_a?(User)
+        if @current_mfe && @current_business.nil?
+          @current_business = resource.business
+          @business_via_mfe = true
+        end
+
         if resource.employee
-          if @business_via_mfe
-            bhandle_manage_clients_path
-          else
-            manage_clients_path
-          end
+          manage_clients_path
         else
-          if @business_via_mfe
-            bhandle_client_invoices_path
-          else
-            client_invoices_path
-          end
+          client_invoices_path
         end
       else
         signed_in_root_path(resource)
