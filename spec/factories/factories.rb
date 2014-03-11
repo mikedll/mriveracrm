@@ -54,7 +54,8 @@ FactoryGirl.define do
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
-    after(:create) do |user|
+    confirmed_at { Time.now }
+    after(:create) do |user, evaluator|
       FactoryGirl.create(:google_oauth2_credential, :email => user.email, :user => user)
     end
 
