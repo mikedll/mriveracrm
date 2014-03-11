@@ -29,11 +29,27 @@ class ApplicationController < ActionController::Base
   def require_business_and_current_user_belongs_to_it
     if current_business.nil?
       Business.current = nil
-      head :forbidden
+
+      if current_user
+        # theyre in the wrong place, but logged in. We can send
+        # them somewhere useful.
+        flash[:notice] = I18n.t('errors.not_found_back_to_entry')
+        redirect_to after_sign_in_path_for(current_user)
+      else
+        # not logged in and no business. nothing here.
+        respond_to do |format|
+          format.html { redirect_to root_path }
+          format.js { head :not_found }        
+        end
+      end
     else
       Business.current = current_business
       if user_signed_in? && !current_user.cb?
-        head :forbidden      
+        # user trying to access a business that isnt theirs
+        # we dont redirect them because we dont
+        # know their business' url form, or the mfe form.
+        # we may handle this later.
+        head :not_found
       end
     end
   end
