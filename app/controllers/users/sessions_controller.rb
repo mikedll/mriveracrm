@@ -1,9 +1,9 @@
 class Users::SessionsController < Devise::SessionsController
 
-  prepend_before_filter :_require_business_or_mfe, :only => [ :new, :create ]
+  prepend_before_filter :_require_business_or_mfe, :only => [ :new, :create, :authorize, :google_oauth2, :destroy ]
 
   skip_before_filter :authenticate_user!, :only => [:new, :create, :authorize, :google_oauth2]
-  skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :create, :authorize, :google_oauth2]
+  skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :create, :authorize, :google_oauth2, :destroy]
 
   class NoopApp
     def call(env); end;
