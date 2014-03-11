@@ -4,6 +4,7 @@ require 'spec_helper'
 describe Users::SessionsController do
 
   before do
+    @request.env["devise.mapping"] = Devise.mappings[:user]
     Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
     @user = FactoryGirl.create(:employee_user)
     request.host = @user.employee.business.host
