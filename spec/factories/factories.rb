@@ -5,7 +5,7 @@ FactoryGirl.define do
   factory :business do
     name "my small business"
     handle { "handle#{SecureRandom.hex(8)}yup" }
-    domain { "www.#{handle}.com" }
+    host { "www.#{handle}.com" }
 
     google_oauth2_client_id "google_oauth2_client_idxxx"
     google_oauth2_client_secret "google_oauth2_client_secretxxx"
@@ -15,11 +15,12 @@ FactoryGirl.define do
 
     after(:create) do |business|
       Business.current = business
+      RequestSettings.host = MarketingFrontEnd.first.try(:host) || FactoryGirl.create(:marketing_front_end).host
     end
 
     factory :emerging_papacy do
       name "Emerging Papacy"
-      domain "www.emergingpapacy" + SecureRandom.base64(8) + "yup.com"
+      host { "www.emergingpapacy" + SecureRandom.base64(8) + "yup.com" }
       after(:create) do |business, evaluator|
         FactoryGirl.create(:employee, :business => business, :first_name => "Gregory", :last_name => "the Great")
         FactoryGirl.create(:employee, :business => business, :first_name => "Saint", :last_name => "Benedict")
@@ -156,7 +157,7 @@ FactoryGirl.define do
   end
 
   factory :marketing_front_end do
-    domain { "mfe#{SecureRandom.hex(8)}" }
+    host { "mfe#{SecureRandom.hex(8)}" }
   end
 
   factory :product_image do 

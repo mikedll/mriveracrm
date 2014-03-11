@@ -21,7 +21,7 @@ en:
   business: 
     signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
-    mfe_domain_conflict: is not available.
+    mfe_host_conflict: is not available.
     errors:
       handle_format: can only contain letters and numbers
 

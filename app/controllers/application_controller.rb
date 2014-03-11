@@ -118,12 +118,12 @@ class ApplicationController < ActionController::Base
     Business.current = nil
     RequestSettings.reset
 
-    @current_business = Business.find_by_domain request.host
+    @current_business = Business.find_by_host request.host
 
     if @current_business.nil?
-      @current_mfe = MarketingFrontEnd.find_by_domain request.host
+      @current_mfe = MarketingFrontEnd.find_by_host request.host
       if @current_mfe
-        RequestSettings.host = @current_mfe.domain
+        RequestSettings.host = @current_mfe.host
 
         if params[:business_handle]
           @current_business = Business.find_by_handle params[:business_handle] 
@@ -140,7 +140,7 @@ class ApplicationController < ActionController::Base
         return
       end
     else
-      RequestSettings.host = @current_business.domain
+      RequestSettings.host = @current_business.host
     end
 
     RequestSettings.port = 3000 if Rails.env.development? # yeek.

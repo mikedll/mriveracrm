@@ -11,11 +11,11 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140220081939) do
+ActiveRecord::Schema.define(:version => 20140311193533) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
-    t.string   "domain",                          :default => "",    :null => false
+    t.string   "host",                            :default => "",    :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "stripe_secret_key",               :default => "",    :null => false
@@ -126,7 +126,7 @@ ActiveRecord::Schema.define(:version => 20140220081939) do
 
   create_table "marketing_front_ends", :force => true do |t|
     t.string   "title",                       :default => "", :null => false
-    t.string   "domain",                      :default => "", :null => false
+    t.string   "host",                        :default => "", :null => false
     t.string   "google_oauth2_client_id",     :default => "", :null => false
     t.string   "google_oauth2_client_secret", :default => "", :null => false
     t.datetime "created_at",                                  :null => false

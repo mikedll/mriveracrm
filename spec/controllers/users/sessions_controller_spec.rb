@@ -6,7 +6,7 @@ describe Users::SessionsController do
   before do
     Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
     @user = FactoryGirl.create(:employee_user)
-    request.host = @user.employee.business.domain
+    request.host = @user.employee.business.host
   end
 
   it "should redirect to google with proper business oauth key" do

@@ -5,7 +5,7 @@ describe Manage::ProductImagesController do
     before(:each) do
       @user = FactoryGirl.create(:employee_user)
       sign_in @user
-      request.host = @user.employee.business.domain
+      request.host = @user.employee.business.host
       @product = FactoryGirl.create(:product, :business => @user.business)
     end
 

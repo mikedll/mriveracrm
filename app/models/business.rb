@@ -21,7 +21,7 @@ class Business < ActiveRecord::Base
 
   validates :handle, :allow_blank => true, :uniqueness => true
 
-  validates :domain, :uniqueness => true, :allow_blank => true
+  validates :host, :uniqueness => true, :allow_blank => true
 
   validate :_no_mfe_conflict
   
@@ -82,7 +82,7 @@ class Business < ActiveRecord::Base
   end
 
   def _no_mfe_conflict
-    errors.add(:domain, I18n.t('business.mfe_domain_conflict')) if MarketingFrontEnd.find_by_domain domain
+    errors.add(:host, I18n.t('business.mfe_host_conflict')) if MarketingFrontEnd.find_by_host host
   end
 
 

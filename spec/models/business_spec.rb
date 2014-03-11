@@ -28,10 +28,10 @@ describe Business do
 
     it "should not allow conflict with mfe" do
       mfe = FactoryGirl.create(:marketing_front_end)
-      d = FactoryGirl.build(:business, :domain => mfe.domain)
+      d = FactoryGirl.build(:business, :host => mfe.host)
       d.save.should be_false
-      d.errors[:domain].should =~ [I18n.t('business.mfe_domain_conflict')]
-      d.domain = FactoryGirl.build(:business).domain
+      d.errors[:host].should =~ [I18n.t('business.mfe_host_conflict')]
+      d.host = FactoryGirl.build(:business).host
       d.save.should be_true
     end
 
