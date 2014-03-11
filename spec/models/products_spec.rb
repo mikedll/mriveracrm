@@ -40,7 +40,7 @@ describe Product do
   end
 
   context "search" do
-    it "should search in product's name", :current => true do
+    it "should search in product's name" do
       FactoryGirl.create(:product, :name => "Cat Food")
       FactoryGirl.create(:product, :name => "Dog Food")
       FactoryGirl.create(:product, :name => "Forks")

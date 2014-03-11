@@ -63,6 +63,13 @@ FactoryGirl.define do
     factory :employee_user do
       employee { FactoryGirl.create(:employee) }
       client nil
+
+      factory :unconfirmed_new_employee_user do
+        after :create do |user, evaluator|
+          user.send(:generate_confirmation_token!)
+        end
+      end
+
     end
   end
 

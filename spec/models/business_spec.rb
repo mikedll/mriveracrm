@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe Business do
 
-  context "validations", :current => true do
+  context "validations" do
     before do
       @business = FactoryGirl.create(:business)
     end
