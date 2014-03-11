@@ -6,5 +6,5 @@
   Confirm your email here to begin using the app:
 
 %p
-  = link_to 'Confirm my account', confirmation_url(@resource, :host => RequestSettings.full_host, :confirmation_token => @resource.confirmation_token)
+  = "#{link_to 'Confirm my account', confirmation_url(@resource, :host => RequestSettings.full_host, :confirmation_token => @resource.confirmation_token)}."
 
