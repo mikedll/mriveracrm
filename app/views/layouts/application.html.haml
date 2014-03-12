@@ -9,6 +9,9 @@
     = javascript_include_tag "application"
     = javascript_include_tag "https://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g"
 
+    - if @current_business
+      %meta{:content => business_path, :name=>'app-path-prefix'}
+
     = yield :head
 
   %body{:class => [@theme.nil? ? "" : @theme]}

@@ -13,7 +13,9 @@ class window.Client extends BaseModel
 
 class window.Clients extends Backbone.Collection
   model: Client
-  url: '/manage/clients'
+  url: () ->
+    gUrlManager.url('/manage/clients')
+
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
     @comparator = (client) ->

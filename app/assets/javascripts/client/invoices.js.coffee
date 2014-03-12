@@ -6,7 +6,7 @@ class window.Invoices extends Backbone.Collection
   comparator: (invoice) ->
     invoice.get('id')
   url: () ->
-    "/client/invoices"
+    gUrlManager.url("/client/invoices")
 
 class window.ClientInvoiceView extends CrmModelView
   modelName: 'invoice'

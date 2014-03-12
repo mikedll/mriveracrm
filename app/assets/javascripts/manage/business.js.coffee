@@ -1,7 +1,7 @@
 
 class window.Business extends BaseModel
   url: () ->
-    '/manage/business'
+    gUrlManager.url('/manage/business')
 
   validate: (attrs, options) ->
     if !attrs.name? || attrs.name.trim() == ""

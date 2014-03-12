@@ -18,6 +18,6 @@
 //= require eventHotKeys
 //= require regexes
 //= require bg_rotator
-//= require products
+//= require urlManager
 //
 

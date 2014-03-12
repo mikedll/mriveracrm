@@ -19,7 +19,9 @@ class window.ProductImage extends BaseModel
 
 class window.RelatedImages extends BaseCollection
   model: ProductImage
-  url: '/manage/images'
+  url: () ->
+    gUrlManager.url('/manage/images')
+
   initialize: () ->
     BaseCollection.prototype.initialize.apply(this, arguments)
     @url = () =>
