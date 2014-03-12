@@ -43,6 +43,8 @@ class PaymentGatewayProfile < ActiveRecord::Base
     raise "Implement in subclass."
   end
 
+  protected 
+
   def _create_remote
     raise "Implement in subclass."
   end

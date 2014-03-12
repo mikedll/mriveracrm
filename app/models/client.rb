@@ -63,7 +63,7 @@ class Client < ActiveRecord::Base
   end
 
   def require_payment_gateway_profile
-    if payment_gateway_profile.nil?
+    if payment_gateway_profile.nil? && !business.stripe_secret_key.blank?
       self.payment_gateway_profile = StripePaymentGatewayProfile.new
       self.payment_gateway_profile.save!
     end

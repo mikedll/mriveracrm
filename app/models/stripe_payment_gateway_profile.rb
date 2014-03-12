@@ -1,5 +1,8 @@
 class StripePaymentGatewayProfile < PaymentGatewayProfile
 
+  class NoStripeApiKey < Exception
+  end
+
   def public
     {
       :id => id,
@@ -62,6 +65,10 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
 
   def update_payment_info(opts)
+    if vendor_id.blank?
+      _create_remote
+    end
+
     card_param = nil
     if opts[:token].blank?
       card = card_from_opts(opts)
@@ -114,7 +121,12 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   end
 
 
+  protected 
+
   def _create_remote
+    return if self.client.business.stripe_secret_key.blank?
+
+
     customer = nil
     _with_stripe_key do
       customer = Stripe::Customer.create(:description => client.payment_profile_description, :email => client.email)
