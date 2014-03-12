@@ -1,11 +1,11 @@
 // 
 //= require vendor/jquery
 //= require vendor/jquery_ujs
-//= require vendor/bootstrap
-//= require twitter/bootstrap
 //= require vendor/dropzone
 //= require vendor/jquery-ui/jquery-ui
 //= require vendor/jquery-ui-bootstrapconflicts.js
+//= require vendor/bootstrap
+//= require twitter/bootstrap
 //= require jquery.easing-1.3.pack
 //= require vendor/builder
 //= require vendor/pretty
