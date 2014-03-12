@@ -27,7 +27,9 @@ class window.Product extends BaseModel
 
 class window.Products extends Backbone.Collection
   model: Product
-  url: '/manage/products'
+  url: ->
+    gUrlManager.url('/manage/products')
+
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
     @comparator = (product) ->
