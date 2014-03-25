@@ -63,6 +63,10 @@ class ApplicationController < ActionController::Base
       end
   end
 
+  def after_omniauth_failure_path_for(scope)
+    new_user_session_path
+  end
+
   protected 
 
   def force_www
