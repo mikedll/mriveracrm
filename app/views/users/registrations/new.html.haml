@@ -25,6 +25,7 @@
 
     = f.input :email, :required => true
 
+    = f.input :use_google_oauth_registration, :as => :boolean, :label => "Use Google OAuth Registration (recommended)"
     = f.input :password, :required => true
 
     = f.input :password_confirmation, :required => true

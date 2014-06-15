@@ -27,6 +27,8 @@ class User < ActiveRecord::Base
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
 
+  attr_accessor :use_google_oauth_registration
+
   def self.find_for_google_oauth2(auth, current_user)
     # user exists
     user = cb.google_oauth2(auth[:info][:email]).first
