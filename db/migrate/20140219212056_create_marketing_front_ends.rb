@@ -8,7 +8,7 @@ class CreateMarketingFrontEnds < ActiveRecord::Migration
       t.timestamps
     end
 
-    d = Rails.env.production? ? 'www.mikedllcrm.com' : 'devmarketing.mikedllcrm.com'
+    d = Rails.env.production? ? 'www.mriveracrm.com' : 'devmarketing.mriveracrm.com'
     execute "insert into marketing_front_ends (title, domain, created_at, updated_at) values ('Mikedll CRM', '#{d}', now(), now())"
 
     execute "update businesses set handle = 'mikedll' where domain = 'www.mikedll.com'"
