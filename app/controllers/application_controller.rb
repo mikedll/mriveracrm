@@ -28,8 +28,6 @@ class ApplicationController < ActionController::Base
 
   def require_business_and_current_user_belongs_to_it
     if current_business.nil?
-      Business.current = nil
-
       if current_user
         # theyre in the wrong place, but a route trigger. raise
         # not found.
@@ -49,7 +47,6 @@ class ApplicationController < ActionController::Base
         end
       end
     else
-      Business.current = current_business
       if user_signed_in? && !current_user.cb?
         # user trying to access a business that isnt theirs
         # we dont redirect them because we dont
@@ -142,7 +139,10 @@ class ApplicationController < ActionController::Base
 
     @current_business = Business.find_by_host request.host
 
-    if @current_business.nil?
+    # Determine host
+    if @current_business
+      RequestSettings.host = @current_business.host
+    else
       @current_mfe = MarketingFrontEnd.find_by_host request.host
       if @current_mfe
         RequestSettings.host = @current_mfe.host
@@ -161,12 +161,13 @@ class ApplicationController < ActionController::Base
         head :not_found
         return
       end
-    else
-      RequestSettings.host = @current_business.host
     end
 
     RequestSettings.port = 3000 if Rails.env.development? # yeek.
 
+    if @current_business
+      Business.current = @current_business
+    end
 
     raise "Programmer error: neither mfe or business found." if (!current_business && !current_mfe)
   end
