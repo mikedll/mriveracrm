@@ -1,7 +1,7 @@
 class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration
 
   belongs_to :business
   belongs_to :employee
@@ -20,6 +20,8 @@ class User < ActiveRecord::Base
 
   before_validation :_handle_new_business_owner
   before_validation :_defaults, :if => :new_record?
+
+  after_initialize :_default_creation_type
 
   validates :first_name, :last_name, :business, :presence => true
   validate :_employee_or_client
@@ -90,6 +92,9 @@ class User < ActiveRecord::Base
     end
   end
 
+  def _default_creation_type
+    self.use_google_oauth_registration = true if new_record?
+  end
 
   
 end

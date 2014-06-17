@@ -4,7 +4,7 @@
   %h2
     = t('sign_up')
 
-  = simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => ["form-horizontal"] }) do |f|
+  = simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => ["form-horizontal new-registration-form"] }) do |f|
     = devise_error_messages!
 
     = simple_fields_for @business do |bf|
@@ -19,16 +19,18 @@
         lower case letters and numbers. Example 'rocketfoodies',
         'michaelrivera', 'sexieryou'.
 
-    = f.input :first_name, :required => true
+    = f.input :use_google_oauth_registration, :as => :boolean, :label => "Use Google OAuth instead of password (recommended)"
 
-    = f.input :last_name, :required => true
+    .custom-account-fields
+      = f.input :first_name, :required => true
 
-    = f.input :email, :required => true
+      = f.input :last_name, :required => true
 
-    = f.input :use_google_oauth_registration, :as => :boolean, :label => "Use Google OAuth Registration (recommended)"
-    = f.input :password, :required => true
+      = f.input :email, :required => true
 
-    = f.input :password_confirmation, :required => true
+      = f.input :password, :required => true
+
+      = f.input :password_confirmation, :required => true
 
     = f.submit t('sign_up')
 

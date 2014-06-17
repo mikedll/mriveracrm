@@ -19,5 +19,7 @@
 //= require regexes
 //= require bg_rotator
 //= require urlManager
+//= require registrations
+//= require bootDetector
 //
 

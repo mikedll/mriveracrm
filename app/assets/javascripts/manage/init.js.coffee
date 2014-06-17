@@ -43,11 +43,13 @@ $(() ->
 
     rootApp = null
     if config.modelCollectionKlass?
+      # resources
       modelCollectionKlass = config.modelCollectionKlass
       rootCollectionBootstrap = lazyGetBootstrap(anchorSelector)
       rootCollection = new modelCollectionKlass()
       rootApp = new rootAppViewKlass(el: rootViewAnchor, collection: rootCollection, parent: stack)
     else if config.modelKlass?
+      # resource
       modelBootstrap = lazyGetBootstrap(anchorSelector)
       model = new config.modelKlass()
       modelView = new config.modelViewKlass(model: model)
