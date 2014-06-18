@@ -30,8 +30,10 @@ en:
       one_user_per_employee: 'already has a user assigned'
   invitation:
     errors:
+      email_conflict_handle: "is already in use for a pending new business by this handle."
       email_conflict: "is already in use by an existing user."
-      only_one: 'must have either a client or an employee, and not both'
+      only_one: 'if handle for new business is blank, then must have either a client or an employee, and not both'
+      no_client_or_employee_for_handle: "cannot have employee or client if there is a handle for a new business"
 
   transaction:
     errors:

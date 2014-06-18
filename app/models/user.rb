@@ -38,7 +38,6 @@ class User < ActiveRecord::Base
 
     # does not exist. require open invite.
     invitation = Invitation.cb.open.find_by_email auth[:info][:email]
-
     if invitation
       # invited user
       user = if current_user.nil?
@@ -50,11 +49,12 @@ class User < ActiveRecord::Base
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return nil if !invitation.accept_user!(user) # credential likely is already in use for this business
     elsif current_user.nil? && params[:business]
-      # new business
-      # if there is a current_user, that user will be ignored.
-      user = User.new_from_auth(auth[:info])
-      user.become_owner_of_new_business(params[:business])
-      user.credentials.push(Credential.new_from_google_oauth2(auth, user))
+      invitation = Invitation.handled.open.find_by_email auth[:info][:email]
+      if invitation
+        user = User.new_from_auth(auth[:info])
+        user.credentials.push(Credential.new_from_google_oauth2(auth, user))
+        return nil if !invitation.accept_user!(user)
+      end
     elsif current_user
       # this is pretty much a weird login....current_user is trying to relogin with no
       # invitation or new business. why? log him out.
@@ -75,9 +75,9 @@ class User < ActiveRecord::Base
     user
   end
 
-  def become_owner_of_new_business(params)
+  def become_owner_of_new_business(handle)
     @business = Business.new
-    @business.handle = params[:handle] if params[:handle] # this will trigger validations properly...
+    @business.handle = handle if handle # this will trigger validations properly...
     @employee = Employee.new
     @employee.business = @business        
     self.employee = @employee

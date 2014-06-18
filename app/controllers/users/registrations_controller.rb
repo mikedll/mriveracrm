@@ -14,7 +14,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
   #
   def create
     build_resource
-    resource.become_owner_of_new_business(params[:business])
+    resource.become_owner_of_new_business(params[:business] ? params[:business][:handle] : nil)
     if resource.use_google_oauth_registration
       # Doing a google oauth create
       redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))

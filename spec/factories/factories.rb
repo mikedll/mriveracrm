@@ -2,9 +2,13 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
+
+  sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
+
   factory :business do
     name "my small business"
-    handle { "handle#{SecureRandom.hex(4)}yup" }
+    handle { generate(:business_handle) }
     host { "www.#{handle}.com" }
 
     google_oauth2_client_id "google_oauth2_client_idxxx"
@@ -32,7 +36,7 @@ FactoryGirl.define do
     business { FactoryGirl.create(:business) }
     first_name "Mike"
     last_name "Worker Bee"
-    email { "employee" + SecureRandom.base64(8) + "@example.com" }
+    email { generate(:employee_email) }
   end
 
   factory :credential do
@@ -49,8 +53,7 @@ FactoryGirl.define do
     end
   end
 
-  factory :user do
-    client { FactoryGirl.create(:stubbed_client) }
+  factory :user_base, :class => User do
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
@@ -59,16 +62,21 @@ FactoryGirl.define do
       FactoryGirl.create(:google_oauth2_credential, :email => user.email, :user => user)
     end
 
-    factory :client_user
+    factory :user do
+      client { FactoryGirl.create(:stubbed_client) }
 
-    factory :employee_user do
-      employee { FactoryGirl.create(:employee) }
-      client nil
+      factory :client_user
 
-      factory :unconfirmed_new_employee_user do
-        after :create do |user, evaluator|
-          user.send(:generate_confirmation_token!)
+      factory :employee_user do
+        employee { FactoryGirl.create(:employee) }
+        client nil
+
+        factory :unconfirmed_new_employee_user do
+          after :create do |user, evaluator|
+            user.send(:generate_confirmation_token!)
+          end
         end
+
       end
 
     end
@@ -90,9 +98,7 @@ FactoryGirl.define do
   end
 
   factory :invitation do
-    before(:create) do |invitation|
-      invitation.business = invitation.employee.try(:business) || invitation.client.business
-    end
+
 
     factory :client_invitation, :parent => :invitation do
       client { FactoryGirl.create(:stubbed_client) }
@@ -100,6 +106,11 @@ FactoryGirl.define do
 
     factory :employee_invitation, :parent => :invitation do
       employee { FactoryGirl.create(:employee) }
+    end
+
+    factory :new_business_invitation, :parent => :invitation do
+      email { generate(:employee_email) }
+      handle { generate(:business_handle) }
     end
 
   end
