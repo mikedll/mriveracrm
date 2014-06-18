@@ -47,6 +47,7 @@ class Users::SessionsController < Devise::SessionsController
 
     if @user && @user.persisted?
       session.delete(:sessions_business_handle)
+      @supress_business_handle = false
       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Google"
       sign_in_and_redirect @user, :event => :authentication
     else
