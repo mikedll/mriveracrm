@@ -56,7 +56,7 @@ class Invitation < ActiveRecord::Base
       errors.add(:base, I18n.t('invitation.errors.no_client_or_employee_for_handle')) if !(employee.nil? && client.nil?)
     end
   end
-  
+
   def _strip_fields
     self.handle.strip!
     self.email.strip!

@@ -22,22 +22,15 @@ class Users::RegistrationsController < Devise::RegistrationsController
         # Doing a google oauth create
         i = Invitation.new(:email => resource.email, :handle => params[:business] ? params[:business][:handle] : nil)
         if !i.save
-          i.errors.full_messages.each do |m|
-            resource.errors.add(:base, m)
-          end
-
-          @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
-          clean_up_passwords resource
-          render "users/registrations/new"
+          i.errors.full_messages.each { |m| resource.errors.add(:base, "#{I18n.t('activemodel.models.invitation')}: #{m}") }
+          _response_for_create_fails
           return
         end
 
         redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))
         return
       else
-        @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
-        clean_up_passwords resource
-        render "users/registrations/new"
+        _response_for_create_fails
         return
       end
     end
@@ -53,14 +46,19 @@ class Users::RegistrationsController < Devise::RegistrationsController
         respond_with resource, :location => after_inactive_sign_up_path_for(resource)
       end
     else
-      @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
-      clean_up_passwords resource
-      render "users/registrations/new"
+      _response_for_create_fails
     end
   end
 
   def signed_in_root_path
     business_path
   end
+
+  def _response_for_create_fails
+    @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
+    clean_up_passwords resource
+    render "users/registrations/new"
+  end
+
 
 end

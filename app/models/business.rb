@@ -24,7 +24,6 @@ class Business < ActiveRecord::Base
   validates :host, :uniqueness => true, :allow_blank => true
 
   validate :_no_mfe_conflict
-  
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
@@ -70,7 +69,7 @@ class Business < ActiveRecord::Base
                 :medium => p.images.first.data.large.url,
                 :small => p.images.first.data.small.url
               })
-    end    
+    end
   end
 
 
