@@ -14,3 +14,4 @@ class window.Registrations
   onDocLoad: () ->
     @useOAuthField.bind('change', (e) => @handleState())
     @handleState()
+    @container.find(':input:visible').first().focus()
