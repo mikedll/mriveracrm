@@ -19,7 +19,18 @@ class Users::RegistrationsController < Devise::RegistrationsController
     if resource.use_google_oauth_registration
       if resource.valid?
         # Doing a google oauth create
-        Invitation.create!(:email => resource.email, :handle => params[:business] ? params[:business][:handle] : nil)
+        i = Invitation.new(:email => resource.email, :handle => params[:business] ? params[:business][:handle] : nil)
+        if !i.save
+          i.errors.full_messages.each do |m|
+            resource.errors.add(:base, m)
+          end
+
+          @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
+          clean_up_passwords resource
+          render "users/registrations/new"
+          return
+        end
+        
         redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))
         return
       else
