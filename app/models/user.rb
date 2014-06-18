@@ -13,6 +13,9 @@ class User < ActiveRecord::Base
 
   devise :database_authenticatable, :registerable, :rememberable, :trackable, :confirmable
 
+  before_validation :_capture_employee_business
+  before_validation :_defaults, :if => :new_record?
+
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
 
   validates :first_name, :last_name, :business, :presence => true, :if => Proc.new { |u| !(u.new_record? && u.use_google_oauth_registration) }
@@ -23,8 +26,7 @@ class User < ActiveRecord::Base
   #
   # validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
 
-  before_validation :_handle_new_business_owner
-  before_validation :_defaults, :if => :new_record?
+  before_save :_handle_new_business_owner
 
   after_initialize :_default_creation_type
 
@@ -109,6 +111,12 @@ class User < ActiveRecord::Base
     errors.add(:base, 'must be associated with employee or client of this business') if (self.employee.nil? && self.client.nil?)
   end
 
+  def _capture_employee_business
+    if employee && employee.new_record? && employee.business && employee.business.new_record?
+      self.business = employee.business    
+    end
+  end
+
   def _handle_new_business_owner
     if employee && employee.new_record? && employee.business && employee.business.new_record?
       employee.email = email
@@ -117,8 +125,6 @@ class User < ActiveRecord::Base
         employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
         employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
         errors.add(:base, I18n.t('users.new_business_failed'))
-      else
-        self.business = employee.business
       end
     end
   end
