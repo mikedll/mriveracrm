@@ -4,6 +4,17 @@
   %h2
     = t('sign_up')
 
+  - if resource.conflicting_invitation
+    %p
+      If you are
+      = "#{resource.conflicting_invitation.email}, "
+      and already started the business creation process,
+      you can 
+      = t('login_via_oauth')
+      now to continue.
+    %p
+      = button_to t('login_via_oauth'), omniauth_authorize_path(:provider => :google_oauth2), :class => "btn"
+
   = simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => ["form-horizontal new-registration-form"] }) do |f|
     = devise_error_messages!
 

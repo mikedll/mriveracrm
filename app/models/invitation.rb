@@ -9,6 +9,7 @@ class Invitation < ActiveRecord::Base
   scope :cb, lambda { where('invitations.business_id = ?', Business.current.try(:id)) }
   scope :handled, where("invitations.business_id is null and invitations.handle <> ''")
   scope :open, where('invitations.status = ?', :open)
+  scope :open_for_handle_and_email, lambda { |handle, email| handled.open.where(:email => email, :handle => handle) }
 
   before_validation :_strip_fields
   before_validation { @virtual_path = 'invitation' }
@@ -88,11 +89,9 @@ class Invitation < ActiveRecord::Base
         errors.add(:email, t('.errors.email_conflict'))
       end
     else
-      finder = Invitation.open.handled.where(:email => self.email, :handle => self.handle)
-      if persisted?
-        finder = finder.where('id <> ?', self.id)
-      end
-      errors.add(:email, t('.errors.email_conflict')) if finder.first
+      finder = Invitation.open_for_handle_and_email(handle, email)
+      finder = finder.where('id <> ?', self.id) if persisted?
+      errors.add(:email, t('.errors.email_conflict_handle')) if finder.first
     end
   end
 

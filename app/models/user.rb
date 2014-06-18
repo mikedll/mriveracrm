@@ -1,6 +1,6 @@
 class User < ActiveRecord::Base
 
-  attr_accessor :use_google_oauth_registration
+  attr_accessor :use_google_oauth_registration, :conflicting_invitation
 
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration

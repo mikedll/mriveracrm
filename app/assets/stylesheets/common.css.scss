@@ -62,8 +62,15 @@ li {
 }
 
 
+/************ devise ************/
 
-/* login */
+#error_explanation {
+  h2 { font-size: 12pt; }
+  ul { color: red; }
+}
+
+
+/********************* login */
 
 .login {
   position: absolute;

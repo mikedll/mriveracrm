@@ -4,7 +4,7 @@
  *= require vendor/dropzone
  *= require vendor/jquery-ui/jquery-ui
  *= require vendor/timepicker/jquery-ui-timepicker-addon
- *= require default
+ *= require common
  *= require apps
  *= require_tree ./themes
  *= require_tree ./manage

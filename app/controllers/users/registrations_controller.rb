@@ -23,6 +23,9 @@ class Users::RegistrationsController < Devise::RegistrationsController
         i = Invitation.new(:email => resource.email, :handle => params[:business] ? params[:business][:handle] : nil)
         if !i.save
           i.errors.full_messages.each { |m| resource.errors.add(:base, "#{I18n.t('activemodel.models.invitation')}: #{m}") }
+          if resource.errors[:base].any? { |m| m.ends_with?(t('invitation.errors.email_conflict_handle')) }
+            resource.conflicting_invitation = Invitation.open_for_handle_and_email(i.handle, i.email).first
+          end
           _response_for_create_fails
           return
         end
@@ -56,6 +59,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   def _response_for_create_fails
     @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
+    @business.handle = resource.conflicting_invitation.handle if resource.conflicting_invitation
     clean_up_passwords resource
     render "users/registrations/new"
   end
