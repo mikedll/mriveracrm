@@ -1,5 +1,7 @@
 class User < ActiveRecord::Base
 
+  attr_accessor :use_google_oauth_registration
+
   # Setup accessible (or protected) attributes for your model
   attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration
 
@@ -13,6 +15,9 @@ class User < ActiveRecord::Base
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
 
+  validates :first_name, :last_name, :business, :presence => true, :if => Proc.new { |u| !(u.new_record? && u.use_google_oauth_registration) }
+  validate :_employee_or_client
+
   #
   # CHECK THIS OUT; ISNT WORKING RIGHT.
   #
@@ -23,15 +28,10 @@ class User < ActiveRecord::Base
 
   after_initialize :_default_creation_type
 
-  validates :first_name, :last_name, :business, :presence => true
-  validate :_employee_or_client
-
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
 
-  attr_accessor :use_google_oauth_registration
-
-  def self.find_for_google_oauth2(auth, current_user, params = {})
+  def self.find_for_google_oauth2(auth, current_user)
     # user exists
     user = cb.google_oauth2(auth[:info][:email]).first
     return user if user
@@ -48,7 +48,7 @@ class User < ActiveRecord::Base
              end
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return nil if !invitation.accept_user!(user) # credential likely is already in use for this business
-    elsif current_user.nil? && params[:business]
+    elsif current_user.nil?
       invitation = Invitation.handled.open.find_by_email auth[:info][:email]
       if invitation
         user = User.new_from_auth(auth[:info])
@@ -96,6 +96,10 @@ class User < ActiveRecord::Base
     "#{first_name} #{last_name} (#{self.email})"
   end
 
+  def use_google_oauth_registration=(value)
+    @use_google_oauth_registration = ActiveRecord::ConnectionAdapters::Column.value_to_boolean(value)
+  end
+
   def _defaults
     self.business = Business.current if business.nil?
     self.timezone = 'Pacific Time (US & Canada)' if timezone.nil?
@@ -120,7 +124,7 @@ class User < ActiveRecord::Base
   end
 
   def _default_creation_type
-    self.use_google_oauth_registration = true if new_record?
+    self.use_google_oauth_registration = true if new_record? && self.use_google_oauth_registration.nil?
   end
 
   

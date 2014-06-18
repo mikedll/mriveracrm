@@ -15,10 +15,19 @@ class Users::RegistrationsController < Devise::RegistrationsController
   def create
     build_resource
     resource.become_owner_of_new_business(params[:business] ? params[:business][:handle] : nil)
+
     if resource.use_google_oauth_registration
-      # Doing a google oauth create
-      redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))
-      return
+      if resource.valid?
+        # Doing a google oauth create
+        Invitation.create!(:email => resource.email, :handle => params[:business] ? params[:business][:handle] : nil)
+        redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))
+        return
+      else
+        @business = (resource.employee && resource.employee.business) ? resource.employee.business : Business.new
+        clean_up_passwords resource
+        render "users/registrations/new"
+        return
+      end
     end
 
     if resource.save

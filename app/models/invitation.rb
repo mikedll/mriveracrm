@@ -21,7 +21,7 @@ class Invitation < ActiveRecord::Base
   validate :_no_email_conflict, :if => lambda { |i| !i.email.blank? }
   validates :business_id, :presence => true, :if => lambda { |i| i.handle.blank? }
 
-  attr_accessible :email
+  attr_accessible :email, :handle 
   state_machine :status, :initial => :open do
     event :accept do
       transition [:open] => :accepted

@@ -10,6 +10,8 @@
     = simple_fields_for @business do |bf|
       = bf.input :handle, :label => t('business.signup_handle')
 
+    = f.input :email, :required => true
+
     .control-group
       %label
       .controls
@@ -26,8 +28,6 @@
       = f.input :first_name, :required => true
 
       = f.input :last_name, :required => true
-
-      = f.input :email, :required => true
 
       = f.input :password, :required => true
 
