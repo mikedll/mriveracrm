@@ -28,7 +28,7 @@ class Users::SessionsController < Devise::SessionsController
 	def google_oauth2
     status, headers, response = middleware.call(request.env)
 
-    @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user)
+    @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user, params.slice(:business))
 
     if @user && @user.persisted?
       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Google"

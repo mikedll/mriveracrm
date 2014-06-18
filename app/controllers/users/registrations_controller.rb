@@ -13,13 +13,14 @@ class Users::RegistrationsController < Devise::RegistrationsController
   # else we can't map the user.
   #
   def create
-    @business = Business.new
-    @business.handle = params[:business][:handle] if params[:business]
-    @employee = Employee.new
-    @employee.business = @business
-        
     build_resource
-    resource.employee = @employee
+    resource.become_owner_of_new_business(params[:business])
+    if resource.use_google_oauth_registration
+      # Doing a google oauth create
+      redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))
+      return
+    end
+
     if resource.save
       if resource.active_for_authentication?
         set_flash_message :notice, :signed_up if is_navigational_format?

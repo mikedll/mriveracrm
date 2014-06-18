@@ -31,31 +31,58 @@ class User < ActiveRecord::Base
 
   attr_accessor :use_google_oauth_registration
 
-  def self.find_for_google_oauth2(auth, current_user)
+  def self.find_for_google_oauth2(auth, current_user, params = {})
     # user exists
     user = cb.google_oauth2(auth[:info][:email]).first
     return user if user
 
     # does not exist. require open invite.
     invitation = Invitation.cb.open.find_by_email auth[:info][:email]
-    return nil if invitation.nil?
 
-    user = if current_user.nil?
-             user = User.new
-             user.email = auth[:info][:email]
-             user.first_name = auth[:info][:first_name]
-             user.last_name = auth[:info][:last_name]    
-             user.confirmed_at = Time.now  # google users are auto-confirmed
-             user
-           else
-             current_user
-           end
-    user.credentials.push(Credential.new_from_google_oauth2(auth, user))
-
-    return nil if !invitation.accept_user!(user) # credential likely is already in use for this business
+    if invitation
+      # invited user
+      user = if current_user.nil?
+               user = User.new_from_auth(auth[:info])
+             else
+               # apparently, we're taking ownership of a new credential....?
+               current_user
+             end
+      user.credentials.push(Credential.new_from_google_oauth2(auth, user))
+      return nil if !invitation.accept_user!(user) # credential likely is already in use for this business
+    elsif current_user.nil? && params[:business]
+      # new business
+      # if there is a current_user, that user will be ignored.
+      user = User.new_from_auth(auth[:info])
+      user.become_owner_of_new_business(params[:business])
+      user.credentials.push(Credential.new_from_google_oauth2(auth, user))
+    elsif current_user
+      # this is pretty much a weird login....current_user is trying to relogin with no
+      # invitation or new business. why? log him out.
+      return nil 
+    else
+      return nil
+    end
 
     user
   end
+
+  def self.new_from_auth(info)
+    user = new
+    user.email = info[:email]
+    user.first_name = info[:first_name]
+    user.last_name = info[:last_name]
+    user.confirmed_at = Time.now  # google users are auto-confirmed
+    user
+  end
+
+  def become_owner_of_new_business(params)
+    @business = Business.new
+    @business.handle = params[:handle] if params[:handle] # this will trigger validations properly...
+    @employee = Employee.new
+    @employee.business = @business        
+    self.employee = @employee
+  end
+
 
   def cb?
     business_id == Business.current.id

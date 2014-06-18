@@ -8,6 +8,10 @@ module ApplicationHelper
     s
   end
 
+  #
+  # This is a legacy helper...should not be used going forward from June 15th, 2014,
+  # or equivalently, after the multitenant oauth refactoring.
+  #
   def user_omniauth_authorize_path(provider)
     omniauth_authorize_path(provider)
   end
