@@ -50,7 +50,7 @@ class User < ActiveRecord::Base
              end
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return nil if !invitation.accept_user!(user) # credential likely is already in use for this business
-    elsif current_user.nil?
+    elsif current_user.nil? && cb.first.nil?
       invitation = Invitation.handled.open.find_by_email auth[:info][:email]
       if invitation
         user = User.new_from_auth(auth[:info])
