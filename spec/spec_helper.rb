@@ -42,7 +42,7 @@ Spork.prefork do
 
 
     # Cleanup carrierwave images
-    config.after(:all) do      
+    config.after(:all) do
       if Rails.env.test? || Rails.env.cucumber?
         tmp = FactoryGirl.create(:image)
         store_path = File.dirname(File.dirname(tmp.data.url))
@@ -56,7 +56,7 @@ end
 
 Spork.each_run do
 
-  ActiveSupport::Dependencies.clear # or classes don't reload...weird  
+  ActiveSupport::Dependencies.clear # or classes don't reload...weird
   FactoryGirl.reload
   Dir[Rails.root.join("spec/support/**/*.rb")].each {|f| load f}
 

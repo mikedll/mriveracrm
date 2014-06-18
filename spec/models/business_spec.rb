@@ -23,7 +23,7 @@ describe Business do
       ["chaos 9", "chao*s9"].map { |h| FactoryGirl.build(:business, :handle => h) }.each do |b|
         b.save.should be_false
         b.errors[:handle].should =~ [I18n.t('business.errors.handle_format')]
-      end        
+      end
     end
 
     it "should not allow conflict with mfe" do

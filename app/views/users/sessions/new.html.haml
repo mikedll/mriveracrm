@@ -17,4 +17,8 @@
         = f.submit I18n.t('sign_in'), :class => "btn"
 
       %p
-        = link_to "Didn't receive confirmation instructions?", new_confirmation_path(resource_name)
+        - if @current_mfe
+          = link_to "Didn't receive confirmation instructions?", new_confirmation_path(resource_name)
+          %br
+          = link_to t('sign_up'), new_user_registration_path
+

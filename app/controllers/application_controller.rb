@@ -178,5 +178,12 @@ class ApplicationController < ActionController::Base
     raise "Programmer error: neither mfe or business found." if (!current_business && !current_mfe)
   end
 
+  def _require_mfe
+    unless @current_mfe
+      flash[:error] = t('path_not_found')
+      redirect_to root_path
+    end
+  end
+
 
 end

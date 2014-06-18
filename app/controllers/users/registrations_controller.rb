@@ -2,6 +2,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
 
   skip_before_filter :authenticate_user!
   skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :create]
+  before_filter :_require_mfe
 
   def new
     @business = Business.new
@@ -30,7 +31,7 @@ class Users::RegistrationsController < Devise::RegistrationsController
           render "users/registrations/new"
           return
         end
-        
+
         redirect_to omniauth_authorize_path({:provider => :google_oauth2}.merge(params[:business] ? { 'business[handle]' => params[:business][:handle] } : {}))
         return
       else
