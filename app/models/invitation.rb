@@ -21,7 +21,8 @@ class Invitation < ActiveRecord::Base
   validate :_no_email_conflict, :if => lambda { |i| !i.email.blank? }
   validates :business_id, :presence => true, :if => lambda { |i| i.handle.blank? }
 
-  attr_accessible :email, :handle 
+  attr_accessible :email, :handle
+
   state_machine :status, :initial => :open do
     event :accept do
       transition [:open] => :accepted
@@ -39,11 +40,14 @@ class Invitation < ActiveRecord::Base
       user.employee = employee
     elsif !handle.blank?
       user.become_owner_of_new_business(handle)
+      self.business = user.business
     else
       raise "Nonsensical invitation. Neither employee nor client relationship."
     end
 
     return false if !user.save
+
+
     accept!
   end
 

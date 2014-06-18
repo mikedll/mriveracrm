@@ -55,6 +55,9 @@ describe Invitation do
       b.should_not be_nil
       b.should == u.business
       u.employee.role.should == Employee::Roles::OWNER
+
+      invitation.reload
+      invitation.business.should == b
     end
   end
 
