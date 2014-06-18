@@ -4,7 +4,7 @@
   .app-view.login_failed
     %p
       %strong
-        = button_to 'Login via Google', user_omniauth_authorize_path(:provider => :google_oauth2), :class => "btn"
+        = button_to 'Login via Google', omniauth_authorize_path(:provider => :google_oauth2), :class => "btn"
 
     %p
       Or, use your username and password with that you may have created:
@@ -16,4 +16,5 @@
         = f.input :password
         = f.submit I18n.t('sign_in'), :class => "btn"
 
-      = render "devise/shared/links"
+      %p
+        = link_to "Didn't receive confirmation instructions?", new_confirmation_path(resource_name)

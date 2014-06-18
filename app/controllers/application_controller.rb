@@ -102,7 +102,7 @@ class ApplicationController < ActionController::Base
   end
 
   def url_options
-    if @business_via_mfe
+    if @business_via_mfe && !@supress_business_handle
       { :business_handle => @current_business.handle }.merge(super)
     else
       super
@@ -147,8 +147,14 @@ class ApplicationController < ActionController::Base
       if @current_mfe
         RequestSettings.host = @current_mfe.host
 
-        if params[:business_handle]
-          @current_business = Business.find_by_handle params[:business_handle] 
+        business_handle = params[:business_handle]
+        if business_handle.nil? && session[:sessions_business_handle]
+          # there is probably an omniauth callback action
+          business_handle = session[:sessions_business_handle]
+        end
+
+        if business_handle
+          @current_business = Business.find_by_handle business_handle
            if @current_business.nil?
              head :not_found
              return
