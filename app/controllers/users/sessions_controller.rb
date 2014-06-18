@@ -69,8 +69,6 @@ class Users::SessionsController < Devise::SessionsController
                                              :path_prefix => omniauth_authorize_path(:provider => provider).chomp("/#{provider}"),
                                              :scope => MikedllCrm::Configuration.get('google_oauth2_scope'),
                                              :approval_prompt => "auto"
-    })    
-
-
+    })
   end
 end

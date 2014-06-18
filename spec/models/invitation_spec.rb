@@ -30,7 +30,7 @@ describe Invitation do
       h = @invitation.handle
       @invitation.handle = "  #{@invitation.handle}  "
       @invitation.save.should be_true
-      @invitation.email.should == e    
+      @invitation.email.should == e
       @invitation.handle.should == h
     end
   end
@@ -40,7 +40,7 @@ describe Invitation do
       invitation = FactoryGirl.create(:client_invitation)
       user = FactoryGirl.create(:employee_user)
       invitation.accept_user!(user)
-      invitation.accepted?.should be_true      
+      invitation.accepted?.should be_true
     end
 
     it "should be able to create a business" do
@@ -50,9 +50,10 @@ describe Invitation do
       u.business.should be_nil
       invitation.accept_user!(u).should be_true
       u.business.should_not be_nil
-      Business.first.should_not be_nil
+      b = Business.first
       u.reload
-      Business.first.should == u.business
+      b.should_not be_nil
+      b.should == u.business
       u.employee.role.should == Employee::Roles::OWNER
     end
   end

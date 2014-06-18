@@ -13,7 +13,9 @@ class User < ActiveRecord::Base
 
   devise :database_authenticatable, :registerable, :rememberable, :trackable, :confirmable
 
-  before_validation :_capture_employee_business
+  after_initialize :_default_creation_type
+
+  before_validation :_capture_business
   before_validation :_defaults, :if => :new_record?
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
@@ -26,9 +28,7 @@ class User < ActiveRecord::Base
   #
   # validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
 
-  before_save :_handle_new_business_owner
-
-  after_initialize :_default_creation_type
+  before_save :_create_new_business_if_necessary
 
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
@@ -60,7 +60,7 @@ class User < ActiveRecord::Base
     elsif current_user
       # this is pretty much a weird login....current_user is trying to relogin with no
       # invitation or new business. why? log him out.
-      return nil 
+      return nil
     else
       return nil
     end
@@ -78,11 +78,14 @@ class User < ActiveRecord::Base
   end
 
   def become_owner_of_new_business(handle)
-    @business = Business.new
-    @business.handle = handle if handle # this will trigger validations properly...
-    @employee = Employee.new
-    @employee.business = @business        
-    self.employee = @employee
+    business = Business.new
+    business.handle = handle if handle # this will trigger validations properly...
+    employee = Employee.new
+    employee.business = business
+    employee.email = email
+    employee.role = Employee::Roles::OWNER # if you create a business, you're the owner.
+    self.employee = employee
+    self.business = business
   end
 
 
@@ -111,21 +114,28 @@ class User < ActiveRecord::Base
     errors.add(:base, 'must be associated with employee or client of this business') if (self.employee.nil? && self.client.nil?)
   end
 
-  def _capture_employee_business
-    if employee && employee.new_record? && employee.business && employee.business.new_record?
-      self.business = employee.business    
+  def _capture_business
+    if business.nil? && employee && employee.new_record? && employee.business && employee.business.new_record?
+      self.business = employee.business
     end
   end
 
-  def _handle_new_business_owner
-    if employee && employee.new_record? && employee.business && employee.business.new_record?
-      employee.email = email
-      employee.role = Employee::Roles::OWNER
-      if !employee.business.save || !employee.save
-        employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
-        employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
-        errors.add(:base, I18n.t('users.new_business_failed'))
-      end
+  def _create_new_business_if_necessary
+
+    # note: some of the following checks on changed or new_record
+    # shouldn't be necessary due to how active-record automatically
+    # saves associations on a given record R before saving R itself.
+
+    if employee && employee.business && (employee.business.new_record? || employee.business.changed?) && (!employee.business.errors.empty? || !employee.business.save)
+      errors.add(:base, I18n.t('users.new_business_failed'))
+      employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
+      return
+    end
+
+    if employee && (employee.new_record? || employee.changed?) && (!employee.errors.empty? && !employee.save)
+      employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
+      errors.add(:base, I18n.t('users.new_business_employee_failed'))
+      return
     end
   end
 
@@ -133,6 +143,5 @@ class User < ActiveRecord::Base
     self.use_google_oauth_registration = true if new_record? && self.use_google_oauth_registration.nil?
   end
 
-  
 end
 

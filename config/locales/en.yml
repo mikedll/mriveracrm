@@ -56,6 +56,7 @@ en:
 
   users:
     new_business_failed: "Unable to relate this new user to the new business as its owner. Contact support if the problem persists."
+    new_business_employee_failed: "Unable to relate this new user as an employee of the newly created business. Contact support if the problem persists."
 
   date:
     abbr_day_names:
@@ -271,6 +272,7 @@ en:
     models:
       business: 'Business'
       employee: 'Employee'
+      invitation: 'Invitation'
 
     errors:
       <<: *errors
