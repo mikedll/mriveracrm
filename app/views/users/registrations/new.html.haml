@@ -21,8 +21,6 @@
     = simple_fields_for @business do |bf|
       = bf.input :handle, :label => t('business.signup_handle')
 
-    = f.input :email, :required => true
-
     .control-group
       %label
       .controls
@@ -32,6 +30,9 @@
         lower case letters and numbers, and it should
         describe your business. Example 'rocketfoodies',
         'lisaandrewsspa', 'newenglandfishery', 'hipcorgishow'.
+
+    = f.input :email, :required => true
+
 
     = f.input :use_google_oauth_registration, :as => :boolean, :label => "Use Google OAuth instead of password (recommended)"
 
