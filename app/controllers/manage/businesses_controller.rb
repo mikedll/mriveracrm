@@ -30,7 +30,7 @@ class Manage::BusinessesController < Manage::BaseController
       current_object.stripe_publishable_key = params[:stripe_publishable_key] if params[:stripe_publishable_key]
       current_object.google_oauth2_client_id = params[:google_oauth2_client_id] if params[:google_oauth2_client_id]
       current_object.google_oauth2_client_secret = params[:google_oauth2_client_secret] if params[:google_oauth2_client_secret]
-      # current_object. = params[:] if params[:]
+      current_object.splash_html = params[:splash_html] if params[:splash_html]
       # current_object. = params[:] if params[:]
       # current_object. = params[:] if params[:]
       # current_object. = params[:] if params[:]
