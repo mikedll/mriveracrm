@@ -1,7 +1,12 @@
 class Manage::BusinessesController < Manage::BaseController
 
   make_resourceful do
-    actions :show, :update
+    actions :show, :update, :destroy
+
+    response_for :destroy do |format|
+      format.html
+      format.json { render :json => current_object }
+    end
 
     response_for(:show, :update) do |format|
       format.html

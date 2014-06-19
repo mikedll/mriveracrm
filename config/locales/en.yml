@@ -25,6 +25,7 @@ en:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 
   business: 
+    confirm_delete: "This will delete your entire business' data. All users, all clients...Everything. You will lose access to it immediately. It will not be recoverable. Really delete this?"
     signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
     mfe_host_conflict: is not available.

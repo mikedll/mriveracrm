@@ -12,3 +12,6 @@ class window.Business extends BaseModel
 class window.BusinessView extends CrmModelView
   modelName: 'business'
 
+  onDestroy: () ->
+    CrmModelView.prototype.onDestroy.apply(@, arguments)
+    window.location = '/'

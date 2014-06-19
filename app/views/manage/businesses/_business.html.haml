@@ -10,3 +10,4 @@
   = f.input :splash_html, :as => :text
 
   = render :partial => 'shared/model_view_basic_buttons'
+  = render :partial => 'shared/model_view_delete_button', :locals => { :data => { :confirm => t('business.confirm_delete') } }

@@ -50,7 +50,7 @@ MikedllCrm::Application.routes.draw do
 
   namespace 'manage' do
 
-    resource :business, :only => [:show, :update]
+    resource :business, :only => [:show, :update, :destroy]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
 
@@ -62,7 +62,7 @@ MikedllCrm::Application.routes.draw do
       end
     end
 
-    resources :clients do
+    resources :clients, :only => [:new, :index, :show, :update, :create] do
       put :archive
       put :unarchive
       resources :notes
@@ -149,7 +149,7 @@ MikedllCrm::Application.routes.draw do
 
     namespace 'manage' do
 
-      resource :business, :only => [:show, :update]
+      resource :business, :only => [:show, :update, :destroy]
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
 
@@ -161,7 +161,7 @@ MikedllCrm::Application.routes.draw do
         end
       end
 
-      resources :clients do
+      resources :clients, :only => [:new, :index, :show, :update, :create] do
         put :archive
         put :unarchive
         resources :notes
