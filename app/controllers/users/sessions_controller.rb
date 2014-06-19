@@ -59,6 +59,7 @@ class Users::SessionsController < Devise::SessionsController
       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Google"
       sign_in_and_redirect @user, :event => :authentication
     else
+      @supress_business_handle = false
       if @user && !@user.errors.full_messages.empty?
         flash[:error] = @user.errors.full_messages.join(". ")
       end
