@@ -37,6 +37,7 @@ en:
       one_user_per_employee: 'already has a user assigned'
   invitation:
     errors:
+      email_not_beta_tester: "email is not recognized as an approved beta tester."
       email_conflict_handle: "is already in use for a pending new business by this handle."
       email_conflict: "is already in use by an existing user."
       only_one: 'if handle for new business is blank, then must have either a client or an employee, and not both'

@@ -24,6 +24,7 @@ gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 gem 'rest-client'
+gem 'activeadmin'
 
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 

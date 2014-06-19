@@ -7,10 +7,10 @@ class ApplicationController < ActionController::Base
   # See ActionController::RequestForgeryProtection for details
   # Uncomment the :secret if you're not using the cookie session store
   protect_from_forgery # :secret => 'e174a43326b3dbe4f8bbf3975fc99b94'
-  
-  # See ActionController::Base for details 
+
+  # See ActionController::Base for details
   # Uncomment this to filter the contents of submitted sensitive data parameters
-  # from your application log (in this case, all fields with names like "password"). 
+  # from your application log (in this case, all fields with names like "password").
   # filter_parameter_logging :password
 
   before_filter :force_www
@@ -113,7 +113,12 @@ class ApplicationController < ActionController::Base
     new_user_session_path
   end
 
-  protected 
+  def authenticate_admin!
+    redirect_to root_path unless current_user && current_user.is_admin?
+  end
+
+
+  protected
 
   def force_www
     return if Rails.env.development? # doesnt work with port 3000

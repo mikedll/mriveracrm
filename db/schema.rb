@@ -11,7 +11,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140618221338) do
+ActiveRecord::Schema.define(:version => 20140619041231) do
+
+  create_table "beta_testers", :force => true do |t|
+    t.string   "email"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -202,9 +208,9 @@ ActiveRecord::Schema.define(:version => 20140618221338) do
 
   create_table "users", :force => true do |t|
     t.integer  "business_id"
-    t.string   "first_name",             :default => "", :null => false
-    t.string   "last_name",              :default => "", :null => false
-    t.string   "email",                  :default => "", :null => false
+    t.string   "first_name",             :default => "",    :null => false
+    t.string   "last_name",              :default => "",    :null => false
+    t.string   "email",                  :default => "",    :null => false
     t.integer  "sign_in_count"
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
@@ -215,13 +221,14 @@ ActiveRecord::Schema.define(:version => 20140618221338) do
     t.string   "timezone"
     t.integer  "employee_id"
     t.integer  "client_id"
-    t.string   "encrypted_password",     :default => "", :null => false
+    t.string   "encrypted_password",     :default => "",    :null => false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
     t.string   "confirmation_token"
     t.datetime "confirmed_at"
     t.datetime "confirmation_sent_at"
+    t.boolean  "is_admin",               :default => false
   end
 
   add_index "users", ["business_id", "confirmation_token"], :name => "index_users_on_business_id_and_confirmation_token", :unique => true

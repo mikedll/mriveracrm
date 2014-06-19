@@ -1,5 +1,7 @@
 class User < ActiveRecord::Base
 
+  include ActionView::Helpers::TranslationHelper
+
   attr_accessor :use_google_oauth_registration, :conflicting_invitation
 
   # Setup accessible (or protected) attributes for your model
@@ -23,6 +25,7 @@ class User < ActiveRecord::Base
 
   validates :first_name, :last_name, :business, :presence => true, :if => Proc.new { |u| !(u.new_record? && u.use_google_oauth_registration) }
   validate :_employee_or_client
+  validate :_is_beta_tester
 
   #
   # CHECK THIS OUT; ISNT WORKING RIGHT.
@@ -61,6 +64,10 @@ class User < ActiveRecord::Base
         user = User.new_from_auth(auth[:info])
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
         return nil if !invitation.accept_user!(user)
+      else
+        u = User.new
+        u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
+        return u
       end
     elsif current_user
       # this is pretty much a weird login....current_user is trying to relogin with no
@@ -148,6 +155,12 @@ class User < ActiveRecord::Base
 
   def _default_creation_type
     self.use_google_oauth_registration = true if new_record? && self.use_google_oauth_registration.nil?
+  end
+
+  def _is_beta_tester
+    if new_record? && employee && employee.role == Employee::Roles::OWNER && BetaTester.find_by_email(email).nil?
+      errors.add(:email, t("invitation.errors.email_not_beta_tester"))
+    end
   end
 
 end

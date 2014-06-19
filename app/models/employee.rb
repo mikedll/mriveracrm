@@ -8,6 +8,7 @@ class Employee < ActiveRecord::Base
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }
 
   scope :cb, lambda { where('employees.business_id = ?', Business.current.try(:id)) }
+  scope :is_owner, lambda { where('employees.role = ?', Roles::OWNER) }
 
   module Roles
     OWNER = 'owner'

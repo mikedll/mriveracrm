@@ -1,6 +1,8 @@
 
 MikedllCrm::Application.routes.draw do
 
+  ActiveAdmin.routes(self)
+
   # raw marketing / custom domain
   resource :business, :path => "", :only => [:show]
 
