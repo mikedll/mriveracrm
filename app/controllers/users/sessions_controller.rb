@@ -5,7 +5,7 @@ class Users::SessionsController < Devise::SessionsController
   skip_before_filter :authenticate_user!, :only => [:new, :create, :authorize, :google_oauth2]
   skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :create, :authorize, :google_oauth2, :destroy]
 
-  skip_before_filter :_clear_sessions_business_handle, [:authorize]
+  skip_before_filter :_clear_sessions_business_handle, [:new, :authorize]
 
   class NoopApp
     def call(env); end;
