@@ -8,7 +8,7 @@ ActiveAdmin.register_page "Dashboard" do
       column do
         panel "Business and owner" do
           ul do
-            Business.all.each do |b|
+            Business.unscoped.all.each do |b|
               li do
                 "#{b.id}: #{b.handle} - #{b.name} - #{b.employees.is_owner.first.try(:email)}"
               end
