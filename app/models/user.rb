@@ -22,8 +22,8 @@ class User < ActiveRecord::Base
   before_validation :_defaults, :if => :new_record?
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
-  validates :first_name, :last_name, :business, :presence => true, :if => Proc.new { |u| !(u.new_record? && u.use_google_oauth_registration) }
-  validates :password, :length => { :minimum => 8 }, :if => lambda { |u| u.credentials.empty? }
+  validates :first_name, :last_name, :business, :presence => true, :if => Proc.new { |u| !(u.new_oauthed_user?) }
+  validates :password, :length => { :minimum => 8 }, :if => lambda { |u| !u.new_oauthed_user? && u.credentials.empty?  }
   validates_confirmation_of :password, :if => lambda { |u| u.credentials.empty? }
   validate :_employee_or_client
   validate :_is_beta_tester
@@ -119,6 +119,11 @@ class User < ActiveRecord::Base
   def use_google_oauth_registration=(value)
     @use_google_oauth_registration = ActiveRecord::ConnectionAdapters::Column.value_to_boolean(value)
   end
+
+  def new_oauthed_user?
+    new_record? && use_google_oauth_registration
+  end
+
 
   def _defaults
     self.business = Business.current if business.nil?
