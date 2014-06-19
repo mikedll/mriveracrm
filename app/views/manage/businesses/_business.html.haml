@@ -1,5 +1,5 @@
 
-= simple_form_for :business, :url => manage_business_path, :html => { :class => 'form-horizontal' } do |f|
+= simple_form_for :business, :remote => true, :url => manage_business_path, :html => { :class => 'form-horizontal' } do |f|
 
   = f.input :name
   = f.input :stripe_secret_key
