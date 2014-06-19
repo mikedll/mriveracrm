@@ -69,7 +69,7 @@ ActiveRecord::Schema.define(:version => 20140618221338) do
     t.datetime "updated_at"
   end
 
-  add_index "credentials", ["email"], :name => "index_credentials_on_email", :unique => true
+  add_index "credentials", ["business_id", "email"], :name => "index_credentials_on_business_id_and_email", :unique => true
 
   create_table "detected_errors", :force => true do |t|
     t.text     "message"
