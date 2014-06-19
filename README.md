@@ -30,10 +30,13 @@ Fix any bugs. Do assets compilation and deploy, if assets have changed.
 Commit manifest.
 
     # whatever you git commit manuver is
-
+    g add public/assets/manifest.yml
+    g ci -m "Updated manifest."
+    
 Don't mess up your dev machine.
 
     rake assets:clean
+    g co .   # restore old manifest.
 
 Fix any bugs....are you sure? Then finish release.
 
