@@ -14,11 +14,15 @@
 
         = f.input :email
         = f.input :password
-        = f.submit I18n.t('sign_in'), :class => "btn"
+
+        .control-group
+          %label
+          .controls
+            = f.submit I18n.t('sign_in'), :class => "btn"
 
       %p
         - if @current_mfe
           = link_to "Didn't receive confirmation instructions?", new_confirmation_path(resource_name)
           %br
-          = link_to t('sign_up'), new_user_registration_path
-
+          - if !@business_via_mfe
+            = link_to t('sign_up'), new_user_registration_path

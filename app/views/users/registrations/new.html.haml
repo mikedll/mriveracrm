@@ -44,5 +44,8 @@
 
       = f.input :password_confirmation, :required => true
 
-    = f.submit t('sign_up'), :class => "btn"
+    .control-group
+      %label
+      .controls
+        = f.submit t('sign_up'), :class => "btn"
 
