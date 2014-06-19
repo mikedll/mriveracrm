@@ -41,7 +41,14 @@ class Users::SessionsController < Devise::SessionsController
 	def google_oauth2
     @supress_business_handle = true
 
-    status, headers, response = middleware.call(request.env)
+    begin
+      status, headers, response = middleware.call(request.env)
+    rescue OmniAuth::Strategies::OAuth2::CallbackError => e
+      flash[:error] = I18n.t('user.errors.cancelled_oauth')
+      session["devise.google_data"] = request.env["omniauth.auth"]
+      redirect_to new_user_session_path
+      return
+    end
 
     @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user)
 

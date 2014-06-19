@@ -15,6 +15,7 @@ en:
   user:
     errors:
       no_invitation: "No open invitation could be found for your email, %{email}."
+      cancelled_oauth: "Your OAuth (Google or other) login failed."
 
   client:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
