@@ -23,6 +23,9 @@ class User < ActiveRecord::Base
 
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id, :message => "is already taken" }
 
+  validates :password, :length => { :minimum => 8 }
+  validates_confirmation_of :password
+
   validates :first_name, :last_name, :business, :presence => true, :if => Proc.new { |u| !(u.new_record? && u.use_google_oauth_registration) }
   validate :_employee_or_client
   validate :_is_beta_tester
