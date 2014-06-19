@@ -36,6 +36,7 @@ Commit manifest.
 Don't mess up your dev machine.
 
     rake assets:clean
+    g co .   # restore old manifest.
 
 Fix any bugs....are you sure? Then finish release.
 
