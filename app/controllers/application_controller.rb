@@ -50,11 +50,19 @@ class ApplicationController < ActionController::Base
       end
     else
       if user_signed_in? && !current_user.cb?
+
         # user trying to access a business that isnt theirs
-        # we dont redirect them because we dont
-        # know their business' url form, or the mfe form.
-        # we may handle this later.
-        head :not_found
+        if @current_mfe
+          flash[:notice] = I18n.t('errors.not_found_redirect_home')
+          redirect_to business_path(:business_handle => current_user.business.handle)
+        elsif @current_business
+          # severe violation at wrong url for wrong business domain
+          # redirect to user's actual business domain.
+          flash[:notice] = I18n.t('errors.not_found_redirect_home')
+          redirect_to root_path(:host => current_user.business.host)
+        else
+          head :not_found
+        end
       end
     end
   end
