@@ -5,6 +5,8 @@ class Users::SessionsController < Devise::SessionsController
   skip_before_filter :authenticate_user!, :only => [:new, :create, :authorize, :google_oauth2]
   skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:new, :create, :authorize, :google_oauth2, :destroy]
 
+  skip_before_filter :_clear_sessions_business_handle, [:authorize]
+
   class NoopApp
     def call(env); end;
   end
@@ -53,7 +55,6 @@ class Users::SessionsController < Devise::SessionsController
     @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user)
 
     if @user && @user.persisted?
-      session.delete(:sessions_business_handle)
       @supress_business_handle = false
       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Google"
       sign_in_and_redirect @user, :event => :authentication

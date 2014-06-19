@@ -22,6 +22,8 @@ class ApplicationController < ActionController::Base
   before_filter :require_business_and_current_user_belongs_to_it
   before_filter :configure_theme
 
+  before_filter :_clear_sessions_business_handle
+
   around_filter :business_keys
 
   attr_accessor :current_business, :current_mfe
@@ -181,6 +183,10 @@ class ApplicationController < ActionController::Base
     end
 
     raise "Programmer error: neither mfe or business found." if (!current_business && !current_mfe)
+  end
+
+  def _clear_sessions_business_handle
+    session.delete(:sessions_business_handle) if session[:sessions_business_handle]
   end
 
   def _require_mfe
