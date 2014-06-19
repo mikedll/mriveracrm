@@ -4,7 +4,7 @@ namespace :prodrefresh do
   desc "Clear sensitive data in the db after a prod refresh"
   task :clearsensitive => :environment do
     Client.find_each do |c|
-      c.email = "none#{c.id}@mikedll.com"
+      c.email = "none#{c.id}@michaelrivera.com"
       c.save!
     end
 

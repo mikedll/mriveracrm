@@ -28,7 +28,7 @@ class ProductsController < ApplicationController
   end
 
   def current_objects
-    @current_objects ||= Product.index_or_search(params.slice(:query, :max_price))
+    @current_objects ||= Product.cb.index_or_search(params.slice(:query, :max_price))
   end
 
 end

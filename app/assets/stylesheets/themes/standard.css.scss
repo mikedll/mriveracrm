@@ -1,0 +1,50 @@
+
+body.standard {
+    font-family: Verdana, Arial, Sans-Serif;
+    font-size: 9pt;
+
+    background: #262626;
+    color: black;
+
+    #header {
+        position: absolute;
+        height: 100%;
+        width: 100%;
+        background: top center url(/images/anza1.png) no-repeat;
+    }
+
+    div#main{
+      position:absolute;
+      left:30%;
+      width:600px;
+
+      top: 340px;
+      margin-left:-315px;
+    }
+
+    div div {
+      margin: 1em 0 1em 0;
+      padding: 0;
+    }
+
+    div#main div a,
+    div#main div a:link,
+    div#main div a:visited {
+      color: blue;
+    }
+
+    div#main div a:hover {
+      color: #373737;
+    }
+
+    .floating_container {
+      background: #fffff2;
+      padding:15px;
+      z-index: 1;
+    }
+}
+
+
+* html body.standard div#main {
+  width: 630px;
+}

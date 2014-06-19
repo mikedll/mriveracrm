@@ -10,7 +10,8 @@ MikedllCrm::Application.configure do
 
   config.active_support.deprecation = :notify
 
-  config.action_mailer.default_url_options = { :host => 'www.mikedll.com:80' }
+  config.action_mailer.default_url_options = { :host => 'www.mriveracrm.com:80' }
+  config.action_mailer.delivery_method = :test
 
   config.action_controller.asset_host = 'd1dmxqf6tri91s.cloudfront.net'
 
@@ -20,6 +21,6 @@ MikedllCrm::Application.configure do
   config.assets.css_compressor = :yui
   config.assets.compress = true
 
-  HOST = 'www.mikedll.com'
+  HOST = 'www.mriveracrm.com'
 
 end

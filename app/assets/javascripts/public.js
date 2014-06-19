@@ -2,6 +2,6 @@
 
 //
 //= require apps
-//= require products
+//= require_tree ./public
 //
 

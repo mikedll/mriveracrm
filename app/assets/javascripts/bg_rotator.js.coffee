@@ -36,5 +36,5 @@ class window.Main
     this
 
 $(() ->
-  $('body').data('main', (new Main()).onDocLoad())
+  $('body').data('main', (new Main()).onDocLoad()) if false
   )

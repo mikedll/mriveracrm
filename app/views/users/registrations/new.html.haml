@@ -1,0 +1,82 @@
+
+
+.container.padded
+  %h2
+    = t('sign_up')
+
+  - if resource.conflicting_invitation
+    %p
+      If you are
+      = "#{resource.conflicting_invitation.email}, "
+      and already started the business creation process,
+      you can 
+      = t('login_via_oauth')
+      now to continue.
+    %p
+      = button_to t('login_via_oauth'), omniauth_authorize_path(:provider => :google_oauth2), :class => "btn"
+
+  = simple_form_for(resource, :as => resource_name, :url => registration_path(resource_name), :html => { :class => ["form-horizontal new-registration-form"] }) do |f|
+    = devise_error_messages!
+
+    = simple_fields_for @business do |bf|
+      = bf.input :handle, :label => t('business.signup_handle')
+
+    .control-group
+      %label
+      .controls
+
+        The business handle is an alphanumeric string that will be
+        used in web URLs here on the CRM.  It must consist only of
+        lower case letters and numbers, and it should
+        describe your business. Example 'rocketfoodies',
+        'lisaandrewsspa', 'newenglandfishery', 'hipcorgishow'.
+
+    = f.input :email, :required => true
+
+
+    = f.input :use_google_oauth_registration, :as => :boolean, :label => "Use Google OAuth instead of password (recommended)"
+
+    .custom-account-fields
+      = f.input :first_name, :required => true
+
+      = f.input :last_name, :required => true
+
+      = f.input :password, :required => true
+
+      = f.input :password_confirmation, :required => true
+
+    .control-group
+      %label
+      .controls
+
+        %p
+          %strong
+            By continuing, you agree to the following Terms of Service:
+
+            %ol.terms-of-service
+              %li
+                The software application you are about to use, MRivera CRM
+                ("the app"), does not guarentee or promise anything.  Your
+                privacy is not guaranteed. Your data's persistence is not
+                guaranteed. No functionality is guaranteed.
+
+              %li
+                If you are paying a fee to use the app, you agree that you are paying
+                for the opportunity that the app might work, and that
+                it might benefit your business. No such benefit is guaranteed.
+                
+              %li
+                In no event shall the owner of the app
+                be liable for any claim, damages or other
+                liability, whether in an action of contract, tort or otherwise, arising from,
+                out of or in connection with the app or the use or other dealings in
+                the app.
+
+              %li
+                The owner of the app reserves the
+                right to arbitrarily terminate your account and all data
+                related to your account at any time, without notice and without
+                give a reason for termination.
+          
+        = f.submit t('sign_up'), :class => "btn"
+

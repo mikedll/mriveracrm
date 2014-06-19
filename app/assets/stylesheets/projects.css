@@ -2,6 +2,62 @@
   http://tympanus.net/codrops/2010/11/14/animated-portfolio-gallery/
 */
 
+
+
+ul#projects_list li {
+  list-style: disc;
+  margin: .5em 0;
+}
+
+.dynamic h1 {
+  padding: 0;
+  margin: 0;
+  font-size: 12px;
+  background: #262626;
+  color: #fffff2;
+  font-weight: bold;
+  padding: 2pt;
+}
+
+.dynamic {
+  float: right;
+  clear: right;
+  width: 210px;
+  border: 1px solid #262626;
+  border-right: 0;
+  border-bottom: 0;
+  margin: 1em 0 1em 1em;
+}
+
+.dynamic ul {
+  clear: both;
+  padding: 0;
+  margin: 0;
+}
+
+.dynamic ul li {
+  margin: 1em 1em;
+}
+
+.dynamic .date {
+  font-family: Verdana;
+  font-size: 8pt;
+}
+
+
+#top_menu ul {
+  margin: 0;
+  padding: 0;
+}
+
+#top_menu ul li {
+    font-size: 10pt;
+    font-weight: bold;
+    padding: 0;
+    float: left;
+    margin: 0em 1em 1em;
+}
+
 h1.title{
     position:absolute;
     right:20px;

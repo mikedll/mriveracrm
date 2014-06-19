@@ -2,16 +2,29 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
+
+  sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
+
   factory :business do
     name "my small business"
-    domain { "www.domain" + SecureRandom.base64(8) + "yup.com" }
+    handle { generate(:business_handle) }
+    host { "www.#{handle}.com" }
+
+    google_oauth2_client_id "google_oauth2_client_idxxx"
+    google_oauth2_client_secret "google_oauth2_client_secretxxx"
+
+    stripe_secret_key "sk_test_SoDXR6QkygrYnlnFhDWKNbB2"
+    stripe_publishable_key "pk_test_rPvMBvyuzsgRIXZFCW2xMmxz"
+
     after(:create) do |business|
       Business.current = business
+      RequestSettings.host = MarketingFrontEnd.first.try(:host) || FactoryGirl.create(:marketing_front_end).host
     end
 
     factory :emerging_papacy do
       name "Emerging Papacy"
-      domain "www.emergingpapacy" + SecureRandom.base64(8) + "yup.com"
+      host { "www.emergingpapacy" + SecureRandom.base64(8) + "yup.com" }
       after(:create) do |business, evaluator|
         FactoryGirl.create(:employee, :business => business, :first_name => "Gregory", :last_name => "the Great")
         FactoryGirl.create(:employee, :business => business, :first_name => "Saint", :last_name => "Benedict")
@@ -23,7 +36,7 @@ FactoryGirl.define do
     business { FactoryGirl.create(:business) }
     first_name "Mike"
     last_name "Worker Bee"
-    email { "employee" + SecureRandom.base64(8) + "@example.com" }
+    email { generate(:employee_email) }
   end
 
   factory :credential do
@@ -40,20 +53,32 @@ FactoryGirl.define do
     end
   end
 
-  factory :user do
-    client { FactoryGirl.create(:stubbed_client) }
+  factory :user_base, :class => User do
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
-    after(:create) do |user|
+    confirmed_at { Time.now }
+    after(:create) do |user, evaluator|
       FactoryGirl.create(:google_oauth2_credential, :email => user.email, :user => user)
     end
 
-    factory :client_user
+    factory :user do
+      client { FactoryGirl.create(:stubbed_client) }
 
-    factory :employee_user do
-      employee { FactoryGirl.create(:employee) }
-      client nil
+      factory :client_user
+
+      factory :employee_user do
+        employee { FactoryGirl.create(:employee) }
+        client nil
+
+        factory :unconfirmed_new_employee_user do
+          after :create do |user, evaluator|
+            user.send(:generate_confirmation_token!)
+          end
+        end
+
+      end
+
     end
   end
 
@@ -73,9 +98,7 @@ FactoryGirl.define do
   end
 
   factory :invitation do
-    before(:create) do |invitation|
-      invitation.business = invitation.employee.try(:business) || invitation.client.business
-    end
+
 
     factory :client_invitation, :parent => :invitation do
       client { FactoryGirl.create(:stubbed_client) }
@@ -83,6 +106,11 @@ FactoryGirl.define do
 
     factory :employee_invitation, :parent => :invitation do
       employee { FactoryGirl.create(:employee) }
+    end
+
+    factory :new_business_invitation, :parent => :invitation do
+      email { generate(:employee_email) }
+      handle { generate(:business_handle) }
     end
 
   end
@@ -114,7 +142,7 @@ FactoryGirl.define do
     end
 
     factory :pending_invoice do
-      status "pending"
+      status { "pending" }
     end
   end
 
@@ -145,6 +173,10 @@ FactoryGirl.define do
   factory :image do
     business { FactoryGirl.create(:business) }
     data { File.new(Rails.root.join('spec', 'support', 'testphoto.jpg'), 'r') }
+  end
+
+  factory :marketing_front_end do
+    host { "www.mfe#{SecureRandom.hex(4)}.com" }
   end
 
   factory :product_image do 

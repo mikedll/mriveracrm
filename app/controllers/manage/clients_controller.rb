@@ -3,7 +3,7 @@ class Manage::ClientsController < Manage::BaseController
   before_filter :_parent_name
 
   make_resourceful do
-    actions :all
+    actions :new, :index, :show, :update, :create
     belongs_to :business
     response_for :new do
       render :layout => nil
@@ -14,7 +14,7 @@ class Manage::ClientsController < Manage::BaseController
       format.js { render :json => current_objects }
     end
 
-    response_for(:show, :update, :destroy) do |format|
+    response_for(:show, :update) do |format|
       format.js { render :json => current_object }
     end
 

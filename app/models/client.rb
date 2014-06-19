@@ -59,18 +59,14 @@ class Client < ActiveRecord::Base
 
 
   def display_name
-    "#{first_name} #{last_name}"    
+    "#{first_name} #{last_name}"
   end
 
   def require_payment_gateway_profile
-    if payment_gateway_profile.nil?
+    if payment_gateway_profile.nil? && !business.stripe_secret_key.blank?
       self.payment_gateway_profile = StripePaymentGatewayProfile.new
       self.payment_gateway_profile.save!
     end
-  end
-
-  def destroy
-    raise "Clients cannot be destroyed."
   end
 
   def payment_profile_description

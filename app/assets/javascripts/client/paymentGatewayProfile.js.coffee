@@ -1,6 +1,7 @@
 
 class window.PaymentGatewayProfile extends BaseModel
-  url: '/client/payment_gateway_profile'
+  url: () ->
+    gUrlManager.url('/client/payment_gateway_profile')
 
 class window.PaymentGatewayProfileView extends CrmModelView
   modelName: 'payment_gateway_profile'

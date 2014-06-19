@@ -4,7 +4,8 @@ class window.Product extends BaseModel
 
 class window.SearchableProducts extends Backbone.Collection
   model: Product
-  url: '/products'
+  url: () ->
+    gUrlManager.url('/products')
   initialize: () ->
     Backbone.Collection.prototype.initialize.apply(this, arguments)
     @comparator = (product) ->

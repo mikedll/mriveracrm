@@ -1,5 +1,8 @@
 class StripePaymentGatewayProfile < PaymentGatewayProfile
 
+  class NoStripeApiKey < Exception
+  end
+
   def public
     {
       :id => id,
@@ -23,43 +26,49 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       return false
     end
 
-    transaction = StripeTransaction.new
-    transaction.payment_gateway_profile = self
-    transaction.invoice = invoice
-    transaction.amount = invoice.total
-    transaction.begin!
+    _with_stripe_key do
+      transaction = StripeTransaction.new
+      transaction.payment_gateway_profile = self
+      transaction.invoice = invoice
+      transaction.amount = invoice.total
+      transaction.begin!
 
-    charge = nil
-    begin
-      charge = Stripe::Charge.create({
-                                       :customer => vendor_id,
-                                       :amount => (invoice.total * 100).to_i,
-                                       :currency => "usd",
-                                       :description => invoice.title
-                                     })
-    rescue Stripe::CardError => e
-      self.last_error = e.message
-      invoice.fail_payment!
-      transaction.has_failed!
-      return false
+      charge = nil
+      begin
+        charge = Stripe::Charge.create({
+                                         :customer => vendor_id,
+                                         :amount => (invoice.total * 100).to_i,
+                                         :currency => "usd",
+                                         :description => invoice.title
+                                       })
+      rescue Stripe::CardError => e
+        self.last_error = e.message
+        invoice.fail_payment!
+        transaction.has_failed!
+        return false
+      end
+
+      transaction.vendor_id = charge.id
+      if !charge[:captured]
+        # unknown as to whether this can ever be reached
+        self.last_error = charge[:failure_message]
+        invoice.fail_payment!
+        transaction.has_failed!
+        return false
+      end
+
+      transaction.succeed!
+      invoice.mark_paid!
+      true
     end
-
-    transaction.vendor_id = charge.id
-    if !charge[:captured]
-      # unknown as to whether this can ever be reached
-      self.last_error = charge[:failure_message]
-      invoice.fail_payment!
-      transaction.has_failed!
-      return false
-    end
-
-    transaction.succeed!
-    invoice.mark_paid!
-    true
   end
 
 
   def update_payment_info(opts)
+    if vendor_id.blank?
+      _create_remote
+    end
+
     card_param = nil
     if opts[:token].blank?
       card = card_from_opts(opts)
@@ -74,26 +83,28 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       card_param = opts[:token]
     end
 
-    customer = Stripe::Customer.retrieve(self.vendor_id)
-    customer.card = card_param
+    _with_stripe_key do
+      customer = Stripe::Customer.retrieve(self.vendor_id)
+      customer.card = card_param
 
-    begin
-      customer.save
-    rescue Stripe::CardError => e
-      errors.add(:base, e.message)
-      return false
-    rescue Stripe::InvalidRequestError => e
-      DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => self.client.id)
-      errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-      return false
-    rescue => e
-      DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => self.client.id)
-      errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-      return false
+      begin
+        customer.save
+      rescue Stripe::CardError => e
+        errors.add(:base, e.message)
+        return false
+      rescue Stripe::InvalidRequestError => e
+        DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => self.client.id)
+        errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
+        return false
+      rescue => e
+        DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => self.client.id)
+        errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
+        return false
+      end
+
+      _cache_customer(customer)
+      save!
     end
-
-    _cache_customer(customer)
-    save!
   end
 
   def reload_remote
@@ -101,14 +112,26 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       DetectedErrors.create(:message => "Reloading but no vendor id", :client_id => self.client.id)
       return
     end
-    customer = Stripe::Customer.retrieve(self.vendor_id)
+    customer = nil
+    _with_stripe_key do
+      customer = Stripe::Customer.retrieve(self.vendor_id)
+    end
     _cache_customer(customer)
     save!
   end
 
 
+  protected 
+
   def _create_remote
-    customer = Stripe::Customer.create(:description => client.payment_profile_description, :email => client.email)
+    return if self.client.business.stripe_secret_key.blank?
+
+
+    customer = nil
+    _with_stripe_key do
+      customer = Stripe::Customer.create(:description => client.payment_profile_description, :email => client.email)
+    end
+
     self.vendor_id = customer.id
     _cache_customer(customer)
     save!
@@ -121,5 +144,15 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end    
   end
 
+  def _with_stripe_key
+    begin
+      raise "Stripe api key was not blank. Probably a bug." if Stripe.api_key != ""
+
+      Stripe.api_key = self.client.business.stripe_secret_key
+      yield
+    ensure
+      Stripe.api_key = ""
+    end
+  end
 
 end

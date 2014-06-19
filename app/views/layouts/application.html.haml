@@ -2,23 +2,38 @@
 
 %html
   %head
-    %title The Mike De La Loza Company
+    %title= page_title
     = csrf_meta_tag
 
     = stylesheet_link_tag "application"    
     = javascript_include_tag "application"
     = javascript_include_tag "https://www.google.com/jsapi?key=ABQIAAAA72yvhISft7fcXhZGyvHBHxRsGGQrPf-nc6BgXjkx_4DXFvH7xxRDhZbcZcLQhHVpXhIMcqUTfHQQ8g"
 
+    - if @current_business
+      %meta{:content => business_path, :name=>'app-path-prefix'}
+
     = yield :head
 
-  %body
+  %body{:class => [@theme.nil? ? "" : @theme]}
     = render :partial => "shared/gain_layout"
     %div{ 'data-asset-prefix' => absolute_asset_prefix, 'id' => 'header'}
     = render :partial => "shared/flash", :locals => { :flash => flash }
     = yield
 
     = render :partial => "shared/ganalytics" if Rails.env.production?
-    = render :partial => "shared/login"
+
+    - if @current_business
+      = render :partial => "shared/login"
 
 
     = render :partial => 'shared/apps_general_templates'
+
+    - if @current_business.nil?
+      .container.padded
+        .created.support
+          %hr
+          = t('app_title')
+          Created by 
+          = link_to "Michael Rivera", 'http://www.michaelriveraco.com', :target => "_blank"
+          |
+          Support: mrivera -AT- michaelriveraco -dot- com

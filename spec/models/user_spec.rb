@@ -7,6 +7,14 @@ describe User do
     @user.valid?.should be_true
   end
 
+  it "should be adminable" do
+    @user = FactoryGirl.create(:user)
+    @user.is_admin?.should be_false
+    @user.is_admin = true
+    @user.save!
+    @user.is_admin?.should be_true
+  end
+
   context "find_for_google_oauth2" do
     it "should succeed with proper auth hash and no current user" do
       cred = FactoryGirl.build(:credential)

@@ -11,13 +11,30 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20130823091235) do
+ActiveRecord::Schema.define(:version => 20140619041231) do
+
+  create_table "beta_testers", :force => true do |t|
+    t.string   "email"
+    t.datetime "created_at", :null => false
+    t.datetime "updated_at", :null => false
+  end
 
   create_table "businesses", :force => true do |t|
-    t.string   "name",       :default => "", :null => false
-    t.string   "domain",     :default => "", :null => false
+    t.string   "name",                            :default => "",    :null => false
+    t.string   "host",                            :default => "",    :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "stripe_secret_key",               :default => "",    :null => false
+    t.string   "stripe_publishable_key",          :default => "",    :null => false
+    t.string   "google_oauth2_client_id",         :default => "",    :null => false
+    t.string   "google_oauth2_client_secret",     :default => "",    :null => false
+    t.string   "authorizenet_payment_gateway_id", :default => "",    :null => false
+    t.string   "authorizenet_api_login_id",       :default => "",    :null => false
+    t.string   "authorizenet_transaction_key",    :default => "",    :null => false
+    t.boolean  "authorizenet_test",               :default => false, :null => false
+    t.string   "handle",                          :default => "",    :null => false
+    t.text     "splash_html",                     :default => "",    :null => false
+    t.text     "contact_text",                    :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
@@ -58,7 +75,7 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
     t.datetime "updated_at"
   end
 
-  add_index "credentials", ["email"], :name => "index_credentials_on_email", :unique => true
+  add_index "credentials", ["business_id", "email"], :name => "index_credentials_on_business_id_and_email", :unique => true
 
   create_table "detected_errors", :force => true do |t|
     t.text     "message"
@@ -76,6 +93,7 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
     t.string   "email",       :default => "", :null => false
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "role",        :default => "", :null => false
   end
 
   create_table "images", :force => true do |t|
@@ -96,6 +114,7 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
     t.string   "status"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "handle",      :default => ""
   end
 
   create_table "invoices", :force => true do |t|
@@ -110,6 +129,15 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
     t.string   "pdf_file"
     t.string   "pdf_file_unique_id"
     t.string   "pdf_file_original_filename"
+  end
+
+  create_table "marketing_front_ends", :force => true do |t|
+    t.string   "title",                       :default => "", :null => false
+    t.string   "host",                        :default => "", :null => false
+    t.string   "google_oauth2_client_id",     :default => "", :null => false
+    t.string   "google_oauth2_client_secret", :default => "", :null => false
+    t.datetime "created_at",                                  :null => false
+    t.datetime "updated_at",                                  :null => false
   end
 
   create_table "notes", :force => true do |t|
@@ -180,9 +208,9 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
 
   create_table "users", :force => true do |t|
     t.integer  "business_id"
-    t.string   "first_name",         :default => "", :null => false
-    t.string   "last_name",          :default => "", :null => false
-    t.string   "email",              :default => "", :null => false
+    t.string   "first_name",             :default => "",    :null => false
+    t.string   "last_name",              :default => "",    :null => false
+    t.string   "email",                  :default => "",    :null => false
     t.integer  "sign_in_count"
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
@@ -193,6 +221,18 @@ ActiveRecord::Schema.define(:version => 20130823091235) do
     t.string   "timezone"
     t.integer  "employee_id"
     t.integer  "client_id"
+    t.string   "encrypted_password",     :default => "",    :null => false
+    t.string   "reset_password_token"
+    t.datetime "reset_password_sent_at"
+    t.datetime "remember_created_at"
+    t.string   "confirmation_token"
+    t.datetime "confirmed_at"
+    t.datetime "confirmation_sent_at"
+    t.boolean  "is_admin",               :default => false
   end
+
+  add_index "users", ["business_id", "confirmation_token"], :name => "index_users_on_business_id_and_confirmation_token", :unique => true
+  add_index "users", ["business_id", "email"], :name => "index_users_on_business_id_and_email", :unique => true
+  add_index "users", ["business_id", "reset_password_token"], :name => "index_users_on_business_id_and_reset_password_token", :unique => true
 
 end

@@ -1,0 +1,20 @@
+
+.container.padded
+  .app-view
+    %p
+      %strong
+        Resend confirmation instructions
+
+        = simple_form_for(resource, :as => resource_name, :url => confirmation_path(resource_name), :html => { :method => :post, :class => "form-horizontal" }) do |f|
+
+          = devise_error_messages!
+
+          = f.input :email
+
+          .control-group
+            %label
+            .controls
+              = f.submit "Resend confirmation instructions", :class => "btn"
+
+          %p
+            = link_to I18n.t("sign_in"), new_user_session_path, :class => "btn"

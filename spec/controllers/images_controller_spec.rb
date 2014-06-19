@@ -5,7 +5,7 @@ describe Manage::ProductImagesController do
     before(:each) do
       @user = FactoryGirl.create(:employee_user)
       sign_in @user
-      request.host = @user.employee.business.domain
+      request.host = @user.employee.business.host
       @product = FactoryGirl.create(:product, :business => @user.business)
     end
 
@@ -30,7 +30,7 @@ describe Manage::ProductImagesController do
       @product_image2.primary.should be_true
       @product_image2.active.should be_true
       @product_image3.primary.should be_false
-      put :make_primary, {:format => :json, :id => @product_image.id, :product_id => @product_image.product_id }
+      put :toggle_primary, {:format => :json, :id => @product_image.id, :product_id => @product_image.product_id }
       @product_image.reload
       @product_image.primary.should be_true
       @product_image.active.should be_true

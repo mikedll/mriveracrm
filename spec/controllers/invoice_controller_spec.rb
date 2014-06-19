@@ -8,7 +8,7 @@ describe Manage::InvoicesController do
       @user = FactoryGirl.create(:employee_user)
       @client = FactoryGirl.create(:client, :business => @user.business)
       sign_in @user
-      request.host = @user.employee.business.domain
+      request.host = @user.employee.business.host
     end
 
     it "should allow invoices to be created by employee" do
@@ -27,7 +27,7 @@ describe Manage::InvoicesController do
       @user = FactoryGirl.create(:client_user)
       @client = FactoryGirl.create(:client, :business => @user.business)
       sign_in @user
-      request.host = @user.client.business.domain
+      request.host = @user.client.business.host
       
       get :index, {:format => 'js', :client_id => @client.id}
 
