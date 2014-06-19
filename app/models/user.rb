@@ -40,7 +40,11 @@ class User < ActiveRecord::Base
     return user if user
 
     # does not exist. require open invite.
-    invitation = Invitation.cb.open.find_by_email auth[:info][:email]
+    invitation = if cb.first
+                   Invitation.cb.open.find_by_email auth[:info][:email]
+                 else
+                   nil
+                 end
     if invitation
       # invited user
       user = if current_user.nil?
