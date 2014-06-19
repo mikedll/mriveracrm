@@ -88,6 +88,16 @@ li {
   padding: 1em;
 }
 
+/********************* signup */
+
+ol.terms-of-service {
+  li {
+    list-style: normal;
+    margin: 1em 0;
+  }
+}
+
+
 .menu a,
 .menu a:link,
 .menu a:visited {
@@ -116,3 +126,5 @@ input.expiration_month {
 input.cv_code {
   width: 40px;
 }
+
+
