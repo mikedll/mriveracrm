@@ -12,6 +12,10 @@ en:
   delete_confirm: "Delete this?"
   revert_confirm: "Are you sure you want to revert all your changes?"
 
+  user:
+    errors:
+      no_invitation: "No open invitation could be found for your email, %{email}."
+
   client:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."

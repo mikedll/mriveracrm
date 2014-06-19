@@ -11,8 +11,8 @@ class Invitation < ActiveRecord::Base
   scope :open, where('invitations.status = ?', :open)
   scope :open_for_handle_and_email, lambda { |handle, email| handled.open.where(:email => email, :handle => handle) }
 
-  before_validation :_strip_fields
   before_validation { @virtual_path = 'invitation' }
+  before_validation :_strip_fields
   before_validation :_capture_client_email
   before_validation :_capture_business
 

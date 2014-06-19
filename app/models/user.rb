@@ -15,6 +15,7 @@ class User < ActiveRecord::Base
 
   after_initialize :_default_creation_type
 
+  before_validation { @virtual_path = 'user' }
   before_validation :_capture_business
   before_validation :_defaults, :if => :new_record?
 
@@ -62,7 +63,9 @@ class User < ActiveRecord::Base
       # invitation or new business. why? log him out.
       return nil
     else
-      return nil
+      u = User.new
+      u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
+      return u
     end
 
     user
