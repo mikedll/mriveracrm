@@ -131,8 +131,16 @@ class ApplicationController < ActionController::Base
   protected
 
   def force_www
-    return if Rails.env.development? # doesnt work with port 3000
-    redirect_to :host => 'www.' + request.host if request.host !~ /^www\./
+    return if Rails.env.development? # Doesn't work with certain CRM addresses. Might not even keep this feature.
+
+    if request.host !~ /^www\./
+      s = request.protocol + 'www.' + request.host
+      if Rails.env.development? # doesnt work with port 3000
+        s += ":3000"
+      end
+      s += request.path
+      redirect_to s
+    end
   end
 
   def ssl_required?
