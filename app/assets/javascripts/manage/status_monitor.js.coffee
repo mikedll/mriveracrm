@@ -2,9 +2,8 @@
 class window.StatusMonitor extends BaseModel
   defaults:
     status: ''
-  initialize: () ->
-    BaseModel.prototype.initialize.apply(this, arguments)
-    @url = '/manage/status_monitor'
+  url: () ->
+    gUrlManager.url('/manage/status_monitor')
 
 class window.StatusMonitorView extends CrmModelView
   initialize: () ->
