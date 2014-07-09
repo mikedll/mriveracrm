@@ -25,6 +25,7 @@ gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 gem 'rest-client'
 gem 'activeadmin'
+gem 'aws-ses', '~> 0.4.4', require: 'aws/ses'
 
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 

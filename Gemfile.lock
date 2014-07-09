@@ -63,6 +63,11 @@ GEM
       builder
       mime-types
       xml-simple
+    aws-ses (0.4.4)
+      builder
+      mail (> 2.2.5)
+      mime-types
+      xml-simple
     bcrypt-ruby (3.0.1)
     bourbon (3.2.3)
       sass (~> 3.2)
@@ -347,6 +352,7 @@ DEPENDENCIES
   activemerchant (~> 1.31)
   activerecord-postgresql-adapter
   aws-s3 (>= 0.6.3)
+  aws-ses (~> 0.4.4)
   capistrano
   capistrano-unicorn
   capybara

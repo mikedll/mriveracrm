@@ -22,7 +22,7 @@ module MikedllCrm
 
   class Configuration
 
-    def self.config 
+    def self.config
       return @config if @config
       @config = {
         # :google_oauth2_scope => 'userinfo.email,userinfo.profile,https://mail.google.com/mail/feed/atom,https://www.google.com/m8/feeds/'
