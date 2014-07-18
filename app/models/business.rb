@@ -1,10 +1,13 @@
 class Business < ActiveRecord::Base
 
+  #
+  # The current business in use in the global request.
+  #
+  cattr_accessor :current
+
   has_many :projects
   has_many :users, :dependent => :destroy
   has_many :credentials # used validations in credential. destroyed by users, not here.
-
-  cattr_accessor :current
 
   has_many :clients, :dependent => :destroy
   has_many :products, :dependent => :destroy
@@ -12,6 +15,7 @@ class Business < ActiveRecord::Base
 
   has_many :invitations, :dependent => :destroy
   has_many :images, :dependent => :destroy
+  has_one :usage_subscription, :dependent => :destroy
 
   before_validation :_format_handle
 

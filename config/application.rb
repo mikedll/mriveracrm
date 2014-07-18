@@ -18,6 +18,16 @@ module MikedllCrm
     config.assets.enabled = true
     config.assets.precompile += ['application.js', 'application.css', 'home.css', 'home.js', 'client.js', 'manage.js', 'contact_page.js', 'gallery.js', 'public.js', 'public.css']
 
+    config.generators do |g|
+      g.template_engine :haml
+      g.test_framework  :rspec, :fixture => false
+      g.helper          false
+      g.view_specs      false
+      g.helper_specs    false
+      g.stylesheets     false
+      g.javascripts     false
+    end
+
   end
 
   class Configuration
