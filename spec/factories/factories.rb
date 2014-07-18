@@ -2,6 +2,8 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:settings_key) { |n| "key#{n}" }
+
   sequence(:feature_pricing_index) { |n| n }
 
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
@@ -215,6 +217,12 @@ FactoryGirl.define do
     price "9.99"
     release "MyString"
     feature_name "MyString"
+  end
+
+  factory :setting do
+    key { generate(:settings_key) }
+    value "good"
+    value_type { "String" }
   end
 
 end
