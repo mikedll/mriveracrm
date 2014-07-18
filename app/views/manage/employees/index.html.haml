@@ -1,0 +1,13 @@
+- content_for :head do
+  = javascript_include_tag 'manage'
+
+.container-fluid.gui-container  
+  .employees-gui.app-gui
+    = render :partial => 'shared/app', :locals => { :app_top => true, :app_class => 'employees', :title => "Employees", :sorts => [['updated_at', 'desc', 'date', 'Updated At'], ['last_name', 'asc', 'string', 'Last Name']], :bootstrap => current_objects }
+
+.templates.hide
+  - [Employee, User].each do |klass|
+    %div{ :class => "#{klass.to_s.underscore}_view_example"}
+      = render klass.new
+  = render :partial => 'shared/model_collection_view_template', :locals => { :model_name => 'transaction'}
+  = render :partial => 'shared/model_collection_view_template', :locals => { :model_name => 'user', :disable_create => true}

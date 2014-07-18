@@ -53,6 +53,7 @@ MikedllCrm::Application.routes.draw do
     resource :business, :only => [:show, :update, :destroy]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
+    resources :employees, :only => [:new, :index, :show, :update, :create]
 
     resources :products do
       resources :product_images, :path => "images" do
@@ -152,6 +153,7 @@ MikedllCrm::Application.routes.draw do
       resource :business, :only => [:show, :update, :destroy]
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
+      resources :employees, :only => [:new, :index, :show, :update, :create]
 
       resources :products do
         resources :product_images, :path => "images" do

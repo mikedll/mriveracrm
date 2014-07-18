@@ -5,6 +5,8 @@ class Employee < ActiveRecord::Base
   has_one :user
   has_many :invitations
 
+  attr_accessible :first_name, :last_name, :email, :role
+
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }
 
   scope :cb, lambda { where('employees.business_id = ?', Business.current.try(:id)) }

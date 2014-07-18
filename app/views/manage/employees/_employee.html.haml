@@ -1,0 +1,26 @@
+= simple_form_for employee, :remote => true, :url => manage_employees_path(employee), :html => { :class => 'form-horizontal'} do |f|
+
+  .control-group
+    .control-label
+    .controls
+      .btn-group
+        %a.users.btn
+          %i.icon-user
+          Users
+      .btn-group
+        %a.invitations.btn
+          User Invitations
+
+  = f.input :first_name, :input_html => employee.persisted? ? {} : { :id => nil }
+  
+  = f.input :last_name, :input_html => employee.persisted? ? {} : { :id => nil }
+
+  = f.input :email, :input_html => employee.persisted? ? {} : { :id => nil }
+
+
+  .control-group
+    .control-label
+    .controls
+      = render :partial => 'shared/model_view_basic_buttons'
+
+  .clearfix

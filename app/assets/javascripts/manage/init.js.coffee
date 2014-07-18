@@ -7,6 +7,9 @@ $(() ->
     '.clients-gui':
       modelCollectionKlass: Clients
       rootAppViewKlass: ClientAppView
+    '.employees-gui':
+      modelCollectionKlass: Employees
+      rootAppViewKlass: EmployeeAppView
     '.products-gui':
       modelCollectionKlass: Products
       rootAppViewKlass: ProductAppView
@@ -24,6 +27,8 @@ $(() ->
     # instead of named by model.
     if selector == '.clients-gui'
       return __clients
+    else if selector == '.employees-gui'
+      return __employees
     else if selector == '.products-gui'
       return __products
     else if selector == '.business-gui'
