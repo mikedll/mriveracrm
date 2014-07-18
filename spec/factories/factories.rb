@@ -2,17 +2,11 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:feature_pricing_index) { |n| n }
+
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
 
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
-
-  factory :usage_subscription do
-    business
-    plan "98as7df98"
-    card_last_4 "4111"
-    card_brand "Visa"
-    remote_id "cus_9sdf87x98"
-  end
 
   factory :business do
     name "my small business"
@@ -206,6 +200,21 @@ FactoryGirl.define do
       record.image = FactoryGirl.create(:image, :business => sb) if record.image.nil?
       record.product = FactoryGirl.create(:product, :business => sb) if record.product.nil?
     end
+  end
+
+  factory :usage_subscription do
+    business
+    plan "98as7df98"
+    card_last_4 "4111"
+    card_brand "Visa"
+    remote_id "cus_9sdf87x98"
+  end
+
+  factory :feature_pricing do
+    index { generate(:feature_pricing_index).to_i }
+    price "9.99"
+    release "MyString"
+    feature_name "MyString"
   end
 
 end
