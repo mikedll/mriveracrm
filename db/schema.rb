@@ -97,12 +97,11 @@ ActiveRecord::Schema.define(:version => 20140719031003) do
   end
 
   create_table "feature_pricings", :force => true do |t|
-    t.integer  "bit_index",                                   :default => 0,   :null => false
-    t.decimal  "price",        :precision => 10, :scale => 2, :default => 0.0, :null => false
-    t.integer  "generation",                                  :default => 0,   :null => false
-    t.string   "feature_name",                                :default => "",  :null => false
-    t.datetime "created_at",                                                   :null => false
-    t.datetime "updated_at",                                                   :null => false
+    t.integer  "feature_id",                                :default => 0,   :null => false
+    t.decimal  "price",      :precision => 10, :scale => 2, :default => 0.0, :null => false
+    t.integer  "generation",                                :default => 0,   :null => false
+    t.datetime "created_at",                                                 :null => false
+    t.datetime "updated_at",                                                 :null => false
   end
 
   create_table "feature_selections", :force => true do |t|
@@ -110,6 +109,13 @@ ActiveRecord::Schema.define(:version => 20140719031003) do
     t.integer  "usage_subscription_id", :default => 0, :null => false
     t.datetime "created_at",                           :null => false
     t.datetime "updated_at",                           :null => false
+  end
+
+  create_table "features", :force => true do |t|
+    t.integer  "bit_index",    :default => 0,  :null => false
+    t.string   "feature_name", :default => "", :null => false
+    t.datetime "created_at",                   :null => false
+    t.datetime "updated_at",                   :null => false
   end
 
   create_table "images", :force => true do |t|

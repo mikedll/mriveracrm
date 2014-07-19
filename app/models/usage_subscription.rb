@@ -1,8 +1,9 @@
 class UsageSubscription < ActiveRecord::Base
+
   belongs_to :business
   has_one :feature_selection
 
-  has_many :feature_pricings, :through => :feature_selection
+  has_many :features, :through => :feature_selection
 
   attr_accessible :card_brand, :card_last_4, :plan, :remote_id, :remote_status
 

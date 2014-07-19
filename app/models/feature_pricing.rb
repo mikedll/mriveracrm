@@ -1,18 +1,8 @@
 class FeaturePricing < ActiveRecord::Base
-  attr_accessible :feature_name, :price, :release, :index
+  belongs_to :feature
 
+  validates :feature_id, :presence => true
   validates :price, :presence => true
   validates :generation, :presence => true
-  validates :feature_name, :presence => true
-  validates :index, :uniqueness => true
-  validate :_never_change_index
-
-  scope :for_generation, lambda { |g_id| where('generation >= ?', g_id) }
-
-  def _never_change_index
-    if !new_record? && changed?(:index)
-      errors[:index] = I18n.t('feature_pricing.cant_change_index')
-    end
-  end
 
 end

@@ -2,9 +2,11 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:random_name) { |n| "#{Fake::Name.name}#{n}" }
+
   sequence(:settings_key) { |n| "key#{n}" }
 
-  sequence(:feature_pricing_index) { |n| n }
+  sequence(:feature_bit_index) { |n| n }
 
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
 
@@ -32,7 +34,7 @@ FactoryGirl.define do
       after(:create) do |business, evaluator|
         FactoryGirl.create(:employee, :business => business, :first_name => "Gregory", :last_name => "the Great")
         FactoryGirl.create(:employee, :business => business, :first_name => "Saint", :last_name => "Benedict")
-      end   
+      end
     end
   end
 
@@ -93,8 +95,8 @@ FactoryGirl.define do
     last_name "Watson"
 
     factory :stubbed_client do
-      before(:create) { |profile, evaluator| 
-        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } 
+      before(:create) { |profile, evaluator|
+        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
 
         Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
       }
@@ -183,7 +185,7 @@ FactoryGirl.define do
     host { "www.mfe#{SecureRandom.hex(4)}.com" }
   end
 
-  factory :product_image do 
+  factory :product_image do
     ignore do
       seed_business { FactoryGirl.create(:business) }
     end
@@ -204,6 +206,12 @@ FactoryGirl.define do
     end
   end
 
+  factory :setting do
+    key { generate(:settings_key) }
+    value "good"
+    value_type { "String" }
+  end
+
   factory :usage_subscription do
     business
     plan "98as7df98"
@@ -213,21 +221,19 @@ FactoryGirl.define do
     remote_status "paid"
   end
 
-  factory :feature_pricing do
-    index { generate(:feature_pricing_index).to_i }
-    price "9.99"
-    release "MyString"
-    feature_name "MyString"
+  factory :feature do
+    bit_index { generate(:feature_bit_index).to_i }
+    feature_name { generate(:random_name) }
   end
 
-  factory :setting do
-    key { generate(:settings_key) }
-    value "good"
-    value_type { "String" }
+  factory :feature_pricing do
+    feature
+    generation { 1 }
+    price "9.99"
   end
 
   factory :feature_selection do
-    feature_pricing
+    feature
     usage_subscription
   end
 
