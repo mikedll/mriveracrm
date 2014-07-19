@@ -40,37 +40,46 @@ class UsageSubscription < ActiveRecord::Base
   # for products, and $3/month per user for a portfolio...what are the
   # plan names? Doesn’t it seem like we want a bit string for this?
   # Especially if we have re-releases of features for different pricing?
-  # Can we do that? For example, feature 1, release 1? Where release 1
+  # Can we do that? For example, feature 1, generation 1? Where generation 1
   # end users retain the benefits of their pricing?
 
   # This should work, and provide very nice bit strings.
 
-  # All that remains is to have a list of releases, each of which
-  # supports a list of features. Earlier releases will have nulls for
+  # All that remains is to have a list of generations, each of which
+  # supports a list of features. Earlier generations will have nulls for
   # feature slots that were never used.
 
   # Then, we have a list of features that take up slots in the bit
   # string, indicating true or false.
 
-  # The release part of the bit string should support a lot of
-  # releases...If we released once a week for 20 years, we’d need 1040
+  # The generation part of the bit string should support a lot of
+  # generations...If we released once a week for 20 years, we’d need 1040
   # values. In later generations, we can simply scrap old pricing and
   # raise pricing mechanisms...level the playing field and eliminate
   # certain generations.
 
-  # Or even add to the bitstring. A release a week for 100 years. That’s
+  # Or even add to the bitstring. A generation a week for 100 years. That’s
   # 5,000. Or, 2^15 bits to pass that up. Let’s say 16 bits, then.
 
-  # That leaves 48 bits to complete the first digit of a base 64
-  # encoding integer, for 48 features. Let’s add another eight sets of
-  # 64 features. This makes 9 characters in the base-64 encoded string.
+  # We also add 4 bits to cover 16 pricing schemes, this scheme just
+  # being one of them, so that the same stripe key can be used for
+  # customly-named plans that dont use this scheme (note that this may
+  # result in a wasted first base-64 character in those plan's names,
+  # or ids). This takes 4 bits.
 
+  # That's 20 bits so far.
+
+  # Let's then append 238 features, for 258 bits of information. Bits
+  # representing features will be populated from the RHS of the
+  # bitstring. This is evently divisible by 6, for 43 base64
+  # characters that'll contribute to a plan id.
+
+  # This makes 43 characters in the base-64 encoded string.
   # This is the Stripe ID of the plan, and the name can be simply “CRM
-  # v24 32” with leading zeros. Bits representing features will be
-  # populated from the rhs of the string.
+  # v24 32” with leading zeros.
 
-  # This means we can look at a Stripe plan and calculate which release
-  # and set of features went into it.
+  # This means we can look at a Stripe plan and calculate which
+  # generation and set of features went into it.
 
   # Stripe provides meta data for features but that would entail making
   # names for plan and there doesn’t seem to be a point to that.  This
@@ -78,26 +87,15 @@ class UsageSubscription < ActiveRecord::Base
   # discounts are not being provided here. Those can be handled via
   # coupons, or something. Or just not handled.
 
-  # We also add 4 bits to cover 16 pricing schemes, this scheme just
-  # being one of them, so that the same stripe key can be used for
-  # customly-named plans that dont use this scheme (note that this may
-  # result in a wasted first base-64 character in those plan's names,
-  # or ids). This takes away 4 bits from the 48 bits that were
-  # remaining for the first base-64 encoded character.
-
   # The bit string is thus:
 
-  # [ 4 bits for pricing scheme | 16 bits for release | 44 bits + 8 x 64 bits for features, starting at RHS ]
+  # [ 4 bits for pricing scheme | 16 bits for generation | 238 bits for features, starting at RHS ]
 
-  # The resulting plan id will be 96 characters long...which is kind of long but we'll see if it works.
-  # it might not.
-
-  # Which should result in 9 characters, base 64 encoded.
+  # The resulting plan id will be 43 characters long...which is kind
+  # of long but we'll see if it works.  it might not.
 
   # The cost of the plan can be determined from lookup tables in the
   # app.
-
-
 
   def calculated_plan_id
     return @calculated_plan_id if @calculated_pland_id
@@ -185,22 +183,41 @@ class UsageSubscription < ActiveRecord::Base
     end
   end
 
+  # [ 4 bits for pricing scheme | 16 bits for generation | 44 bits + 8 x 64 bits for features, starting at RHS ]
+  PRICING_SCHEME = 0
+  FEATURE_BITS = 238
   def _calculate_price_and_plan
-    fps = self.feature_pricings.for_generation(generation)
     for_feature_index = {}
-    fps.each do |fp|
-
+    features.each do |f|
       # better to use feature index...feature name can change...
-      if for_feature_index[fp.index].nil?
-        for_feature_index[fp.index] = fp
-      elsif fp.generation < for_feature_index[fp.index].generation
-        for_feature_index[fp.index] = fp
+      if for_feature_index[f.bit_index].nil?
+        # latest generation that is less than or equal to this usage subscription's generation
+        fp = f.feature_pricings.select { |fp| fp.generation <= generation }.sort { |a,b| a.generation <=> b.generation }.last
+        for_feature_index[f.bit_index] = fp
       end
     end
 
-    @calculated_price = fps.inject(BigDecimal.new("0.0")) { |acc, el| acc += el.price; acc}
-    @calculated_plan_id = ""
+
+    features_bitstring = ""
+    (0...feature_bits).each do |i|
+      if for_feature_index[i]
+        features_bitstring = "0#{features_bitstring}"
+      else
+        features_bitstring = "1#{features_bitstring}"
+      end
+    end
+
+    @calculated_price = for_feature_index.values.inject(BigDecimal.new("0.0")) { |acc, el| acc += el.price; acc}
+    @calculated_plan_id = [[_to_bit_string(PRICING_SCHEME) + _to_bit_string(generation_bitstring) + features_bitstring].pack("B*")].pack("m0")
   end
 
+  # converts integer to bit string, the length of which is a multiple of 4.
+  # uses minimum length required.
+  def _to_bit_string(i)
+    hexed = PRICING_SCHEME.to_s(16)
+    padded = true if hexed.length % 2 == 1  # prepend 0
+    bitstring = [(padded ? "0#{hexed}" : hexed)].pack("H*").unpack("B*").first
+    padded ? bitstring[4,bitstring.length - 4] : bitstring
+  end
 
 end
