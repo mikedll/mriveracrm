@@ -67,6 +67,9 @@ en:
     new_business_failed: "Unable to relate this new user to the new business as its owner. Contact support if the problem persists."
     new_business_employee_failed: "Unable to relate this new user as an employee of the newly created business. Contact support if the problem persists."
 
+  feature_pricing:
+    cant_change_index: "cannot be changed once decided"
+
   date:
     abbr_day_names:
     - Sun
