@@ -1,7 +1,8 @@
 class UsageSubscription < ActiveRecord::Base
   belongs_to :business
+  has_one :feature_selection
 
-  attr_accessible :card_brand, :card_last_4, :plan, :remote_id
+  attr_accessible :card_brand, :card_last_4, :plan, :remote_id, :remote_status
 
   #
   # A given business may registered with a package that enables or

@@ -9,7 +9,7 @@ class CreateSettings < ActiveRecord::Migration
 
     reversible do |dir|
       dir.up do
-        execute "insert into settings (key, value, value_type) values ('Release', '1.6')"
+        execute "insert into settings (key, value, value_type) values ('Generation', '1', 'Integer')"
       end
     end
   end

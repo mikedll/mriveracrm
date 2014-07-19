@@ -7,6 +7,7 @@ class CreateUsageSubscriptions < ActiveRecord::Migration
       t.string  :plan,          :null => false, :default => ""
       t.string  :remote_id,     :null => false, :default => ""
       t.string  :remote_status, :null => false, :default => ""
+      t.integer :generation,    :null => false, :default => ""
       t.timestamps
     end
   end

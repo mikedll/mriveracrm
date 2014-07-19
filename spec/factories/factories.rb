@@ -210,6 +210,7 @@ FactoryGirl.define do
     card_last_4 "4111"
     card_brand "Visa"
     remote_id "cus_9sdf87x98"
+    remote_status "paid"
   end
 
   factory :feature_pricing do
@@ -223,6 +224,11 @@ FactoryGirl.define do
     key { generate(:settings_key) }
     value "good"
     value_type { "String" }
+  end
+
+  factory :feature_selection do
+    feature_pricing
+    usage_subscription
   end
 
 end
