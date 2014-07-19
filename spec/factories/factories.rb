@@ -2,7 +2,7 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
-  sequence(:random_name) { |n| "#{Fake::Name.name}#{n}" }
+  sequence(:random_name) { |n| "asdfas#{n}" } # #{Fake::Name.name}#{n}
 
   sequence(:settings_key) { |n| "key#{n}" }
 
