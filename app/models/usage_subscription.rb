@@ -177,7 +177,7 @@ class UsageSubscription < ActiveRecord::Base
     begin
       raise "Stripe api key was not blank. Probably a bug." if Stripe.api_key != ""
 
-      Stripe.api_key = Configuration.get('stripe.secret_key')
+      Stripe.api_key = MikedllCrm::Configuration.get('stripe.secret_key')
       yield
     ensure
       Stripe.api_key = ""
