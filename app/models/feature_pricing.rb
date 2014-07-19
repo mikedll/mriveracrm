@@ -7,6 +7,8 @@ class FeaturePricing < ActiveRecord::Base
   validates :index, :uniqueness => true
   validate :_never_change_index
 
+  scope :for_generation, lambda { |g_id| where('generation >= ?', g_id) }
+
   def _never_change_index
     if !new_record? && changed?(:index)
       errors[:index] = I18n.t('feature_pricing.cant_change_index')

@@ -88,10 +88,27 @@ class UsageSubscription < ActiveRecord::Base
 
   # [ 4 bits for pricing scheme | 16 bits for release | 44 bits + 8 x 64 bits for features, starting at RHS ]
 
+  # The resulting plan id will be 96 characters long...which is kind of long but we'll see if it works.
+  # it might not.
+
   # Which should result in 9 characters, base 64 encoded.
 
   # The cost of the plan can be determined from lookup tables in the
   # app.
+
+
+
+  def calculated_plan_id
+    return @calculated_plan_id if @calculated_pland_id
+    _calculate_price_and_plan
+    @calculated_pland_id
+  end
+
+  def calculated_price
+    return @calculated_price if @calculated_price
+    _calculate_price_and_plan
+    @calculated_price
+  end
 
   def update_payment_info(card_attrs = {})
     _with_billing_stripe_key do
@@ -167,6 +184,22 @@ class UsageSubscription < ActiveRecord::Base
     end
   end
 
+  def _calculate_price_and_plan
+    fps = self.feature_pricings.for_generation(generation)
+    for_feature_index = {}
+    fps.each do |fp|
+
+      # better to use feature index...feature name can change...
+      if for_feature_index[fp.index].nil?
+        for_feature_index[fp.index] = fp
+      elsif fp.generation < for_feature_index[fp.index].generation
+        for_feature_index[fp.index] = fp
+      end
+    end
+
+    @calculated_price = fps.inject(BigDecimal.new("0.0")) { |acc, el| acc += el.price; acc}
+    @calculated_plan_id = ""
+  end
 
 
 end
