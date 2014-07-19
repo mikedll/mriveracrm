@@ -72,9 +72,16 @@ class UsageSubscription < ActiveRecord::Base
   # discounts are not being provided here. Those can be handled via
   # coupons, or something. Or just not handled.
 
+  # We also add 4 bits to cover 16 pricing schemes, this scheme just
+  # being one of them, so that the same stripe key can be used for
+  # customly-named plans that dont use this scheme (note that this may
+  # result in a wasted first base-64 character in those plan's names,
+  # or ids). This takes away 4 bits from the 48 bits that were
+  # remaining for the first base-64 encoded character.
+
   # The bit string is thus:
 
-  # [ 16 bits for release | 48 bits + 8 x 64 bits for features, starting at RHS ]
+  # [ 4 bits for pricing scheme | 16 bits for release | 44 bits + 8 x 64 bits for features, starting at RHS ]
 
   # Which should result in 9 characters, base 64 encoded.
 
