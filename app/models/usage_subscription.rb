@@ -125,17 +125,17 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def subscribe!
-    fps = self.feature_pricings.beyond_generation(generation)
+    fps = self.feature_pricings.for_generation(generation)
 
-    _with_billing_stripe_key do
-      plan = Stripe::Plan.find_by_id calculated_plan_id
-      if plan.nil?
-        plan = Stripe::Plan.create(:id => calculated_plan_id, :price => calculated_price)
-        # handle errors
-      end
+    # _with_billing_stripe_key do
+    #   plan = Stripe::Plan.find_by_id calculated_plan_id
+    #   if plan.nil?
+    #     plan = Stripe::Plan.create(:id => calculated_plan_id, :price => calculated_price)
+    #     # handle errors
+    #   end
 
-      Subsription.create(:plan => calculated_plan_id)
-    end
+    #   Subsription.create(:plan => calculated_plan_id)
+    # end
   end
 
   def reload_remote
