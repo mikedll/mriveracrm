@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140619041231) do
+ActiveRecord::Schema.define(:version => 20140719031003) do
 
   create_table "beta_testers", :force => true do |t|
     t.string   "email"
@@ -94,6 +94,22 @@ ActiveRecord::Schema.define(:version => 20140619041231) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "role",        :default => "", :null => false
+  end
+
+  create_table "feature_pricings", :force => true do |t|
+    t.integer  "bit_index",                                   :default => 0,   :null => false
+    t.decimal  "price",        :precision => 10, :scale => 2, :default => 0.0, :null => false
+    t.integer  "generation",                                  :default => 0,   :null => false
+    t.string   "feature_name",                                :default => "",  :null => false
+    t.datetime "created_at",                                                   :null => false
+    t.datetime "updated_at",                                                   :null => false
+  end
+
+  create_table "feature_selections", :force => true do |t|
+    t.integer  "feature_pricing_id",    :default => 0, :null => false
+    t.integer  "usage_subscription_id", :default => 0, :null => false
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
   end
 
   create_table "images", :force => true do |t|
@@ -190,6 +206,14 @@ ActiveRecord::Schema.define(:version => 20140619041231) do
     t.integer  "business_id"
   end
 
+  create_table "settings", :force => true do |t|
+    t.string   "key",        :default => "",       :null => false
+    t.string   "value",      :default => "",       :null => false
+    t.string   "value_type", :default => "String", :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
+  end
+
   create_table "transactions", :force => true do |t|
     t.integer  "invoice_id"
     t.integer  "payment_gateway_profile_id"
@@ -204,6 +228,18 @@ ActiveRecord::Schema.define(:version => 20140619041231) do
     t.string   "type",                                                                                      :null => false
     t.string   "outside_id"
     t.string   "outside_vendor"
+  end
+
+  create_table "usage_subscriptions", :force => true do |t|
+    t.integer  "business_id",   :default => 0,  :null => false
+    t.string   "card_brand",    :default => "", :null => false
+    t.string   "card_last_4",   :default => "", :null => false
+    t.string   "plan",          :default => "", :null => false
+    t.string   "remote_id",     :default => "", :null => false
+    t.string   "remote_status", :default => "", :null => false
+    t.integer  "generation",    :default => 0,  :null => false
+    t.datetime "created_at",                    :null => false
+    t.datetime "updated_at",                    :null => false
   end
 
   create_table "users", :force => true do |t|

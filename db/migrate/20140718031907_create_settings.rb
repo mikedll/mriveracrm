@@ -1,16 +1,16 @@
 class CreateSettings < ActiveRecord::Migration
-  def change
+  def self.up
     create_table :settings do |t|
-      t.string :key        :null => false, :default => ""
-      t.string :value,     :null => false, :default => ""
-      t.string :value_type :null => false, :default => "String"
+      t.string :key,        :null => false, :default => ""
+      t.string :value,      :null => false, :default => ""
+      t.string :value_type, :null => false, :default => "String"
       t.timestamps
     end
 
-    reversible do |dir|
-      dir.up do
-        execute "insert into settings (key, value, value_type) values ('Generation', '1', 'Integer')"
-      end
-    end
+    execute "insert into settings (key, value, value_type, created_at, updated_at) values ('Generation', '1', 'Integer', now(), now())"
+  end
+
+  def self.down
+    drop_table :settings
   end
 end
