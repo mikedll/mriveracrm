@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140619041231) do
+ActiveRecord::Schema.define(:version => 20140721015616) do
 
   create_table "beta_testers", :force => true do |t|
     t.string   "email"
@@ -35,6 +35,7 @@ ActiveRecord::Schema.define(:version => 20140619041231) do
     t.string   "handle",                          :default => "",    :null => false
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
+    t.string   "google_analytics_id",             :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
