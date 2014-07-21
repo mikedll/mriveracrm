@@ -12,6 +12,11 @@ en:
   delete_confirm: "Delete this?"
   revert_confirm: "Are you sure you want to revert all your changes?"
 
+  main_nav:
+    home: "Home"
+    products: "Products"
+    contact: "Contact"
+
   user:
     errors:
       no_invitation: "No open invitation could be found for your email, %{email}."
