@@ -14,6 +14,10 @@ $(() ->
       modelKlass: Business
       modelViewKlass: BusinessView
       rootAppViewKlass: SingleModelAppView
+    '.billing-settings-gui':
+      modelKlass: BillingSettings
+      modelViewKlass: BillingSettingsView
+      rootAppViewKlass: SingleModelAppView
     '.status-monitor-gui':
       modelKlass: StatusMonitor
       modelViewKlass: StatusMonitorView

@@ -50,6 +50,7 @@ MikedllCrm::Application.routes.draw do
 
   namespace 'manage' do
 
+    resource :billing_settings, :only => [:show, :update]
     resource :business, :only => [:show, :update, :destroy]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
@@ -149,6 +150,7 @@ MikedllCrm::Application.routes.draw do
 
     namespace 'manage' do
 
+      resource :billing_settings, :only => [:show, :update]
       resource :business, :only => [:show, :update, :destroy]
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 

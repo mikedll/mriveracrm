@@ -1,0 +1,25 @@
+- content_for :head do
+  = javascript_include_tag 'manage'
+  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'billing-settings', :bootstrap => current_object.to_json }
+
+.gui-container.container-fluid
+  .billing-settings-gui.app-gui.single-model
+
+    .section-title
+      Billing
+
+    .row-fluid
+      .span12
+        .errors.alert.alert-error.hide
+        .models-show-container
+
+      .clear
+
+      .spinner-container.hide 
+        .spinner
+          = image_tag 'loading.gif'
+
+.templates.hide
+  %div{ :class => "billing_settings_view_example"}
+    = render :partial => "billing_settings"
+

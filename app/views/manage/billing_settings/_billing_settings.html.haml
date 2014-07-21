@@ -1,0 +1,6 @@
+
+= simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path, :html => { :class => 'form-horizontal' } do |f|
+
+  = f.input :name
+
+  = render :partial => 'shared/model_view_basic_buttons'
