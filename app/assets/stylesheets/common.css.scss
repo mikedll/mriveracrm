@@ -81,8 +81,22 @@ li {
   border-bottom: 1px solid #000;
   border-left: 1px solid #000;
   padding: 5px;
+
+  ul.nav-pills {
+    margin: 0;
+  }
+
+  .nav-pills > li > a {
+    padding-top: 4px;
+    padding-bottom: 4px;
+    margin-top: 1px;
+    margin-bottom: 1px;
+  }
 }
 
+.nav > .disabled.informational > a {
+  color: #000;
+}
 
 .login_failed {
   padding: 1em;
@@ -95,21 +109,6 @@ ol.terms-of-service {
     list-style: normal;
     margin: 1em 0;
   }
-}
-
-
-.menu a,
-.menu a:link,
-.menu a:visited {
-  color: blue;
-}
-
-.menu a:hover {
-  color: #373737;
-}
-
-.menu.major a {
-  font-weight: bold;
 }
 
 
