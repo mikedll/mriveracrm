@@ -18,8 +18,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   def pay_invoice!(invoice)
     if !can_pay?
       self.last_error = I18n.t('payment_gateway_profile.cant_pay')
-      return false 
-    end    
+      return false
+    end
 
     if !invoice.can_pay?
       self.last_error = I18n.t('invoice.cannot_pay')
@@ -75,11 +75,11 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       return false if !card_valid?(card)
       card_param = {
         :number => card.number,
-        :exp_month => card.month, 
+        :exp_month => card.month,
         :exp_year => card.year,
         :cvc => card.verification_value
       }
-    else      
+    else
       card_param = opts[:token]
     end
 
@@ -121,7 +121,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   end
 
 
-  protected 
+  protected
 
   def _create_remote
     return if self.client.business.stripe_secret_key.blank?
@@ -141,7 +141,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     if customer[:active_card]
       self.card_last_4 = customer[:active_card][:last4]
       self.card_brand = customer[:active_card][:type]
-    end    
+    end
   end
 
   def _with_stripe_key
