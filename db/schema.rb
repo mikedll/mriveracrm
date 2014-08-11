@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140719031003) do
+ActiveRecord::Schema.define(:version => 20140725094027) do
 
   create_table "beta_testers", :force => true do |t|
     t.string   "email"
@@ -35,6 +35,7 @@ ActiveRecord::Schema.define(:version => 20140719031003) do
     t.string   "handle",                          :default => "",    :null => false
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
+    t.string   "google_analytics_id",             :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
@@ -172,13 +173,14 @@ ActiveRecord::Schema.define(:version => 20140719031003) do
 
   create_table "payment_gateway_profiles", :force => true do |t|
     t.string   "type"
-    t.integer  "client_id"
+    t.integer  "payment_gateway_profilable_id"
     t.string   "vendor_id"
     t.string   "card_profile_id"
     t.string   "card_last_4"
     t.string   "card_brand"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.integer  "payment_gateway_profilable_type", :default => 0, :null => false
   end
 
   create_table "product_images", :force => true do |t|

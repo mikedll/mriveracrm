@@ -122,7 +122,7 @@ FactoryGirl.define do
   end
 
   factory :authorize_net_payment_gateway_profile do
-    client { FactoryGirl.create(:client) }
+    payment_gateway_profilable { FactoryGirl.create(:client) }
 
     factory :authorize_net_payment_gateway_profile_ready, :parent => :authorize_net_payment_gateway_profile do
       client { FactoryGirl.create(:client) }

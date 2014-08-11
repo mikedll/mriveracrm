@@ -1,5 +1,5 @@
 class PaymentGatewayProfile < ActiveRecord::Base
-  belongs_to :client
+  belongs_to :payment_gateway_profilable, polymorphic: true
   has_many :transactions
 
   after_create :_create_remote

@@ -2,13 +2,9 @@ class UsageSubscription < ActiveRecord::Base
 
   belongs_to :business
   has_one :feature_selection
-
+  has_one :payment_gateway_profile, as: :payment_gateway_profilable
   has_many :features, :through => :feature_selection
 
-  attr_accessible :card_brand, :card_last_4, :plan, :remote_id, :remote_status
-
-  after_create :_create_remote
-  
   #
   # A given business may registered with a package that enables or
   # disables certain features, based on that business’ request. Billing
@@ -109,20 +105,6 @@ class UsageSubscription < ActiveRecord::Base
     @calculated_price
   end
 
-  def update_payment_info(card_attrs = {})
-    _with_billing_stripe_key do
-      customer = Stripe::Customer.retrieve remote_id
-      customer.card = card_attrs
-      if customer.save
-        reload_remote
-      else
-        customer.errors.each do |e|
-          errors[:base].push(e)
-        end
-      end
-    end
-  end
-
   def subscribe!
     fps = self.feature_pricings.for_generation(generation)
 
@@ -137,51 +119,19 @@ class UsageSubscription < ActiveRecord::Base
     # end
   end
 
-  def reload_remote
-    if self.remote_id.blank?
-      DetectedErrors.create(:message => "Usage subscription reloading but no remote id.", :business_id => self.business_id)
-      return
+  def payment_gateway_profilable_remote_app_key
+    key = MikedllCrm::Configuration.get('stripe.secret_key')
+    if key.blank?
+      raise "Stripe Secrete Key should never be blank. App is misconfigured."
     end
-    customer = nil
-    _with_billing_stripe_key do
-      customer = Stripe::Customer.retrieve(self.remote_id)
-    end
-    _assign_customer_attrs(customer)
-    save!
+    key
   end
 
+  def payment_gateway_profilable_desc_attrs
+    { :description => business.handle }
+  end
 
   protected
-
-  def _create_remote
-    customer = nil
-    _with_billing_stripe_key do
-      customer = Stripe::Customer.create(description: business.handle, email: business.nil? ? nil : business.employees.is_owner.first.try(:email))
-    end
-    self.remote_id = customer.id
-    _assign_customer_attrs(customer)
-    save!
-
-    subscribe!
-  end
-
-  def _assign_customer_attrs(customer)
-    if customer[:active_card]
-      self.card_last_4 = customer[:active_card][:last4]
-      self.card_brand = customer[:active_card][:type]
-    end
-  end
-
-  def _with_billing_stripe_key
-    begin
-      raise "Stripe api key was not blank. Probably a bug." if Stripe.api_key != ""
-
-      Stripe.api_key = MikedllCrm::Configuration.get('stripe.secret_key')
-      yield
-    ensure
-      Stripe.api_key = ""
-    end
-  end
 
   # [ 4 bits for pricing scheme | 16 bits for generation | 44 bits + 8 x 64 bits for features, starting at RHS ]
   PRICING_SCHEME = 0

@@ -93,11 +93,11 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         errors.add(:base, e.message)
         return false
       rescue Stripe::InvalidRequestError => e
-        DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => self.client.id)
+        DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => payment_gateway_profilable_id)
         errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
         return false
       rescue => e
-        DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => self.client.id)
+        DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => payment_gateway_profilable_id)
         errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
         return false
       end
@@ -109,7 +109,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
   def reload_remote
     if self.vendor_id.blank?
-      DetectedErrors.create(:message => "Reloading but no vendor id", :client_id => self.client.id)
+      DetectedErrors.create(:message => "Reloading but no vendor id", :client_id => payment_gateway_profilable_id)
       return
     end
     customer = nil
@@ -124,12 +124,11 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   protected
 
   def _create_remote
-    return if self.client.business.stripe_secret_key.blank?
-
+    return if payment_gateway_profilable.payment_gateway_profilable_remote_app_key.blank?
 
     customer = nil
     _with_stripe_key do
-      customer = Stripe::Customer.create(:description => client.payment_profile_description, :email => client.email)
+      customer = Stripe::Customer.create(payment_gateway_profilable.payment_gateway_profilable_desc_attrs)
     end
 
     self.vendor_id = customer.id
@@ -148,7 +147,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     begin
       raise "Stripe api key was not blank. Probably a bug." if Stripe.api_key != ""
 
-      Stripe.api_key = self.client.business.stripe_secret_key
+      Stripe.api_key = payment_gateway_profilable.payment_gateway_profilable_remote_app_key
+
       yield
     ensure
       Stripe.api_key = ""

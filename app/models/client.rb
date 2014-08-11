@@ -5,7 +5,7 @@ class Client < ActiveRecord::Base
   has_many :users
   has_many :invitations
   has_many :invoices
-  has_one :payment_gateway_profile
+  has_one :payment_gateway_profile, as: :payment_gateway_profilable
 
 
   attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
@@ -78,6 +78,16 @@ class Client < ActiveRecord::Base
       id
     end
   end
+
+  def payment_gateway_profilable_remote_app_key
+    business.stripe_secret_key
+  end
+
+  def payment_gateway_profilable_desc_attrs
+    { :description => payment_profile_description, :email => email}
+  end
+
+
 
   def _strip_fields
     self.zip.strip!
