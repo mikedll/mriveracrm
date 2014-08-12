@@ -6,4 +6,12 @@
   = f.input :expiration_year
   = f.input :cv_code
 
+  - Feature::ALL.each do |feature|
+    .control-group
+      .control-label
+        %label
+          = feature.last
+      .controls
+        = check_box_tag feature.first, true
+
   = render :partial => 'shared/model_view_basic_buttons'

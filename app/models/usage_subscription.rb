@@ -1,16 +1,27 @@
 class UsageSubscription < ActiveRecord::Base
 
   belongs_to :business
-  has_one :feature_selection
   has_one :payment_gateway_profile, as: :payment_gateway_profilable
-  has_many :features, :through => :feature_selection
+  has_many :feature_selections
+  has_many :features, :through => :feature_selections
+
+  accepts_nested_attributes_for :feature_selections, :allow_destroy => true, :reject_if => :all_blank
 
   after_create :_require_payment_gateway_profile
 
   def renderable_json
     to_json({
-              :include => { :payment_gateway_profile => {
+              :include => { 
+                :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand]
+                },
+                :feature_selections => {
+                  :include => {
+                    :feature => {
+                      :only => [:id, :feature_name]
+                    }
+                  },
+                  :only => [:id]
                 }
               },
               :only => [:plan, :generation]

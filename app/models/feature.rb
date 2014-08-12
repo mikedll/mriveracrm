@@ -1,6 +1,15 @@
 class Feature < ActiveRecord::Base
+
+  ALL = [
+    ['clients', "Client Manager"],
+    ['employees', "Multiple Employees"],
+    ['invoicing', "Client Invoicing"],
+    ['products', 'Products Showcase']
+  ]
+
   attr_accessible :feature_name, :bit_index
 
+  has_many :feature_selections
   has_many :feature_pricings
 
   validates :feature_name, :presence => true, :uniqueness => true
