@@ -181,7 +181,7 @@ ActiveRecord::Schema.define(:version => 20140812230113) do
     t.string   "card_brand"
     t.datetime "created_at"
     t.datetime "updated_at"
-    t.integer  "payment_gateway_profilable_type", :default => 0, :null => false
+    t.string   "payment_gateway_profilable_type", :default => "", :null => false
   end
 
   create_table "product_images", :force => true do |t|
