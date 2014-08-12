@@ -12,7 +12,7 @@ class Feature < ActiveRecord::Base
   validates :bit_index, :uniqueness => true
   validate :_never_change_index
 
-  def self.ensure_master_list_created
+  def self.ensure_master_list_created!
     them = all
 
     names = them.map(&:name)

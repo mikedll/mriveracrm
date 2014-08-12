@@ -28,7 +28,7 @@ Spork.prefork do
     config.filter_run_excluding :broken => true
 
     config.before(:all) do
-      Feature.ensure_master_list_created
+      Feature.ensure_master_list_created!
     end
 
     config.before(:suite) do
