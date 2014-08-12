@@ -9,6 +9,20 @@ describe UsageSubscription do
     end
   end
 
+  context "feature_selections" do
+    it "should be indicatable through nested attributes", :current => true do
+      fs = Feature.all
+      @us = FactoryGirl.create(:usage_subscription)
+
+      f = fs.first
+      @us.features.count.should == 0
+      @us.attributes = { :feature_selections_attributes => [{:feature_id => f.id}] }
+      @us.save!
+      @us.features.count.should == 1
+      Feature.count.should == fs.count
+    end
+  end
+
   context "bit string demos", :current => true do
     it "should show ruby bit string demos. (not a real spec)" do
       scheme = 1
