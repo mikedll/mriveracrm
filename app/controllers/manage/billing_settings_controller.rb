@@ -19,7 +19,7 @@ class Manage::BillingSettingsController < Manage::BaseController
   end
 
   def current_object
-    @current_object ||= nil
+    @current_object ||= @current_business.usage_subscription
   end
 
   def current_objects
@@ -28,10 +28,32 @@ class Manage::BillingSettingsController < Manage::BaseController
   end
 
   def update
+    if current_object.payment_gateway_profile.nil?
+      render :status => :unprocessable_entity, :json => { :full_messages => [t('usage_subscriptions.no_payment_gateway_profile')] }
+      return
+    end
+
     before :update
     begin
-      current_object.name = params[:name] if params[:name]
-      result = current_object.save
+      result = current_object.payment_gateway_profile.update_payment_info((params[:billing_settings] || {}).slice(:card_number, :expiration_month, :expiration_year, :cv_code))
+    rescue ActiveRecord::StaleObjectError
+      current_object.reload
+      result = false
+    end
+
+    if current_object.payment_gateway_profile.changed? && !result
+      save_failed!
+      after :update_fails
+      response_for :update_fails
+      return
+    end
+
+    begin
+      # we dont use a transaction. we'll allow other kinds of errors.
+      if result
+        current_object.usage_subscription.name = params[:name] if params[:name]
+        current_object.usage_subscription.save
+      end
     rescue ActiveRecord::StaleObjectError
       current_object.reload
       result = false
@@ -46,6 +68,7 @@ class Manage::BillingSettingsController < Manage::BaseController
       after :update_fails
       response_for :update_fails
     end
+
   end
 
   def object_parameters

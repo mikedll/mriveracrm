@@ -1,6 +1,9 @@
 
 = simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path, :html => { :class => 'form-horizontal' } do |f|
 
-  = f.input :name
+  = f.input :card_number
+  = f.input :expiration_month
+  = f.input :expiration_year
+  = f.input :cv_code
 
   = render :partial => 'shared/model_view_basic_buttons'

@@ -64,6 +64,9 @@ en:
     cannot_delete: 'cannot be deleted in its current state'
     cannot_generate_pdf: 'cannot be generated in this state'
 
+  usage_subscriptions:
+    no_payment_gateway_profile: "An internal error has occured. There is no payment profile available for your business. Please contact support if this error persists."
+
   payment_gateway_profile:
     cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."
