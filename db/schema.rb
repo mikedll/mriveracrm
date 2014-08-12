@@ -240,10 +240,7 @@ ActiveRecord::Schema.define(:version => 20140725094027) do
 
   create_table "usage_subscriptions", :force => true do |t|
     t.integer  "business_id",   :default => 0,  :null => false
-    t.string   "card_brand",    :default => "", :null => false
-    t.string   "card_last_4",   :default => "", :null => false
     t.string   "plan",          :default => "", :null => false
-    t.string   "remote_id",     :default => "", :null => false
     t.string   "remote_status", :default => "", :null => false
     t.integer  "generation",    :default => 0,  :null => false
     t.datetime "created_at",                    :null => false
