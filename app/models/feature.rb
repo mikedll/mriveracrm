@@ -1,21 +1,21 @@
 class Feature < ActiveRecord::Base
 
 
-  attr_accessible :feature_name, :bit_index
+  attr_accessible :name, :bit_index
 
   has_many :feature_selections
   has_many :feature_pricings
 
-  before_validation :_default_pretty_name
+  before_validation :_default_public_name
 
   validates :name, :presence => true, :uniqueness => true
   validates :bit_index, :uniqueness => true
   validate :_never_change_index
 
-  def self.load_master
+  def self.ensure_master_list_created
     them = all
 
-    names = them.map(:name)
+    names = them.map(&:name)
     MasterFeatureList::ALL.each_with_index do |n, i|
       if !names.include?(n)
         f = create(:name => n, :bit_index => i)
@@ -35,9 +35,9 @@ class Feature < ActiveRecord::Base
     end
   end
 
-  def _default_pretty_name
-    if new_record? && pretty_name.blank?
-      self.pretty_name = name.titleize
+  def _default_public_name
+    if new_record? && public_name.blank?
+      self.public_name = name.titleize
     end
   end
 
