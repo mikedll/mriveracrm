@@ -5,6 +5,48 @@ class UsageSubscription < ActiveRecord::Base
   has_one :payment_gateway_profile, as: :payment_gateway_profilable
   has_many :features, :through => :feature_selection
 
+  after_create :_require_payment_gateway_profile
+
+  def calculated_plan_id
+    return @calculated_plan_id if @calculated_pland_id
+    _calculate_price_and_plan
+    @calculated_pland_id
+  end
+
+  def calculated_price
+    return @calculated_price if @calculated_price
+    _calculate_price_and_plan
+    @calculated_price
+  end
+
+  def subscribe!
+    fps = self.feature_pricings.for_generation(generation)
+
+    # _with_billing_stripe_key do
+    #   plan = Stripe::Plan.find_by_id calculated_plan_id
+    #   if plan.nil?
+    #     plan = Stripe::Plan.create(:id => calculated_plan_id, :price => calculated_price)
+    #     # handle errors
+    #   end
+
+    #   Subsription.create(:plan => calculated_plan_id)
+    # end
+  end
+
+  def payment_gateway_profilable_remote_app_key
+    key = MikedllCrm::Configuration.get('stripe.secret_key')
+    if key.blank?
+      raise "Stripe Secrete Key should never be blank. App is misconfigured."
+    end
+    key
+  end
+
+  def payment_gateway_profilable_desc_attrs
+    { :description => business.handle }
+  end
+
+  protected
+
   #
   # A given business may registered with a package that enables or
   # disables certain features, based on that business’ request. Billing
@@ -93,46 +135,6 @@ class UsageSubscription < ActiveRecord::Base
   # The cost of the plan can be determined from lookup tables in the
   # app.
 
-  def calculated_plan_id
-    return @calculated_plan_id if @calculated_pland_id
-    _calculate_price_and_plan
-    @calculated_pland_id
-  end
-
-  def calculated_price
-    return @calculated_price if @calculated_price
-    _calculate_price_and_plan
-    @calculated_price
-  end
-
-  def subscribe!
-    fps = self.feature_pricings.for_generation(generation)
-
-    # _with_billing_stripe_key do
-    #   plan = Stripe::Plan.find_by_id calculated_plan_id
-    #   if plan.nil?
-    #     plan = Stripe::Plan.create(:id => calculated_plan_id, :price => calculated_price)
-    #     # handle errors
-    #   end
-
-    #   Subsription.create(:plan => calculated_plan_id)
-    # end
-  end
-
-  def payment_gateway_profilable_remote_app_key
-    key = MikedllCrm::Configuration.get('stripe.secret_key')
-    if key.blank?
-      raise "Stripe Secrete Key should never be blank. App is misconfigured."
-    end
-    key
-  end
-
-  def payment_gateway_profilable_desc_attrs
-    { :description => business.handle }
-  end
-
-  protected
-
   # [ 4 bits for pricing scheme | 16 bits for generation | 44 bits + 8 x 64 bits for features, starting at RHS ]
   PRICING_SCHEME = 0
   FEATURE_BITS = 238
@@ -168,6 +170,13 @@ class UsageSubscription < ActiveRecord::Base
     padded = true if hexed.length % 2 == 1  # prepend 0
     bitstring = [(padded ? "0#{hexed}" : hexed)].pack("H*").unpack("B*").first
     padded ? bitstring[4,bitstring.length - 4] : bitstring
+  end
+
+  def _require_payment_gateway_profile
+    if payment_gateway_profile.nil?
+      self.payment_gateway_profile = StripePaymentGatewayProfile.new
+      self.payment_gateway_profile.save!
+    end
   end
 
 end
