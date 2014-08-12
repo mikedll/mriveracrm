@@ -7,9 +7,11 @@ class CreateUsageSubscriptions < ActiveRecord::Migration
       t.string  :plan,          :null => false, :default => ""
       t.string  :remote_id,     :null => false, :default => ""
       t.string  :remote_status, :null => false, :default => ""
-      t.integer :generation,    :null => false, :default => ""
+      t.integer :generation,    :null => false, :default => 0
       t.timestamps
     end
+
+    execute "INSERT INTO usage_subscriptions (business_id, updated_at, created_at) select id, now(), now() from businesses"
   end
 
   def down
