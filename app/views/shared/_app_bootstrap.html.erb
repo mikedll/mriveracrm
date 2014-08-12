@@ -1,7 +1,7 @@
 <script>
   <%- if bootstrap.is_a?(String)%>
-  __<%= app_class %> = <%= j bootstrap.html_safe %>
+  var __<%= app_class.underscore %> = <%= j bootstrap.html_safe %>
   <% else %>
-  __<%= app_class %> = <%= j bootstrap.to_json.html_safe %>
+  var __<%= app_class.underscore %> = <%= j bootstrap.to_json.html_safe %>
   <% end %>
 </script>
