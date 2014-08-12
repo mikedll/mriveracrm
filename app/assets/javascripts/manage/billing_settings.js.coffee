@@ -6,3 +6,7 @@ class window.BillingSettings extends BaseModel
 
 class window.BillingSettingsView extends CrmModelView
   modelName: 'billing_settings'
+
+  initialize: (options) ->
+    CrmModelView.prototype.initialize.apply(this, arguments)
+    @useDirty = false
