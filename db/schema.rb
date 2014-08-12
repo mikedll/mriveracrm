@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140812230113) do
+ActiveRecord::Schema.define(:version => 20140812233106) do
 
   create_table "beta_testers", :force => true do |t|
     t.string   "email"
@@ -106,7 +106,7 @@ ActiveRecord::Schema.define(:version => 20140812230113) do
   end
 
   create_table "feature_selections", :force => true do |t|
-    t.integer  "feature_pricing_id",    :default => 0, :null => false
+    t.integer  "feature_id",            :default => 0, :null => false
     t.integer  "usage_subscription_id", :default => 0, :null => false
     t.datetime "created_at",                           :null => false
     t.datetime "updated_at",                           :null => false
