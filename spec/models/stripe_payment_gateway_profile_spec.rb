@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe StripePaymentGatewayProfile do 
 
-  context "basics", :current => true do
+  context "basics" do
     before(:each) { @profile = FactoryGirl.create(:stubbed_client).payment_gateway_profile }
     it "should work with stubs"do
       @profile.should_not be_nil
