@@ -7,6 +7,16 @@ class UsageSubscription < ActiveRecord::Base
 
   after_create :_require_payment_gateway_profile
 
+  def renderable_json
+    to_json({
+              :include => { :payment_gateway_profile => {
+                  :only => [:card_last_4, :card_brand]
+                }
+              },
+              :only => [:plan, :generation]
+            })
+  end
+
   def calculated_plan_id
     return @calculated_plan_id if @calculated_pland_id
     _calculate_price_and_plan

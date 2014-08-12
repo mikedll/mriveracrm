@@ -5,16 +5,16 @@ class Manage::BillingSettingsController < Manage::BaseController
 
     response_for :destroy do |format|
       format.html
-      format.json { render :json => current_object }
+      format.json { render :json => current_object.renderable_json }
     end
 
     response_for(:show, :update) do |format|
       format.html
-      format.json { render :json => current_object }
+      format.json { render :json => current_object.renderable_json }
     end
 
     response_for(:update_fails) do |format|
-      format.json { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
+      format.json { render :status => :unprocessable_entity, :json => { :object => current_object.renderable_json, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
   end
 
