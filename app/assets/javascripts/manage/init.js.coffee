@@ -32,6 +32,8 @@ $(() ->
       return __products
     else if selector == '.business-gui'
       return __business
+    else if selector == '.billing-settings-gui'
+      return __billing_settings
     else
       # something went wrong here.
       return []
