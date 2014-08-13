@@ -6,12 +6,12 @@
   = f.input :expiration_year
   = f.input :cv_code
 
-  - Feature::ALL.each do |feature|
+  - Feature.all.each do |feature|
     .control-group
       .control-label
-        %label
-          = feature.last
+        %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}"}
+          = feature.public_name
       .controls
-        = check_box_tag feature.first, true
+        = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, true, :id => "billing_settings_feature_selections_attributes_#{feature.id}"
 
   = render :partial => 'shared/model_view_basic_buttons'
