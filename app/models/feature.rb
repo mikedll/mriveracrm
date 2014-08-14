@@ -27,6 +27,10 @@ class Feature < ActiveRecord::Base
     them
   end
 
+  def as_json_public
+    as_json(:only => [:created_at, :public_name, :name, :bit_index])
+  end
+
   protected
 
   def _never_change_index
