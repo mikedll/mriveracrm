@@ -38,7 +38,7 @@ class Manage::BillingSettingsController < Manage::BaseController
 
     before :update
     begin
-      result = current_object.payment_gateway_profile.update_payment_info((params[:billing_settings] || {}).slice(:card_number, :expiration_month, :expiration_year, :cv_code))
+      result = current_object.payment_gateway_profile.update_payment_info((params[:billing_settings] || {})[:payment_gateway_profile] || {})
     rescue ActiveRecord::StaleObjectError
       current_object.reload
       result = false
@@ -51,12 +51,10 @@ class Manage::BillingSettingsController < Manage::BaseController
       return
     end
 
+    # we dont use a transaction. we'll allow a second phase of errors, after the card update.
+
     begin
-      # we dont use a transaction. we'll allow other kinds of errors.
-      if result
-        current_object.usage_subscription.name = params[:name] if params[:name]
-        current_object.usage_subscription.save
-      end
+      result = current_object.update_attributes(object_parameters)
     rescue ActiveRecord::StaleObjectError
       current_object.reload
       result = false
@@ -75,7 +73,7 @@ class Manage::BillingSettingsController < Manage::BaseController
   end
 
   def object_parameters
-    [] # too worried about mass assignment
+    params.slice(* UsageSubscription.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
 end
