@@ -54,7 +54,9 @@ class Manage::BillingSettingsController < Manage::BaseController
     # we dont use a transaction. we'll allow a second phase of errors, after the card update.
 
     begin
-      result = current_object.update_attributes(object_parameters)
+      current_object.attributes = object_parameters
+      current_object.feature_selections_attributes = params[:feature_selections_attributes] # this isnt in attr accessible
+      result = current_object.save
     rescue ActiveRecord::StaleObjectError
       current_object.reload
       result = false
