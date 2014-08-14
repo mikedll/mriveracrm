@@ -629,10 +629,12 @@ class window.CrmModelView extends ModelBaseView
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
         if el$.is('[type=checkbox]') && el$.hasClass('hasrelation')
+          idField = if attribute_name of @model.hasrelations then @model.hasrelations[attribute_name] else 'id'
+          valAsInt = parseInt(el$.val())
           if Object.prototype.toString.call( v ) == '[object Array]'
-            el$.prop('checked', _.some(v, (related) -> related.id = el$.val()))
+            el$.prop('checked', _.some(v, (related) -> related[idField] == valAsInt))
           else
-            el$.prop('checked', v.id == el$.val())
+            el$.prop('checked', v[idField] == valAsInt)
         else
           if el$.hasClass('datetimepicker')
             v = @toHumanReadableDateTimeFormat(attribute_name)
