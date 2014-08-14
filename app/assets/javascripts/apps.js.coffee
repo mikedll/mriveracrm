@@ -589,7 +589,7 @@ class window.CrmModelView extends ModelBaseView
           id_field = @model.hasrelations[attribute_name]
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() ->
             h = {}
-            h[id_field] = $(this).val()
+            h[id_field] = parseInt($(this).val())
             h
           ).toArray()
 
