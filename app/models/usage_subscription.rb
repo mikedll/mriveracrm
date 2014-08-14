@@ -25,6 +25,10 @@ class UsageSubscription < ActiveRecord::Base
     feature_selections.map { |fs| { :feature_selection_id => fs.id, :feature_id => fs.feature.id } }
   end
 
+  def has_feature(f)
+    features.include?(f)
+  end
+
   def calculated_plan_id
     return @calculated_plan_id if @calculated_pland_id
     _calculate_price_and_plan
