@@ -1,6 +1,8 @@
 
 = simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path, :html => { :class => 'form-horizontal' } do |f|
 
+  .errors.alert.alert-error.hide
+
   = f.input :card_number
   = f.input :expiration_month
   = f.input :expiration_year

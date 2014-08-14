@@ -684,6 +684,9 @@ class window.CrmModelView extends ModelBaseView
     @renderErrors(@model.validationError) if @model.validationError?
 
   clearErrors: (changedAttributesw) ->
+
+    @$('.errors').hide() # full messages
+
     toFix = @inputsCache
 
     if arguments.length > 0 and changedAttributes?
@@ -695,9 +698,20 @@ class window.CrmModelView extends ModelBaseView
         .find('span.help-inline').remove()
 
 
+  renderFullMessages: (response) ->
+    s = ""
+    _.chain(response.full_messages).filter((m) ->
+      /\w/.test(m)
+    ).each((m) ->
+      s = "#{s} #{m}"
+      s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
+    )
+    @$('.errors').text(s).show()
+
   onError: (model, xhr, options) ->
     response = jQuery.parseJSON( xhr.responseText )
     @clearErrors()
+    @renderFullMessages(response)
     @renderErrors(response.errors)
 
   noSubmit: (e) ->
