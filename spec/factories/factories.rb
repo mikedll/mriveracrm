@@ -6,7 +6,7 @@ FactoryGirl.define do
 
   sequence(:settings_key) { |n| "key#{n}" }
 
-  sequence(:feature_bit_index) { |n| n }
+  sequence(:feature_bit_index) { |n| MasterFeatureList::ALL.count + n }
 
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
 
