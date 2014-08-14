@@ -8,6 +8,9 @@
   = f.input :expiration_year
   = f.input :cv_code
 
+  %h5
+    Select which features you want to enable:
+
   - Feature.all.each do |feature|
     .control-group
       .control-label
