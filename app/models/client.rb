@@ -87,6 +87,12 @@ class Client < ActiveRecord::Base
     { :description => payment_profile_description, :email => email}
   end
 
+  def payment_profile_profilable_card_args
+    {
+      :first_name => first_name,
+      :last_name => last_name,
+    }
+  end
 
 
   def _strip_fields

@@ -8,13 +8,11 @@ class PaymentGatewayProfile < ActiveRecord::Base
 
   def card_from_opts(opts)
     ActiveMerchant::Billing::CreditCard.new({
-                                              :first_name => client.first_name,
-                                              :last_name => client.last_name,
                                               :month => opts[:expiration_month].to_i,
                                               :year => "20#{opts[:expiration_year]}".to_i,
                                               :number => opts[:card_number],
                                               :verification_value => opts[:cv_code]
-                                            })
+                                            }.merge(payment_gateway_profilable.payment_profile_profilable_card_args))
   end
 
   def card_valid?(card)

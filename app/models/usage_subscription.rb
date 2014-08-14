@@ -67,6 +67,11 @@ class UsageSubscription < ActiveRecord::Base
     { :description => business.handle }
   end
 
+  def payment_profile_profilable_card_args
+    {}
+  end
+
+
   protected
 
   #
