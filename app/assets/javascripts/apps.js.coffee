@@ -620,6 +620,11 @@ class window.CrmModelView extends ModelBaseView
         v = @model.get(attribute_name)
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
+        if el$.is('[type=checkbox]') && el$.hasClass('hasrelation')
+          if Object.prototype.toString.call( v ) == '[object Array]'
+            el$.prop('checked', _.some(v, (related) -> related.id = el$.val()))
+          else
+            el$.prop('checked', v.id == el$.val())
         else
           if el$.hasClass('datetimepicker')
             v = @toHumanReadableDateTimeFormat(attribute_name)
