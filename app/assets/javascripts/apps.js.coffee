@@ -595,7 +595,7 @@ class window.CrmModelView extends ModelBaseView
 
   fromForm: () ->
     updated = {}
-    _.each(@$(':input'), (el) =>
+    _.each(@inputsCache, (el) =>
       nameAndValue = @nameAndValueFromInput($(el))
       updated[ nameAndValue[0] ] = nameAndValue[1] if nameAndValue?
     )
