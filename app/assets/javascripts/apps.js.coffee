@@ -586,8 +586,11 @@ class window.CrmModelView extends ModelBaseView
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
         else if elSelection.hasClass('hasrelation')
+          id_field = @model.hasrelations[attribute_name]
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() ->
-            id: $(this).val()
+            h = {}
+            h[id_field] = $(this).val()
+            h
           ).toArray()
 
         else

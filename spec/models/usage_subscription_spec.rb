@@ -16,9 +16,9 @@ describe UsageSubscription do
 
       f = fs.first
       @us.features.count.should == 0
-      @us.attributes = { :feature_selections_attributes => [{:feature_id => f.id}] }
-      @us.save!
+      @us.update_attributes!({ :feature_selections_attributes => [{:feature_id => f.id}] })
       @us.features.count.should == 1
+
       Feature.count.should == fs.count
     end
   end
