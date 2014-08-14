@@ -15,19 +15,14 @@ class PaymentGatewayProfile < ActiveRecord::Base
                                               :number => opts[:card_number],
                                               :verification_value => opts[:cv_code]
                                             })
-    
   end
 
   def card_valid?(card)
     card.validate
     if !card.valid?
       lookup = {:month => :expiration_month, :year => :expiration_year, :number => :card_number, :verification_value => :cv_code}
-      card.errors.each do |k,v|
-        if lookup[k.to_sym]
-          errors.add(lookup[k.to_sym], v) 
-        else
-          errors.add(k, v) 
-        end
+      card.errors.each do |k,es|
+        es.each { |e| errors.add(lookup[k.to_sym] ? lookup[k.to_sym] : k, e) }
       end
       return false
     end
