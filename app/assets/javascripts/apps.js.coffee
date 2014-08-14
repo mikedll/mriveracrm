@@ -532,6 +532,7 @@ class window.CrmModelView extends ModelBaseView
       @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
+    # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
     if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
