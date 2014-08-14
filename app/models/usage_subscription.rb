@@ -11,21 +11,18 @@ class UsageSubscription < ActiveRecord::Base
 
   def renderable_json
     to_json({
-              :include => { 
+              :methods => [:feature_selections_attributes],
+              :include => {
                 :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand]
-                },
-                :feature_selections => {
-                  :include => {
-                    :feature => {
-                      :only => [:id, :feature_name]
-                    }
-                  },
-                  :only => [:id]
                 }
               },
               :only => [:plan, :generation]
             })
+  end
+
+  def feature_selections_attributes
+    feature_selections.map { |fs| { :feature_selection_id => fs.id, :feature_id => fs.feature.id } }
   end
 
   def calculated_plan_id
