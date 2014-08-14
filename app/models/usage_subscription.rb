@@ -7,7 +7,7 @@ class UsageSubscription < ActiveRecord::Base
 
   accepts_nested_attributes_for :feature_selections, :allow_destroy => true, :reject_if => :all_blank
 
-  after_create :_require_payment_gateway_profile
+  after_create :require_payment_gateway_profile
 
   def renderable_json
     to_json({
@@ -71,6 +71,12 @@ class UsageSubscription < ActiveRecord::Base
     {}
   end
 
+  def require_payment_gateway_profile
+    if payment_gateway_profile.nil?
+      self.payment_gateway_profile = StripePaymentGatewayProfile.new
+      self.payment_gateway_profile.save!
+    end
+  end
 
   protected
 
@@ -197,13 +203,6 @@ class UsageSubscription < ActiveRecord::Base
     padded = true if hexed.length % 2 == 1  # prepend 0
     bitstring = [(padded ? "0#{hexed}" : hexed)].pack("H*").unpack("B*").first
     padded ? bitstring[4,bitstring.length - 4] : bitstring
-  end
-
-  def _require_payment_gateway_profile
-    if payment_gateway_profile.nil?
-      self.payment_gateway_profile = StripePaymentGatewayProfile.new
-      self.payment_gateway_profile.save!
-    end
   end
 
 end

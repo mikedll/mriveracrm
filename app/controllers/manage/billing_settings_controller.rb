@@ -29,8 +29,11 @@ class Manage::BillingSettingsController < Manage::BaseController
 
   def update
     if current_object.payment_gateway_profile.nil?
-      render :status => :unprocessable_entity, :json => { :full_messages => [t('usage_subscriptions.no_payment_gateway_profile')] }
-      return
+      current_object.require_payment_gateway_profile
+      if current_object.payment_gateway_profile.nil?
+        render :status => :unprocessable_entity, :json => { :full_messages => [t('usage_subscriptions.no_payment_gateway_profile')] }
+        return
+      end
     end
 
     before :update
