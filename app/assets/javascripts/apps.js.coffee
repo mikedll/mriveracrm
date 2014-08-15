@@ -118,7 +118,7 @@ class window.BaseModel extends Backbone.Model
     _.each(attrs, (value, attribute_name) =>
       if not _.has(@_attributesSinceSync, attribute_name)
         @_attributesSinceSync[attribute_name] = @previous(attribute_name)
-      else if @_attributesSinceSync[attribute_name] == @get(attribute_name)
+      else if _.isEqual(@_attributesSinceSync[attribute_name], @get(attribute_name))
         delete @_attributesSinceSync[attribute_name]
     )
     @_isDirty = !$.isEmptyObject(@_attributesSinceSync)
