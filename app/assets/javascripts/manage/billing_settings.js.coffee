@@ -33,7 +33,7 @@ class window.BillingSettings extends BaseModel
           # retain existing keys if we are overriding one
           relation_before = _.find(cur_related_set, (r) -> r[idField] == relation[idField])
           if typeof(relation_before) != "undefined"
-            relation = _.extend(relation_before, relation)
+            relation = _.extend({}, relation_before, relation)
 
             # this relation was present originally, was deleted, and has returned. cancel _destroy.
             if _.has(relation, '_destroy')
@@ -46,14 +46,15 @@ class window.BillingSettings extends BaseModel
         # (o * n) where o == size(original value of this attribute) and n == size(v)
         _.each(orig_related_set, (orig_relation) ->
           if not _.some(v, (relation) -> relation[idField] == orig_relation[idField])
-            v.push(_.extend(orig_relation, {'_destroy': '1'}))
+            v.push(_.extend({}, orig_relation, {'_destroy': '1'}))
         )
 
         # not there originally. added. no action.
 
-        # not there originally, added, removed.
+        # not there originally, added, removed. no action is needed for this.
     )
     BaseModel.prototype.set.apply(@, [attrs])
+
 
 class window.BillingSettingsView extends CrmModelView
   modelName: 'billing_settings'
