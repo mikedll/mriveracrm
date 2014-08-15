@@ -17,6 +17,5 @@ class window.BillingSettingsView extends CrmModelView
 
   initialize: (options) ->
     CrmModelView.prototype.initialize.apply(@, arguments)
-    @useDirty = false
     @features = new Features()
 
