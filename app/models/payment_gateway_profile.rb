@@ -6,6 +6,10 @@ class PaymentGatewayProfile < ActiveRecord::Base
 
   attr_accessor :last_error, :card_number, :expiration_month, :expiration_year, :cv_code
 
+  def self.card_virtual_attributes
+    [:card_number, :expiration_month, :expiration_year, :cv_code]
+  end
+
   def card_from_opts(opts)
     ActiveMerchant::Billing::CreditCard.new({
                                               :month => opts[:expiration_month].to_i,

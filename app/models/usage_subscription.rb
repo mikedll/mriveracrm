@@ -6,12 +6,13 @@ class UsageSubscription < ActiveRecord::Base
   has_many :features, :through => :feature_selections
 
   accepts_nested_attributes_for :feature_selections, :allow_destroy => true, :reject_if => :all_blank
+  accepts_nested_attributes_for :payment_gateway_profile, :reject_if => :all_blank
 
   after_create :require_payment_gateway_profile
 
   def renderable_json
     to_json({
-              :methods => [:feature_selections_attributes],
+              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes],
               :include => {
                 :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand]
@@ -23,6 +24,13 @@ class UsageSubscription < ActiveRecord::Base
 
   def feature_selections_attributes
     feature_selections.map { |fs| { :id => fs.id, :feature_id => fs.feature.id } }
+  end
+
+  #
+  # These attributes are fake.
+  #
+  def payment_gateway_profile_attributes
+    PaymentGatewayProfile.card_virtual_attributes.inject({  }) { |acc, e| acc[e] = ""; acc }
   end
 
   def has_feature(f)
