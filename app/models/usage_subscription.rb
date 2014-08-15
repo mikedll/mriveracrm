@@ -22,7 +22,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def feature_selections_attributes
-    feature_selections.map { |fs| { :feature_selection_id => fs.id, :feature_id => fs.feature.id } }
+    feature_selections.map { |fs| { :id => fs.id, :feature_id => fs.feature.id } }
   end
 
   def has_feature(f)
