@@ -142,28 +142,24 @@ class window.BaseModel extends Backbone.Model
         idField = @hasrelations[attribute_name]
         cur_related_set = @get(attribute_name)
         orig_related_set = if attribute_name of @_attributesSinceSync then @_attributesSinceSync[attribute_name] else cur_related_set
-        prev_related_set = @previous(attribute_name)
 
-        # do a merge of attributes, usin the idField as a matcher.
-        # if an intermediate table is being used in a many-to-many, this preserves the key
-        # of the relation object.
-        # (n * m) where n == size(v) and m == size(current value of this attribute)
+        # if relation is already in cur relation set, preserve all current existing keys
+        # and not just the foreign key.
+        # (n * m) where n == size(v array) and m == size(current array value of this attribute)
         _.each(v, (relation, i) ->
-
-          # retain existing keys if we are overriding one
           relation_before = _.find(cur_related_set, (r) -> r[idField] == relation[idField])
           if typeof(relation_before) != "undefined"
-            relation = _.extend({}, relation_before, relation)
+            v[i] = _.extend({}, relation_before, relation)
 
-            # this relation was present originally, was deleted, and has returned. cancel _destroy.
-            if _.has(relation, '_destroy')
-              delete relation['_destroy']
-
-          v[i] = relation # modifying relation for some reason doesn't modify v, the array.
+          # if key '_destroy' is present, this relation was present originally,
+          # then was removed (added _destroy), then has been returned as of this set operation.
+          # cancel the destroy by removing the '_destroy' key.
+          if _.has(relation, '_destroy')
+            delete relation['_destroy']
         )
 
-        # scan for relations that were there originally, and are now now gone, or fading. mark with _destroy.
-        # (o * n) where o == size(original value of this attribute) and n == size(v)
+        # originally present, removed. mark with '_destroy'.
+        # (o * n) where o == size(original value of this attribute) and n == size(v array)
         _.each(orig_related_set, (orig_relation) ->
           if not _.some(v, (relation) -> relation[idField] == orig_relation[idField])
             v.push(_.extend({}, orig_relation, {'_destroy': '1'}))
@@ -187,13 +183,22 @@ class window.BaseModel extends Backbone.Model
   # sync(...)  or fetch to verify that.
   #
   # Can be used if one is confident that a change elsewhere on a view
-  # has forced a change to this model in the database (rate).
+  # has forced a change to this model in the database (rare).
   #
   setAndAssumeSync: (attrs) ->
     @set(attrs)
     @trigger('sync', @, null, {})
 
   onSync: () ->
+
+    # purge any destroyed attrs, before deleting history.
+    attrs = {}
+    _.each(@hasrelations, (idField, attributeName, l) =>
+      attrs[attributeName] = _.filter(@get(attributeName), (r) -> not _.has(r, '_destroy'))
+    )
+    if _.size(attrs) > 0
+      @set(attrs)
+
     @_attributesSinceSync = {}
     @_isRequesting = false
     @_isInvalid = false
@@ -676,7 +681,7 @@ class window.CrmModelView extends ModelBaseView
           idField = if attribute_name of @model.hasrelations then @model.hasrelations[attribute_name] else 'id'
           valAsInt = parseInt(el$.val())
           if Object.prototype.toString.call( v ) == '[object Array]'
-            el$.prop('checked', _.some(v, (related) -> related[idField] == valAsInt))
+            el$.prop('checked', _.some(v, (related) -> related[idField] == valAsInt && not _.has(related, '_destroy')))
           else
             el$.prop('checked', v[idField] == valAsInt)
         else
