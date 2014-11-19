@@ -18,7 +18,7 @@ class UsageSubscription < ActiveRecord::Base
                   :only => [:card_last_4, :card_brand]
                 }
               },
-              :only => [:plan, :generation]
+              :only => []
             })
   end
 
