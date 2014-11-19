@@ -91,6 +91,7 @@ class window.BaseModel extends Backbone.Model
 
     @_lastRequestError = null
     @_attributesSinceSync = {}
+    @dumpOnChange = false
     @listenTo(@, 'invalid', @onInvalid)
     @listenTo(@, 'change', @onChange)
     @listenTo(@, 'request', @onRequest)
@@ -129,6 +130,9 @@ class window.BaseModel extends Backbone.Model
     else
       @validationError = null
       @_isInvalid = false
+
+    if @dumpOnChange
+      console.log(@attributes)
 
   #
   # Originally overridden to handle hasrelation relations from checkboxes.
