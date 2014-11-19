@@ -148,26 +148,26 @@ class window.BaseModel extends Backbone.Model
         # (n * m) where n == size(v array) and m == size(current array value of this attribute)
         _.each(v, (relation, i) ->
           relation_before = _.find(cur_related_set, (r) -> r[idField] == relation[idField])
+
           if typeof(relation_before) != "undefined"
-            v[i] = _.extend({}, relation_before, relation)
+            relation = _.extend({}, relation_before, relation)
 
           # if key '_destroy' is present, this relation was present originally,
           # then was removed (added _destroy), then has been returned as of this set operation.
           # cancel the destroy by removing the '_destroy' key.
           if _.has(relation, '_destroy')
             delete relation['_destroy']
+
+          v[i] = relation
         )
 
-        # originally present, removed. mark with '_destroy'.
+
+        # originally present. removed. mark with '_destroy'.
         # (o * n) where o == size(original value of this attribute) and n == size(v array)
         _.each(orig_related_set, (orig_relation) ->
           if not _.some(v, (relation) -> relation[idField] == orig_relation[idField])
             v.push(_.extend({}, orig_relation, {'_destroy': '1'}))
         )
-
-        # not there originally. added. no action.
-
-        # not there originally, added, removed. no action is needed for this.
     )
     Backbone.Model.prototype.set.apply(@, [attrs])
 
@@ -190,14 +190,24 @@ class window.BaseModel extends Backbone.Model
     @trigger('sync', @, null, {})
 
   onSync: () ->
-
     # purge any destroyed attrs, before deleting history.
-    attrs = {}
+    retainedHasRelations = {}
+    destroyingRelations = {}
     _.each(@hasrelations, (idField, attributeName, l) =>
-      attrs[attributeName] = _.filter(@get(attributeName), (r) -> not _.has(r, '_destroy'))
+      retainable = _.partition(@get(attributeName), (r) -> not _.has(r, '_destroy'))
+      retainedHasRelations[attributeName] = retainable[0]
+      destroyingRelations[attributeName] = retainable[1]
     )
-    if _.size(attrs) > 0
-      @set(attrs)
+
+    # purge history of destroyed to prevent _destroy additions in set(...).
+    _.each(destroyingRelations, (destroyed, attributeName, l) =>
+      # delete orig_set history, to prevent _destroy markings
+      @unset(attributeName, silent: true)
+      delete @_attributesSinceSync[attributeName]
+    )
+
+    if _.size(retainedHasRelations) > 0
+      @set(retainedHasRelations) # remove those elements.
 
     @_attributesSinceSync = {}
     @_isRequesting = false
