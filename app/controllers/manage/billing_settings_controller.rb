@@ -38,7 +38,7 @@ class Manage::BillingSettingsController < Manage::BaseController
 
     before :update
     begin
-      result = current_object.payment_gateway_profile.update_payment_info((params[:billing_settings] || {})[:payment_gateway_profile] || {})
+      result = current_object.payment_gateway_profile.update_payment_info((params[:billing_settings] || {})[:payment_gateway_profile_attributes] || {})
     rescue ActiveRecord::StaleObjectError
       current_object.reload
       result = false
