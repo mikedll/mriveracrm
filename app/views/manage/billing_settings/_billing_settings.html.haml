@@ -3,10 +3,11 @@
 
   .errors.alert.alert-error.hide
 
-  = f.input :card_number
-  = f.input :expiration_month
-  = f.input :expiration_year
-  = f.input :cv_code
+  = f.simple_fields_for :payment_gateway_profile_attributes do |pgpa|
+    = pgpa.input :card_number
+    = pgpa.input :expiration_month
+    = pgpa.input :expiration_year
+    = pgpa.input :cv_code
 
   %h5
     Select which features you want to enable:

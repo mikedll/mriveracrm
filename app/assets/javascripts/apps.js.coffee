@@ -508,6 +508,7 @@ class window.CrmModelView extends ModelBaseView
     @listenTo(@model, 'change', @onModelChanged)
 
     @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
+    @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
 
     @inputsCache = []
     @readonlyInputsCache = []
@@ -612,27 +613,35 @@ class window.CrmModelView extends ModelBaseView
     return true
 
   nameFromInput: (elSelection) ->
-    attribute_name = null
+    attributeName = null
 
     if elSelection.hasClass('read-only-field')
       if elSelection.data('name')?
-        attribute_name = elSelection.data('name')
+        attributeName = elSelection.data('name')
     else
-      matched = @attributeMatcher.exec(elSelection.prop('name'))
+      n = elSelection.prop('name')
+      matched = @attributeMatcher.exec(n)
       if matched? && matched.length == 2
-        attribute_name = matched[1]
-    attribute_name
+        attributeName = matched[1]
+
+        # this could potentially be written even more generically.
+        if matched[0].length != n.length
+          secondLevelMatch = @subAttributeMatcher.exec(n.substring(matched[1].length, n.length))
+          if secondLevelMatch? && secondLevelMatch.length == 2
+            attributeName = [attributeName, secondLevelMatch[1]]
+
+    attributeName
 
   #
   # returns null if it can't get the attribute name and value
   #
-  # returns [attribute_name, value] otherwise.
+  # returns [attributeName, value] otherwise.
   #
   # e.g. ['company', 'Smith and Son']
   #
   nameAndValueFromInput: (elSelection) ->
-    attribute_name = @nameFromInput(elSelection)
-    if attribute_name?
+    attributeName = @nameFromInput(elSelection)
+    if attributeName?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
       else if elSelection.hasClass('float')
@@ -649,7 +658,7 @@ class window.CrmModelView extends ModelBaseView
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
         else if elSelection.hasClass('hasrelation')
-          id_field = @model.hasrelations[attribute_name]
+          id_field = @model.hasrelations[attributeName]
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() ->
             h = {}
             h[id_field] = parseInt($(this).val())
@@ -660,7 +669,7 @@ class window.CrmModelView extends ModelBaseView
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() -> $(this).val()).toArray()
       else
         val = elSelection.val()
-      return [attribute_name, val]
+      return [attributeName, val]
     else
       return null
 
@@ -683,16 +692,28 @@ class window.CrmModelView extends ModelBaseView
     @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
 
+  deepGet: (attrs) ->
+    return @model.get(attrs) if !_.isArray(attrs)
+
+    fetched = null
+    _.each(attrs, (v, i) =>
+      if fetched?
+        fetched = fetched[v]
+      else
+        fetched = @model.get(v)
+    )
+    fetched
+
   copyModelToForm: () ->
     @inputsCache.each((i, el) =>
       el$ = $(el)
-      attribute_name = @nameFromInput(el$)
-      if attribute_name? && @model.get(attribute_name)?
-        v = @model.get(attribute_name)
+      attributeName = @nameFromInput(el$)
+      if attributeName? && @deepGet(attributeName)?
+        v = @deepGet(attributeName)
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
         if el$.is('[type=checkbox]') && el$.hasClass('hasrelation')
-          idField = if attribute_name of @model.hasrelations then @model.hasrelations[attribute_name] else 'id'
+          idField = if attributeName of @model.hasrelations then @model.hasrelations[attributeName] else 'id'
           valAsInt = parseInt(el$.val())
           if Object.prototype.toString.call( v ) == '[object Array]'
             el$.prop('checked', _.some(v, (related) -> related[idField] == valAsInt && not _.has(related, '_destroy')))
@@ -700,21 +721,21 @@ class window.CrmModelView extends ModelBaseView
             el$.prop('checked', v[idField] == valAsInt)
         else
           if el$.hasClass('datetimepicker')
-            v = @toHumanReadableDateTimeFormat(attribute_name)
+            v = @toHumanReadableDateTimeFormat(attributeName)
           else if el$.hasClass('hasDatepicker')
-            v = @toHumanReadableDateFormat(attribute_name)
+            v = @toHumanReadableDateFormat(attributeName)
           el$.val(v)
     )
 
     @readonlyInputsCache.each((i, el) =>
       el$ = $(el)
-      attribute_name = el$.data('name')
-      if (attribute_name? && @model.get(attribute_name)?)
-        v = @model.get(attribute_name)
+      attributeName = el$.data('name')
+      if (attributeName? && @model.get(attributeName)?)
+        v = @model.get(attributeName)
         if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_name)
+          v = @toHumanReadableDateTimeFormat(attributeName)
         else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_name)
+          v = @toHumanReadableDateFormat(attributeName)
         el$.find('.controls').text(v)
     )
 
