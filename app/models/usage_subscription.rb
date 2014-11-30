@@ -76,7 +76,11 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def payment_profile_profilable_card_args
-    {}
+    o = business.employees.is_owner.first
+    {
+      :first_name => o.first_name,
+      :last_name => o.last_name
+    }
   end
 
   def require_payment_gateway_profile

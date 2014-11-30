@@ -13,6 +13,10 @@ class Manage::BillingSettingsController < Manage::BaseController
       format.json { render :json => current_object.renderable_json }
     end
 
+    response_for :payment_info_update_fails do |format|
+      format.json { render :status => :unprocessable_entity, :json => { :object => current_object.payment_gateway_profile.public, :errors => current_object.payment_gateway_profile.errors, :full_messages => current_object.payment_gateway_profile.errors.full_messages} }
+    end
+
     response_for(:update_fails) do |format|
       format.json { render :status => :unprocessable_entity, :json => { :object => current_object.renderable_json, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
@@ -37,22 +41,27 @@ class Manage::BillingSettingsController < Manage::BaseController
     end
 
     before :update
-    begin
-      result = current_object.payment_gateway_profile.update_payment_info((params[:billing_settings] || {})[:payment_gateway_profile_attributes] || {})
-    rescue ActiveRecord::StaleObjectError
-      current_object.reload
-      result = false
-    end
 
-    if current_object.payment_gateway_profile.changed? && !result
-      save_failed!
-      after :update_fails
-      response_for :update_fails
-      return
+    payment_params = params[:payment_gateway_profile_attributes] || {}
+    if !payment_params.blank?
+
+      result = false
+      begin
+        result = current_object.payment_gateway_profile.update_payment_info(payment_params)
+      rescue ActiveRecord::StaleObjectError
+        current_object.reload
+        result = false
+      end
+
+      if !result
+        save_failed!
+        after :update_fails
+        response_for :payment_info_update_fails
+        return
+      end
     end
 
     # we dont use a transaction. we'll allow a second phase of errors, after the card update.
-
     begin
       current_object.attributes = object_parameters
       current_object.feature_selections_attributes = params[:feature_selections_attributes] # this isnt in attr accessible
