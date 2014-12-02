@@ -43,7 +43,7 @@ class Manage::BillingSettingsController < Manage::BaseController
     before :update
 
     payment_params = params[:payment_gateway_profile_attributes] || {}
-    if !payment_params.blank?
+    if !payment_params.values.all? { |v| v.blank? }
 
       result = false
       begin
