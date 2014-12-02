@@ -546,23 +546,44 @@ class window.CrmModelView extends ModelBaseView
 
   decorateDirty: () ->
     return if !@useDirty
-    changed = @model.changedAttributesSinceSync()
-    @inputsCache.each((i, domEl)  =>
-      el$ = $(domEl)
-      attribute_name = @nameFromInput( el$ )
-      if attribute_name?
-        if @model.isDirty() and _.has(changed, attribute_name)
-          el$.closest('.control-group').addClass('warning')
+
+    if !@model.isDirty()
+      @inputsCache.each((i, domEl)  =>
+        $(domEl).closest('.control-group').removeClass('warning')
+      )
+    else
+      current = @model.changedAttributes()
+      changed = @model.changedAttributesSinceSync()
+      @inputsCache.each((i, domEl)  =>
+        el$ = $(domEl)
+        attributeName = @nameFromInput( el$ )
+        if attributeName?
+          markChanged = false
+          if _.isArray(attributeName)
+            changedO = changed[attributeName[0]]
+            currentO = current[attributeName[0]]
+            if typeof(changedO) != "undefined"
+              _.each(attributeName.slice(1,-1), (el, i) =>
+                currentO = currentO[el]
+                changedO = changedO[el]
+              )
+              if changedO[attributeName[attributeName.length - 1]] != currentO[attributeName[attributeName.length - 1]]
+                markChanged = true
+          else if _.has(changed, attributeName)
+            markChanged = true
+
+          if markChanged
+            el$.closest('.control-group').addClass('warning')
+          else
+            el$.closest('.control-group').removeClass('warning')
         else
-          el$.closest('.control-group').removeClass('warning')
-      else
-        # this may not be an input related to our model
-    )
+          # this may not be an input related to our model
+      )
 
     @$('.read-only-field').each((i, domEl) =>
       el$ = $(domEl)
-      attribute_name = el$.data('name')
-      if attribute_name? and @model.isDirty() and _.has(changed, attribute_name)
+      attributeName = el$.data('name')
+      if attributeName? and @model.isDirty() and _.has(changed, attributeName)
         el$.closest('.control-group').addClass('warning')
       else
         el$.closest('.control-group').removeClass('warning')
