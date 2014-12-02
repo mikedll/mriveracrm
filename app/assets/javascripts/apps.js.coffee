@@ -605,10 +605,7 @@ class window.CrmModelView extends ModelBaseView
       return false
 
     nameAndValue = @nameAndValueFromInput($(e.target))
-    if nameAndValue?
-      attrs = {}
-      attrs[nameAndValue[0]] = nameAndValue[1]
-      @model.set(attrs)
+    @deepSet([nameAndValue]) if nameAndValue?
 
     return true
 
@@ -691,6 +688,27 @@ class window.CrmModelView extends ModelBaseView
     @parent.childViewPushed(@[collectionName + 'AppView'])
     @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
+
+  deepSet: (attrsArray) ->
+    attrs = {}
+    _.each(attrsArray, (packedAssignment, l) =>
+      if !_.isArray(packedAssignment[0])
+        attrs[packedAssignment[0]] = packedAssignment[1]
+      else
+        # need to traverse deeper into contained hash and make one
+        # with the proper value set.
+        curHash = @model.get(packedAssignment[0][0])
+
+        _.each(packedAssignment[0].slice(1,-1), (hashIndex, i) =>
+          curHash = curHash[hashIndex]
+        )
+
+        curHash[packedAssignment[0][packedAssignment[0].length - 1]] = packedAssignment[1]
+
+        attrs[packedAssignment[0][0]] = curHash # insert deep hash
+    )
+
+    @model.set(attrs)
 
   deepGet: (attrs) ->
     return @model.get(attrs) if !_.isArray(attrs)
