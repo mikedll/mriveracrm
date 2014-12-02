@@ -617,15 +617,19 @@ class window.CrmModelView extends ModelBaseView
         attributeName = elSelection.data('name')
     else
       n = elSelection.prop('name')
+      cumulativeMatchedLength = 0
       matched = @attributeMatcher.exec(n)
-      if matched? && matched.length == 2
-        attributeName = matched[1]
 
-        # this could potentially be written even more generically.
-        if matched[0].length != n.length
-          secondLevelMatch = @subAttributeMatcher.exec(n.substring(matched[1].length, n.length))
-          if secondLevelMatch? && secondLevelMatch.length == 2
-            attributeName = [attributeName, secondLevelMatch[1]]
+      while matched? && matched.length == 2 && cumulativeMatchedLength != n.length
+        if !attributeName?
+          attributeName = matched[1]
+        else if _.isArray(attributeName)
+          attributeName.push(matched[1])
+        else
+          attributeName = [attributeName, matched[1]]
+
+        cumulativeMatchedLength += matched[0].length
+        matched = @subAttributeMatcher.exec(n.substring(cumulativeMatchedLength, n.length))
 
     attributeName
 
