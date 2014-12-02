@@ -107,13 +107,17 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
   end
 
+  RECOGNIZED_ERRORS = [
+    "Failed to create"
+  ]
+
   def update_plan!(plan_id)
     _with_stripe_key do
       customer = Stripe::Customer.retrieve(self.vendor_id)
 
       begin
         if customer.subscriptions.data.empty?
-          result = customer.subscriptions.create(:trial_end => Time.now + payment_gateway_profilable.class::TRIAL_DURATION,
+          result = customer.subscriptions.create(:trial_end => (Time.now + payment_gateway_profilable.class::TRIAL_DURATION).to_i,
                                                  :plan => plan_id)
         else
           sub = customer.subscriptions.data.first
@@ -121,7 +125,14 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
           sub.save
         end
       rescue Stripe::InvalidRequestError => e
-        self.payment_gateway_profilable.errors(:base, I18n.t('payment_gateway_profile.plan_update_error'))
+
+        if RECOGNIZED_ERRORS.any? { |m| e.message.start_with?(m) }
+          payment_gateway_profilable.errors.add(:base, I18n.t('payment_gateway_profile.custom_plan_update_error', :message => e.message))
+        else
+          payment_gateway_profilable.errors.add(:base, I18n.t('payment_gateway_profile.plan_update_error'))
+          DetectedError.create(:message => e.message, :business_id => self.payment_gateway_profilable.business_id)
+        end
+
         return false
       end
 
@@ -140,24 +151,26 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   def ensure_plan_created!(plan_id, price)
     _with_stripe_key do
 
-      plan_id = nil
+      plan = nil
       begin
-        plan_id = Stripe::Plan.retrieve plan_id
+        plan = Stripe::Plan.retrieve plan_id
       rescue Stripe::InvalidRequestError => e
-        if e.message.contains?("No such plan:")
-          plan_id = nil
+        if e.message.start_with?("No such plan:")
+          plan = nil
         else
           raise e
         end
       end
 
-      if plan_id.nil?
-        plan_id = Stripe::Plan.create(:id => plan_id,
-                                      :amount => price * 100,
-                                      :currency => STRIPE_CURRENCIES['usd'],
-                                      :interval => STRIPE_INTERVALS['month'],
-                                      :name => plan_id)
+      if plan.nil?
+        plan = Stripe::Plan.create(:id => plan_id,
+                                   :amount => (price * 100).to_i,
+                                   :currency => STRIPE_CURRENCIES['usd'],
+                                   :interval => STRIPE_INTERVALS['month'],
+                                   :name => plan_id)
       end
+
+      plan
     end
   end
 

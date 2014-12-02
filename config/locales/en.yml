@@ -71,6 +71,7 @@ en:
     cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."
     plan_update_error: "Subscription plan failed to update. Check your inputs. If this persists. please contact your business representative."
+    custom_plan_update_error: "Subscription plan failed to update: %{message}"
 
   users:
     new_business_failed: "Unable to relate this new user to the new business as its owner. Contact support if the problem persists."
