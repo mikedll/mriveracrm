@@ -707,9 +707,27 @@ class window.CrmModelView extends ModelBaseView
           curHash = curHash[hashIndex]
         )
 
-        curHash[packedAssignment[0][packedAssignment[0].length - 1]] = packedAssignment[1]
+        if curHash[packedAssignment[0][packedAssignment[0].length - 1]] != packedAssignment[1]
 
-        attrs[packedAssignment[0][0]] = curHash # insert deep hash
+          if !_.has(attrs, packedAssignment[0][0])
+            # this is tricky. don't modify the nested hash that's
+            # already in the backbone model object. you have to make an
+            # assignment to a new hash object, or you'll modify the
+            # attributes of the backbone object directly here, even
+            # though 'set' has yet to be called.
+            curHash = _.clone(curHash)
+          else
+            # if we already constructed a new hash, there will be an
+            # assignment in attrs. you can make changes to it freely.
+            curHash = attrs[packedAssignment[0][0]]
+
+          # invariant: curHash no longer points to anything associated with the original
+          # backbone model object.
+
+          curHash[packedAssignment[0][packedAssignment[0].length - 1]] = packedAssignment[1]
+
+          attrs[packedAssignment[0][0]] = curHash
+
     )
 
     @model.set(attrs)
