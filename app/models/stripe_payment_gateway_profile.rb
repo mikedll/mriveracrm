@@ -107,6 +107,60 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
   end
 
+  def update_plan!(plan_id)
+    _with_stripe_key do
+      customer = Stripe::Customer.retrieve(self.vendor_id)
+
+      begin
+        if customer.subscriptions.data.empty?
+          result = customer.subscriptions.create(:trial_end => Time.now + payment_gateway_profilable.class::TRIAL_DURATION,
+                                                 :plan => plan_id)
+        else
+          sub = customer.subscriptions.data.first
+          sub.plan = plan_id
+          sub.save
+        end
+      rescue Stripe::InvalidRequestError => e
+        self.payment_gateway_profilable.errors(:base, I18n.t('payment_gateway_profile.plan_update_error'))
+        return false
+      end
+
+      true
+    end
+  end
+
+  STRIPE_INTERVALS = {
+    'month' => 'month'
+  }
+
+  STRIPE_CURRENCIES = {
+    'usd' => 'usd'
+  }
+
+  def ensure_plan_created!(plan_id, price)
+    _with_stripe_key do
+
+      plan_id = nil
+      begin
+        plan_id = Stripe::Plan.retrieve plan_id
+      rescue Stripe::InvalidRequestError => e
+        if e.message.contains?("No such plan:")
+          plan_id = nil
+        else
+          raise e
+        end
+      end
+
+      if plan_id.nil?
+        plan_id = Stripe::Plan.create(:id => plan_id,
+                                      :amount => price * 100,
+                                      :currency => STRIPE_CURRENCIES['usd'],
+                                      :interval => STRIPE_INTERVALS['month'],
+                                      :name => plan_id)
+      end
+    end
+  end
+
   def reload_remote
     if self.vendor_id.blank?
       DetectedErrors.create(:message => "Reloading but no vendor id", :client_id => payment_gateway_profilable_id)

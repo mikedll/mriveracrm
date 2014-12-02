@@ -10,6 +10,8 @@ class UsageSubscription < ActiveRecord::Base
 
   after_create :require_payment_gateway_profile
 
+  TRIAL_DURATION = 2.weeks
+
   def renderable_json
     to_json({
               :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes],
@@ -40,7 +42,7 @@ class UsageSubscription < ActiveRecord::Base
   def calculated_plan_id
     return @calculated_plan_id if @calculated_pland_id
     _calculate_price_and_plan
-    @calculated_pland_id
+    @calculated_plan_id
   end
 
   def calculated_price
@@ -49,18 +51,14 @@ class UsageSubscription < ActiveRecord::Base
     @calculated_price
   end
 
-  def subscribe!
-    fps = self.feature_pricings.for_generation(generation)
+  def ensure_correct_plan!
+    # fps = self.feature_pricings.for_generation(generation)
 
-    # _with_billing_stripe_key do
-    #   plan = Stripe::Plan.find_by_id calculated_plan_id
-    #   if plan.nil?
-    #     plan = Stripe::Plan.create(:id => calculated_plan_id, :price => calculated_price)
-    #     # handle errors
-    #   end
-
-    #   Subsription.create(:plan => calculated_plan_id)
-    # end
+    if plan != calculated_plan_id
+      self.plan = calculated_plan_id
+      payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
+      save! if payment_gateway_profile.update_plan(plan)
+    end
   end
 
   def payment_gateway_profilable_remote_app_key
@@ -188,24 +186,31 @@ class UsageSubscription < ActiveRecord::Base
     features.each do |f|
       # better to use feature index...feature name can change...
       if for_feature_index[f.bit_index].nil?
-        # latest generation that is less than or equal to this usage subscription's generation
-        fp = f.feature_pricings.select { |fp| fp.generation <= generation }.sort { |a,b| a.generation <=> b.generation }.last
+
+        # least-expensive generation that came with, or after, this one.
+        fp = f.feature_pricings.select { |fp| fp.generation >= generation }.sort { |a,b| a.price <=> b.price }.first
+
+        if fp.nil?
+          f.ensure_generation_pricing!
+          fp = f.feature_pricings.first
+        end
+
         for_feature_index[f.bit_index] = fp
       end
     end
 
 
     features_bitstring = ""
-    (0...feature_bits).each do |i|
+    (0...FEATURE_BITS).each do |i|
       if for_feature_index[i]
-        features_bitstring = "0#{features_bitstring}"
-      else
         features_bitstring = "1#{features_bitstring}"
+      else
+        features_bitstring = "0#{features_bitstring}"
       end
     end
 
-    @calculated_price = for_feature_index.values.inject(BigDecimal.new("0.0")) { |acc, el| acc += el.price; acc}
-    @calculated_plan_id = [[_to_bit_string(PRICING_SCHEME) + _to_bit_string(generation_bitstring) + features_bitstring].pack("B*")].pack("m0")
+    @calculated_price = for_feature_index.values.inject(BigDecimal.new("0.0")) { |acc, fp| acc += fp.price; acc}
+    @calculated_plan_id = [[_to_bit_string(PRICING_SCHEME) + _to_bit_string(generation) + features_bitstring].pack("B*")].pack("m0")
   end
 
   # converts integer to bit string, the length of which is a multiple of 4.

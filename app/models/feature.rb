@@ -12,6 +12,10 @@ class Feature < ActiveRecord::Base
   validates :bit_index, :uniqueness => true
   validate :_never_change_index
 
+  def self.ensure_minimal_pricings!
+    Feature.all.each {  |f| f.ensure_generation_pricing! }
+  end
+
   def self.ensure_master_list_created!
     them = all
 
@@ -25,6 +29,12 @@ class Feature < ActiveRecord::Base
 
     them.sort! { |a,b| a.bit_index <=> b.bit_index }
     them
+  end
+
+  def ensure_generation_pricing!
+    if feature_pricings.empty?
+      FeaturePricing.create!(:generation => 1, :price => FeaturePricing::DEFAULT, :feature => self)
+    end
   end
 
   def as_json_public
