@@ -19,12 +19,13 @@ class PaymentGatewayProfile < ActiveRecord::Base
                                             }.merge(payment_gateway_profilable.payment_profile_profilable_card_args))
   end
 
+  EXCLUDED_CARD_KEY_ERRORS = ['brand']
   def card_valid?(card)
     card.validate
     if !card.valid?
       lookup = {:month => :expiration_month, :year => :expiration_year, :number => :card_number, :verification_value => :cv_code}
       card.errors.each do |k,es|
-        es.each { |e| errors.add(lookup[k.to_sym] ? lookup[k.to_sym] : k, e) }
+        es.each { |e| errors.add(lookup[k.to_sym] ? lookup[k.to_sym] : k, e) if !EXCLUDED_CARD_KEY_ERRORS.any? { |excluded| excluded == k } }
       end
       return false
     end
