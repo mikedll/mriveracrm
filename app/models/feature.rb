@@ -33,7 +33,7 @@ class Feature < ActiveRecord::Base
 
   def ensure_generation_pricing!
     if feature_pricings.empty?
-      FeaturePricing.create!(:generation => 1, :price => FeaturePricing::DEFAULT, :feature => self)
+      fp = FeaturePricing.create!(:generation => 1, :price => FeaturePricing::DEFAULT, :feature => self)
     end
   end
 
