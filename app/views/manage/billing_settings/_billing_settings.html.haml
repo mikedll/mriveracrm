@@ -12,7 +12,7 @@
   %h5
     Select which features you want to enable:
 
-  - Feature.all.each do |feature|
+  - Feature.bit_index_ordered.all.each do |feature|
     .control-group
       .control-label
         %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}"}

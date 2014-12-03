@@ -12,6 +12,8 @@ class Feature < ActiveRecord::Base
   validates :bit_index, :uniqueness => true
   validate :_never_change_index
 
+  scope :bit_index_ordered, lambda { order('bit_index') }
+
   def self.ensure_minimal_pricings!
     Feature.all.each {  |f| f.ensure_generation_pricing! }
   end

@@ -5,4 +5,6 @@ class FeatureSelection < ActiveRecord::Base
   validates :feature_id, :presence => true, :uniqueness => { :scope => :usage_subscription_id }
   validates :usage_subscription_id, :presence => true
 
+  scope :bit_index_ordered, lambda { joins(:feature).order('features.bit_index') }
+
 end
