@@ -21,7 +21,7 @@
       = render :partial => 'shared/model_view_basic_buttons'
  
       .btn-group
-        %button.put_action.btn{ :data => {:action => 'mark_successful', :attribute_enabler => 'succeedable', :enabled_when => 'true', :confirm => "Review your information carefully. It cannot be deleted after this. Proceed?"}}
+        %button.put_action.btn{ :type => "button", :data => {:action => 'mark_successful', :attribute_enabler => 'succeedable', :enabled_when => 'true', :confirm => "Review your information carefully. It cannot be deleted after this. Proceed?"}}
           Mark Successful
 
       = render :partial => 'shared/model_view_delete_button', :locals => { :data => { :attribute_enabler => 'destroyable', :enabled_when => 'true' } }

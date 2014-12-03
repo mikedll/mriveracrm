@@ -31,23 +31,23 @@
       = render :partial => 'shared/model_view_basic_buttons'
 
       .btn-group
-        %button.put_action.btn{ :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
+        %button.put_action.btn{ :type => "button", :data => {:action => 'mark_pending', :hotkey => 'm', :attribute_enabler => 'status', :enabled_when => 'open', :confirm => "Mark this invoice as pending so others can see it?"}}
           Mark Pending
 
       .btn-group
-        %button.put_action.btn{ :data => {:action => 'regenerate_pdf', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment,paid,closed,cancelled'}}
+        %button.put_action.btn{ :type => "button", :data => {:action => 'regenerate_pdf', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment,paid,closed,cancelled'}}
           Regenerate PDF
 
       .btn-group
-        %button.put_action.btn{ :data => {:action => 'mark_paid', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will mark the invoice as paid. You must have created an outside transaction to do this."}}
+        %button.put_action.btn{ :type => "button", :data => {:action => 'mark_paid', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will mark the invoice as paid. You must have created an outside transaction to do this."}}
           Mark Paid
 
       .btn-group
-        %button.put_action.btn{ :data => {:action => 'cancel', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will cancel this invoice. It will be hidden from the client."}}
+        %button.put_action.btn{ :type => "button", :data => {:action => 'cancel', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "This will cancel this invoice. It will be hidden from the client."}}
           Cancel
 
       .btn-group
-        %button.put_action.btn.btn-warning{ :data => {:action => 'charge', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "Has the client approved this?"}}
+        %button.put_action.btn.btn-warning{ :type => "button", :data => {:action => 'charge', :attribute_enabler => 'status', :enabled_when => 'pending,failed_payment', :confirm => "Has the client approved this?"}}
           Charge
 
       = render :partial => 'shared/model_view_delete_button', :locals => { :data => { :attribute_enabler => 'status', :enabled_when => 'open' } } 
