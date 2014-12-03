@@ -91,12 +91,16 @@ class window.BaseModel extends Backbone.Model
 
     @_lastRequestError = null
     @_attributesSinceSync = {}
-    @dumpOnChange = false
+
+    @ignoredAttributes = {}
+
     @listenTo(@, 'invalid', @onInvalid)
     @listenTo(@, 'change', @onChange)
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
     @listenTo(@, 'error', @onError)
+
+    @dumpOnChange = false
 
   isDirty: () ->
     return @_isDirty
@@ -115,6 +119,12 @@ class window.BaseModel extends Backbone.Model
 
     # todo: should check if we are out of date
     delete attrs['updated_at']
+
+    # ignore any attrs we're told to...
+    _.each(attrs, (v, k) =>
+      if _.has(@ignoredAttributes, k)
+        delete attrs[k]
+    )
 
     _.each(attrs, (value, attribute_name) =>
       if not _.has(@_attributesSinceSync, attribute_name)
