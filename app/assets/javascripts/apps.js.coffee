@@ -566,7 +566,7 @@ class window.CrmModelView extends ModelBaseView
         $(domEl).closest('.control-group').removeClass('warning')
       )
     else
-      current = @model.changedAttributes()
+      current = @model.attributes
       changed = @model.changedAttributesSinceSync()
       @inputsCache.each((i, domEl)  =>
         el$ = $(domEl)
