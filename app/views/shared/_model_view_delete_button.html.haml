@@ -1,3 +1,3 @@
 .btn-group.pull-right
-  %button.destroy.btn.btn-danger{ :data => { :confirm => t('delete_confirm') }.merge(defined?(data) ? data : {} ) }
+  %button.destroy.btn.btn-danger{ :type => "button", :data => { :confirm => t('delete_confirm') }.merge(defined?(data) ? data : {} ) }
     Delete

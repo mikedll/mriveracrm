@@ -492,6 +492,7 @@ class window.CrmModelView extends ModelBaseView
       'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click .btn.save': 'save'
+      'click button[type=button][data-confirm]': 'startConfirmation'
       'confirm:complete .btn.revert': 'revert'
       'confirm:complete .btn.destroy': 'destroy'
       'confirm:complete .btn.put_action': 'putActionConfirmed'
@@ -620,10 +621,16 @@ class window.CrmModelView extends ModelBaseView
     # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
-    if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
-      @save()
-      e.stopPropagation()
-      return false
+
+    if e.keyCode == 13
+      if $(e.target).is('button')
+        return false # ignore 'enter' on a button key. it will be triggered elsewhere.
+
+      if(e.ctrlKey == false && !$(e.target).is('textarea'))
+        e.stopPropagation()
+        e.preventDefault()
+        @save()
+        return false
 
     nameAndValue = @nameAndValueFromInput($(e.target))
     @deepSet([nameAndValue]) if nameAndValue?
@@ -809,6 +816,21 @@ class window.CrmModelView extends ModelBaseView
         else
           el$.addClass('disabled')
     )
+
+  startConfirmation: (e) ->
+    # we do this because type => button on the %button tag disables
+    # the rails UJS handling of the confirm event.
+    element = $(e.target)
+    message = element.data('confirm')
+
+    if !message?
+      return true
+
+    if ($.rails.fire(element, 'confirm'))
+      answer = $.rails.confirm(message);
+      callback = $.rails.fire(element, 'confirm:complete', [answer]);
+
+    return answer && callback
 
   revert: (e, answer) ->
     return false if @buttonsCache.filter(e.target).length == 0
