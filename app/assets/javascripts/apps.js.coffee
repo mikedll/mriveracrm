@@ -699,7 +699,7 @@ class window.CrmModelView extends ModelBaseView
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
-        else if elSelection.hasClass('hasrelation') && typeof(@model.hasManyRelations) != "undefined"
+        else if elSelection.hasClass('has-many-relation') && typeof(@model.hasManyRelations) != "undefined"
           id_field = @model.hasManyRelations[attributeName]
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() ->
             h = {}
