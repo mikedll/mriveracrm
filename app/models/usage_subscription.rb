@@ -25,7 +25,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def feature_selections_attributes
-    feature_selections.map { |fs| { :id => fs.id, :feature_id => fs.feature.id } }
+    feature_selections.sort { |a,b| a.feature.bit_index <=> b.feature.bit_index }.map { |fs| { :id => fs.id, :feature_id => fs.feature.id } }
   end
 
   #
