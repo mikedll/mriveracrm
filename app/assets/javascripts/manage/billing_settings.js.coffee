@@ -3,7 +3,7 @@ class window.BillingSettings extends BaseModel
 
   initialize: () ->
     BaseModel.prototype.initialize.apply(@, arguments)
-    @hasrelations =
+    @hasManyRelations =
       'feature_selections_attributes': 'feature_id'
 
   url: () ->

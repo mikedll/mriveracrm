@@ -18,6 +18,6 @@
         %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}"}
           = feature.public_name
       .controls
-        = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, current_object.has_feature(feature),  :id => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "hasrelation"
+        = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, current_object.has_feature(feature),  :id => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "has-many-relation"
 
   = render :partial => 'shared/model_view_basic_buttons'

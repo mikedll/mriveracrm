@@ -141,11 +141,11 @@ class window.BaseModel extends Backbone.Model
   # to be performance improved with some hashes.
   #
   set: (attrs) ->
-    _.each(attrs, (v, attribute_name) =>
-      if attribute_name of @hasrelations
-        idField = @hasrelations[attribute_name]
-        cur_related_set = @get(attribute_name)
-        orig_related_set = if attribute_name of @_attributesSinceSync then @_attributesSinceSync[attribute_name] else cur_related_set
+    _.each(attrs, (v, attributeName) =>
+      if typeof(@hasManyRelations) != "undefined" && attributeName of @hasManyRelations
+        idField = @hasManyRelations[attributeName]
+        cur_related_set = @get(attributeName)
+        orig_related_set = if attributeName of @_attributesSinceSync then @_attributesSinceSync[attributeName] else cur_related_set
 
         # if relation is already in cur relation set, preserve all current existing keys
         # and not just the foreign key.
@@ -197,7 +197,7 @@ class window.BaseModel extends Backbone.Model
     # purge any destroyed attrs, before deleting history.
     retainedHasRelations = {}
     destroyingRelations = {}
-    _.each(@hasrelations, (idField, attributeName, l) =>
+    _.each(@hasManyRelations, (idField, attributeName, l) =>
       retainable = _.partition(@get(attributeName), (r) -> not _.has(r, '_destroy'))
       retainedHasRelations[attributeName] = retainable[0]
       destroyingRelations[attributeName] = retainable[1]
@@ -679,8 +679,8 @@ class window.CrmModelView extends ModelBaseView
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
-        else if elSelection.hasClass('hasrelation')
-          id_field = @model.hasrelations[attributeName]
+        else if elSelection.hasClass('hasrelation') && typeof(@model.hasManyRelations) != "undefined"
+          id_field = @model.hasManyRelations[attributeName]
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() ->
             h = {}
             h[id_field] = parseInt($(this).val())
@@ -773,8 +773,8 @@ class window.CrmModelView extends ModelBaseView
         v = @deepGet(attributeName)
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
-        if el$.is('[type=checkbox]') && el$.hasClass('hasrelation')
-          idField = if attributeName of @model.hasrelations then @model.hasrelations[attributeName] else 'id'
+        if el$.is('[type=checkbox]') && el$.hasClass('has-many-relation')
+          idField = if (typeof(@model.hasManyRelations) != "undefined" and (attributeName of @model.hasManyRelations)) then @model.hasManyRelations[attributeName] else 'id'
           valAsInt = parseInt(el$.val())
           if Object.prototype.toString.call( v ) == '[object Array]'
             el$.prop('checked', _.some(v, (related) -> related[idField] == valAsInt && not _.has(related, '_destroy')))
