@@ -22,5 +22,12 @@
 
   .control-group
     .control-label
+      %label
+        Price:
+    .controls
+      .read-only-field{:data => {:name => 'price'} }
+
+  .control-group
+    .control-label
     .controls
       = render :partial => 'shared/model_view_basic_buttons'

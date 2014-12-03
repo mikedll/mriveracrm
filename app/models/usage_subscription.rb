@@ -14,7 +14,7 @@ class UsageSubscription < ActiveRecord::Base
 
   def renderable_json
     to_json({
-              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes],
+              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices],
               :include => {
                 :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand]
@@ -22,6 +22,15 @@ class UsageSubscription < ActiveRecord::Base
               },
               :only => []
             })
+  end
+
+  def feature_prices
+    Feature.bit_index_ordered.all.map do |feature|
+      {
+        :id => feature.id,
+        :price => feature.feature_pricings.for_generation(generation).price_ordered.first.price
+      }
+    end
   end
 
   def feature_selections_attributes
@@ -191,7 +200,7 @@ class UsageSubscription < ActiveRecord::Base
       if for_feature_index[f.bit_index].nil?
 
         # least-expensive generation that came with, or after, this one.
-        fp = f.feature_pricings.select { |fp| fp.generation >= generation }.sort { |a,b| a.price <=> b.price }.first
+        fp = f.feature_pricings.for_generation(generation).price_ordered.first
 
         fp = f.ensure_generation_pricing! if fp.nil?
         for_feature_index[f.bit_index] = fp
