@@ -227,7 +227,9 @@ class window.BaseView extends Backbone.View
   initialize: (options) ->
     @useDirty = true
 
-    @events = {}
+    @events =
+      'click a,button': 'checkDisabled'
+
     @parent = options.parent if options
 
   childViewPushed: (view) ->
@@ -266,10 +268,17 @@ class window.BaseView extends Backbone.View
 
   onSync: (model, resp, options) ->
 
+  checkDisabled: (e) ->
+    if $(e.target).hasClass('disabled')
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+      return false
+    return true
 
 class window.ModelBaseView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
+
     @listenTo(@model, 'change', @onModelChanged)
     @listenTo(@model, 'sync', @onSync)
 
@@ -302,7 +311,6 @@ class window.BaseCollection extends Backbone.Collection
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
-    $.extend(@events, 'click a,button': 'checkDisabled')
 
     $(window).resize( () => @resizeView() )
     @resizeView()
@@ -339,13 +347,6 @@ class window.WithChildrenView extends BaseView
         $(el).removeAttr('tabIndex')
     )
 
-
-  checkDisabled: (e) ->
-    if $(e.target).hasClass('disabled')
-      e.stopPropagation()
-      return false
-    return true
-
   focusTopModelView: () ->
     throw "Must implement in child class."
 
@@ -367,8 +368,10 @@ class window.ListItemView extends ModelBaseView
 
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
-    @events =
+    @events = $.extend(@events,
       'click a': 'show'
+    )
+
     @parent = options.parent
     # these two should be in ModelBaseView
     # @listenTo(@model, 'sync', @onSync)
@@ -487,7 +490,7 @@ class window.CrmModelView extends ModelBaseView
 
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
-    @events =
+    @events = $.extend(@events,
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
@@ -497,7 +500,7 @@ class window.CrmModelView extends ModelBaseView
       'confirm:complete .btn.destroy': 'destroy'
       'confirm:complete .btn.put_action': 'putActionConfirmed'
       'click .btn.put_action:not([data-confirm])': 'putAction'
-
+    )
 
     @parent = options.parent
     @listenTo(@model, 'request', @onRequest)
@@ -979,9 +982,11 @@ class window.SingleModelAppView extends WithChildrenView
 class window.SearchAndListView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
-    @events =
+
+    @events = $.extend(@events,
       'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
+    )
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
