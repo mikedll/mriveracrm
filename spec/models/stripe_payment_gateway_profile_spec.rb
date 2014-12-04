@@ -138,6 +138,32 @@ describe StripePaymentGatewayProfile do
         @profile.last_error.should == 'Your card was declined'
       end
     end
+
+    context "plan update" do
+      before do
+        @f1 = FactoryGirl.create(:feature)
+        @f2 = FactoryGirl.create(:feature)
+        @f3 = FactoryGirl.create(:feature)
+        Feature.ensure_minimal_pricings!
+        @profile = FactoryGirl.create(:stripe_payment_gateway_profile_for_us)
+        @ug = @profile.payment_gateway_profilable
+        FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
+        FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f2)
+      end
+
+      it "should be able to create a usage subscription's plan" do
+        @profile.ensure_plan_created!(@ug.calculated_plan_id, @ug.calculated_price).should be_true
+      end
+
+      it "should be able to update a plan and have it update usage subscription" do
+        before = @ug.plan
+        expected_plan = @ug.calculated_plan_id
+        @profile.ensure_plan_created!(@ug.calculated_plan_id, @ug.calculated_price).should be_true
+        @ug.payment_gateway_profile.update_plan!(@ug.calculated_plan_id).should be_true
+        @ug.reload.plan.should_not == before
+        @ug.plan.should == expected_plan
+      end
+    end
   end
 
 end

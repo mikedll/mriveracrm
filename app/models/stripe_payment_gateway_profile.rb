@@ -125,7 +125,6 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
           sub.save
         end
       rescue Stripe::InvalidRequestError => e
-
         if RECOGNIZED_ERRORS.any? { |m| e.message.start_with?(m) }
           payment_gateway_profilable.errors.add(:base, I18n.t('payment_gateway_profile.custom_plan_update_error', :message => e.message))
         else
@@ -136,8 +135,14 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         return false
       end
 
+      customer = Stripe::Customer.retrieve(self.vendor_id)
       _cache_customer(customer)
-      save
+
+      success = false
+      self.class.transaction do
+        success = (payment_gateway_profilable.changed? && payment_gateway_profilable).save && save
+      end
+      success
     end
   end
 
@@ -211,8 +216,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
 
     if !customer.subscriptions.data.empty?
-      if payment_gateway_profileable.respond_to?(:plan)
-        self.payment_gateway_profileable.plan = customer.subscriptions.data.first.plan
+      if payment_gateway_profilable.respond_to?(:plan)
+        self.payment_gateway_profilable.plan = customer.subscriptions.data.first.plan.id
       end
     end
   end
