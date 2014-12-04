@@ -5,12 +5,12 @@ describe UsageSubscription do
     it "should require business" do
       @us = FactoryGirl.create(:usage_subscription)
       @us.business = nil
-      @us.save.should be_true
+      @us.save.should be_false
     end
   end
 
   context "feature_selections" do
-    it "should be indicatable through nested attributes", :current => true do
+    it "should be indicatable through nested attributes" do
       fs = Feature.all
       @us = FactoryGirl.create(:usage_subscription)
 
@@ -23,7 +23,47 @@ describe UsageSubscription do
     end
   end
 
-  context "bit string demos", :current => true do
+  it "should accurately calculate plan id", :current => true do
+    @f1 = FactoryGirl.create(:feature)
+    @f2 = FactoryGirl.create(:feature)
+    @f3 = FactoryGirl.create(:feature)
+    Feature.ensure_minimal_pricings!
+    @profile = FactoryGirl.create(:stripe_payment_gateway_profile_for_us)
+    @ug = @profile.payment_gateway_profilable
+    @ug.generation = 1
+    FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
+    FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f2)
+
+    bs = "0000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000"
+    encoded = "AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGA="
+    encoded.unpack("m0").first.unpack("B*").first.should == bs
+
+    @ug.calculated_plan_id.should == encoded
+    bitstring = @ug.calculated_plan_id.unpack("m0").first.unpack("B*").join('')
+
+    plan_bits = bitstring[0,4]
+    bitstring = bitstring[4,bitstring.length]
+
+    generation_bits = bitstring[0,UsageSubscription::GENERATION_BITS]
+    bitstring = bitstring[UsageSubscription::GENERATION_BITS,bitstring.length]
+
+    feature_bits = bitstring
+
+    # Check generation
+    generation_from_code = [generation_bits].pack("B*").unpack("H*").first.to_i
+    @ug.generation.should == generation_from_code
+
+    # Check bits
+    features_indicated = (0...UsageSubscription::FEATURE_BITS).select { |i|
+      feature_bits[feature_bits.length - i - 1] == "1"
+    }.map { |i| Feature.find_by_bit_index i }
+
+    @ug.features.should =~ features_indicated
+
+    true
+  end
+
+  context "bit string demos" do
     it "should show ruby bit string demos. (not a real spec)" do
       scheme = 1
       generation = 2
@@ -39,8 +79,6 @@ describe UsageSubscription do
 
       decoded_binary_s = Base64.strict_decode64(base64s)
       decoded_s = decoded_binary_s.unpack("B*").first
-      decoded_s
-      decoded_s[4,4]
 
       decoded_scheme = decoded_s[0,4]
       decoded_generation = decoded_s[4,4]

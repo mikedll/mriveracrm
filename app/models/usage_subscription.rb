@@ -163,10 +163,10 @@ class UsageSubscription < ActiveRecord::Base
 
   # That's 20 bits so far.
 
-  # Let's then append 238 features, for 258 bits of information. Bits
+  # Let's then append 236 features, for 256 bits of information. Bits
   # representing features will be populated from the RHS of the
-  # bitstring. This is evently divisible by 6, for 43 base64
-  # characters that'll contribute to a plan id.
+  # bitstring. This is evenly divisible by 64, for 44 base64 characters
+  # that'll contribute to a plan id.
 
   # This makes 43 characters in the base-64 encoded string.
   # This is the Stripe ID of the plan, and the name can be simply “CRM
@@ -183,7 +183,7 @@ class UsageSubscription < ActiveRecord::Base
 
   # The bit string is thus:
 
-  # [ 4 bits for pricing scheme | 16 bits for generation | 238 bits for features, starting at RHS ]
+  # [ 4 bits for pricing scheme | 16 bits for generation | 236 bits for features, starting at RHS ]
 
   # The resulting plan id will be 43 characters long...which is kind
   # of long but we'll see if it works.  it might not.
@@ -191,9 +191,10 @@ class UsageSubscription < ActiveRecord::Base
   # The cost of the plan can be determined from lookup tables in the
   # app.
 
-  # [ 4 bits for pricing scheme | 16 bits for generation | 44 bits + 8 x 64 bits for features, starting at RHS ]
   PRICING_SCHEME = 0
-  FEATURE_BITS = 238
+  GENERATION_BITS = 16
+  FEATURE_BITS = 236
+
   def _calculate_price_and_plan
     for_feature_index = {}
     features.each do |f|
@@ -219,16 +220,17 @@ class UsageSubscription < ActiveRecord::Base
     end
 
     @calculated_price = for_feature_index.values.inject(BigDecimal.new("0.0")) { |acc, fp| acc += fp.price; acc}
-    @calculated_plan_id = [[_to_bit_string(PRICING_SCHEME) + _to_bit_string(generation) + features_bitstring].pack("B*")].pack("m0")
+    @calculated_plan_id = [[_to_bit_string(PRICING_SCHEME) + _to_bit_string(generation, 16) + features_bitstring].pack("B*")].pack("m0")
   end
 
   # converts integer to bit string, the length of which is a multiple of 4.
   # uses minimum length required.
-  def _to_bit_string(i)
-    hexed = PRICING_SCHEME.to_s(16)
+  def _to_bit_string(i, min_width=0)
+    hexed = i.to_s(16)
     padded = true if hexed.length % 2 == 1  # prepend 0
     bitstring = [(padded ? "0#{hexed}" : hexed)].pack("H*").unpack("B*").first
-    padded ? bitstring[4,bitstring.length - 4] : bitstring
+    bitstring = bitstring[4,bitstring.length - 4] if padded
+    ("0" * [min_width - bitstring.length, 0].max) + bitstring
   end
 
 end

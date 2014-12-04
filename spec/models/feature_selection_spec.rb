@@ -7,7 +7,7 @@ describe FeatureSelection do
       @us = FactoryGirl.create(:usage_subscription)
     end
 
-    it "should not allow dup features", :current => true  do
+    it "should not allow dup features"  do
       p = FactoryGirl.create(:feature_pricing)
       fs1 = FactoryGirl.build(:feature_selection, :feature => p.feature, :usage_subscription => @us)
       fsdup = FactoryGirl.build(:feature_selection, :feature => p.feature, :usage_subscription => @us)

@@ -133,7 +133,13 @@ FactoryGirl.define do
   end
 
   factory :stripe_payment_gateway_profile do
-    client { FactoryGirl.create(:client) }
+    payment_gateway_profilable { FactoryGirl.create(:client) }
+  end
+
+  factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
+    before(:create) { |profile, evaluator|
+      profile.payment_gateway_profilable = FactoryGirl.build(:usage_subscription)
+    }
   end
 
   factory :invoice do
