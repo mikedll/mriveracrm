@@ -136,7 +136,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         return false
       end
 
-      true
+      _cache_customer(customer)
+      save
     end
   end
 
@@ -207,6 +208,12 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     if customer[:active_card]
       self.card_last_4 = customer[:active_card][:last4]
       self.card_brand = customer[:active_card][:type]
+    end
+
+    if !customer.subscriptions.data.empty?
+      if payment_gateway_profileable.respond_to?(:plan)
+        self.payment_gateway_profileable.plan = customer.subscriptions.data.first.plan
+      end
     end
   end
 

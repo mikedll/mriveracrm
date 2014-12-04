@@ -64,9 +64,10 @@ class UsageSubscription < ActiveRecord::Base
     # fps = self.feature_pricings.for_generation(generation)
 
     if plan != calculated_plan_id
-      self.plan = calculated_plan_id
       if payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
-        save! if payment_gateway_profile.update_plan!(plan)
+        if !payment_gateway_profile.update_plan!(calculated_plan_id)
+          DetectedError.create(:message => "Unable to update plan in stripe: #{calculated_plan_id}", :business_id => business_id)
+        end
       else
         DetectedError.create(:message => "Unable to create plan in stripe: #{calculated_plan_id}", :business_id => business_id)
       end
