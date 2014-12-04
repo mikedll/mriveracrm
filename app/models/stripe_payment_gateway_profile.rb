@@ -63,7 +63,6 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
   end
 
-
   def update_payment_info(opts)
     if vendor_id.blank?
       _create_remote
@@ -137,12 +136,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
       customer = Stripe::Customer.retrieve(self.vendor_id)
       _cache_customer(customer)
-
-      success = false
-      self.class.transaction do
-        success = (payment_gateway_profilable.changed? && payment_gateway_profilable).save && save
-      end
-      success
+      save
     end
   end
 
