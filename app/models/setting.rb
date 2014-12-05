@@ -8,7 +8,7 @@ class Setting < ActiveRecord::Base
 
   def get
     case value_type
-    when "Boolean"; then (value_type.blank? && value_type != "false")
+    when "Boolean"; then (!value_type.blank? && value_type != "false")
     when "Integer"; then value_type.to_i
     else; value_type # assume string
     end
