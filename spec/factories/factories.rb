@@ -222,6 +222,7 @@ FactoryGirl.define do
     business
     plan "98as7df98"
     remote_status "paid"
+    generation { 0 }
   end
 
   factory :feature do
@@ -231,7 +232,7 @@ FactoryGirl.define do
 
   factory :feature_pricing do
     feature
-    generation { 1 }
+    generation { 0 }
     price "9.99"
   end
 

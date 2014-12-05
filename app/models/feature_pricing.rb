@@ -9,5 +9,6 @@ class FeaturePricing < ActiveRecord::Base
   validates :generation, :presence => true
 
   scope :for_generation, lambda { |g| where('generation >= ?', g) }
+  scope :generation_ordered, lambda { order('generation') }
   scope :price_ordered, lambda { order('price') }
 end

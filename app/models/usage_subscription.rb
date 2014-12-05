@@ -222,7 +222,7 @@ class UsageSubscription < ActiveRecord::Base
         # least-expensive generation that came with, or after, this one.
         fp = f.feature_pricings.for_generation(generation).price_ordered.first
 
-        fp = f.ensure_generation_pricing! if fp.nil?
+        fp = f.ensure_generation_pricing!(generation) if fp.nil?
         for_feature_index[f.bit_index] = fp
       end
     end

@@ -7,7 +7,7 @@ class CreateSettings < ActiveRecord::Migration
       t.timestamps
     end
 
-    execute "insert into settings (key, value, value_type, created_at, updated_at) values ('Generation', '1', 'Integer', now(), now())"
+    execute "insert into settings (key, value, value_type, created_at, updated_at) values ('Generation', '0', 'Integer', now(), now())"
   end
 
   def self.down
