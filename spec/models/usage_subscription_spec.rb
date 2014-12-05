@@ -63,7 +63,7 @@ describe UsageSubscription do
     true
   end
 
-  context "price", :current => true do
+  context "price" do
     before do
       @f1 = FactoryGirl.create(:feature)
       @f2 = FactoryGirl.create(:feature)
