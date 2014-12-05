@@ -77,7 +77,7 @@ describe UsageSubscription do
       @ug = @profile.payment_gateway_profilable
     end
 
-    it "should generate current generations pricing if necessary" do
+    it "should generate current generation's pricing if necessary" do
       @f4 = FactoryGirl.create(:feature)
 
       FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
