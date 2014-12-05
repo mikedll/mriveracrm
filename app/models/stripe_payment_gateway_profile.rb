@@ -210,7 +210,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
 
     if !customer.subscriptions.data.empty?
-      if payment_gateway_profilable.respond_to?(:plan)
+      if payment_gateway_profilable.payment_gateway_profilable_subscribable? # has plan and status column
+        self.payment_gateway_profilable.remote_status = customer.subscriptions.data.first.status
         self.payment_gateway_profilable.plan = customer.subscriptions.data.first.plan.id
       end
     end

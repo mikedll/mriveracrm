@@ -12,6 +12,14 @@ class UsageSubscription < ActiveRecord::Base
 
   TRIAL_DURATION = 2.weeks
 
+  module Status
+    TRIALING = 'trialing'
+    ACTIVE = 'active'
+    PAST_DUE = 'past_due'
+    CANCELLED = 'canceled'
+    UNPAID = 'unpaid'
+  end
+
   def reload(options = nil)
     @calculated_plan_id = nil
     @calculated_price = nil
@@ -86,6 +94,10 @@ class UsageSubscription < ActiveRecord::Base
       raise "Stripe Secrete Key should never be blank. App is misconfigured."
     end
     key
+  end
+
+  def payment_gateway_profilable_subscribable?
+    true
   end
 
   def payment_gateway_profilable_desc_attrs

@@ -83,6 +83,10 @@ class Client < ActiveRecord::Base
     business.stripe_secret_key
   end
 
+  def payment_gateway_profilable_subscribable?
+    false
+  end
+
   def payment_gateway_profilable_desc_attrs
     { :description => payment_profile_description, :email => email}
   end

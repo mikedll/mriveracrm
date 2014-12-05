@@ -49,7 +49,7 @@ class PaymentGatewayProfile < ActiveRecord::Base
   end
 
   def _save_plan_on_profilable
-    if payment_gateway_profilable.respond_to?(:plan) && payment_gateway_profilable.plan_changed?
+    if payment_gateway_profilable.payment_gateway_profilable_subscribable? && (payment_gateway_profilable.plan_changed? || payment_gateway_profilable.remote_status_changed?)
       payment_gateway_profilable.save
     else
       true
