@@ -108,13 +108,7 @@ FactoryGirl.define do
   factory :beta_tester
 
   factory :invitation do
-    ignore do
-      useful_email { generate(:guest_email) }
-    end
-
-    before(:create) do |record, evaluator|
-      bt = FactoryGirl.create(:beta_tester, :email => evaluator.useful_email)
-    end
+    email { FactoryGirl.create(:beta_tester, :email => generate(:guest_email)).email }
 
     factory :client_invitation, :parent => :invitation do
       client { FactoryGirl.create(:stubbed_client) }
@@ -125,7 +119,6 @@ FactoryGirl.define do
     end
 
     factory :new_business_invitation, :parent => :invitation do
-      email { useful_email }
       handle { generate(:business_handle) }
     end
 
