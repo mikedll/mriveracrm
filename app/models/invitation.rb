@@ -12,7 +12,7 @@ class Invitation < ActiveRecord::Base
   scope :open_for_handle_and_email, lambda { |handle, email| handled.open.where(:email => email, :handle => handle) }
 
   before_validation { @virtual_path = 'invitation' }
-  before_validation :_strip_fields
+  before_validation :_format_fields
   before_validation :_capture_client_email
   before_validation :_capture_business
 
@@ -63,9 +63,10 @@ class Invitation < ActiveRecord::Base
     end
   end
 
-  def _strip_fields
+  def _format_fields
     self.handle.strip!
     self.email.strip!
+    self.email.downcase!
   end
 
   def _capture_client_email

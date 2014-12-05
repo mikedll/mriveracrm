@@ -8,6 +8,8 @@ FactoryGirl.define do
 
   sequence(:feature_bit_index) { |n| MasterFeatureList::ALL.count + n }
 
+  sequence(:guest_email) { |n| "someone#{n}" + SecureRandom.base64(8) + "@example.com" }
+
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
 
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
@@ -103,8 +105,16 @@ FactoryGirl.define do
     end
   end
 
-  factory :invitation do
+  factory :beta_tester
 
+  factory :invitation do
+    ignore do
+      useful_email { generate(:guest_email) }
+    end
+
+    before(:create) do |record, evaluator|
+      bt = FactoryGirl.create(:beta_tester, :email => evaluator.useful_email)
+    end
 
     factory :client_invitation, :parent => :invitation do
       client { FactoryGirl.create(:stubbed_client) }
@@ -115,7 +125,7 @@ FactoryGirl.define do
     end
 
     factory :new_business_invitation, :parent => :invitation do
-      email { generate(:employee_email) }
+      email { useful_email }
       handle { generate(:business_handle) }
     end
 
