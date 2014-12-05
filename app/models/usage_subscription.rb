@@ -12,6 +12,12 @@ class UsageSubscription < ActiveRecord::Base
 
   TRIAL_DURATION = 2.weeks
 
+  def reload(options = nil)
+    @calculated_plan_id = nil
+    @calculated_price = nil
+    super(options)
+  end
+
   def renderable_json
     to_json({
               :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices],
