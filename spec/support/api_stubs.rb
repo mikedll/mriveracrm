@@ -10,7 +10,18 @@ class ApiStubs
 
   def self.stripe_create_customer(customer_profile_id = '')
     created_at = Time.now
-    YAML.load load('stripe_create_customer').result( binding )
+
+    sub = YAML.load load('subscriptions').result( binding )
+    slo = Stripe::ListObject.construct_from(sub['values'], sub['api_key'])
+
+    cards = YAML.load load('cards').result( binding )
+    clo = Stripe::ListObject.construct_from(cards['values'], cards['api_key'])
+
+    cus = YAML.load load('stripe_create_customer').result( binding )
+    c = Stripe::Customer.construct_from(cus['values'], cus['api_key'])
+    c.subscriptions = slo
+    c.cards = clo
+    c
   end
 
   def self.load(file)
