@@ -228,6 +228,7 @@ FactoryGirl.define do
   factory :feature do
     bit_index { generate(:feature_bit_index).to_i }
     name { generate(:random_name) }
+    public_name { |r| r.name.titlize }
   end
 
   factory :feature_pricing do

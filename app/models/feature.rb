@@ -1,10 +1,10 @@
 class Feature < ActiveRecord::Base
 
 
-  attr_accessible :name, :bit_index
+  attr_accessible :name, :bit_index, :public_name
 
-  has_many :feature_selections
-  has_many :feature_pricings
+  has_many :feature_selections, :dependent => :destroy
+  has_many :feature_pricings, :dependent => :destroy
 
   before_validation :_default_public_name
 
@@ -24,7 +24,7 @@ class Feature < ActiveRecord::Base
     names = them.map(&:name)
     MasterFeatureList::ALL.each_with_index do |n, i|
       if !names.include?(n)
-        f = create(:name => n, :bit_index => i)
+        f = create(:name => n, :bit_index => i, :public_name => n.titleize)
         them.push(f)
       end
     end
