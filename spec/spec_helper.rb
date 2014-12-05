@@ -27,6 +27,14 @@ Spork.prefork do
     config.filter_run_excluding :live_stripe => true
     config.filter_run_excluding :broken => true
 
+    # config.backtrace_clean_patterns = [
+    #   # /\/lib\d*\/ruby\//,
+    #   # /bin\//,
+    #   #/gems/,
+    #   # /spec\/spec_helper\.rb/,
+    #   # /lib\/rspec\/(core|expectations|matchers|mocks)/
+    # ]
+
     config.before(:all) do
       Feature.ensure_master_list_created!
     end
