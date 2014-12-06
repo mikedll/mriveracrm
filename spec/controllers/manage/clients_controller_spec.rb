@@ -17,7 +17,7 @@ describe Manage::ClientsController do
       response.should redirect_to(:host => 'www.mikedll.com')
     end
 
-    it "should redirect to behandle url if user is signed in and tried to access plainly with mfe" do
+    it "should redirect to bhandle url if user is signed in and tried to access plainly with mfe" do
       get :index
       response.should redirect_to(bhandle_manage_clients_path(:business_handle => @user.employee.business.handle))
     end
