@@ -159,7 +159,16 @@ FactoryGirl.define do
 
     factory :pending_invoice do
       status { "pending" }
+
+      factory :paid_invoice do
+        after (:create) do |invoice, evaluator|
+          FactoryGirl.create(:successul_outside_transaction, :invoice => invoice)
+          invoice.mark_paid!
+        end
+      end
     end
+
+
   end
 
   factory :transaction do
@@ -168,6 +177,10 @@ FactoryGirl.define do
     factory :outside_transaction, :class => OutsideTransaction do
       outside_vendor { 'Paypal' }
       outside_id { '3434334' }
+
+      factory :successul_outside_transaction do
+        status "successful"
+      end
     end
 
     factory :authorize_net_transaction, :class => AuthorizeNetTransaction do
