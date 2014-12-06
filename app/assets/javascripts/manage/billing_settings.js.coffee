@@ -20,6 +20,18 @@ class window.BillingSettingsView extends CrmModelView
     @features = new Features()
     @textRenderer = new TextRenderer()
 
+  copyModelToForm: () ->
+    CrmModelView.prototype.copyModelToForm.apply(@, arguments)
+    @inputsCache.each((i, el) =>
+      el$ = $(el)
+      attributeName = @nameFromInput(el$)
+      if attributeName == 'feature_selections_attributes'
+        valAsInt = parseInt(el$.val())
+        featurePrice = _.find(@model.get('feature_prices'), (fp) -> fp.id == valAsInt)
+        if featurePrice
+          el$.closest('.feature-display').find('.price').text("$#{@textRenderer.toFixed(featurePrice.price, 2)}")
+    )
+
   onModelChanged: (e) ->
     CrmModelView.prototype.onModelChanged.apply(@, arguments)
     priceField = @readonlyInputsCache.filter('[data-name="price"]').first()
