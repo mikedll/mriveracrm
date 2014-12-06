@@ -58,7 +58,7 @@ describe Invoice do
       invoice = FactoryGirl.create(:invoice, :status => :pending)
       invoice.cancel!.should be_true
       invoice.cancelled?.should be_true
-      
+
       invoice = FactoryGirl.create(:invoice, :status => :open)
       expect { invoice.cancel! }.to raise_error(StateMachine::InvalidTransition)
     end

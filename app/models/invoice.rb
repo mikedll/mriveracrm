@@ -90,7 +90,7 @@ class Invoice < ActiveRecord::Base
 
 
   before_validation { @virtual_path = 'invoice' }
-  before_validation :_defaults
+  before_validation :_defaults_and_formatting
   before_validation :_verify_can_edit?
 
   validates :client, :date, :total, :presence => true
@@ -188,13 +188,15 @@ class Invoice < ActiveRecord::Base
 
   private
 
-  def _defaults
+  def _defaults_and_formatting
     if new_record?
       self.description = "..." if description.nil?
       self.total = 0.0 if total.nil?
       self.date = Time.now if date.nil?
       self.title = "New invoice" if title.nil?
     end
+
+    self.status = status.to_s if status.instance_of?(Symbol)
   end
 
   def _verify_can_edit?
