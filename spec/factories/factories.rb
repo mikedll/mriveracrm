@@ -81,7 +81,8 @@ FactoryGirl.define do
 
         factory :unconfirmed_new_employee_user do
           after :create do |user, evaluator|
-            user.send(:generate_confirmation_token!)
+            user.confirmed_at = nil
+            user.send(:generate_confirmation_token!) # saves
           end
         end
 
