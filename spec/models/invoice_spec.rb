@@ -106,7 +106,7 @@ describe Invoice do
     end
   end
 
-  context "pdf_gen" do
+  context "pdf_gen"  do
     before do
       @uuid = SecureRandom.uuid
       SecureRandom.stub(:uuid) { @uuid }

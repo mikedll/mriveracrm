@@ -1,13 +1,13 @@
 require 'spec_helper'
 
 describe FeatureSelection do
-  context "validations" do
+  context "validations"  do
 
     before do
       @us = FactoryGirl.create(:usage_subscription)
     end
 
-    it "should not allow dup features"  do
+    it "should not allow dup features" do
       p = FactoryGirl.create(:feature_pricing)
       fs1 = FactoryGirl.build(:feature_selection, :feature => p.feature, :usage_subscription => @us)
       fsdup = FactoryGirl.build(:feature_selection, :feature => p.feature, :usage_subscription => @us)
