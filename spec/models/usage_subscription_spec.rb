@@ -28,9 +28,9 @@ describe UsageSubscription do
   end
 
   it "should accurately calculate plan id" do
-    @f1 = FactoryGirl.create(:feature)
-    @f2 = FactoryGirl.create(:feature)
-    @f3 = FactoryGirl.create(:feature)
+    @f1 = FactoryGirl.create(:feature, :bit_index => 0)
+    @f2 = FactoryGirl.create(:feature, :bit_index => 1)
+    @f3 = FactoryGirl.create(:feature, :bit_index => 2)
     Feature.ensure_minimal_pricings!
     @profile = FactoryGirl.create(:stripe_payment_gateway_profile_for_us)
     @ug = @profile.payment_gateway_profilable
@@ -38,8 +38,8 @@ describe UsageSubscription do
     FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
     FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f2)
 
-    bs = "0000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001100000"
-    encoded = "AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAGA="
+    bs = "0000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011"
+    encoded = "AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM="
     encoded.unpack("m0").first.unpack("B*").first.should == bs
 
     @ug.calculated_plan_id.should == encoded
