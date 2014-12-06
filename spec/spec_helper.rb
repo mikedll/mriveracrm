@@ -36,12 +36,11 @@ Spork.prefork do
     # ]
 
     config.before(:all) do
-      Feature.ensure_master_list_created!
+      DatabaseCleaner.clean_with(:truncation)
+      DatabaseCleaner.strategy = :transaction
     end
 
     config.before(:suite) do
-      DatabaseCleaner.strategy = :transaction
-      DatabaseCleaner.clean_with(:truncation)
     end
 
     config.before(:each) do

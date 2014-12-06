@@ -10,6 +10,10 @@ describe UsageSubscription do
   end
 
   context "feature_selections" do
+    before do
+      Feature.ensure_master_list_created!
+    end
+
     it "should be indicatable through nested attributes" do
       fs = Feature.all
       @us = FactoryGirl.create(:usage_subscription)
