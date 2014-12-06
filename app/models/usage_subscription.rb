@@ -8,6 +8,8 @@ class UsageSubscription < ActiveRecord::Base
   accepts_nested_attributes_for :feature_selections, :allow_destroy => true, :reject_if => :all_blank
   accepts_nested_attributes_for :payment_gateway_profile, :reject_if => :all_blank
 
+  validates :business_id, :presence => true
+
   after_create :require_payment_gateway_profile
 
   TRIAL_DURATION = 2.weeks
