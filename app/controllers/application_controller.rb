@@ -58,8 +58,9 @@ class ApplicationController < ActionController::Base
         elsif @current_business
           # severe violation at wrong url for wrong business domain
           # redirect to user's actual business domain.
-          flash[:notice] = I18n.t('errors.not_found_redirect_home')
-          redirect_to root_path(:host => current_user.business.host)
+          # we show not_found to avoid showing what drive's
+          # the violated user's domain.
+          head :not_found
         else
           head :not_found
         end
