@@ -1,7 +1,18 @@
 
-/* product images */
-
 @import "../variables";
+
+/* top right menu getting a little cramped */
+
+.nav-pills .dropdown-menu {
+  padding: 16px 0;
+
+  li { 
+    margin: 10px 0; 
+  }
+}
+
+
+/* product images */
 
 .model-view {
   .image-list {
