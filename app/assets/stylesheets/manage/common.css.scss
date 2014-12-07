@@ -1,6 +1,8 @@
 
 /* product images */
 
+@import "../variables";
+
 .model-view {
   .image-list {
 
@@ -80,6 +82,8 @@
 }
 
 .features-menu {
+
+  margin-top: $standard-vertical-break;
 
   .feature-display {
     margin: 12px 16px;

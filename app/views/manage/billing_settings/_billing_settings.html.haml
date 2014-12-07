@@ -10,10 +10,10 @@
     = f.simple_fields_for :payment_gateway_profile_attributes do |pgpa|
       = render :partial => "shared/payment_gateway_profile_attributes", :locals => { :f => pgpa, :card_number_placeholder => nil }
 
-  %h5
-    Select which features you want to enable:
-
   .features-menu
+    %h5
+      Features Enabled
+
     - Feature.bit_index_ordered.all.each_with_index do |feature, i|
       - if i % 4 == 0
         .row
