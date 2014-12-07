@@ -576,7 +576,7 @@ class window.CrmModelView extends ModelBaseView
 
     if !@model.isDirty()
       @inputsCache.each((i, domEl)  =>
-        $(domEl).closest('.control-group').removeClass('warning')
+        $(domEl).closest('.control-group,.inline-control-group').removeClass('warning')
       )
     else
       current = @model.attributes
@@ -600,9 +600,9 @@ class window.CrmModelView extends ModelBaseView
             markChanged = true
 
           if markChanged
-            el$.closest('.control-group').addClass('warning')
+            el$.closest('.control-group,.inline-control-group').addClass('warning')
           else
-            el$.closest('.control-group').removeClass('warning')
+            el$.closest('.control-group,.inline-control-group').removeClass('warning')
         else
           # this may not be an input related to our model
       )

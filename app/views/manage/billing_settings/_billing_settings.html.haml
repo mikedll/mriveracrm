@@ -1,13 +1,14 @@
 
-= simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path, :html => { :class => 'form-horizontal' } do |f|
+= simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path, :html => { :class =>  'form-horizontal' } do |f|
+
+  %h5
+    Payment Information
 
   .errors.alert.alert-error.hide
 
-  = f.simple_fields_for :payment_gateway_profile_attributes do |pgpa|
-    = pgpa.input :card_number
-    = pgpa.input :expiration_month
-    = pgpa.input :expiration_year
-    = pgpa.input :cv_code
+  .form-horizontal
+    = f.simple_fields_for :payment_gateway_profile_attributes do |pgpa|
+      = render :partial => "shared/payment_gateway_profile_attributes", :locals => { :f => pgpa, :card_number_placeholder => nil }
 
   %h5
     Select which features you want to enable:
