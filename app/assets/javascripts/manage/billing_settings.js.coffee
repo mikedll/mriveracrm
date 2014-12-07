@@ -30,6 +30,8 @@ class window.BillingSettingsView extends CrmModelView
         featurePrice = _.find(@model.get('feature_prices'), (fp) -> fp.id == valAsInt)
         if featurePrice
           el$.closest('.feature-display').find('.price').text("$#{@textRenderer.toFixed(featurePrice.price, 2)}")
+      else if _.isEqual(attributeName, ['payment_gateway_profile_attributes', 'card_number'])
+        el$.prop('placeholder', @deepGet(['payment_gateway_profile', 'card_prompt']))
     )
 
   onModelChanged: (e) ->

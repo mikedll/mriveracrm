@@ -33,7 +33,8 @@ class UsageSubscription < ActiveRecord::Base
               :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices],
               :include => {
                 :payment_gateway_profile => {
-                  :only => [:card_last_4, :card_brand]
+                  :only => [:card_last_4, :card_brand],
+                  :methods => [:card_prompt]
                 }
               },
               :only => []
