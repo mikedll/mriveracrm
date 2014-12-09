@@ -534,7 +534,7 @@ class window.CrmModelView extends ModelBaseView
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'change', @onModelChanged)
 
-    @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
+    @attributeMatcher = new RegExp("^" + @modelName + "\\[(\\w+)\\]")
     @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
 
     @inputsCache = []

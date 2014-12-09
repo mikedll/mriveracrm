@@ -25,7 +25,7 @@ class window.PaymentGatewayProfileView extends CrmModelView
     @$(':input').val('')
 
   copyModelToForm: () ->
-    @$('input[name="authorize_net_payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
+    @$('input[name="payment_gateway_profile[card_number]"]').prop('placeholder', @model.get('card_prompt'))
 
   buildDom: () ->
     @$el.html($('.templates .payment-gateway-profile-view-example').children().clone()) if @$el.children().length == 0
