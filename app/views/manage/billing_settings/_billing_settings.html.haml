@@ -1,39 +1,39 @@
 
-= simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path, :html => { :class =>  'form-horizontal' } do |f|
+= simple_form_for :billing_settings, :remote => true, :url => manage_billing_settings_path do |f|
 
   %h5
     Payment Information
 
   .errors.alert.alert-error.hide
 
+  = f.simple_fields_for :payment_gateway_profile_attributes do |pgpa|
+    = render :partial => "shared/payment_gateway_profile_attributes", :locals => { :f => pgpa, :card_number_placeholder => nil }
+
   .form-horizontal
-    = f.simple_fields_for :payment_gateway_profile_attributes do |pgpa|
-      = render :partial => "shared/payment_gateway_profile_attributes", :locals => { :f => pgpa, :card_number_placeholder => nil }
+    .features-menu
+      %h5
+        Features Enabled
 
-  .features-menu
-    %h5
-      Features Enabled
+      - Feature.bit_index_ordered.all.each_with_index do |feature, i|
+        - if i % 4 == 0
+          .row
+        .span3
+          .feature-display.control-group
 
-    - Feature.bit_index_ordered.all.each_with_index do |feature, i|
-      - if i % 4 == 0
-        .row
-      .span3
-        .feature-display.control-group
+            %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "checkbox"}
+              = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, current_object.has_feature(feature),  :id => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "has-many-relation"
+              = feature.public_name
+              .price.pull-right
 
-          %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "checkbox"}
-            = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, current_object.has_feature(feature),  :id => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "has-many-relation"
-            = feature.public_name
-            .price.pull-right
+      .clear
+      .control-group.price-display
+        .control-label
+          %label
+            Price:
+        .controls
+          .read-only-field{:data => {:name => 'price'} }
 
-    .clear
-    .control-group.price-display
-      .control-label
-        %label
-          Price:
-      .controls
-        .read-only-field{:data => {:name => 'price'} }
-
-    .control-group
-      .control-label
-      .controls
-        = render :partial => 'shared/model_view_basic_buttons'
+      .control-group
+        .control-label
+        .controls
+          = render :partial => 'shared/model_view_basic_buttons'

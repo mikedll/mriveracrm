@@ -204,6 +204,16 @@ div.read-only-field {
   vertical-align: middle;
 }
 
+.inline-control-group .control-label {
+  height: 19px;
+}
+
+.inline-control-group .control-label label {
+  font-size: 8pt;
+  font-weight: bold;
+  margin-bottom: 0;
+}
+
 .inline-control-group.warning input,
 .inline-control-group.warning select,
 .inline-control-group.warning textarea {

@@ -8,5 +8,8 @@
 
   = render :partial => "shared/payment_gateway_profile_attributes", :locals => { :f => f, :card_number_placeholder => authorize_net_payment_gateway_profile.card_prompt }
 
-  %button.save.btn.btn-primary
-    Save
+  .inline-control-group
+    .control-label
+    .controls
+      %button.save.btn.btn-primary
+        Save
