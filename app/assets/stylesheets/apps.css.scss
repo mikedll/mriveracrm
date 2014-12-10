@@ -189,7 +189,7 @@
   padding: 4px 4px 4px 0px;
 }
 
-div.read-only-field {
+.read-only-field {
   font-size: 14pt;
   line-height: 28px;
 }
@@ -212,6 +212,10 @@ div.read-only-field {
   font-size: 8pt;
   font-weight: bold;
   margin-bottom: 0;
+}
+
+.control-group.warning .read-only-field { 
+  color: $bootstrap-warning;
 }
 
 .inline-control-group.warning input,

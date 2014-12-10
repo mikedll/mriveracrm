@@ -23,6 +23,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def reload(options = nil)
+    @feature_prices = nil
     @calculated_plan_id = nil
     @calculated_price = nil
     super(options)
@@ -30,7 +31,7 @@ class UsageSubscription < ActiveRecord::Base
 
   def renderable_json
     to_json({
-              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices],
+              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices, :price],
               :include => {
                 :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand],
@@ -41,8 +42,13 @@ class UsageSubscription < ActiveRecord::Base
             })
   end
 
+  def price
+    _calculate_price_and_plan
+    @calculated_price
+  end
+
   def feature_prices
-    Feature.bit_index_ordered.all.map do |feature|
+    @feature_prices ||= Feature.bit_index_ordered.all.map do |feature|
       fp = feature.feature_pricings.for_generation(generation).price_ordered.first
       if !fp
         fp = feature.ensure_generation_pricing!
@@ -221,30 +227,23 @@ class UsageSubscription < ActiveRecord::Base
   FEATURE_BITS = 236
 
   def _calculate_price_and_plan
-    for_feature_index = {}
-    features.each do |f|
-      # better to use feature index...feature name can change...
-      if for_feature_index[f.bit_index].nil?
-
-        # least-expensive generation that came with, or after, this one.
-        fp = f.feature_pricings.for_generation(generation).price_ordered.first
-
-        fp = f.ensure_generation_pricing!(generation) if fp.nil?
-        for_feature_index[f.bit_index] = fp
-      end
+    price_and_bit_indices = features.inject({ :price => BigDecimal.new("0.0"), :bit_indices => {}}) do |acc, f|
+      acc[:price] += feature_prices.select { |fp| fp[:id] == f.id }.first[:price]
+      acc[:bit_indices][f.bit_index] = true
+      acc
     end
 
+    @calculated_price = price_and_bit_indices[:price]
 
     features_bitstring = ""
     (0...FEATURE_BITS).each do |i|
-      if for_feature_index[i]
+      if price_and_bit_indices[:bit_indices][i]
         features_bitstring = "1#{features_bitstring}"
       else
         features_bitstring = "0#{features_bitstring}"
       end
     end
 
-    @calculated_price = for_feature_index.values.inject(BigDecimal.new("0.0")) { |acc, fp| acc += fp.price; acc}
     @calculated_plan_id = [[_to_bit_string(PRICING_SCHEME) + _to_bit_string(generation, 16) + features_bitstring].pack("B*")].pack("m0")
   end
 

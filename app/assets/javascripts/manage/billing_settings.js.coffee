@@ -9,6 +9,24 @@ class window.BillingSettings extends BaseModel
   url: () ->
     gUrlManager.url('/manage/billing_settings')
 
+  adjustSetAttrs: (attrs) ->
+    attrs = BaseModel.prototype.adjustSetAttrs.apply(@, arguments)
+
+    # we could probably do this better with a smarter listener...
+    if _.has(attrs, 'feature_selections_attributes') and !_.has(attrs, 'price')
+      price = 0.0
+      fps = @get('feature_prices')
+      _.each(attrs['feature_selections_attributes'], (feature_selection, i) =>
+        if !_.has(feature_selection, '_destroy')
+          pricing = _.find(fps, (el) -> el.id == feature_selection.feature_id)
+          if typeof(pricing) != "undefined"
+            price += parseFloat(pricing.price)
+      )
+
+      attrs['price'] = price
+
+    attrs
+
   isNew: () ->
     false
 
@@ -36,13 +54,5 @@ class window.BillingSettingsView extends CrmModelView
 
   onModelChanged: (e) ->
     CrmModelView.prototype.onModelChanged.apply(@, arguments)
-    priceField = @readonlyInputsCache.filter('[data-name="price"]').first()
-
-    price = 0.0
-    _.each(@model.get('feature_selections_attributes'), (feature_selection, i) =>
-      if !_.has(feature_selection, '_destroy')
-        pricing = _.find(@model.get('feature_prices'), (el) -> el.id == feature_selection.feature_id)
-        if typeof(pricing) != "undefined"
-          price += parseFloat(pricing.price)
-    )
-    priceField.text("$" + (@textRenderer.toFixed(price, 2)) + " per month")
+    @readonlyInputsCache.filter('[data-name="price"]').first()
+      .text("$" + (@textRenderer.toFixed(@model.get('price'), 2)) + " per month")

@@ -157,6 +157,10 @@ class window.BaseModel extends Backbone.Model
     if @dumpOnChange
       console.log(@attributes)
 
+  # hook for subclasses to adjust the set attrs
+  adjustSetAttrs: (attrs) ->
+    attrs
+
   #
   # Originally overridden to handle hasrelation relations from checkboxes.
   #
@@ -196,6 +200,9 @@ class window.BaseModel extends Backbone.Model
             v.push(_.extend({}, orig_relation, {'_destroy': '1'}))
         )
     )
+
+    @adjustSetAttrs(attrs)
+
     Backbone.Model.prototype.set.apply(@, [attrs])
 
   changedAttributesSinceSync: () ->
