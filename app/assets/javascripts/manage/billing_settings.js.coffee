@@ -6,6 +6,9 @@ class window.BillingSettings extends BaseModel
     @hasManyRelations =
       'feature_selections_attributes': 'feature_id'
 
+    @ignoredAttributes['feature_prices'] = true
+    @ignoredAttributes['payment_gateway_profile'] = true
+
   url: () ->
     gUrlManager.url('/manage/billing_settings')
 
