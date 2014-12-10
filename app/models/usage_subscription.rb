@@ -50,7 +50,7 @@ class UsageSubscription < ActiveRecord::Base
   def feature_prices
     @feature_prices ||= Feature.bit_index_ordered.all.map do |feature|
       fp = feature.feature_pricings.for_generation(generation).price_ordered.first
-      fp = feature.ensure_generation_pricing! if !fp
+      fp = feature.ensure_generation_pricing!(generation) if !fp
       {
         :id => feature.id,
         :price => fp.price

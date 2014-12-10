@@ -34,7 +34,7 @@ class Feature < ActiveRecord::Base
   end
 
   def ensure_generation_pricing!(generation = 0)
-    if feature_pricings.for_generation(generation).empty?
+    if feature_pricings.for_generation(generation).first.nil?
       last_gen = feature_pricings.generation_ordered.last
       fp = FeaturePricing.create!(:generation => generation, :price => (last_gen ? last_gen.price : FeaturePricing::DEFAULT), :feature => self)
     end
