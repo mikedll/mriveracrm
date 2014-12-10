@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140812233106) do
+ActiveRecord::Schema.define(:version => 20141210141632) do
 
   create_table "beta_testers", :force => true do |t|
     t.string   "email"
@@ -240,12 +240,14 @@ ActiveRecord::Schema.define(:version => 20140812233106) do
   end
 
   create_table "usage_subscriptions", :force => true do |t|
-    t.integer  "business_id",   :default => 0,  :null => false
-    t.string   "plan",          :default => "", :null => false
-    t.string   "remote_status", :default => "", :null => false
-    t.integer  "generation",    :default => 0,  :null => false
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
+    t.integer  "business_id",            :default => 0,  :null => false
+    t.string   "plan",                   :default => "", :null => false
+    t.string   "remote_status",          :default => "", :null => false
+    t.integer  "generation",             :default => 0,  :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
+    t.datetime "trial_ends_at"
+    t.datetime "current_period_ends_at"
   end
 
   create_table "users", :force => true do |t|

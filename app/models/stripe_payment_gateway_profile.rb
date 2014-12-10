@@ -211,6 +211,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
     if !customer.subscriptions.data.empty?
       if payment_gateway_profilable.payment_gateway_profilable_subscribable? # has plan and status column
+        self.trial_ends_at = Time.zone.at(customer.subscriptions.data.first.trial_end)
+        self.current_period_ends_at = Time.zone.at(customer.subscriptions.data.first.current_period_end)
         self.payment_gateway_profilable.remote_status = customer.subscriptions.data.first.status
         self.payment_gateway_profilable.plan = customer.subscriptions.data.first.plan.id
       end
