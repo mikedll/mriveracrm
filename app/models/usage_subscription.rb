@@ -50,9 +50,7 @@ class UsageSubscription < ActiveRecord::Base
   def feature_prices
     @feature_prices ||= Feature.bit_index_ordered.all.map do |feature|
       fp = feature.feature_pricings.for_generation(generation).price_ordered.first
-      if !fp
-        fp = feature.ensure_generation_pricing!
-      end
+      fp = feature.ensure_generation_pricing! if !fp
       {
         :id => feature.id,
         :price => fp.price
@@ -88,8 +86,6 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def ensure_correct_plan!
-    # fps = self.feature_pricings.for_generation(generation)
-
     if plan != calculated_plan_id
       if payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
         if !payment_gateway_profile.update_plan!(calculated_plan_id)

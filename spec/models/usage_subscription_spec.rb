@@ -95,6 +95,7 @@ describe UsageSubscription do
     end
 
     it "should reflect generation" do
+
       FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
       FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f2)
 
@@ -108,19 +109,19 @@ describe UsageSubscription do
       FactoryGirl.create(:feature_pricing, :feature => @f2, :generation => 2, :price => "2.00")
       FactoryGirl.create(:feature_pricing, :feature => @f3, :generation => 2, :price => "15.00")
 
-      @ug.reload.calculated_price.should == BigDecimal.new("4.00") # 2 + 2
+      @ug.reload.calculated_price.should == BigDecimal.new("12.00") # 6 + 6 still. dont use future gen.
 
       @ug.update_attributes(:generation => 1)
-      @ug.calculated_price.should == BigDecimal.new("4.00") # 2 + 2
+      @ug.reload.calculated_price.should == BigDecimal.new("20.00") # 10 + 10
       FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f3)
-      @ug.reload.calculated_price.should == BigDecimal("14.00") # 2 + 2 + 10
+      @ug.reload.calculated_price.should == BigDecimal("30.00") # 10 + 10 + 10
 
       FactoryGirl.create(:feature_pricing, :feature => @f1, :generation => 3, :price => "20.00")
       FactoryGirl.create(:feature_pricing, :feature => @f2, :generation => 3, :price => "20.00")
       FactoryGirl.create(:feature_pricing, :feature => @f3, :generation => 3, :price => "20.00")
 
 
-      @ug.reload.calculated_price.should == BigDecimal("14.00") # 2 + 2 + 10
+      @ug.reload.calculated_price.should == BigDecimal("30.00") # 10 + 10 + 10
 
       # 4th generation picks up latest pricings.
       @uggen4 = FactoryGirl.create(:usage_subscription, :generation => 3)
