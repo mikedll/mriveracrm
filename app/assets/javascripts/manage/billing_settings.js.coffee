@@ -42,7 +42,7 @@ class window.BillingSettingsView extends CrmModelView
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
-    @inputsCache.each((i, el) =>
+    @inputsCache.add(@readonlyInputsCache).each((i, el) =>
       el$ = $(el)
       attributeName = @nameFromInput(el$)
       if attributeName == 'feature_selections_attributes'
@@ -53,8 +53,9 @@ class window.BillingSettingsView extends CrmModelView
       else if _.isEqual(attributeName, ['payment_gateway_profile_attributes', 'card_number'])
         el$.prop('placeholder', @deepGet(['payment_gateway_profile', 'card_prompt']))
       else if attributeName == "trial_ends_at"
-        if Date.parse(@get('trial_ends_at')) < Date.parse('now')
-          el$.closest('control-group')# .hide()
+        v = @model.get('trial_ends_at')
+        if typeof(v) == "undefined" || Date.parse(v) < Date.parse('now')
+          el$.closest('.control-group').hide()
         else
-          el$.closest('control-group')# .show()
+          el$.closest('.control-group').show()
     )
