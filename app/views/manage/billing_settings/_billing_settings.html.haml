@@ -36,6 +36,13 @@
       .control-group.trial-ends-at-display
         .control-label
           %label
+            Subscription Status:
+        .controls
+          .read-only-field{:data => {:name => 'remote_status'} }
+
+      .control-group.trial-ends-at-display
+        .control-label
+          %label
             Trial Ends:
         .controls
           .read-only-field{:data => {:name => 'trial_ends_at'}, :class => "datetime" }
