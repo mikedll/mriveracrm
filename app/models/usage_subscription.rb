@@ -12,7 +12,7 @@ class UsageSubscription < ActiveRecord::Base
 
   after_create :require_payment_gateway_profile
 
-  TRIAL_DURATION = 2.weeks
+  TRIAL_DURATION = 30.days
 
   module Status
     TRIALING = 'trialing'
