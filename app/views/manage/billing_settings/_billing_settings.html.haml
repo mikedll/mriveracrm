@@ -29,9 +29,16 @@
       .control-group.price-display
         .control-label
           %label
-            Price:
+            Monthly Price:
         .controls
-          .read-only-field{:data => {:name => 'price'} }
+          .read-only-field{:data => {:name => 'price'}, :class => "money" }
+
+      .control-group.trial-ends-at-display
+        .control-label
+          %label
+            Trial Ends:
+        .controls
+          .read-only-field{:data => {:name => 'trial_ends_at'}, :class => "datetime" }
 
       .control-group
         .control-label

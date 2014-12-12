@@ -23,6 +23,7 @@ window.AppsConfig =
   dateJsRubyDatetimeFormat: 'yyyy-MM-ddTHH:mm:ss'
   dateJsReadableDatetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
   dateJsReadableDateFormat: 'ddd yyyy-MM-dd'
+  dateJsReadonlyDateTime: 'dddd, MMMM dd, h:mmtt'
   datePickerDateFormat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
   fadeDuration: 1000
@@ -286,15 +287,14 @@ class window.BaseView extends Backbone.View
     d.toString(AppsConfig.dateJsRubyDatetimeFormat) +
       $.timepicker.timezoneOffsetString(-d.getTimezoneOffset(), true)
 
-  toHumanReadableDateFormat: (field) ->
-    date = Date.parse(@model.get(field))
+  toHumanReadableDateFormat: (dateString) ->
+    date = Date.parse(dateString)
     date.toString(AppsConfig.dateJsReadableDateFormat)
 
-  toHumanReadableDateTimeFormat: (field) ->
-    v = @model.get(field)
-    return "" if !v?
-    date = Date.parse(v)
-    date.toString(AppsConfig.dateJsReadableDatetimeFormat)
+  toHumanReadableDateTimeFormat: (dateString, format) ->
+    return "" if !dateString?
+    date = Date.parse(dateString)
+    date.toString(if typeof(format) != "undefined" then AppsConfig[format] else AppsConfig[dateJsReadableDatetimeFormat])
 
   onSync: (model, resp, options) ->
 
@@ -543,6 +543,7 @@ class window.CrmModelView extends ModelBaseView
 
     @attributeMatcher = new RegExp("^" + @modelName + "\\[(\\w+)\\]")
     @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
+    @textRenderer = new TextRenderer()
 
     @inputsCache = []
     @readonlyInputsCache = []
@@ -822,9 +823,11 @@ class window.CrmModelView extends ModelBaseView
             el$.prop('checked', v[idField] == valAsInt)
         else
           if el$.hasClass('datetimepicker')
-            v = @toHumanReadableDateTimeFormat(attributeName)
+            v = @toHumanReadableDateTimeFormat(v)
           else if el$.hasClass('hasDatepicker')
-            v = @toHumanReadableDateFormat(attributeName)
+            v = @toHumanReadableDateFormat(v)
+          else if el$.hasClass('money')
+            v = "$#{@textRenderer.toFixed(v, 2)}"
           el$.val(v)
     )
 
@@ -833,11 +836,13 @@ class window.CrmModelView extends ModelBaseView
       attributeName = el$.data('name')
       if (attributeName? && @model.get(attributeName)?)
         v = @model.get(attributeName)
-        if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attributeName)
-        else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attributeName)
-        el$.find('.controls').text(v)
+        if el$.hasClass('datetime')
+          v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
+        else if el$.hasClass('date')
+          v = @toHumanReadableDateFormat(v)
+        else if el$.hasClass('money')
+          v = "$#{@textRenderer.toFixed(v, 2)}"
+        el$.text(v)
     )
 
     _.each( @$('.put_action, .destroy'), (el) =>

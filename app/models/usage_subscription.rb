@@ -38,8 +38,12 @@ class UsageSubscription < ActiveRecord::Base
                   :methods => [:card_prompt]
                 }
               },
-              :only => []
+              :only => [:trial_ends_at, :remote_status, :current_period_ends_at]
             })
+  end
+
+  def trialing?
+    trial_ends_at && trial_ends_at > Time.zone.now
   end
 
   def price

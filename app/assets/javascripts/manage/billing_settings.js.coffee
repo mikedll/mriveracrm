@@ -39,7 +39,6 @@ class window.BillingSettingsView extends CrmModelView
   initialize: (options) ->
     CrmModelView.prototype.initialize.apply(@, arguments)
     @features = new Features()
-    @textRenderer = new TextRenderer()
 
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
@@ -53,9 +52,9 @@ class window.BillingSettingsView extends CrmModelView
           el$.closest('.feature-display').find('.price').text("$#{@textRenderer.toFixed(featurePrice.price, 2)}")
       else if _.isEqual(attributeName, ['payment_gateway_profile_attributes', 'card_number'])
         el$.prop('placeholder', @deepGet(['payment_gateway_profile', 'card_prompt']))
+      else if attributeName == "trial_ends_at"
+        if Date.parse(@get('trial_ends_at')) < Date.parse('now')
+          el$.closest('control-group')# .hide()
+        else
+          el$.closest('control-group')# .show()
     )
-
-  onModelChanged: (e) ->
-    CrmModelView.prototype.onModelChanged.apply(@, arguments)
-    @readonlyInputsCache.filter('[data-name="price"]').first()
-      .text("$" + (@textRenderer.toFixed(@model.get('price'), 2)) + " per month")

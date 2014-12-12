@@ -121,6 +121,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         else
           sub = customer.subscriptions.data.first
           sub.plan = plan_id
+          sub.trial_end = payment_gateway_profilable.trial_ends_at.to_i if payment_gateway_profilable.trialing?
           sub.save
         end
       rescue Stripe::InvalidRequestError => e
@@ -211,10 +212,22 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
     if !customer.subscriptions.data.empty?
       if payment_gateway_profilable.payment_gateway_profilable_subscribable? # has plan and status column
-        self.trial_ends_at = Time.zone.at(customer.subscriptions.data.first.trial_end)
-        self.current_period_ends_at = Time.zone.at(customer.subscriptions.data.first.current_period_end)
-        self.payment_gateway_profilable.remote_status = customer.subscriptions.data.first.status
-        self.payment_gateway_profilable.plan = customer.subscriptions.data.first.plan.id
+        sub = customer.subscriptions.data.first
+
+        if !sub.trial_end.nil?
+          self.payment_gateway_profilable.trial_ends_at = Time.zone.at(sub.trial_end)
+        else
+          self.payment_gateway_profilable.trial_ends_at = nil
+        end
+
+        if sub.current_period_end
+          self.payment_gateway_profilable.current_period_ends_at = Time.zone.at(sub.current_period_end)
+        else
+          self.payment_gateway_profilable.current_period_ends_at = nil
+        end
+
+        self.payment_gateway_profilable.remote_status = sub.status
+        self.payment_gateway_profilable.plan = sub.plan.id
       end
     end
   end

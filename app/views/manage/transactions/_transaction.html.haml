@@ -1,10 +1,11 @@
 
 = simple_form_for transaction, :remote => true, :url => manage_clients_path, :html => { :class => 'form-horizontal'} do |f|
 
-  .control-group.read-only-field{ :data => { :name => 'type' } }
+  .control-group
     .control-label
       Type:
     .controls
+      .read-only-field{ :data => { :name => 'type' } }
 
   .outside_transaction_fields
     = f.input :outside_id, :label => "Outside Id", :input_html => {}.merge(transaction.persisted? ? {} : { :id => nil })
