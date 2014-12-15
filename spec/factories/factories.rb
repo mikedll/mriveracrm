@@ -238,7 +238,7 @@ FactoryGirl.define do
   factory :usage_subscription do
     business
     plan "98as7df98"
-    remote_status "paid"
+    remote_status "active"
     generation { 0 }
   end
 

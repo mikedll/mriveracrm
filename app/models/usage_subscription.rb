@@ -91,13 +91,19 @@ class UsageSubscription < ActiveRecord::Base
 
   def ensure_correct_plan!
     if plan != calculated_plan_id
-      if payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
+      if !payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
+        DetectedError.create(:message => "Unable to create plan in stripe: #{calculated_plan_id}", :business_id => business_id)
+        false
+      else
         if !payment_gateway_profile.update_plan!(calculated_plan_id)
           DetectedError.create(:message => "Unable to update plan in stripe: #{calculated_plan_id}", :business_id => business_id)
+          false
+        else
+          true
         end
-      else
-        DetectedError.create(:message => "Unable to create plan in stripe: #{calculated_plan_id}", :business_id => business_id)
       end
+    else
+      true
     end
   end
 
