@@ -44,7 +44,7 @@ class User < ActiveRecord::Base
     return user if user
 
     # does not exist. require open invite.
-    invitation = Invitation.cb.open.find_by_email auth[:info][:email]
+    invitation = Invitation.cb.open.find_by_email auth[:info][:email].downcase
     if invitation
       # invited user
       user = if current_user.nil?
@@ -56,7 +56,7 @@ class User < ActiveRecord::Base
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return user if !invitation.accept_user!(user) # credential likely is already in use for this business
     elsif current_user.nil? && cb.first.nil?
-      invitation = Invitation.handled.open.find_by_email auth[:info][:email]
+      invitation = Invitation.handled.open.find_by_email auth[:info][:email].downcase
       if invitation
         user = User.new_from_auth(auth[:info])
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
