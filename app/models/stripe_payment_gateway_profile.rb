@@ -1,6 +1,13 @@
 class StripePaymentGatewayProfile < PaymentGatewayProfile
 
+  scope :by_vendor_id, lambda { |id| where("vendor_id = ?", id) }
+  scope :with_payment_gateway_profilable, lambda { joins(:payment_gateway_profilable).where('payment_gateway_profilable_type = ?', 'usage_subscription') }
+
   class NoStripeApiKey < Exception
+  end
+
+  module Events
+    SUBSCRIPTION_UPDATED = 'customer.subscription.updated'
   end
 
   def public
@@ -13,6 +20,35 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
   def can_pay?
     !self.vendor_id.nil? && !self.card_last_4.blank?
+  end
+
+  def subscribable?
+    payment_gateway_profilable.payment_gateway_profilable_subscribable?
+  end
+
+  def active_plan?
+    payment_gateway_profilable.payment_gateway_profilable_subscribable?
+    [UsageSubscription::Status::TRIALING,
+      UsageSubscription::Status::ACTIVE].any? { |s| s == payment_gateway_profilable.remote_status }
+  end
+
+  NOT_FOUND_MESSAGE = "No such event: "
+  def webhook_event_with_stripe_key(key, id)
+    event = nil
+
+    _with_stripe_key(key) do
+      begin
+        event = Stripe::Event.retrieve id
+      rescue Stripe::InvalidRequestError => e
+        if e.message.include?(NOT_FOUND_MESSAGE)
+          event = nil
+        else
+          raise e
+        end
+      end
+    end
+
+    event
   end
 
   def pay_invoice!(invoice)
@@ -232,11 +268,11 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
   end
 
-  def _with_stripe_key
+  def _with_stripe_key(key = nil)
     begin
       raise "Stripe api key was not blank. Probably a bug." if Stripe.api_key != ""
 
-      Stripe.api_key = payment_gateway_profilable.payment_gateway_profilable_remote_app_key
+      Stripe.api_key = key ? key : payment_gateway_profilable.payment_gateway_profilable_remote_app_key
 
       yield
     ensure

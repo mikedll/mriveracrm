@@ -124,7 +124,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def payment_profile_profilable_card_args
-    o = business.employees.is_owner.first
+    o = business.an_owner
     {
       :first_name => o.first_name,
       :last_name => o.last_name
@@ -136,6 +136,10 @@ class UsageSubscription < ActiveRecord::Base
       self.payment_gateway_profile = StripePaymentGatewayProfile.new
       self.payment_gateway_profile.save!
     end
+  end
+
+  def notify_inactive!
+    SubscriptionMailer.status_inactive(self).deliver!
   end
 
   protected

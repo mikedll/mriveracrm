@@ -76,6 +76,10 @@ class Business < ActiveRecord::Base
     end
   end
 
+  def an_owner
+    employees.is_owner.first
+  end
+
 
   private
 

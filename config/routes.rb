@@ -12,6 +12,8 @@ MikedllCrm::Application.routes.draw do
     end
   end
 
+  resources :stripe_webhooks, :only => [:create]
+
   ######################################## custom domain
   devise_for :users, :controllers => { :sessions => "users/sessions", :registrations => "users/registrations", :confirmations => "users/confirmations" }
 
@@ -101,11 +103,11 @@ MikedllCrm::Application.routes.draw do
 
 
   ################################################ Business via MFE
-  ################################################ 
+  ################################################
   ################################################ This is NOT exactly the same as down below.
   ################################################ sometimes its useful to comment this out
   ################################################ when running rake routes, since its almosta dup of above
-  
+
   scope "b/(:business_handle)", :as => 'bhandle', :constraints => { :business_handle => Regexes::BUSINESS_HANDLE_ROUTING } do
     resource :business, :path => "", :only => [:show]
 
