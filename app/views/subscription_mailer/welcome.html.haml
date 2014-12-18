@@ -1,0 +1,18 @@
+%p
+  Hi
+  = "#{@us.business.an_owner.first_name},"
+
+%p
+  This is to welcome you to
+  = "#{@us.business.default_mfe.title}."
+
+
+- if @us.trialing?
+  %p
+    Your trial will end
+    = "#{l(@us.trial_ends_at, :format => :long)}."
+    No action is required after that date if you don't want
+    to continue to use the product.
+
+= render :partial => 'shared/email_contact_info', :locals => { :business => @us.business }
+

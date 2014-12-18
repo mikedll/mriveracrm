@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141218051250) do
+ActiveRecord::Schema.define(:version => 20141218063725) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -30,6 +30,7 @@ ActiveRecord::Schema.define(:version => 20141218051250) do
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
     t.string   "google_analytics_id",             :default => "",    :null => false
+    t.integer  "default_mfe_id",                  :default => 0,     :null => false
   end
 
   create_table "clients", :force => true do |t|
@@ -147,6 +148,13 @@ ActiveRecord::Schema.define(:version => 20141218051250) do
     t.string   "pdf_file"
     t.string   "pdf_file_unique_id"
     t.string   "pdf_file_original_filename"
+  end
+
+  create_table "lifecycle_notifications", :force => true do |t|
+    t.integer  "business_id", :default => 0,  :null => false
+    t.string   "identifier",  :default => "", :null => false
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
   end
 
   create_table "marketing_front_ends", :force => true do |t|

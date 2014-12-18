@@ -34,6 +34,8 @@ class User < ActiveRecord::Base
 
   before_save :_create_new_business_if_necessary
 
+  after_save :_notify_subscription, :if => lambda { |r| r.confirmed_at_changed? && !confirmed_at.nil? && r.employee && r.employee.owner? }
+
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
 
@@ -156,6 +158,19 @@ class User < ActiveRecord::Base
 
   def _default_creation_type
     self.use_google_oauth_registration = true if new_record? && self.use_google_oauth_registration.nil?
+  end
+
+  protected
+
+  def _notify_subscription
+
+    welcomed = employee.business.lifecycle_notifications.by_identifier(LifecycleNotification::Common::WELCOME).first
+    if !welcomed
+      employee.business.usage_subscription.notify_signup!
+      ln = employee.business.lifecycle_notifications.build(:identifier => 'welcome')
+      ln.save!
+    end
+
   end
 
 end

@@ -13,4 +13,9 @@ class Employee < ActiveRecord::Base
   module Roles
     OWNER = 'owner'
   end
+
+  def owner?
+    self.role == Roles::OWNER
+  end
+
 end

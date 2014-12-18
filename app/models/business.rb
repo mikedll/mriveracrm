@@ -15,10 +15,15 @@ class Business < ActiveRecord::Base
 
   has_many :invitations, :dependent => :destroy
   has_many :images, :dependent => :destroy
+  has_many :lifecycle_notifications, :dependent => :destroy
   has_one :usage_subscription, :dependent => :destroy
 
+  belongs_to :default_mfe, :class_name => "MarketingFrontEnd"
+
+  before_validation :_find_default_mfe, :if => :new_record?
   before_validation :_format_handle
 
+  validates :default_mfe_id, :presence => true
   validates :handle, :presence => true
   validates :handle, :length => { :minimum => 3 }, :allow_blank => true
   validates :handle, :format => { :with => Regexes::BUSINESS_HANDLE, :message => I18n.t('business.errors.handle_format')}, :allow_blank => true
@@ -28,6 +33,8 @@ class Business < ActiveRecord::Base
   validates :host, :uniqueness => true, :allow_blank => true
 
   validate :_no_mfe_conflict
+
+  after_create :_have_usage_subscription
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
@@ -77,19 +84,31 @@ class Business < ActiveRecord::Base
   end
 
   def an_owner
-    employees.is_owner.first
+    employees.is_owner.first.user
   end
 
 
   private
+
 
   def _format_handle
     self.handle.strip!
     self.handle.downcase!
   end
 
+  def _find_default_mfe
+    # can be improved...try actually setting one in a controller. or, set a primary
+    # mfe for the system.
+    self.default_mfe = MarketingFrontEnd.first if !default_mfe
+  end
+
   def _no_mfe_conflict
     errors.add(:host, I18n.t('business.mfe_host_conflict')) if MarketingFrontEnd.find_by_host host
+  end
+
+  def _have_usage_subscription
+    self.usage_subscription = UsageSubscription.new
+    self.usage_subscription.save!
   end
 
 

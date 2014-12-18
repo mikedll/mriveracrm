@@ -15,6 +15,7 @@ FactoryGirl.define do
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
 
   factory :business do
+    default_mfe
     name "my small business"
     handle { generate(:business_handle) }
     host { "www.#{handle}.com" }
@@ -38,6 +39,10 @@ FactoryGirl.define do
         FactoryGirl.create(:employee, :business => business, :first_name => "Saint", :last_name => "Benedict")
       end
     end
+  end
+
+  factory :lifecycle_notification do
+    business
   end
 
   factory :employee do

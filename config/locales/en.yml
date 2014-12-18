@@ -66,6 +66,7 @@ en:
   usage_subscriptions:
     no_payment_gateway_profile: "An internal error has occured. There is no payment profile available for your business. Please contact support if this error persists."
     trial_expired: "Trial Expired"
+    welcome: Welcome to %{title}
 
   payment_gateway_profile:
     cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
