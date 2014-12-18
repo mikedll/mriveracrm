@@ -11,13 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141210141632) do
-
-  create_table "beta_testers", :force => true do |t|
-    t.string   "email"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-  end
+ActiveRecord::Schema.define(:version => 20141218051250) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false

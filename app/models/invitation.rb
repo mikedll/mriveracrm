@@ -21,7 +21,6 @@ class Invitation < ActiveRecord::Base
   validates :email, :format => { :with => Regexes::EMAIL }, :allow_blank => true
   validate :_no_email_conflict, :if => lambda { |i| !i.email.blank? }
   validates :business_id, :presence => true, :if => lambda { |i| i.handle.blank? }
-  validate :_is_beta_tester, :if => lambda { |i| !i.handle.blank? }
 
   attr_accessible :email, :handle
 
@@ -94,12 +93,6 @@ class Invitation < ActiveRecord::Base
       finder = Invitation.open_for_handle_and_email(handle, email)
       finder = finder.where('id <> ?', self.id) if persisted?
       errors.add(:email, t('.errors.email_conflict_handle')) if finder.first
-    end
-  end
-
-  def _is_beta_tester
-    if (new_record? || open?) && BetaTester.find_by_email(email).nil?
-      errors.add(:email, t(".errors.email_not_beta_tester"))
     end
   end
 

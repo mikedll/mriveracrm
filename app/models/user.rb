@@ -26,7 +26,6 @@ class User < ActiveRecord::Base
   validates :password, :length => { :minimum => 8 }, :if => lambda { |u| !u.new_oauthed_user? && u.credentials.empty?  }
   validates_confirmation_of :password, :if => lambda { |u| u.credentials.empty? }
   validate :_employee_or_client
-  validate :_is_beta_tester
 
   #
   # CHECK THIS OUT; ISNT WORKING RIGHT.
@@ -157,12 +156,6 @@ class User < ActiveRecord::Base
 
   def _default_creation_type
     self.use_google_oauth_registration = true if new_record? && self.use_google_oauth_registration.nil?
-  end
-
-  def _is_beta_tester
-    if new_record? && employee && employee.role == Employee::Roles::OWNER && BetaTester.find_by_email(email).nil?
-      errors.add(:email, t("invitation.errors.email_not_beta_tester"))
-    end
   end
 
 end
