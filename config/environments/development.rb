@@ -11,6 +11,7 @@ MikedllCrm::Application.configure do
 
   # Don't care if the mailer can't send
   config.action_mailer.raise_delivery_errors = false
+  config.action_mailer.delivery_method = :test
 
   config.action_dispatch.best_standards_support = :builtin
 
