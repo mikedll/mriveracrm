@@ -14,6 +14,7 @@ namespace :data_migrations do
 
     Business.all.each do |b|
       b.acquire_default_features!
+      b.usage_subscription.notify_signup!
     end
   end
 end
