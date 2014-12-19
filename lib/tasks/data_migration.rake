@@ -11,6 +11,10 @@ namespace :data_migrations do
       mfe = MarketingFrontEnd.first
       mfe.features.push(f) if mfe.features.find_by_id(f.id).nil?
     end
+
+    Business.all.each do |b|
+      b.acquire_default_features!
+    end
   end
 end
 

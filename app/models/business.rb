@@ -88,6 +88,11 @@ class Business < ActiveRecord::Base
     e.user if e
   end
 
+  def acquire_default_features!
+    self.usage_subscription.features = default_mfe.features.all
+    self.usage_subscription.save!
+  end
+
 
   private
 
