@@ -5,6 +5,7 @@ class Feature < ActiveRecord::Base
 
   has_many :feature_selections, :dependent => :destroy
   has_many :feature_pricings, :dependent => :destroy
+  has_many :feature_provision, :dependent => :destroy
 
   before_validation :_default_public_name
 

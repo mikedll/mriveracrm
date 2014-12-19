@@ -108,6 +108,7 @@ class Business < ActiveRecord::Base
 
   def _have_usage_subscription
     self.usage_subscription = UsageSubscription.new
+    self.usage_subscription.features = default_mfe.features.all
     self.usage_subscription.save!
   end
 

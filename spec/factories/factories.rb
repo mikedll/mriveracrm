@@ -264,4 +264,9 @@ FactoryGirl.define do
     usage_subscription
   end
 
+  factory :feature_provision do
+    feature
+    marketing_front_end
+  end
+
 end
