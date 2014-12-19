@@ -84,7 +84,8 @@ class Business < ActiveRecord::Base
   end
 
   def an_owner
-    employees.is_owner.first.user
+    e = employees.is_owner.first
+    e.user if e
   end
 
 

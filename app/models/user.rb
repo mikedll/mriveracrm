@@ -34,7 +34,15 @@ class User < ActiveRecord::Base
 
   before_save :_create_new_business_if_necessary
 
-  after_save :_notify_subscription, :if => lambda { |r| r.confirmed_at_changed? && !confirmed_at.nil? && r.employee && r.employee.owner? }
+  after_save :_notify_subscription, :if => lambda { |r|
+    r.employee && r.employee.owner? &&
+
+    # confirmed with non-oauth login
+    ((!r.new_record? && r.confirmed_at_changed? && !confirmed_at.nil?) ||
+
+      # immediately confirmed with new business via oauth
+      (r.new_record? && r.business_id_changed?))
+  }
 
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
@@ -163,14 +171,8 @@ class User < ActiveRecord::Base
   protected
 
   def _notify_subscription
-
-    welcomed = employee.business.lifecycle_notifications.by_identifier(LifecycleNotification::Common::WELCOME).first
-    if !welcomed
-      employee.business.usage_subscription.notify_signup!
-      ln = employee.business.lifecycle_notifications.build(:identifier => 'welcome')
-      ln.save!
-    end
-
+    employee.business.usage_subscription.reload # trial is inserted into the db on post-create hook.
+    employee.business.usage_subscription.notify_signup!
   end
 
 end
