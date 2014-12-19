@@ -14,6 +14,13 @@ namespace :data_migrations do
 
     Business.all.each do |b|
       b.acquire_default_features!
+
+      if b.an_owner.nil?
+        e = b.employees.first
+        e.role = Employee::Roles::OWNER
+        e.save!
+      end
+
       b.usage_subscription.notify_signup!
     end
   end
