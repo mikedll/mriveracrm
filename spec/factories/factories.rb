@@ -15,7 +15,7 @@ FactoryGirl.define do
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
 
   factory :business do
-    default_mfe
+    default_mfe { FactoryGirl.create(:marketing_front_end) }
     name "my small business"
     handle { generate(:business_handle) }
     host { "www.#{handle}.com" }
@@ -29,6 +29,8 @@ FactoryGirl.define do
     after(:create) do |business|
       Business.current = business
       RequestSettings.host = MarketingFrontEnd.first.try(:host) || FactoryGirl.create(:marketing_front_end).host
+      e = FactoryGirl.build(:employee, :business => business, :role => Employee::Roles::OWNER)
+      FactoryGirl.create(:employee_user, :employee => e)
     end
 
     factory :emerging_papacy do
