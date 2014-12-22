@@ -12,7 +12,7 @@ namespace :data_migrations do
       mfe.features.push(f) if mfe.features.find_by_id(f.id).nil?
     end
 
-    Business.all.each do |b|
+    Business.unscoped.all.each do |b|
       b.acquire_default_features!
 
       if b.an_owner.nil?
@@ -21,6 +21,15 @@ namespace :data_migrations do
         e.save!
       end
 
+      b.usage_subscription.require_payment_gateway_profile
+      b.usage_subscription.first_plan
+    end
+  end
+
+  desc "Notify signups."
+  task :notify_signups => :environment do
+    Business.unscoped.all.each do |b|
+      b.usage_subscription.reload
       b.usage_subscription.notify_signup!
     end
   end

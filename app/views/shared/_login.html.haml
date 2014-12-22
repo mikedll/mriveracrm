@@ -8,10 +8,12 @@
       %li
         = link_to "Home", business_path, :tabIndex => '-1'
       - if current_user.employee
-        %li
-          = link_to 'Products', manage_products_path, :tabIndex => '-1'
-        %li
-          = link_to 'Clients', manage_clients_path, :tabIndex => '-1'
+        - if bcan? Feature::Names::PRODUCTS
+          %li
+            = link_to 'Products', manage_products_path, :tabIndex => '-1'
+        - if bcan? Feature::Names::CLIENTS
+          %li
+            = link_to 'Clients', manage_clients_path, :tabIndex => '-1'
         %li.dropdown
           %a.dropdown-toggle{:data => { :toggle => "dropdown" }, :href => "#", :tabIndex => "-1"}
             Settings

@@ -1,5 +1,7 @@
 class Manage::InvoicesController < Manage::BaseController
 
+  before_filter :_business_support
+
   make_resourceful do
     actions :index, :show, :update, :create, :destroy
     belongs_to :client
@@ -80,6 +82,10 @@ class Manage::InvoicesController < Manage::BaseController
 
   def object_parameters
     params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
+  end
+
+  def _business_support
+    _bcan?(Feature::Names::INVOICING)
   end
 
 end

@@ -1,6 +1,5 @@
 class Feature < ActiveRecord::Base
 
-
   attr_accessible :name, :bit_index, :public_name
 
   has_many :feature_selections, :dependent => :destroy
@@ -15,6 +14,36 @@ class Feature < ActiveRecord::Base
 
   scope :bit_index_ordered, lambda { order('bit_index') }
 
+  module Names
+    CLIENTS = 'clients'
+    EMPLOYEES = 'employees'
+    INVOICING = 'invoicing'
+    PRODUCTS = 'products'
+  end
+
+  # This is the master list of features. This
+  # derives the bit index.
+  ALL = [
+    Names::CLIENTS,
+    Names::EMPLOYESS,
+    Names::INVOICING,
+    Names::PRODUCTS
+  ]
+
+  def self.first_generation_price(name)
+    p = {
+      Names::CLIENTS => BigDecimal("10.0"),
+      Names::EMPLOYESS => BigDecimal("0.0"),
+      Names::INVOICING => BigDecimal("10.0"),
+      Names::PRODUCTS => BigDecimal("5.0")
+    }[name]
+
+    raise "No first generation price for #{p}."
+
+    p
+  end
+
+
   def self.ensure_minimal_pricings!
     Feature.all.each {  |f| f.ensure_generation_pricing! }
   end
@@ -23,7 +52,7 @@ class Feature < ActiveRecord::Base
     them = all
 
     names = them.map(&:name)
-    MasterFeatureList::ALL.each_with_index do |n, i|
+    ALL.each_with_index do |n, i|
       if !names.include?(n)
         f = create(:name => n, :bit_index => i, :public_name => n.titleize)
         them.push(f)
@@ -37,7 +66,7 @@ class Feature < ActiveRecord::Base
   def ensure_generation_pricing!(generation = 0)
     if feature_pricings.for_generation(generation).first.nil?
       last_gen = feature_pricings.generation_ordered.last
-      fp = FeaturePricing.create!(:generation => generation, :price => (last_gen ? last_gen.price : FeaturePricing::DEFAULT), :feature => self)
+      fp = FeaturePricing.create!(:generation => generation, :price => (last_gen ? last_gen.price : self.class.first_generation_price(name)), :feature => self)
     end
   end
 

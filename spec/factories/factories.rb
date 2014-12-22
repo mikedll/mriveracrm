@@ -242,11 +242,17 @@ FactoryGirl.define do
     value_type { "String" }
   end
 
-  factory :usage_subscription do
+  factory_girl :usage_subscription_base, :class => UsageSubscription do
     business
     plan "98as7df98"
     remote_status "active"
     generation { 0 }
+
+    factory :usage_subscription do
+      before(:create) { |us, evaluator|
+        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
+        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
+    end
   end
 
   factory :feature do

@@ -43,6 +43,11 @@ class Business < ActiveRecord::Base
     super
   end
 
+  def supports(name)
+    features.any? { |f| f.name == name }
+  end
+
+
   def invite_employee(email)
     employee = employees.find_by_email(email)
     if employee.nil?

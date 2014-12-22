@@ -1,6 +1,7 @@
 class Manage::ProductsController < Manage::BaseController
 
   before_filter :_parent_name
+  before_filter :_business_support
 
   make_resourceful do
     actions :all
@@ -58,6 +59,10 @@ class Manage::ProductsController < Manage::BaseController
 
   def _parent_name
     @parent_name = "business" # hack; parent_object isnt enough.
+  end
+
+  def _business_support
+    _bcan?(Feature::Names::PRODUCTS)
   end
 
 end

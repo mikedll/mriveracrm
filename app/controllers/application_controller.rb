@@ -148,6 +148,10 @@ class ApplicationController < ActionController::Base
     false
   end
 
+  def _bcan?(n)
+    @current_business && @current_business.supports?(n)
+  end
+
   def _enforce_ssl
     # This doesn't work in dev partially due to the port.
     if ssl_required? && !request.ssl?

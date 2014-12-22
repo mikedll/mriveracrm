@@ -11,7 +11,7 @@ class UsageSubscription < ActiveRecord::Base
   validates :business_id, :presence => true
 
   after_create :require_payment_gateway_profile
-  after_create :_first_plan
+  after_create :first_plan
 
   TRIAL_DURATION = 30.days
 
@@ -137,6 +137,11 @@ class UsageSubscription < ActiveRecord::Base
       self.payment_gateway_profile = StripePaymentGatewayProfile.new
       self.payment_gateway_profile.save!
     end
+  end
+
+
+  def first_plan
+    ensure_correct_plan!
   end
 
   def notify_inactive!
@@ -278,10 +283,6 @@ class UsageSubscription < ActiveRecord::Base
     bitstring = [(padded ? "0#{hexed}" : hexed)].pack("H*").unpack("B*").first
     bitstring = bitstring[4,bitstring.length - 4] if padded
     ("0" * [min_width - bitstring.length, 0].max) + bitstring
-  end
-
-  def _first_plan
-    ensure_correct_plan!
   end
 
 end

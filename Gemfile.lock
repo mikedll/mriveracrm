@@ -73,6 +73,7 @@ GEM
       sass (~> 3.2)
       thor
     builder (3.0.4)
+    cancan (1.6.10)
     capistrano (2.8.0)
       highline
       net-scp (>= 1.0.0)
@@ -356,6 +357,7 @@ DEPENDENCIES
   activerecord-postgresql-adapter
   aws-s3 (>= 0.6.3)
   aws-ses (~> 0.4.4)
+  cancan
   capistrano
   capistrano-unicorn
   capybara

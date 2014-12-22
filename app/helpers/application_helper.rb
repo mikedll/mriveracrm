@@ -24,4 +24,8 @@ module ApplicationHelper
     end
   end
 
+  def bcan?(n)
+    @current_business && @current_business.supports?(n)
+  end
+
 end

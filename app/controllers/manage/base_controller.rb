@@ -11,7 +11,7 @@ class Manage::BaseController < ApplicationController
       response_for :update
     else
       response_for :update_fails
-    end    
+    end
   end
 
 end

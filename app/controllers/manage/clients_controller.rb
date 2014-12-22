@@ -1,6 +1,7 @@
 class Manage::ClientsController < Manage::BaseController
 
   before_filter :_parent_name
+  before_filter :_business_support
 
   make_resourceful do
     actions :new, :index, :show, :update, :create
@@ -76,5 +77,8 @@ class Manage::ClientsController < Manage::BaseController
     @parent_name = "business" # hack; parent_object isnt enough.
   end
 
+  def _business_support
+    _bcan?(Feature::Names::CLIENTS)
+  end
 
 end
