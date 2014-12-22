@@ -165,7 +165,7 @@ class ApplicationController < ActionController::Base
     Business.current = nil
     RequestSettings.reset
 
-    @current_business = Business.find_by_host request.host
+    @current_business = Business.with_features.find_by_host request.host
 
     # Determine host
     if @current_business

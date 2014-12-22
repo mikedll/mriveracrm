@@ -36,4 +36,10 @@ describe Business do
     end
 
   end
+
+  it "scopes", :current => true do
+    b = FactoryGirl.create(:business)
+    b = Business.with_features.find_by_id b.id
+    b.should_not be_nil
+  end
 end

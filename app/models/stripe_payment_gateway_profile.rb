@@ -152,8 +152,13 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
       begin
         if customer.subscriptions.data.empty?
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "updating plan...#{plan_id}"
+
           result = customer.subscriptions.create(:trial_end => (Time.now + payment_gateway_profilable.class::TRIAL_DURATION).to_i,
                                                  :plan => plan_id)
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "done plan...#{plan_id}"
         else
           sub = customer.subscriptions.data.first
           sub.plan = plan_id

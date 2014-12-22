@@ -36,6 +36,8 @@ class Business < ActiveRecord::Base
 
   after_create :_have_usage_subscription
 
+  scope :with_features, lambda { joins(:usage_subscription => :features).includes(:usage_subscription => :features) }
+
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
   def self.all
@@ -44,7 +46,7 @@ class Business < ActiveRecord::Base
   end
 
   def supports(name)
-    features.any? { |f| f.name == name }
+    usage_subscription.features.any? { |f| f.name == name }
   end
 
 

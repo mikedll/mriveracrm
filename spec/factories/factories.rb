@@ -113,10 +113,8 @@ FactoryGirl.define do
     end
   end
 
-  factory :beta_tester
-
   factory :invitation do
-    email { FactoryGirl.create(:beta_tester, :email => generate(:guest_email)).email }
+    email { generate(:guest_email) }
 
     factory :client_invitation, :parent => :invitation do
       client { FactoryGirl.create(:stubbed_client) }
@@ -242,7 +240,7 @@ FactoryGirl.define do
     value_type { "String" }
   end
 
-  factory_girl :usage_subscription_base, :class => UsageSubscription do
+  factory :usage_subscription_base, :class => UsageSubscription do
     business
     plan "98as7df98"
     remote_status "active"
@@ -250,8 +248,13 @@ FactoryGirl.define do
 
     factory :usage_subscription do
       before(:create) { |us, evaluator|
-        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
         Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
+        Stripe::Customer.stub(:retrieve) {
+          c = ApiStubs.stripe_create_customer
+          c.stub(:subscriptions => { :create => nil })
+          c
+        }
+      }
     end
   end
 
