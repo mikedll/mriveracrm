@@ -6,6 +6,7 @@ namespace :data_migrations do
     raise "Not intended for when system has more than one mfe. " if MarketingFrontEnd.count > 1
 
     Feature.ensure_master_list_created!
+    Feature.ensure_minimal_pricings!
 
     Feature.all.each do |f|
       mfe = MarketingFrontEnd.first
