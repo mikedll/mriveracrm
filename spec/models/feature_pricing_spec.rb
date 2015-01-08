@@ -6,7 +6,7 @@ describe FeaturePricing do
     @fp.valid?.should be_true
   end
 
-  it "should be able to draw first gen pricing", :current => true do
+  it "should be able to draw first gen pricing" do
     f = FactoryGirl.create(:feature)
     f.ensure_generation_pricing!
     fp = f.feature_pricings.first

@@ -45,6 +45,11 @@ Spork.prefork do
 
     config.before(:each) do
       DatabaseCleaner.start
+
+      # Global stubs.
+      UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
+      UsageSubscription.any_instance.stub(:first_plan)
+
     end
 
     config.after(:each) do

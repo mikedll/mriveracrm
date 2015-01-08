@@ -2,12 +2,22 @@ require 'spec_helper'
 
 describe UsageSubscription do
   context "validations" do
-    it "should require business" do
+    it "should require business", :current => true do
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "invoking from spec..."
+
       @us = FactoryGirl.create(:usage_subscription)
       @us.business = nil
       @us.save.should be_false
     end
   end
+
+
+
+
+
+
+
 
   context "feature_selections" do
     before do

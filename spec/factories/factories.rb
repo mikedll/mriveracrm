@@ -147,7 +147,7 @@ FactoryGirl.define do
 
   factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
     before(:create) { |profile, evaluator|
-      profile.payment_gateway_profilable = FactoryGirl.build(:usage_subscription)
+      profile.payment_gateway_profilable = FactoryGirl.build(:usage_subscription) if profile.payment_gateway_profilable.nil?
     }
   end
 
@@ -246,14 +246,28 @@ FactoryGirl.define do
     remote_status "active"
     generation { 0 }
 
+    # theoretically we should unstub the default plan stuff here...
+
     factory :usage_subscription do
       before(:create) { |us, evaluator|
-        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
-        Stripe::Customer.stub(:retrieve) {
-          c = ApiStubs.stripe_create_customer
-          c.stub(:subscriptions => { :create => nil })
-          c
+        Stripe::Customer.stub(:create) {
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "stubbed customer create..."
+          ApiStubs.stripe_create_customer
         }
+        # RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile)
+        Stripe::Customer.stub(:retrieve) {
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "stubbed customer retrieve..."
+
+          c = ApiStubs.stripe_retrieve_customer
+          # c.stub(:subscriptions => { :create => nil })
+          # c
+        }
+
+        # Compensate for spec_helper stubs.
+        UsageSubscription.any_instance.unstub(:require_payment_gateway_profile)
+        UsageSubscription.any_instance.unstub(:first_plan)
       }
     end
   end
