@@ -60,6 +60,8 @@ Spork.prefork do
     # Cleanup carrierwave images
     config.after(:all) do
       if Rails.env.test? || Rails.env.cucumber?
+        UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
+        UsageSubscription.any_instance.stub(:first_plan)
         tmp = FactoryGirl.create(:image)
         store_path = File.dirname(File.dirname(tmp.data.url))
         temp_path = tmp.data.cache_dir
