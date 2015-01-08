@@ -25,7 +25,7 @@ class Feature < ActiveRecord::Base
   # derives the bit index.
   ALL = [
     Names::CLIENTS,
-    Names::EMPLOYESS,
+    Names::EMPLOYEES,
     Names::INVOICING,
     Names::PRODUCTS
   ]
@@ -33,7 +33,7 @@ class Feature < ActiveRecord::Base
   def self.first_generation_price(name)
     p = {
       Names::CLIENTS => BigDecimal("10.0"),
-      Names::EMPLOYESS => BigDecimal("0.0"),
+      Names::EMPLOYEES => BigDecimal("0.0"),
       Names::INVOICING => BigDecimal("10.0"),
       Names::PRODUCTS => BigDecimal("5.0")
     }[name]
