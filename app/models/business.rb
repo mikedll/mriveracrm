@@ -45,7 +45,7 @@ class Business < ActiveRecord::Base
     super
   end
 
-  def supports(name)
+  def supports?(name)
     usage_subscription.features.any? { |f| f.name == name }
   end
 
