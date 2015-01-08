@@ -134,10 +134,7 @@ class UsageSubscription < ActiveRecord::Base
 
   def require_payment_gateway_profile
     if payment_gateway_profile.nil?
-      puts "*************** #{__FILE__} #{__LINE__} *************"
-      puts "creating stripe payment gateway profile in create hook...."
-
-      self.payment_gateway_profile = StripePaymentGatewayProfile.new
+      self.payment_gateway_profile = StripePaymentGatewayProfile.new(:payment_gateway_profilable => self)
       self.payment_gateway_profile.save!
     end
   end
