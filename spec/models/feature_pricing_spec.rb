@@ -10,6 +10,5 @@ describe FeaturePricing do
     f = FactoryGirl.create(:feature)
     f.ensure_generation_pricing!
     fp = f.feature_pricings.first
-    puts fp.price
   end
 end
