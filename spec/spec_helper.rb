@@ -9,7 +9,7 @@ Spork.prefork do
   require File.expand_path("../../config/environment", __FILE__)
   require 'rspec/rails'
   require 'rspec/autorun'
-
+  require 'webmock/rspec'
   require 'factory_girl'
 
   RSpec.configure do |config|
@@ -23,9 +23,16 @@ Spork.prefork do
     config.include Devise::TestHelpers, :type => :controller
 
     # config.filter_run_including :current => true
-    config.filter_run_excluding :live_authorizenet => true
-    config.filter_run_excluding :live_stripe => true
     config.filter_run_excluding :broken => true
+
+    # Live api tests...
+    config.filter_run_excluding :live_stripe => true
+    config.filter_run_excluding :live_authorizenet => true
+
+    LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
+    LIVE_WEB_TESTS.each do |filter|
+      config.filter_run_excluding filter => true
+    end
 
     # config.backtrace_clean_patterns = [
     #   # /\/lib\d*\/ruby\//,
@@ -38,6 +45,9 @@ Spork.prefork do
     config.before(:all) do
       DatabaseCleaner.clean_with(:truncation)
       DatabaseCleaner.strategy = :transaction
+
+      # Ensure no net connect, normally.
+      WebMock.disable_net_connect! if LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k ==  live_filter } }
     end
 
     config.before(:suite) do
@@ -49,7 +59,6 @@ Spork.prefork do
       # Global stubs.
       UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
       UsageSubscription.any_instance.stub(:first_plan)
-
     end
 
     config.after(:each) do

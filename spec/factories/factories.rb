@@ -251,6 +251,8 @@ FactoryGirl.define do
     factory :usage_subscription do
       before(:create) { |us, evaluator|
 
+        Stripe::Plan.stub(:retrieve).and_return(:some_plan)
+
         Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer}
 
         Stripe::Customer.stub(:retrieve) {
