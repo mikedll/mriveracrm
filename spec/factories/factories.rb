@@ -26,9 +26,13 @@ FactoryGirl.define do
     stripe_secret_key "sk_test_SoDXR6QkygrYnlnFhDWKNbB2"
     stripe_publishable_key "pk_test_rPvMBvyuzsgRIXZFCW2xMmxz"
 
-    after(:create) do |business|
-      Business.current = business
-      RequestSettings.host = MarketingFrontEnd.first.try(:host) || FactoryGirl.create(:marketing_front_end).host
+    after(:create) do |business, eval|
+      if Business.current.nil? || RequestSettings.host.nil?
+        Business.current = business
+        RequestSettings.host = business.default_mfe.host
+      end
+
+      # Ensure owner exists.
       e = FactoryGirl.build(:employee, :business => business, :role => Employee::Roles::OWNER)
       FactoryGirl.create(:employee_user, :employee => e)
     end
@@ -211,6 +215,14 @@ FactoryGirl.define do
 
   factory :marketing_front_end do
     host { "www.mfe#{SecureRandom.hex(4)}.com" }
+
+    # Create some default features.
+    after(:create) do |mfe, eval|
+      if Feature.count == 0
+        Feature.ensure_master_list_created!
+      end
+      mfe.features = Feature.all
+    end
   end
 
   factory :product_image do
