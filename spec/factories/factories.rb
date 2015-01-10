@@ -305,15 +305,19 @@ FactoryGirl.define do
     end
   end
 
-  factory :feature do
+  factory :feature_base, :class => Feature do
     bit_index { generate(:feature_bit_index).to_i }
     name { generate(:random_name) }
     public_name { |r| r.name.titleize }
 
-    after(:create) do |f, eval|
-      if !Feature::ALL.include?(f.name)
-        # pricing will fail if we don't do it here.
-        FactoryGirl.create(:feature_pricing, :feature => f)
+    factory :feature_no_pricing
+
+    factory :feature do
+      after(:create) do |f, eval|
+        if !Feature::ALL.include?(f.name)
+          # pricing will fail if we don't do it here.
+          FactoryGirl.create(:feature_pricing, :feature => f)
+        end
       end
     end
   end
