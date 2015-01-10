@@ -77,7 +77,7 @@ class Feature < ActiveRecord::Base
   protected
 
   def _never_change_index
-    if !new_record? && changed?(:bit_index)
+    if !new_record? && bit_index_changed?
       errors[:bit_index] = I18n.t('feature_pricing.cant_change_index')
     end
   end
