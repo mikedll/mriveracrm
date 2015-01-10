@@ -83,7 +83,7 @@ describe Invoice do
   end
 
   context "typical pay cycle" do
-    it "should allow basic payable transactions under normal operations" do
+    it "should allow basic payable transactions under normal operations", :live_stripe => true do
       i = FactoryGirl.create(:unstubbed_client_invoice)
       i.mark_pending!
       i.client.payment_gateway_profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
