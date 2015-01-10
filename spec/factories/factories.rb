@@ -150,9 +150,21 @@ FactoryGirl.define do
   end
 
   factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
-    before(:create) { |profile, evaluator|
-      profile.payment_gateway_profilable = FactoryGirl.build(:usage_subscription) if profile.payment_gateway_profilable.nil?
-    }
+
+    # fancy dancing around after_create hooks
+    before(:create) do |profile, evaluator|
+      profile.stub(:_save_plan_on_profilable)
+      profile.stub(:_create_remote)
+    end
+
+    after(:create) do |profile, evaluator|
+      profile.payment_gateway_profilable = FactoryGirl.create(:usage_subscription, :payment_gateway_profile => profile)
+
+      profile.unstub(:_save_plan_on_profilable)
+      profile.unstub(:_create_remote)
+      profile.send(:_save_plan_on_profilable)
+      profile.send(:_create_remote)
+    end
   end
 
   factory :invoice do
@@ -264,9 +276,7 @@ FactoryGirl.define do
       before(:create) { |us, evaluator|
 
         Stripe::Plan.stub(:retrieve).and_return(:some_plan)
-
         Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer}
-
         Stripe::Customer.stub(:retrieve) {
           c = ApiStubs.stripe_retrieve_customer
           subs_stub = RSpec::Mocks::Mock.new("subscriptions",
@@ -277,17 +287,20 @@ FactoryGirl.define do
           c.stub(:subscriptions => subs_stub)
           c
         }
+      }
 
+      after(:create) do |us, evaluator|
         # Compensate for spec_helper stubs.
         # require_payment_gateway_profile
         if us.payment_gateway_profile.nil?
           us.payment_gateway_profile = StripePaymentGatewayProfile.new(:payment_gateway_profilable => us)
           us.payment_gateway_profile.save!
         end
-        # first_plan
-        us.ensure_correct_plan!
 
-      }
+        # first_plan
+
+        us.ensure_correct_plan!
+      end
     end
   end
 
