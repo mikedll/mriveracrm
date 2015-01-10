@@ -42,6 +42,21 @@ class ApiStubs
     c
   end
 
+  def self.stripe_charge(amount = 7280)
+    customer_profile_id = DEFAULT_VENDOR_ID
+
+    vs = YAML.load load('stripe_charge').result( binding )
+    charge = Stripe::Charge.construct_from(vs['values'], vs['api_key'])
+
+    vs = YAML.load load('stripe_card_for_charge').result( binding )
+    charge.card = Stripe::Card.construct_from(vs['values'], vs['api_key'])
+
+    vs = YAML.load load('stripe_fee_details').result(binding)
+    charge.fee_details = Stripe::Object.construct_from(vs['values'], vs['api_key'])
+
+    charge
+  end
+
 
   def self.load(file)
     template = ERB.new( File.read( Rails.root.join('spec', 'api_stubs', "#{file}.yml.erb") ) )

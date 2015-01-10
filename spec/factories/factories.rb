@@ -113,6 +113,7 @@ FactoryGirl.define do
         PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
 
         Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
+        Stripe::Charge.stub(:create) { ApiStubs.stripe_charge }
       }
     end
   end
