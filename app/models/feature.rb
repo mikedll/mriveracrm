@@ -38,7 +38,7 @@ class Feature < ActiveRecord::Base
       Names::PRODUCTS => BigDecimal("5.0")
     }[name]
 
-    raise "No first generation price for #{p}."
+    raise "No first generation price for #{name}." if p.nil?
 
     p
   end

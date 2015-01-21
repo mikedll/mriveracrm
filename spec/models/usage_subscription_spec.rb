@@ -28,6 +28,9 @@ describe UsageSubscription do
   end
 
   it "should accurately calculate plan id" do
+
+    Feature.destroy_all # unique to this test, since mfe has already been created.
+
     @f1 = FactoryGirl.create(:feature, :bit_index => 0)
     @f2 = FactoryGirl.create(:feature, :bit_index => 1)
     @f3 = FactoryGirl.create(:feature, :bit_index => 2)
