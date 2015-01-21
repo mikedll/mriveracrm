@@ -132,7 +132,7 @@ describe UsageSubscription do
       @usgen4 = FactoryGirl.create(:usage_subscription, :generation => 3)
       FactoryGirl.create(:feature_selection, :usage_subscription => @usgen4, :feature => @f1)
       FactoryGirl.create(:feature_selection, :usage_subscription => @usgen4, :feature => @f2)
-      @usgen4.calculated_price.should == BigDecimal.new("40.00")
+      @usgen4.reload.calculated_price.should == BigDecimal.new("40.00")
 
     end
   end
