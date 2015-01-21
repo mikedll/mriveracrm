@@ -32,18 +32,21 @@ describe UsageSubscription do
     @f2 = FactoryGirl.create(:feature, :bit_index => 1)
     @f3 = FactoryGirl.create(:feature, :bit_index => 2)
     Feature.ensure_minimal_pricings!
+
     @profile = FactoryGirl.create(:stripe_payment_gateway_profile_for_us)
-    @ug = @profile.payment_gateway_profilable
-    @ug.generation = 1
-    FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
-    FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f2)
+    @us = @profile.payment_gateway_profilable
+    @us.generation = 1
+    @us.save
+    @us.reload # plan id is already calculated...wipe it out
+    FactoryGirl.create(:feature_selection, :usage_subscription => @us, :feature => @f1)
+    FactoryGirl.create(:feature_selection, :usage_subscription => @us, :feature => @f2)
 
     bs = "0000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000011"
     encoded = "AAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAM="
     encoded.unpack("m0").first.unpack("B*").first.should == bs
 
-    @ug.calculated_plan_id.should == encoded
-    bitstring = @ug.calculated_plan_id.unpack("m0").first.unpack("B*").join('')
+    @us.calculated_plan_id.should == encoded
+    bitstring = @us.calculated_plan_id.unpack("m0").first.unpack("B*").join('')
 
     plan_bits = bitstring[0,4]
     bitstring = bitstring[4,bitstring.length]
@@ -55,14 +58,14 @@ describe UsageSubscription do
 
     # Check generation
     generation_from_code = [generation_bits].pack("B*").unpack("H*").first.to_i
-    @ug.generation.should == generation_from_code
+    @us.generation.should == generation_from_code
 
     # Check bits
     features_indicated = (0...UsageSubscription::FEATURE_BITS).select { |i|
       feature_bits[feature_bits.length - i - 1] == "1"
     }.map { |i| Feature.find_by_bit_index i }
 
-    @ug.features.should =~ features_indicated
+    @us.features.should =~ features_indicated
 
     true
   end
