@@ -154,13 +154,13 @@ class User < ActiveRecord::Base
     if employee && employee.business && (employee.business.new_record? || employee.business.changed?) && (!employee.business.errors.empty? || !employee.business.save)
       errors.add(:base, I18n.t('users.new_business_failed'))
       employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
-      return
+      return false
     end
 
     if employee && (employee.new_record? || employee.changed?) && (!employee.errors.empty? && !employee.save)
       employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
       errors.add(:base, I18n.t('users.new_business_employee_failed'))
-      return
+      return false
     end
   end
 

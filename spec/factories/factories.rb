@@ -87,22 +87,22 @@ FactoryGirl.define do
       factory :client_user do
         business { client.business }
       end
+    end
 
-      factory :employee_user do
-        employee { FactoryGirl.create(:employee) }
-        business { employee.business }
-        client nil
+    factory :employee_user do
+      employee { FactoryGirl.create(:employee) }
+      business { employee.business }
+      client nil
 
-        factory :unconfirmed_new_employee_user do
-          after :create do |user, evaluator|
-            user.confirmed_at = nil
-            user.send(:generate_confirmation_token!) # saves
-          end
+      factory :unconfirmed_new_employee_user do
+        after :create do |user, evaluator|
+          user.confirmed_at = nil
+          user.send(:generate_confirmation_token!) # saves
         end
-
       end
 
     end
+
   end
 
   factory :client do

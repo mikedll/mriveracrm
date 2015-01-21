@@ -48,6 +48,7 @@ describe Invitation do
       invitation = FactoryGirl.create(:new_business_invitation)
       u = FactoryGirl.build(:user_base, :email => invitation.email)
       u.business.should be_nil
+
       invitation.accept_user!(u).should be_true
       u.business.should_not be_nil
       b = Business.first
