@@ -84,10 +84,13 @@ FactoryGirl.define do
     factory :user do
       client { FactoryGirl.create(:stubbed_client) }
 
-      factory :client_user
+      factory :client_user do
+        business { client.business }
+      end
 
       factory :employee_user do
         employee { FactoryGirl.create(:employee) }
+        business { employee.business }
         client nil
 
         factory :unconfirmed_new_employee_user do
