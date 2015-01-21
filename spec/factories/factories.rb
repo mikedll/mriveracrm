@@ -6,7 +6,7 @@ FactoryGirl.define do
 
   sequence(:settings_key) { |n| "key#{n}" }
 
-  sequence(:feature_bit_index) { |n| n - 1 }
+  sequence(:feature_bit_index) { |n| Feature.count + n - 1 }
 
   sequence(:guest_email) { |n| "someone#{n}" + SecureRandom.base64(8) + "@example.com" }
 

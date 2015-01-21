@@ -54,6 +54,10 @@ Spork.prefork do
     end
 
     config.before(:each) do
+
+      Business.current = nil
+      RequestSettings.reset
+
       DatabaseCleaner.start
 
       # Global stubs.
