@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20141219082345) do
+ActiveRecord::Schema.define(:version => 20150123160725) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -191,6 +191,10 @@ ActiveRecord::Schema.define(:version => 20141219082345) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.string   "payment_gateway_profilable_type", :default => "", :null => false
+    t.datetime "stripe_trial_ends_at"
+    t.datetime "stripe_current_period_ends_at"
+    t.string   "stripe_plan",                     :default => ""
+    t.string   "stripe_status",                   :default => ""
   end
 
   create_table "product_images", :force => true do |t|
@@ -249,14 +253,10 @@ ActiveRecord::Schema.define(:version => 20141219082345) do
   end
 
   create_table "usage_subscriptions", :force => true do |t|
-    t.integer  "business_id",            :default => 0,  :null => false
-    t.string   "plan",                   :default => "", :null => false
-    t.string   "remote_status",          :default => "", :null => false
-    t.integer  "generation",             :default => 0,  :null => false
-    t.datetime "created_at",                             :null => false
-    t.datetime "updated_at",                             :null => false
-    t.datetime "trial_ends_at"
-    t.datetime "current_period_ends_at"
+    t.integer  "business_id", :default => 0, :null => false
+    t.integer  "generation",  :default => 0, :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
   end
 
   create_table "users", :force => true do |t|

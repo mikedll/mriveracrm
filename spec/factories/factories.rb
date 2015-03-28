@@ -14,6 +14,8 @@ FactoryGirl.define do
 
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
 
+  sequence(:customer_vendor_id) { |n| "cus_5TT8tt" + ("0" * ((8 - n.to_s.length)) + n.to_s) }
+
   factory :business do
     default_mfe { FactoryGirl.create(:marketing_front_end) }
     name "my small business"
@@ -270,42 +272,9 @@ FactoryGirl.define do
 
   factory :usage_subscription_base, :class => UsageSubscription do
     business
-    plan "98as7df98"
-    remote_status "active"
     generation { 0 }
 
-    # theoretically we should unstub the default plan stuff here...
-
-    factory :usage_subscription do
-      before(:create) { |us, evaluator|
-
-        Stripe::Plan.stub(:retrieve).and_return(:some_plan)
-        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer}
-        Stripe::Customer.stub(:retrieve) {
-          c = ApiStubs.stripe_retrieve_customer
-          subs_stub = RSpec::Mocks::Mock.new("subscriptions",
-                                             {
-                                               :data => RSpec::Mocks::Mock.new("data", :empty? => true),
-                                               :create => nil
-                                             })
-          c.stub(:subscriptions => subs_stub)
-          c
-        }
-      }
-
-      after(:create) do |us, evaluator|
-        # Compensate for spec_helper stubs.
-        # require_payment_gateway_profile
-        if us.payment_gateway_profile.nil?
-          us.payment_gateway_profile = StripePaymentGatewayProfile.new(:payment_gateway_profilable => us)
-          us.payment_gateway_profile.save!
-        end
-
-        # first_plan
-
-        us.ensure_correct_plan!
-      end
-    end
+    factory :usage_subscription
   end
 
   factory :feature_base, :class => Feature do

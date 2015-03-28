@@ -32,19 +32,31 @@ class UsageSubscription < ActiveRecord::Base
 
   def renderable_json
     to_json({
-              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices, :price],
+              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices, :price, :trial_ends_at, :remote_status, :current_period_ends_at],
               :include => {
                 :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand],
                   :methods => [:card_prompt]
                 }
               },
-              :only => [:trial_ends_at, :remote_status, :current_period_ends_at]
+              :only => []
             })
   end
 
+  def trial_ends_at
+    payment_gateway_profile.stripe_trial_ends_at
+  end
+
+  def remote_status
+    payment_gateway_profile.stripe_status
+  end
+
+  def current_period_ends_at
+    payment_gateway_profile.stripe_current_period_ends_at
+  end
+
   def trialing?
-    trial_ends_at && trial_ends_at > Time.zone.now
+    payment_gateway_profile.trialing?
   end
 
   def price
@@ -91,7 +103,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def ensure_correct_plan!
-    if plan != calculated_plan_id
+    if payment_gateway_profile.stripe_plan != calculated_plan_id
       if !payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
         DetectedError.create(:message => "Unable to create plan in stripe: #{calculated_plan_id}", :business_id => business_id)
         false

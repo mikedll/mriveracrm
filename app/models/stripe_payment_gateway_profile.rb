@@ -29,7 +29,11 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   def active_plan?
     payment_gateway_profilable.payment_gateway_profilable_subscribable?
     [UsageSubscription::Status::TRIALING,
-      UsageSubscription::Status::ACTIVE].any? { |s| s == payment_gateway_profilable.remote_status }
+      UsageSubscription::Status::ACTIVE].any? { |s| s == stripe_status }
+  end
+
+  def trialing?
+    !stripe_trial_ends_at.nil? && stripe_trial_ends_at > Time.zone.now
   end
 
   NOT_FOUND_MESSAGE = "No such event: "
@@ -157,7 +161,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         else
           sub = customer.subscriptions.data.first
           sub.plan = plan_id
-          sub.trial_end = payment_gateway_profilable.trial_ends_at.to_i if payment_gateway_profilable.trialing?
+          sub.trial_end = stripe_trial_ends_at.to_i if trialing?
           sub.save
         end
       rescue Stripe::InvalidRequestError => e
@@ -247,24 +251,22 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
 
     if !customer.subscriptions.data.empty?
-      if payment_gateway_profilable.payment_gateway_profilable_subscribable? # has plan and status column
-        sub = customer.subscriptions.data.first
+      sub = customer.subscriptions.data.first
 
-        if !sub.trial_end.nil?
-          self.payment_gateway_profilable.trial_ends_at = Time.zone.at(sub.trial_end)
-        else
-          self.payment_gateway_profilable.trial_ends_at = nil
-        end
-
-        if sub.current_period_end
-          self.payment_gateway_profilable.current_period_ends_at = Time.zone.at(sub.current_period_end)
-        else
-          self.payment_gateway_profilable.current_period_ends_at = nil
-        end
-
-        self.payment_gateway_profilable.remote_status = sub.status
-        self.payment_gateway_profilable.plan = sub.plan.id
+      if !sub.trial_end.nil?
+        self.stripe_trial_ends_at = Time.zone.at(sub.trial_end)
+      else
+        self.stripe_trial_ends_at = nil
       end
+
+      if sub.current_period_end
+        self.stripe_current_period_ends_at = Time.zone.at(sub.current_period_end)
+      else
+        self.stripe_current_period_ends_at = nil
+      end
+
+      self.stripe_status = sub.status
+      self.stripe_plan = sub.plan.id
     end
   end
 

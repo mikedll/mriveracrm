@@ -42,7 +42,7 @@ Spork.prefork do
     #   # /lib\/rspec\/(core|expectations|matchers|mocks)/
     # ]
 
-    config.before(:all) do
+    config.before(:suite) do
       DatabaseCleaner.clean_with(:truncation)
       DatabaseCleaner.strategy = :transaction
 
@@ -53,20 +53,16 @@ Spork.prefork do
       FactoryGirl.create(:marketing_front_end)
     end
 
-    config.before(:suite) do
+    config.before(:all) do
     end
 
     config.before(:each) do
-
       Business.current = nil
       RequestSettings.reset
 
+      ApiStubs.generic_stripe_stub!
       DatabaseCleaner.start
-
-      # Global stubs.
-      UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
-      UsageSubscription.any_instance.stub(:first_plan)
-    end
+   end
 
     config.after(:each) do
       DatabaseCleaner.clean
@@ -76,13 +72,15 @@ Spork.prefork do
     # Cleanup carrierwave images
     config.after(:all) do
       if Rails.env.test? || Rails.env.cucumber?
-        UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
-        UsageSubscription.any_instance.stub(:first_plan)
+        ApiStubs.generic_stripe_stub!
+
         tmp = FactoryGirl.create(:image)
         store_path = File.dirname(File.dirname(tmp.data.url))
         temp_path = tmp.data.cache_dir
         FileUtils.rm_rf(Dir["#{Rails.root}/public/#{store_path}/[^.]*"])
         FileUtils.rm_rf(Dir["#{Rails.root}/public/#{temp_path}/[^.]*"])
+
+        ApiStubs.release_stripe_stub!
       end
     end
   end

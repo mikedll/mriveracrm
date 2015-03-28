@@ -2,7 +2,6 @@ class PaymentGatewayProfile < ActiveRecord::Base
   belongs_to :payment_gateway_profilable, polymorphic: true
   has_many :transactions
 
-  before_save :_save_plan_on_profilable
   after_create :_create_remote
 
   attr_accessor :last_error, :card_number, :expiration_month, :expiration_year, :cv_code
@@ -42,18 +41,14 @@ class PaymentGatewayProfile < ActiveRecord::Base
     raise "Implement in subclass."
   end
 
+  def trialing?
+    raise "Implement in subclass."
+  end
+
   protected
 
   def _create_remote
     raise "Implement in subclass."
-  end
-
-  def _save_plan_on_profilable
-    if payment_gateway_profilable.payment_gateway_profilable_subscribable? && (payment_gateway_profilable.plan_changed? || payment_gateway_profilable.remote_status_changed?)
-      payment_gateway_profilable.save
-    else
-      true
-    end
   end
 
 end
