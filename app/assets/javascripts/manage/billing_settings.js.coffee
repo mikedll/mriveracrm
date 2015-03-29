@@ -40,6 +40,14 @@ class window.BillingSettingsView extends CrmModelView
     CrmModelView.prototype.initialize.apply(@, arguments)
     @features = new Features()
 
+  # Decorate price changes. That is a read-only field,
+  # and we can change it to reflect the underlying price
+  # on price changes until a sync occurs.
+  onModelChanged: () ->
+    CrmModelView.prototype.onModelChanged.apply(@, arguments)
+    priceField = @readonlyInputsCache.filter((i, el) -> $(el).data('name') == 'price').first()
+    priceField.text("$#{@textRenderer.toFixed(@model.get('price'), 2)}")
+
   copyModelToForm: () ->
     CrmModelView.prototype.copyModelToForm.apply(@, arguments)
     @inputsCache.add(@readonlyInputsCache).each((i, el) =>
