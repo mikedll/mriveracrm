@@ -6,6 +6,17 @@ class PaymentGatewayProfile < ActiveRecord::Base
 
   attr_accessor :last_error, :card_number, :expiration_month, :expiration_year, :cv_code
 
+  TRIAL_DURATION = 30.days
+
+  module Status
+    TRIALING = 'trialing'
+    ACTIVE = 'active'
+    PAST_DUE = 'past_due'
+    CANCELLED = 'canceled'
+    UNPAID = 'unpaid'
+  end
+
+
   def self.card_virtual_attributes
     [:card_number, :expiration_month, :expiration_year, :cv_code]
   end

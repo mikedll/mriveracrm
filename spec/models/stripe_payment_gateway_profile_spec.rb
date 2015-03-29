@@ -162,7 +162,7 @@ describe StripePaymentGatewayProfile do
         @ug.payment_gateway_profile.update_plan!(@ug.calculated_plan_id).should be_true
         @ug.reload.plan.should_not == before
         @ug.plan.should == expected_plan
-        @ug.remote_status.should == UsageSubscription::Status::TRIALING
+        @ug.remote_status.should == PaymentGatewayProfile::Status::TRIALING
       end
     end
   end

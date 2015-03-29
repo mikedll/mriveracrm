@@ -28,8 +28,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
   def active_plan?
     payment_gateway_profilable.payment_gateway_profilable_subscribable?
-    [UsageSubscription::Status::TRIALING,
-      UsageSubscription::Status::ACTIVE].any? { |s| s == stripe_status }
+    [self.class::Status::TRIALING,
+      self.class::Status::ACTIVE].any? { |s| s == stripe_status }
   end
 
   def trialing?
@@ -163,7 +163,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
       begin
         if customer.subscriptions.data.empty?
-          result = customer.subscriptions.create(:trial_end => (Time.now + profilable.class::TRIAL_DURATION).to_i,
+          result = customer.subscriptions.create(:trial_end => (Time.now + self.class::TRIAL_DURATION).to_i,
                                                  :plan => plan_id)
         else
           sub = customer.subscriptions.data.first

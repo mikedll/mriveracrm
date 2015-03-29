@@ -13,16 +13,6 @@ class UsageSubscription < ActiveRecord::Base
   after_create :require_payment_gateway_profile
   after_save :ensure_correct_plan!
 
-  TRIAL_DURATION = 30.days
-
-  module Status
-    TRIALING = 'trialing'
-    ACTIVE = 'active'
-    PAST_DUE = 'past_due'
-    CANCELLED = 'canceled'
-    UNPAID = 'unpaid'
-  end
-
   def reload(options = nil)
     @feature_prices = nil
     @calculated_plan_id = nil
