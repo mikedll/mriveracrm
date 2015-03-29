@@ -1,5 +1,7 @@
 class Manage::BusinessesController < Manage::BaseController
 
+  skip_before_filter :require_active_plan
+
   make_resourceful do
     actions :show, :update, :destroy
 
@@ -53,7 +55,7 @@ class Manage::BusinessesController < Manage::BaseController
     else
       save_failed!
       after :update_fails
-      response_for :update_fails     
+      response_for :update_fails
     end
   end
 

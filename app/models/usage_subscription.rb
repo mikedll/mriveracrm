@@ -33,6 +33,10 @@ class UsageSubscription < ActiveRecord::Base
             })
   end
 
+  def active_plan?
+    payment_gateway_profile.active_plan?
+  end
+
   def trial_ends_at
     payment_gateway_profile.stripe_trial_ends_at
   end

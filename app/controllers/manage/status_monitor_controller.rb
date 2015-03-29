@@ -1,5 +1,7 @@
 class Manage::StatusMonitorController < Manage::BaseController
 
+  skip_before_filter :require_active_plan
+
   def show
     respond_to do |f|
       f.html {}

@@ -21,6 +21,10 @@ class PaymentGatewayProfile < ActiveRecord::Base
     [:card_number, :expiration_month, :expiration_year, :cv_code]
   end
 
+  def active_plan?
+    raise "Implement in subclass."
+  end
+
   def card_from_opts(opts)
     ActiveMerchant::Billing::CreditCard.new({
                                               :month => opts[:expiration_month].to_i,

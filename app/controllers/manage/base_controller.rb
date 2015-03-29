@@ -1,6 +1,7 @@
 class Manage::BaseController < ApplicationController
 
   before_filter :require_employee
+  before_filter :require_active_plan
 
   protected
 

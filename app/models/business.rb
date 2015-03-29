@@ -45,8 +45,16 @@ class Business < ActiveRecord::Base
     super
   end
 
+  def active_plan?
+    usage_subscription.active_plan?
+  end
+
   def supports?(name)
     usage_subscription.features.any? { |f| f.name == name }
+  end
+
+  def active_and_supports?(name)
+    active_plan? && supports?(name)
   end
 
 

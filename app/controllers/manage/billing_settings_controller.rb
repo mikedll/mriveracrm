@@ -1,5 +1,7 @@
 class Manage::BillingSettingsController < Manage::BaseController
 
+  skip_before_filter :require_active_plan
+
   make_resourceful do
     actions :show, :update, :destroy
 

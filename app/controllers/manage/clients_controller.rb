@@ -31,7 +31,7 @@ class Manage::ClientsController < Manage::BaseController
   def current_objects
     top_scope = current_model
     if params[:archived].blank?
-      top_scope = top_scope.unarchived 
+      top_scope = top_scope.unarchived
     else
       top_scope = top_scope.archived
     end

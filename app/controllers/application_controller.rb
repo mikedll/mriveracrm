@@ -131,6 +131,21 @@ class ApplicationController < ActionController::Base
 
   protected
 
+  def require_active_plan
+    if @current_business.nil? || !@current_business.active_plan?
+      flash[:error] = I18n.t('business.errors.inactive_plan_internal')
+      redirect_to business_path
+    end
+  end
+
+  def require_active_plan_public
+    if @current_business.nil? || !@current_business.active_plan?
+      flash[:error] = I18n.t('business.errors.inactive_plan_public')
+      redirect_to business_path
+    end
+  end
+
+
   def force_www
     return if Rails.env.development? # Doesn't work with certain CRM addresses. Might not even keep this feature.
 
