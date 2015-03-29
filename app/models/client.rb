@@ -8,7 +8,7 @@ class Client < ActiveRecord::Base
   has_one :payment_gateway_profile, as: :payment_gateway_profilable
 
 
-  attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
+  attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone_2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
 
   validates :business_id, :presence => true
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }, :if => Proc.new { |c| !c.email.blank? }
