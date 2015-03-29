@@ -147,16 +147,23 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   end
 
   RECOGNIZED_ERRORS = [
-    "Failed to create"
+    "Failed to create",
+    "This customer has no attached payment source"
   ]
 
-  def update_plan!(plan_id)
+  #
+  # The profilable is because Rails isn't smart enough
+  # to load the exact same cached object.
+  #
+  def update_plan!(plan_id, profilable = payment_gateway_profilable)
+    raise "Inequivalence beyond object identity, profilable != payment_gateway_profilable" if profilable != payment_gateway_profilable
+
     _with_stripe_key do
       customer = Stripe::Customer.retrieve(self.vendor_id)
 
       begin
         if customer.subscriptions.data.empty?
-          result = customer.subscriptions.create(:trial_end => (Time.now + payment_gateway_profilable.class::TRIAL_DURATION).to_i,
+          result = customer.subscriptions.create(:trial_end => (Time.now + profilable.class::TRIAL_DURATION).to_i,
                                                  :plan => plan_id)
         else
           sub = customer.subscriptions.data.first
@@ -166,10 +173,10 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         end
       rescue Stripe::InvalidRequestError => e
         if RECOGNIZED_ERRORS.any? { |m| e.message.start_with?(m) }
-          payment_gateway_profilable.errors.add(:base, I18n.t('payment_gateway_profile.custom_plan_update_error', :message => e.message))
+          profilable.errors.add(:base, I18n.t('payment_gateway_profile.custom_plan_update_error', :message => e.message))
         else
-          payment_gateway_profilable.errors.add(:base, I18n.t('payment_gateway_profile.plan_update_error'))
-          DetectedError.create(:message => e.message, :business_id => self.payment_gateway_profilable.business_id)
+          profilable.errors.add(:base, I18n.t('payment_gateway_profile.plan_update_error'))
+          DetectedError.create(:message => e.message, :business_id => self.profilable.business_id)
         end
 
         return false

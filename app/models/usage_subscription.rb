@@ -11,7 +11,7 @@ class UsageSubscription < ActiveRecord::Base
   validates :business_id, :presence => true
 
   after_create :require_payment_gateway_profile
-  after_create :first_plan
+  after_save :ensure_correct_plan!
 
   TRIAL_DURATION = 30.days
 
@@ -106,11 +106,11 @@ class UsageSubscription < ActiveRecord::Base
     if payment_gateway_profile.stripe_plan != calculated_plan_id
       if !payment_gateway_profile.ensure_plan_created!(calculated_plan_id, calculated_price)
         DetectedError.create(:message => "Unable to create plan in stripe: #{calculated_plan_id}", :business_id => business_id)
-        false
+        raise ActiveRecord::Rollback
       else
-        if !payment_gateway_profile.update_plan!(calculated_plan_id)
+        if !payment_gateway_profile.update_plan!(calculated_plan_id, self)
           DetectedError.create(:message => "Unable to update plan in stripe: #{calculated_plan_id}", :business_id => business_id)
-          false
+          raise ActiveRecord::Rollback
         else
           true
         end
@@ -149,11 +149,6 @@ class UsageSubscription < ActiveRecord::Base
       self.payment_gateway_profile = StripePaymentGatewayProfile.new(:payment_gateway_profilable => self)
       self.payment_gateway_profile.save!
     end
-  end
-
-
-  def first_plan
-    ensure_correct_plan!
   end
 
   def notify_inactive!

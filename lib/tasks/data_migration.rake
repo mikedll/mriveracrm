@@ -23,7 +23,7 @@ namespace :data_migrations do
       end
 
       b.usage_subscription.require_payment_gateway_profile
-      b.usage_subscription.first_plan
+      b.usage_subscription.ensure_correct_plan!
     end
   end
 

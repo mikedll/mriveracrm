@@ -64,18 +64,15 @@ class Manage::BillingSettingsController < Manage::BaseController
     # we dont use a transaction. we'll allow a second phase of errors, after the card update.
     result = true
     begin
-
       current_object.attributes = object_parameters
       current_object.feature_selections_attributes = params[:feature_selections_attributes] # this isnt in attr accessible
-      result = current_object.save && current_object.ensure_correct_plan!
-
+      result = current_object.save
     rescue ActiveRecord::StaleObjectError
       current_object.reload
       result = false
     end
 
     if result
-
       current_object.reload # this is a hack to capture the profile save...
       # the profile doesn't adjust the same object here, so we have to reload
       # it from the database. the polymorphic relationship prevents us from
