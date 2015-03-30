@@ -80,6 +80,15 @@ describe Invoice do
       (Invoice.find_by_id id).should_not be_nil
       @invoice.errors.full_messages.should == [I18n.t('invoice.cannot_delete')]
     end
+
+    # See case 146
+    it "should destroy related transactions", :broken => true do
+      @invoice.mark_pending!
+      t = FactoryGirl.create(:outside_transaction, :invoice => @invoice)
+      @invoice.transactions.count.should == 1
+      @invoice.destroy
+      # expect { t.reload }.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 
   context "typical pay cycle" do

@@ -1,9 +1,9 @@
 class Client < ActiveRecord::Base
 
   belongs_to :business
-  has_many :notes
   has_many :users
   has_many :invitations
+  has_many :notes, :dependent => :destroy
   has_many :invoices
   has_one :payment_gateway_profile, as: :payment_gateway_profilable
 
