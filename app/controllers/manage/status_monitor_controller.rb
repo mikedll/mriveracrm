@@ -9,4 +9,10 @@ class Manage::StatusMonitorController < Manage::BaseController
     end
   end
 
+  protected
+
+  def _require_business_support
+    true
+  end
+
 end

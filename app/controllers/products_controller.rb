@@ -1,6 +1,8 @@
 class ProductsController < ApplicationController
 
   skip_before_filter :authenticate_user!
+  before_filter :require_active_plan_public
+  before_filter :_require_business_support
 
   make_resourceful do
     actions :index, :show
@@ -29,6 +31,12 @@ class ProductsController < ApplicationController
 
   def current_objects
     @current_objects ||= Product.cb.index_or_search(params.slice(:query, :max_price))
+  end
+
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::PRODUCTS)
   end
 
 end

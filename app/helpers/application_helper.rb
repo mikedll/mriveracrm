@@ -24,8 +24,8 @@ module ApplicationHelper
     end
   end
 
-  def bcan?(n)
-    @current_business && @current_business.supports?(n)
+  def bcan?(*names)
+    @current_business && @current_business.active_plan? && @current_business.supports?(*names)
   end
 
 end

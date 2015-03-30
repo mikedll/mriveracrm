@@ -29,4 +29,10 @@ class Client::InvoicesController < Client::BaseController
     @current_objects ||= current_user.client.invoices.viewable_to_client.map(&:public)
   end
 
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::INVOICING)
+  end
+
 end

@@ -55,5 +55,11 @@ class Manage::TransactionsController < Manage::BaseController
     end
   end
 
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::INVOICING)
+  end
+
 end
 

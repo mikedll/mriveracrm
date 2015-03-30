@@ -163,8 +163,19 @@ class ApplicationController < ActionController::Base
     false
   end
 
-  def _bcan?(n)
-    @current_business && @current_business.supports?(n)
+  def _bsupports?(*names)
+    if @current_business.nil? || !@current_business.supports?(*names)
+      flash[:error] = I18n.t('business.errors.feature_not_supported')
+      redirect_to business_path
+      return
+    end
+
+    true
+  end
+
+  # Override in subclass as security precaution.
+  def _require_business_support
+    raise "Implement in subclasses."
   end
 
   def _enforce_ssl

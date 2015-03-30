@@ -29,5 +29,11 @@ class Manage::InvitationsController < Manage::BaseController
     params.slice(* Invitation.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::CLIENTS)
+  end
+
 end
 

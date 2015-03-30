@@ -63,4 +63,10 @@ class Manage::BusinessesController < Manage::BaseController
     [] # too worried about mass assignment
   end
 
+  protected
+
+  def _require_business_support
+    true
+  end
+
 end

@@ -4,10 +4,11 @@
   .control-group
     .control-label
     .controls
-      .btn-group
-        %a.invoices.btn{ :data => { :hotkey => 'i' }}
-          %i.icon-book
-          Invoices
+      - if bcan?(Feature::Names::INVOICING)
+        .btn-group
+          %a.invoices.btn{ :data => { :hotkey => 'i' }}
+            %i.icon-book
+            Invoices
       .btn-group
         %a.notes.btn
           %i.icon-comment

@@ -36,8 +36,9 @@ en:
     mfe_host_conflict: is not available.
     errors:
       handle_format: can only contain letters and numbers
-      inactive_plan_internal: "The business' subscription is not active. See the Billing page to rectify this."
-      inactive_plan_public: "This business' paid subscription for this online service is not active. Contact the business representative if you think they are unaware of this."
+      inactive_plan_internal: "Your business' subscription is not active. See the Billing page to rectify this."
+      inactive_plan_public: "This business' support for this online service is not active. Contact a representative of the business if you think they are unaware of this."
+      feature_not_supported: "That feature is not presently supported by this business' online service."
 
   employment:
     errors:

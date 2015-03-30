@@ -95,4 +95,10 @@ class Manage::BillingSettingsController < Manage::BaseController
     params.slice(* UsageSubscription.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
+  protected
+
+  def _require_business_support
+    true
+  end
+
 end
