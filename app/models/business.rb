@@ -45,6 +45,11 @@ class Business < ActiveRecord::Base
     super
   end
 
+  def reload
+    super
+    @an_owner = nil
+  end
+
   def active_plan?
     usage_subscription.active_plan?
   end
@@ -101,8 +106,9 @@ class Business < ActiveRecord::Base
   end
 
   def an_owner
+    return @an_owner if @an_owner
     e = employees.is_owner.first
-    e.user if e
+    @an_owner = e.user if e
   end
 
   def acquire_default_features!
