@@ -176,7 +176,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
           profilable.errors.add(:base, I18n.t('payment_gateway_profile.custom_plan_update_error', :message => e.message))
         else
           profilable.errors.add(:base, I18n.t('payment_gateway_profile.plan_update_error'))
-          DetectedError.create(:message => e.message, :business_id => self.profilable.business_id)
+          DetectedError.create(:message => e.message, :business_id => profilable.business_id)
         end
 
         return false
