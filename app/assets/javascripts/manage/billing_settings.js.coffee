@@ -59,9 +59,9 @@ class window.BillingSettingsView extends CrmModelView
         if featurePrice
           el$.closest('.feature-display').find('.price').text("$#{@textRenderer.toFixed(featurePrice.price, 2)}")
       else if _.isEqual(attributeName, ['payment_gateway_profile_attributes', 'card_number'])
-        el$.prop('placeholder', @deepGet(['payment_gateway_profile', 'card_prompt']))
+        el$.prop('placeholder', @model.deepGet(['payment_gateway_profile', 'card_prompt']))
       else if _.isEqual(attributeName, ['payment_gateway_profile', 'trial_ends_at'])
-        v = @deepGet(['payment_gateway_profile', 'trial_ends_at'])
+        v = @model.deepGet(['payment_gateway_profile', 'trial_ends_at'])
         if typeof(v) == "undefined" || Date.parse(v) < Date.parse('now')
           el$.closest('.control-group').hide()
         else

@@ -162,6 +162,7 @@ class window.BaseModel extends Backbone.Model
   adjustSetAttrs: (attrs) ->
     attrs
 
+
   #
   # Originally overridden to handle hasrelation relations from checkboxes.
   #
@@ -205,6 +206,57 @@ class window.BaseModel extends Backbone.Model
     @adjustSetAttrs(attrs)
 
     Backbone.Model.prototype.set.apply(@, [attrs])
+
+  deepSet: (attrsArray) ->
+    attrs = {}
+    _.each(attrsArray, (packedAssignment, l) =>
+      if !_.isArray(packedAssignment[0])
+        attrs[packedAssignment[0]] = packedAssignment[1]
+      else
+        # need to traverse deeper into contained hash and make one
+        # with the proper value set.
+        curHash = @get(packedAssignment[0][0])
+
+        _.each(packedAssignment[0].slice(1,-1), (hashIndex, i) =>
+          curHash = curHash[hashIndex]
+        )
+
+        if curHash[packedAssignment[0][packedAssignment[0].length - 1]] != packedAssignment[1]
+
+          if !_.has(attrs, packedAssignment[0][0])
+            # this is tricky. don't modify the nested hash that's
+            # already in the backbone model object. you have to make an
+            # assignment to a new hash object, or you'll modify the
+            # attributes of the backbone object directly here, even
+            # though 'set' has yet to be called.
+            curHash = _.clone(curHash)
+          else
+            # if we already constructed a new hash, there will be an
+            # assignment in attrs. you can make changes to it freely.
+            curHash = attrs[packedAssignment[0][0]]
+
+          # invariant: curHash no longer points to anything associated with the original
+          # backbone model object.
+
+          curHash[packedAssignment[0][packedAssignment[0].length - 1]] = packedAssignment[1]
+
+          attrs[packedAssignment[0][0]] = curHash
+
+    )
+
+    @set(attrs)
+
+  deepGet: (attrs) ->
+    return @get(attrs) if !_.isArray(attrs)
+
+    fetched = null
+    _.each(attrs, (v, i) =>
+      if fetched?
+        fetched = fetched[v]
+      else
+        fetched = @get(v)
+    )
+    fetched
 
   changedAttributesSinceSync: () ->
     _.clone(@_attributesSinceSync)
@@ -667,7 +719,7 @@ class window.CrmModelView extends ModelBaseView
         return false
 
     nameAndValue = @nameAndValueFromInput($(e.target))
-    @deepSet([nameAndValue]) if nameAndValue?
+    @model.deepSet([nameAndValue]) if nameAndValue?
 
     return true
 
@@ -757,63 +809,12 @@ class window.CrmModelView extends ModelBaseView
     @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
 
-  deepSet: (attrsArray) ->
-    attrs = {}
-    _.each(attrsArray, (packedAssignment, l) =>
-      if !_.isArray(packedAssignment[0])
-        attrs[packedAssignment[0]] = packedAssignment[1]
-      else
-        # need to traverse deeper into contained hash and make one
-        # with the proper value set.
-        curHash = @model.get(packedAssignment[0][0])
-
-        _.each(packedAssignment[0].slice(1,-1), (hashIndex, i) =>
-          curHash = curHash[hashIndex]
-        )
-
-        if curHash[packedAssignment[0][packedAssignment[0].length - 1]] != packedAssignment[1]
-
-          if !_.has(attrs, packedAssignment[0][0])
-            # this is tricky. don't modify the nested hash that's
-            # already in the backbone model object. you have to make an
-            # assignment to a new hash object, or you'll modify the
-            # attributes of the backbone object directly here, even
-            # though 'set' has yet to be called.
-            curHash = _.clone(curHash)
-          else
-            # if we already constructed a new hash, there will be an
-            # assignment in attrs. you can make changes to it freely.
-            curHash = attrs[packedAssignment[0][0]]
-
-          # invariant: curHash no longer points to anything associated with the original
-          # backbone model object.
-
-          curHash[packedAssignment[0][packedAssignment[0].length - 1]] = packedAssignment[1]
-
-          attrs[packedAssignment[0][0]] = curHash
-
-    )
-
-    @model.set(attrs)
-
-  deepGet: (attrs) ->
-    return @model.get(attrs) if !_.isArray(attrs)
-
-    fetched = null
-    _.each(attrs, (v, i) =>
-      if fetched?
-        fetched = fetched[v]
-      else
-        fetched = @model.get(v)
-    )
-    fetched
-
   copyModelToForm: () ->
     @inputsCache.each((i, el) =>
       el$ = $(el)
       attributeName = @nameFromInput(el$, false)
-      if attributeName? && @deepGet(attributeName)?
-        v = @deepGet(attributeName)
+      if attributeName? && @model.deepGet(attributeName)?
+        v = @model.deepGet(attributeName)
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
         else if el$.is('[type=checkbox]') && el$.hasClass('has-many-relation')
@@ -836,8 +837,8 @@ class window.CrmModelView extends ModelBaseView
     @readonlyInputsCache.each((i, el) =>
       el$ = $(el)
       attributeName = @nameFromInput(el$, true)
-      if attributeName? && @deepGet(attributeName)?
-        v = @deepGet(attributeName)
+      if attributeName? && @model.deepGet(attributeName)?
+        v = @model.deepGet(attributeName)
         if el$.hasClass('datetime')
           v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
         else if el$.hasClass('date')
