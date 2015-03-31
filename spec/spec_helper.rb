@@ -70,7 +70,7 @@ Spork.prefork do
 
 
     # Cleanup carrierwave images
-    config.after(:all) do
+    config.after(:suite) do
       if Rails.env.test? || Rails.env.cucumber?
         ApiStubs.generic_stripe_stub!
 
@@ -81,6 +81,7 @@ Spork.prefork do
         FileUtils.rm_rf(Dir["#{Rails.root}/public/#{temp_path}/[^.]*"])
 
         ApiStubs.release_stripe_stub!
+        DatabaseCleaner.clean_with(:truncation)
       end
     end
   end
