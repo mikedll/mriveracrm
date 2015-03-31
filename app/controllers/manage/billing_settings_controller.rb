@@ -1,6 +1,7 @@
 class Manage::BillingSettingsController < Manage::BaseController
 
   skip_before_filter :require_active_plan
+  before_filter :_can_manage_current_object
 
   make_resourceful do
     actions :show, :update, :destroy
@@ -99,6 +100,10 @@ class Manage::BillingSettingsController < Manage::BaseController
 
   def _require_business_support
     true
+  end
+
+  def _can_manage_current_object
+    authorize! :manage, current_object
   end
 
 end

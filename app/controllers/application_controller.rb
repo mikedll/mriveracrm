@@ -127,6 +127,11 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.is_admin?
   end
 
+  rescue_from CanCan::AccessDenied do |exception|
+    flash[:error] = exception.message
+    redirect_to business_path
+  end
+
   protected
 
   def require_active_plan
