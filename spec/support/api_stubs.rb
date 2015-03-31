@@ -10,17 +10,26 @@ class ApiStubs
     Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer(cnum) }
     Stripe::Customer.stub(:retrieve) do
       c = ApiStubs.stripe_retrieve_customer(cnum)
-      # subs_stub = RSpec::Mocks::Mock.new("subscriptions",
-      #                                    {
-      #                                      :data => RSpec::Mocks::Mock.new("data", :empty? => true),
-      #                                      :create => nil
-      #                                    })
-      # c.stub(:subscriptions => subs_stub)
+
+      plan = RSpec::Mocks::Mock.new("plan", {
+                               :id => :some_id
+                             })
+      subs_stub = RSpec::Mocks::Mock.new("subscriptions",
+                                         {
+                                           :data => RSpec::Mocks::Mock.new("data", {
+                                                                             :empty? => true,
+                                                                             :first => RSpec::Mocks::Mock.new("sub",
+                                                                                                              :plan => plan)}),
+                                           :create => nil
+                                         })
+      c.stub(:subscriptions => subs_stub)
       c
     end
+    Stripe::Subscription.any_instance.stub(:save)
   end
 
   def self.release_stripe_stub!
+    Stripe::Subscription.any_instance.unstub(:save)
     Stripe::Plan.unstub(:retrieve)
     Stripe::Customer.unstub(:create)
     Stripe::Customer.unstub(:retrieve)
