@@ -16,7 +16,8 @@ describe Business do
 
     it "should downcase and trim the handle" do
       b2 = FactoryGirl.create(:business, :handle => " CHAOS9 ")
-      b2.reload.handle.should == "chaos9"
+      b2.reload
+      b2.handle.should == "chaos9"
     end
 
     it "should validate format of handle" do
