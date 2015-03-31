@@ -13,6 +13,14 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     }
   end
 
+  def remote_status
+    stripe_status
+  end
+
+  def trial_ends_at
+    nil
+  end
+
   def pay_invoice!(invoice)
     if self.vendor_id.nil? || self.card_profile_id.nil?
       self.last_error = I18n.t('payment_gateway_profile.cant_pay')

@@ -671,27 +671,29 @@ class window.CrmModelView extends ModelBaseView
 
     return true
 
-  nameFromInput: (elSelection) ->
+  nameFromInput: (elSelection, readOnly) ->
     attributeName = null
+    readOnly = readOnly || elSelection.hasClass('read-only-field')
 
-    if elSelection.hasClass('read-only-field')
-      if elSelection.data('name')?
-        attributeName = elSelection.data('name')
+    n = ""
+    if readOnly && elSelection.data('name')?
+      n = elSelection.data('name')
     else
       n = elSelection.prop('name')
-      cumulativeMatchedLength = 0
-      matched = @attributeMatcher.exec(n)
 
-      while matched? && matched.length == 2 && cumulativeMatchedLength != n.length
-        if !attributeName?
-          attributeName = matched[1]
-        else if _.isArray(attributeName)
-          attributeName.push(matched[1])
-        else
-          attributeName = [attributeName, matched[1]]
+    cumulativeMatchedLength = 0
+    matched = @attributeMatcher.exec(n)
 
-        cumulativeMatchedLength += matched[0].length
-        matched = @subAttributeMatcher.exec(n.substring(cumulativeMatchedLength, n.length))
+    while matched? && matched.length == 2 && cumulativeMatchedLength != n.length
+      if !attributeName?
+        attributeName = matched[1]
+      else if _.isArray(attributeName)
+        attributeName.push(matched[1])
+      else
+        attributeName = [attributeName, matched[1]]
+
+      cumulativeMatchedLength += matched[0].length
+      matched = @subAttributeMatcher.exec(n.substring(cumulativeMatchedLength, n.length))
 
     attributeName
 
@@ -809,12 +811,12 @@ class window.CrmModelView extends ModelBaseView
   copyModelToForm: () ->
     @inputsCache.each((i, el) =>
       el$ = $(el)
-      attributeName = @nameFromInput(el$)
+      attributeName = @nameFromInput(el$, false)
       if attributeName? && @deepGet(attributeName)?
         v = @deepGet(attributeName)
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
-        if el$.is('[type=checkbox]') && el$.hasClass('has-many-relation')
+        else if el$.is('[type=checkbox]') && el$.hasClass('has-many-relation')
           idField = if (typeof(@model.hasManyRelations) != "undefined" and (attributeName of @model.hasManyRelations)) then @model.hasManyRelations[attributeName] else 'id'
           valAsInt = parseInt(el$.val())
           if Object.prototype.toString.call( v ) == '[object Array]'
@@ -833,9 +835,9 @@ class window.CrmModelView extends ModelBaseView
 
     @readonlyInputsCache.each((i, el) =>
       el$ = $(el)
-      attributeName = el$.data('name')
-      if (attributeName? && @model.get(attributeName)?)
-        v = @model.get(attributeName)
+      attributeName = @nameFromInput(el$, true)
+      if attributeName? && @deepGet(attributeName)?
+        v = @deepGet(attributeName)
         if el$.hasClass('datetime')
           v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
         else if el$.hasClass('date')

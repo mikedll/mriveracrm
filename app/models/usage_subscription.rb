@@ -22,11 +22,11 @@ class UsageSubscription < ActiveRecord::Base
 
   def renderable_json
     to_json({
-              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices, :price, :trial_ends_at, :remote_status, :current_period_ends_at],
+              :methods => [:feature_selections_attributes, :payment_gateway_profile_attributes, :feature_prices, :price, :current_period_ends_at],
               :include => {
                 :payment_gateway_profile => {
                   :only => [:card_last_4, :card_brand],
-                  :methods => [:card_prompt]
+                  :methods => [:card_prompt, :trial_ends_at, :remote_status]
                 }
               },
               :only => []
@@ -42,7 +42,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def remote_status
-    payment_gateway_profile.stripe_status
+    payment_gateway_profile.remote_status
   end
 
   def current_period_ends_at

@@ -32,8 +32,12 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       self.class::Status::ACTIVE].any? { |s| s == stripe_status }
   end
 
-  def trialing?
-    !stripe_trial_ends_at.nil? && stripe_trial_ends_at > Time.zone.now
+  def remote_status
+    stripe_status
+  end
+
+  def trial_ends_at
+    stripe_trial_ends_at
   end
 
   NOT_FOUND_MESSAGE = "No such event: "

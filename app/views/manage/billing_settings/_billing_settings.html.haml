@@ -38,14 +38,14 @@
           %label
             Subscription Status:
         .controls
-          .read-only-field{:data => {:name => 'remote_status'} }
+          .read-only-field{:data => {:name => 'billing_settings[payment_gateway_profile][remote_status]'} }
 
       .control-group.trial-ends-at-display
         .control-label
           %label
             Trial Ends:
         .controls
-          .read-only-field{:data => {:name => 'trial_ends_at'}, :class => "datetime" }
+          .read-only-field{:data => {:name => 'billing_settings[payment_gateway_profile][trial_ends_at]'}, :class => "datetime" }
 
       .control-group
         .control-label

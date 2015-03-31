@@ -56,8 +56,19 @@ class PaymentGatewayProfile < ActiveRecord::Base
     raise "Implement in subclass."
   end
 
-  def trialing?
+  def remote_status
     raise "Implement in subclass."
+  end
+
+  #
+  # returns nil or Datetime
+  #
+  def trial_ends_at
+    raise "Implement in subclass."
+  end
+
+  def trialing?
+    !trial_ends_at.nil? && trial_ends_at > Time.zone.now
   end
 
   protected
