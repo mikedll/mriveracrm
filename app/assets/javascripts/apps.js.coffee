@@ -294,7 +294,7 @@ class window.BaseView extends Backbone.View
   toHumanReadableDateTimeFormat: (dateString, format) ->
     return "" if !dateString?
     date = Date.parse(dateString)
-    date.toString(if typeof(format) != "undefined" then AppsConfig[format] else AppsConfig[dateJsReadableDatetimeFormat])
+    date.toString(if typeof(format) != "undefined" then AppsConfig[format] else AppsConfig.dateJsReadableDatetimeFormat)
 
   onSync: (model, resp, options) ->
 
