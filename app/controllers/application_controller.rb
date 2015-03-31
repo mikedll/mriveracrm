@@ -3,6 +3,8 @@
 
 class ApplicationController < ActionController::Base
 
+  include ActionView::Helpers::TranslationHelper
+
   protect_from_forgery
 
   # See ActionController::Base for details
@@ -33,7 +35,7 @@ class ApplicationController < ActionController::Base
         # them somewhere useful.
         respond_to do |format|
           format.html do
-            flash[:notice] = I18n.t('errors.not_found_redirect_home')
+            flash[:notice] = t('errors.not_found_redirect_home')
             redirect_to after_sign_in_path_for(current_user)
           end
           format.js { head :not_found }
@@ -50,7 +52,7 @@ class ApplicationController < ActionController::Base
 
         # user trying to access a business that isnt theirs
         if @current_mfe
-          flash[:notice] = I18n.t('errors.not_found_redirect_home')
+          flash[:notice] = t('errors.not_found_redirect_home')
           redirect_to business_path(:business_handle => current_user.business.handle)
         elsif @current_business
           # severe violation at wrong url for wrong business domain
@@ -79,14 +81,14 @@ class ApplicationController < ActionController::Base
 
   def require_employee
     if current_user.employee.nil?
-      flash[:error] = I18n.t('errors.no_access')
+      flash[:error] = t('errors.no_access')
       redirect_to new_user_session_path
     end
   end
 
   def require_client
     if current_user.client.nil?
-      flash[:error] = I18n.t('errors.no_access')
+      flash[:error] = t('errors.no_access')
       redirect_to new_user_session_path
     end
   end
@@ -125,19 +127,18 @@ class ApplicationController < ActionController::Base
     redirect_to root_path unless current_user && current_user.is_admin?
   end
 
-
   protected
 
   def require_active_plan
     if @current_business.nil? || !@current_business.active_plan?
-      flash[:error] = I18n.t('business.errors.inactive_plan_internal')
+      flash[:error] = t('business.errors.inactive_plan_internal')
       redirect_to business_path
     end
   end
 
   def require_active_plan_public
     if @current_business.nil? || !@current_business.active_plan?
-      flash[:error] = I18n.t('business.errors.inactive_plan_public')
+      flash[:error] = t('business.errors.inactive_plan_public')
       redirect_to business_path
     end
   end
@@ -162,7 +163,7 @@ class ApplicationController < ActionController::Base
 
   def _bsupports?(*names)
     if @current_business.nil? || !@current_business.supports?(*names)
-      flash[:error] = I18n.t('business.errors.feature_not_supported')
+      flash[:error] = t('business.errors.feature_not_supported')
       redirect_to business_path
       return
     end
