@@ -156,21 +156,7 @@ FactoryGirl.define do
   end
 
   factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
-
-    # fancy dancing around after_create hooks
-    before(:create) do |profile, evaluator|
-      profile.stub(:_save_plan_on_profilable)
-      profile.stub(:_create_remote)
-    end
-
-    after(:create) do |profile, evaluator|
-      profile.payment_gateway_profilable = FactoryGirl.create(:usage_subscription, :payment_gateway_profile => profile)
-
-      profile.unstub(:_save_plan_on_profilable)
-      profile.unstub(:_create_remote)
-      profile.send(:_save_plan_on_profilable)
-      profile.send(:_create_remote)
-    end
+    payment_gateway_profilable { FactoryGirl.create(:usage_subscription) }
   end
 
   factory :invoice do

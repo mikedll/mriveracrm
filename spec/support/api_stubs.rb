@@ -2,45 +2,35 @@ class ApiStubs
 
   DEFAULT_VENDOR_ID = 'cus_5TT8ttHofQ6Ngt'
 
-  @@maintained = {}
+  @@customer_db = {}
+  @@plan_db = {}
+
+  def self.reset_bank!
+    @customer_db = {}
+    @plan_db = {}
+  end
+
+  def self.customer_db
+    @customer_db ||= {}
+  end
+
+  def self.plan_db
+    @plan_db ||= {}
+  end
+
 
   def self.generic_stripe_stub!
-    Stripe::Plan.stub(:retrieve).and_return(:some_plan)
-    cnum = FactoryGirl.generate(:customer_vendor_id)
-    Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer(cnum) }
-    Stripe::Customer.stub(:retrieve) do
-      c = ApiStubs.stripe_retrieve_customer(cnum)
+    reset_bank!
 
-      plan = RSpec::Mocks::Mock.new("plan", {
-                               :id => :some_id
-                             })
-      subs_stub = RSpec::Mocks::Mock.new("subscriptions",
-                                         {
-                                           :data => RSpec::Mocks::Mock.new("data", {
-                                                                             :empty? => true,
-                                                                             :first => RSpec::Mocks::Mock.new("sub",
-                                                                                                              :plan => plan)}),
-                                           :create => nil
-                                         })
-      c.stub(:subscriptions => subs_stub)
-      c
-    end
-    Stripe::Subscription.any_instance.stub(:save)
+    Stripe::Plan.stub(:retrieve) { |plan_id| ApiStubs.stripe_retrieve_or_create_plan(plan_id) }
+    Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer(FactoryGirl.generate(:customer_vendor_id)) }
+    Stripe::Customer.stub(:retrieve) { |cid| ApiStubs.stripe_retrieve_customer(cid) }
   end
 
   def self.release_stripe_stub!
-    Stripe::Subscription.any_instance.unstub(:save)
     Stripe::Plan.unstub(:retrieve)
     Stripe::Customer.unstub(:create)
     Stripe::Customer.unstub(:retrieve)
-  end
-
-  def self.reset_bank
-    @maintained = {}
-  end
-
-  def self.maintained
-    @maintained ||= {}
   end
 
   def self.authorize_net_create_customer_payment_profile(payment_profile_id = '12024206')
@@ -49,6 +39,14 @@ class ApiStubs
 
   def self.authorize_net_create_customer_profile(customer_profile_id = '13038989')
     YAML.load load('authorize_net_create_customer_profile').result( binding )
+  end
+
+  def self.stripe_retrieve_or_create_plan(plan_id = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=')
+    return plan_db[plan_id] if plan_db[plan_id]
+
+    created_at = Time.now
+    plan_values = YAML.load load('stripe_live_plan').result( binding )
+    plan_db[plan_id] = Stripe::Plan.construct_from(plan_values['values'], plan_values['api_key'])
   end
 
   def self.stripe_create_customer(customer_profile_id = DEFAULT_VENDOR_ID)
@@ -63,10 +61,12 @@ class ApiStubs
       sub = YAML.load load('stripe_live_subscription').result( binding )
       s = Stripe::Subscription.construct_from(sub['values'], sub['api_key'])
 
-      plan_name = 'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA='
-      plan_values = YAML.load load('stripe_live_plan').result( binding )
-      p = Stripe::Plan.construct_from(plan_values['values'], plan_values['api_key'])
-      s.plan = p
+      s.plan = stripe_retrieve_or_create_plan
+      s.stub(:plan=) do |plan_id|
+        raise Stripe::InvalidRequestError.new("Unknown plan: #{plan_id}", plan_id) if plan_db[plan_id].nil?
+        (s.instance_variable_get('@values'))[:plan] = plan_db[plan_id]
+      end
+      s.stub(:save)
 
       slo.data.push(s)
       nil
@@ -80,12 +80,12 @@ class ApiStubs
     c.subscriptions = slo
     c.cards = clo
 
-    maintained[customer_profile_id] = c
+    customer_db[customer_profile_id] = c
     c
   end
 
   def self.stripe_retrieve_customer(customer_profile_id = DEFAULT_VENDOR_ID)
-    return maintained[customer_profile_id] if maintained[customer_profile_id]
+    return customer_db[customer_profile_id] if customer_db[customer_profile_id]
 
     created_at = Time.now
 
@@ -101,7 +101,7 @@ class ApiStubs
     c.cards = clo
 
     # not created...assume created awhile ago.
-    maintained[customer_profile_id] = c
+    customer_db[customer_profile_id] = c
 
     c
   end

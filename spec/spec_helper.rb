@@ -47,7 +47,7 @@ Spork.prefork do
       DatabaseCleaner.strategy = :transaction
 
       # Ensure no net connect, normally.
-      WebMock.disable_net_connect! if LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k ==  live_filter } }
+      WebMock.disable_net_connect! if LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
       # WebMock.disable!
 
       FactoryGirl.create(:marketing_front_end)
