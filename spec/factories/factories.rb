@@ -20,7 +20,7 @@ FactoryGirl.define do
     default_mfe { FactoryGirl.create(:marketing_front_end) }
     name "my small business"
     handle { generate(:business_handle) }
-    host { "www.#{handle}.com" }
+    host { "www.#{handle.strip}.com" }
 
     google_oauth2_client_id "google_oauth2_client_idxxx"
     google_oauth2_client_secret "google_oauth2_client_secretxxx"

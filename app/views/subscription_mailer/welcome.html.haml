@@ -5,7 +5,10 @@
 %p
   This is to welcome you to
   = "#{@us.business.default_mfe.title}."
-
+  Your business' handle is 
+  = "#{@us.business.handle},"
+  and you can reach its home page and login at
+  = "#{link_to(business_home_url(@us.business), business_home_url(@us.business))}.".html_safe
 
 - if @us.trialing?
   %p

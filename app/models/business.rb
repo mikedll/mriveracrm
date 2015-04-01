@@ -21,7 +21,7 @@ class Business < ActiveRecord::Base
   belongs_to :default_mfe, :class_name => "MarketingFrontEnd"
 
   before_validation :_find_default_mfe, :if => :new_record?
-  before_validation :_format_handle
+  before_validation :_format_fields
 
   validates :default_mfe_id, :presence => true
   validates :handle, :presence => true
@@ -30,7 +30,7 @@ class Business < ActiveRecord::Base
 
   validates :handle, :allow_blank => true, :uniqueness => true
 
-  validates :host, :uniqueness => true, :allow_blank => true
+  validates :host, :uniqueness => true, :allow_blank => true, :format => { :with => Regexes::HOST }
 
   validate :_no_mfe_conflict
 
@@ -116,13 +116,19 @@ class Business < ActiveRecord::Base
     self.usage_subscription.save!
   end
 
+  def default_url_host
+    host.blank? ? default_mfe.host : host
+  end
 
   private
 
 
-  def _format_handle
+  def _format_fields
     self.handle.strip!
     self.handle.downcase!
+
+    self.host.strip!
+    self.host.downcase!
   end
 
   def _find_default_mfe

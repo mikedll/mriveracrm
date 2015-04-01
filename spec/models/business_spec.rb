@@ -36,6 +36,29 @@ describe Business do
       d.save.should be_true
     end
 
+    it "should validate host" do
+      @business.host = "WWWdddcom"
+      @business.save.should be_false
+      @business.errors['host'].should_not be_empty
+
+      @business.host = "www.validchar&(*.com"
+      @business.save.should be_false
+      @business.errors['host'].should_not be_empty
+
+      @business.host = "333-444-9999"
+      @business.save.should be_false
+      @business.errors['host'].should_not be_empty
+
+      @business.host = "www.we-are-great.com"
+      @business.save.should be_true
+    end
+
+    it "should format host" do
+      @business.host = "WWW.ddd.com"
+      @business.save.should be_true
+      @business.host.should == "www.ddd.com"
+    end
+
   end
 
   it "scopes" do
