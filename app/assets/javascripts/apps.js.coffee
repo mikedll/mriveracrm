@@ -462,14 +462,11 @@ class window.ListItemView extends ModelBaseView
     )
 
     @parent = options.parent
-    # these two should be in ModelBaseView
-    # @listenTo(@model, 'sync', @onSync)
-    # @listenTo(@model, 'change', @onModelChanged)
+    # 'sync', 'change', and 'request' are in ModelBaseView
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
-    @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'resorted', @onResorted)
 
   onRemove: () ->
@@ -592,13 +589,11 @@ class window.CrmModelView extends ModelBaseView
     )
 
     @parent = options.parent
-    @listenTo(@model, 'request', @onRequest)
-    @listenTo(@model, 'sync', @onSync)
+    # 'sync', 'change', and 'request' are in ModelBaseView
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
-    @listenTo(@model, 'change', @onModelChanged)
 
     @attributeMatcher = new RegExp("^" + @modelName + "\\[(\\w+)\\]")
     @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
@@ -1000,11 +995,9 @@ class window.SingleModelAppView extends WithChildrenView
     @modelShowContainer.append(@modelView.render().el) if @modelShowContainer? && @modelShowContainer.length > 0 && !$.contains( @modelShowContainer.get(0), @modelView.el)
 
   #
-  # Become the parent of the view and show it.
+  # Become the parent of a view.
   #
-  # It's possible to show a view before this view has been rendered.
-  #
-  show: (view) ->
+  husband: (view) ->
     if !@modelView?
       @modelView = view
       @modelView.parent = @
@@ -1013,6 +1006,13 @@ class window.SingleModelAppView extends WithChildrenView
       @modelView = view
       @modelView.parent = @
 
+  #
+  # Become the parent of the view and show it.
+  #
+  # It's possible to show a view before this view has been rendered.
+  #
+  show: (view) ->
+    @husband(view)
     @showModelView()
 
   render: () ->

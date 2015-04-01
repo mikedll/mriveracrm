@@ -60,7 +60,7 @@ $(() ->
       model = new config.modelKlass()
       modelView = new config.modelViewKlass(model: model)
       rootApp = new rootAppViewKlass(el: rootViewAnchor, parent: stack)
-      rootApp.show(modelView)
+      rootApp.husband(modelView)
     else
       AppsLogger.log("no model klass and no model collection class to load.")
       return
