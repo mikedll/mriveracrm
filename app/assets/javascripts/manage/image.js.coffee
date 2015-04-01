@@ -106,7 +106,6 @@ class window.RelatedImagesCollectionView extends BaseView
     @addAll()
 
   onSync: (model, resp, options) ->
-    BaseView.prototype.onSync.apply(@, arguments)
     @clearHighlightedModelErrors()
 
     # understands that only 1 of these images can be primary.
