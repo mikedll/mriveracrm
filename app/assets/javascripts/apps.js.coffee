@@ -362,6 +362,7 @@ class window.ModelBaseView extends BaseView
     BaseView.prototype.initialize.apply(@, arguments)
 
     @listenTo(@model, 'change', @onModelChanged)
+    @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
 
   dirtyRegistration: () ->
@@ -374,7 +375,13 @@ class window.ModelBaseView extends BaseView
   onModelChanged: (e) ->
     @dirtyRegistration()
 
+  onRequest: (model, xhr, options) ->
+    if @model.isRequesting()
+      @$('.btn').addClass('disabled')
+
   onSync: (model, resp, options) ->
+    if !@model.isRequesting()
+      @$('.btn').removeClass('disabled')
     @dirtyRegistration()
 
 
@@ -935,8 +942,8 @@ class window.CrmModelView extends ModelBaseView
   noSubmit: (e) ->
     false
 
-  onRequest: (e) ->
-
+  onRequest: (model, xhr, options) ->
+    ModelBaseView.prototype.onRequest.apply(@, arguments)
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
