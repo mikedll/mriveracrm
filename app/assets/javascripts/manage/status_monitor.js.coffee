@@ -6,12 +6,11 @@ class window.StatusMonitor extends BaseModel
     gUrlManager.url('/manage/status_monitor')
 
 class window.StatusMonitorView extends CrmModelView
+  modelName: 'status_monitor'
+
   initialize: () ->
-    CrmModelView.prototype.initialize.apply(this, arguments)
+    CrmModelView.prototype.initialize.apply(@, arguments)
     @useDirty = false
-    @modelName = 'status_monitor'
-    @listenTo(@model, 'request', @onRequest)
-    @listenTo(@model, 'error', @onError)
     @events = $.extend(@events,
       'click .check-status': @refresh
     )
@@ -20,6 +19,7 @@ class window.StatusMonitorView extends CrmModelView
     @model.fetch()
 
   onRequest: () ->
+    CrmModelView.prototype.onRequest.apply(@, arguments)
     $('.spinner-container').show()
 
   onComplete: () ->
@@ -30,5 +30,6 @@ class window.StatusMonitorView extends CrmModelView
     CrmModelView.prototype.onSync.apply(this, arguments)
 
   onError: () ->
+    CrmModelView.prototype.onError.apply(@, arguments)
     @onComplete()
 
