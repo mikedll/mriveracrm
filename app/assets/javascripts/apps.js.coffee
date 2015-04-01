@@ -669,9 +669,9 @@ class window.CrmModelView extends ModelBaseView
           # this may not be an input related to our model
       )
 
-    @$('.read-only-field').each((i, domEl) =>
+    @readonlyInputsCache.each((i, domEl) =>
       el$ = $(domEl)
-      attributeName = el$.data('name')
+      attributeName = @nameFromInput(el$, true)
       if attributeName? and @model.isDirty() and _.has(changed, attributeName)
         el$.closest('.control-group').addClass('warning')
       else
@@ -699,6 +699,7 @@ class window.CrmModelView extends ModelBaseView
     # we do recorate the form, though.
     #
     ModelBaseView.prototype.onModelChanged.apply(@, arguments)
+    @copyReadOnlyFieldsToForm()
     @decorateDirty()
     if @model.validationError?
       @renderErrors(@model.validationError)
@@ -811,6 +812,21 @@ class window.CrmModelView extends ModelBaseView
     @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
 
+  copyReadOnlyFieldsToForm: () ->
+    @readonlyInputsCache.each((i, el) =>
+      el$ = $(el)
+      attributeName = @nameFromInput(el$, true)
+      if attributeName? && @model.deepGet(attributeName)?
+        v = @model.deepGet(attributeName)
+        if el$.hasClass('datetime')
+          v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
+        else if el$.hasClass('date')
+          v = @toHumanReadableDateFormat(v)
+        else if el$.hasClass('money')
+          v = "$#{@textRenderer.toFixed(v, 2)}"
+        el$.text(v)
+    )
+
   copyModelToForm: () ->
     @inputsCache.each((i, el) =>
       el$ = $(el)
@@ -836,19 +852,7 @@ class window.CrmModelView extends ModelBaseView
           el$.val(v)
     )
 
-    @readonlyInputsCache.each((i, el) =>
-      el$ = $(el)
-      attributeName = @nameFromInput(el$, true)
-      if attributeName? && @model.deepGet(attributeName)?
-        v = @model.deepGet(attributeName)
-        if el$.hasClass('datetime')
-          v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
-        else if el$.hasClass('date')
-          v = @toHumanReadableDateFormat(v)
-        else if el$.hasClass('money')
-          v = "$#{@textRenderer.toFixed(v, 2)}"
-        el$.text(v)
-    )
+    @copyReadOnlyFieldsToForm()
 
     _.each( @$('.put_action, .destroy'), (el) =>
       el$ = $(el)
