@@ -348,8 +348,6 @@ class window.BaseView extends Backbone.View
     date = Date.parse(dateString)
     date.toString(if typeof(format) != "undefined" then AppsConfig[format] else AppsConfig.dateJsReadableDatetimeFormat)
 
-  onSync: (model, resp, options) ->
-
   checkDisabled: (e) ->
     if $(e.target).hasClass('disabled')
       e.stopPropagation()
@@ -364,6 +362,7 @@ class window.ModelBaseView extends BaseView
     @listenTo(@model, 'change', @onModelChanged)
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
+    @listenTo(@model, 'error', @onError)
 
   dirtyRegistration: () ->
     return if !@useDirty
@@ -377,12 +376,23 @@ class window.ModelBaseView extends BaseView
 
   onRequest: (model, xhr, options) ->
     if @model.isRequesting()
-      @$('.btn').addClass('disabled')
+      @$('.save').addClass('disabled')
+      @$('.revert').addClass('disabled')
 
   onSync: (model, resp, options) ->
-    if !@model.isRequesting()
-      @$('.btn').removeClass('disabled')
+    @resolveButtonAvailability() if !@model.isRequesting()
     @dirtyRegistration()
+
+  onError: (model, resp, options) ->
+    @resolveButtonAvailability() if !@model.isRequesting()
+
+  resolveButtonAvailability: () ->
+    if @model.isDirty()
+      @$('.save').removeClass('disabled')
+      @$('.revert').removeClass('disabled')
+    else
+      @$('.save').addClass('disabled')
+      @$('.revert').addClass('disabled')
 
 
 class window.BaseCollection extends Backbone.Collection
@@ -462,8 +472,7 @@ class window.ListItemView extends ModelBaseView
     )
 
     @parent = options.parent
-    # 'sync', 'change', and 'request' are in ModelBaseView
-    @listenTo(@model, 'error', @onError)
+    # 'sync', 'change', 'request', and 'error' are in ModelBaseView
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
@@ -547,7 +556,8 @@ class window.ListItemView extends ModelBaseView
     @decorateError()
     @decorateRequesting()
 
-  onError: (model, xhr, options) ->
+  onError: (model, resp, options) ->
+    ModelBaseView.prototype.onError.apply(@, arguments)
     @decorateError()
     @decorateRequesting()
 
@@ -589,10 +599,9 @@ class window.CrmModelView extends ModelBaseView
     )
 
     @parent = options.parent
-    # 'sync', 'change', and 'request' are in ModelBaseView
+    # 'sync', 'change', 'error', and 'request' are in ModelBaseView
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
-    @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
 
     @attributeMatcher = new RegExp("^" + @modelName + "\\[(\\w+)\\]")
@@ -678,13 +687,7 @@ class window.CrmModelView extends ModelBaseView
         el$.closest('.control-group').removeClass('warning')
     )
 
-    if @model.isDirty()
-      @$('.save').removeClass('disabled')
-      @$('.revert').removeClass('disabled')
-    else
-      @$('.save').addClass('disabled')
-      @$('.revert').addClass('disabled')
-
+    @resolveButtonAvailability()
 
   onModelChanged: (e) ->
     # since this is the primary editing area of this model,
@@ -933,6 +936,7 @@ class window.CrmModelView extends ModelBaseView
     @$('.errors').text(s).show()
 
   onError: (model, xhr, options) ->
+    ModelBaseView.prototype.onError.apply(@, arguments)
     response = jQuery.parseJSON( xhr.responseText )
     @clearErrors()
     @renderFullMessages(response)
