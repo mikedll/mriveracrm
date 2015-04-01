@@ -72,15 +72,17 @@ Spork.prefork do
     # Cleanup carrierwave images
     config.after(:suite) do
       if Rails.env.test? || Rails.env.cucumber?
-        ApiStubs.generic_stripe_stub!
+        if :asdf.respond_to?(:stub)
+          ApiStubs.generic_stripe_stub!
 
-        tmp = FactoryGirl.create(:image)
-        store_path = File.dirname(File.dirname(tmp.data.url))
-        temp_path = tmp.data.cache_dir
-        FileUtils.rm_rf(Dir["#{Rails.root}/public/#{store_path}/[^.]*"])
-        FileUtils.rm_rf(Dir["#{Rails.root}/public/#{temp_path}/[^.]*"])
+          tmp = FactoryGirl.create(:image)
+          store_path = File.dirname(File.dirname(tmp.data.url))
+          temp_path = tmp.data.cache_dir
+          FileUtils.rm_rf(Dir["#{Rails.root}/public/#{store_path}/[^.]*"])
+          FileUtils.rm_rf(Dir["#{Rails.root}/public/#{temp_path}/[^.]*"])
 
-        ApiStubs.release_stripe_stub!
+          ApiStubs.release_stripe_stub!
+        end
         DatabaseCleaner.clean_with(:truncation)
       end
     end
