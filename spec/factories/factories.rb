@@ -2,6 +2,8 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:random_title) { |n| "#{Faker::Name.name}#{n}" }
+
   sequence(:random_name) { |n| "asdfas#{n}" } # #{Fake::Name.name}#{n}
 
   sequence(:settings_key) { |n| "key#{n}" }
@@ -218,6 +220,7 @@ FactoryGirl.define do
   end
 
   factory :marketing_front_end do
+    title { FactoryGirl.generate(:random_title) }
     host { "www.mfe#{SecureRandom.hex(4)}.com" }
 
     # Create some default features.
