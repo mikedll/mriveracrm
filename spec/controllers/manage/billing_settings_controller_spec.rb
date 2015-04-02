@@ -22,5 +22,12 @@ describe Manage::BillingSettingsController do
       response.should_not be_success
       flash[:error].should == I18n.t('unauthorized.manage.all', :action => "manage", :subject => "billing settings")
     end
+
+    it "should allow access to business owner even if plan is inactive" do
+      @user.employee.business.usage_subscription.payment_gateway_profile.update_attributes!(:stripe_status => PaymentGatewayProfile::Status::PAST_DUE)
+      sign_in @user.employee.business.an_owner
+      get :show
+      response.should be_success
+    end
   end
 end

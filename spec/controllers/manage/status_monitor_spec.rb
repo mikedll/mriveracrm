@@ -22,6 +22,13 @@ describe Manage::StatusMonitorController do
       flash[:error].should == I18n.t('unauthorized.read.business', :action => "read")
     end
 
+    it "should allow access to business owner even if plan is inactive" do
+      @user.employee.business.usage_subscription.payment_gateway_profile.update_attributes!(:stripe_status => PaymentGatewayProfile::Status::PAST_DUE)
+      sign_in @user.employee.business.an_owner
+      get :show
+      response.should be_success
+    end
+
   end
 
 end
