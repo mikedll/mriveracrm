@@ -54,9 +54,7 @@ describe Manage::ClientsController do
       end
 
       it "should deny access if business does not support this feature" do
-        c = Feature.find_by_name Feature::Names::CLIENTS
-        @user.employee.business.usage_subscription.features.select { |f| f == c }.first
-        @user.employee.business.usage_subscription.features.delete(c)
+        SpecSupport.without_feature(@user, Feature::Names::CLIENTS)
         get :index, :business_handle => @user.employee.business.handle
         flash[:error].should == I18n.t('business.errors.feature_not_supported')
         response.should_not be_success

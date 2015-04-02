@@ -3,6 +3,22 @@ require 'spec_helper'
 
 describe Manage::InvoicesController do
 
+  context "security" do
+    before :each do
+      @user = FactoryGirl.create(:employee_user)
+      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
+      sign_in @user
+      request.host = @user.employee.business.host
+    end
+
+    it "should deny access without feature selection" do
+      SpecSupport.without_feature(@user, Feature::Names::INVOICING)
+      get :index
+      flash[:error].should == I18n.t('business.errors.feature_not_supported')
+      response.should_not be_success
+    end
+  end
+
   context "typical usage" do
     before(:each) do
       @user = FactoryGirl.create(:employee_user)
