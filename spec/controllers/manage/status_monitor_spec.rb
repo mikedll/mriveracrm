@@ -2,7 +2,7 @@ require 'spec_helper'
 
 describe Manage::StatusMonitorController do
 
-  context "authorization", :current => true do
+  context "authorization" do
     before :each do
       @user = FactoryGirl.create(:employee_user)
       sign_in @user
