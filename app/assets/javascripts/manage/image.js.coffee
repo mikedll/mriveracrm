@@ -41,7 +41,6 @@ class ImageView extends CrmModelView
     )
 
   toggleActive: (e) ->
-    @model.set('active', $(e.target).is(':checked'))
     @save()
 
   decorateRequesting: () ->
