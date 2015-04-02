@@ -46,6 +46,9 @@ describe Manage::ClientsController do
     end
 
     context "business' plan and feature support" do
+
+      render_views
+
       it "should deny access if business plan is dead" do
         @user.employee.business.usage_subscription.payment_gateway_profile.update_attributes!(:stripe_status => PaymentGatewayProfile::Status::PAST_DUE)
         get :index, :business_handle => @user.employee.business.handle
@@ -58,6 +61,17 @@ describe Manage::ClientsController do
         get :index, :business_handle => @user.employee.business.handle
         flash[:error].should == I18n.t('business.errors.feature_not_supported')
         response.should_not be_success
+      end
+
+      it "should show invoice button with invoicing support" do
+        get :index, :business_handle => @user.employee.business.handle
+        response.body.should have_css('a.invoices.btn')
+      end
+
+      it "should hide invoice button without invoicing support" do
+        SpecSupport.without_feature(@user, Feature::Names::INVOICING)
+        get :index, :business_handle => @user.employee.business.handle
+        response.body.should_not have_css('a.invoices.btn')
       end
     end
   end
