@@ -3,6 +3,7 @@ ActiveAdmin.register_page "Dashboard" do
   controller do
     skip_before_filter :_require_business_or_mfe
     skip_before_filter :require_business_and_current_user_belongs_to_it
+    helper :application
   end
 
   menu :priority => 1, :label => proc{ I18n.t("active_admin.dashboard") }
@@ -23,7 +24,7 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        "Nothing here for now..."
+        link_to "Your Business, #{current_user.business.handle}", business_home_url(current_user.business)
       end
     end
   end
