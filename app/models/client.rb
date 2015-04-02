@@ -27,16 +27,16 @@ class Client < ActiveRecord::Base
 
   def archive!
     if archived?
-      self.errors.add(:base, "Client is already archived") 
+      self.errors.add(:base, "Client is already archived")
       return false
     end
-      
+
     self.update_attributes(:archived => true)
   end
 
   def unarchive!
     if !archived?
-      self.errors.add(:base, "Client is not archived") 
+      self.errors.add(:base, "Client is not archived")
       return false
     end
 

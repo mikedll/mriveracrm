@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe StripePaymentGatewayProfile do 
+describe StripePaymentGatewayProfile do
 
   context "basics" do
     before(:each) { @profile = FactoryGirl.create(:stubbed_client).payment_gateway_profile }
@@ -19,12 +19,12 @@ describe StripePaymentGatewayProfile do
 
     it "should be able to reload remotely with vendor_id, including getting payment profile" do
       token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 314})
-      
+
       @profile.update_payment_info(:token => token.id).should be_true
       @profile.card_last_4 = ""
       @profile.card_brand = ""
       @profile.save!
-      
+
       @profile.card_last_4.should == ''
       @profile.card_brand.should == ''
       @profile.reload_remote
@@ -39,7 +39,7 @@ describe StripePaymentGatewayProfile do
         @profile.card_prompt.should == "No card on file"
         @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
         @profile.card_last_4.should == "1881"
-        @profile.card_prompt.should == "Visa ending in 1881"        
+        @profile.card_prompt.should == "Visa ending in 1881"
       end
 
       it "should be able to create credit card info with token instaed of raw data" do
@@ -54,14 +54,14 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should be able to update credit card info" do
-        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.card_last_4.should == "4242"
-        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '17', :cv_code => '111').should be_true
         @profile.card_last_4.should == "1881"
       end
 
       it "should leave record alone on update failure." do
-        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.card_last_4.should == "4242"
         @profile.update_payment_info({}).should be_false
         @profile.errors.should_not be_empty
@@ -104,7 +104,7 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should be able to pay normal invoice" do
-        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.transactions.count.should == 0
         @invoice.transactions.count.should == 0
         @invoice.paid?.should be_false
@@ -127,7 +127,7 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should capture error when transaction fails due to declined card" do
-        @profile.update_payment_info(:card_number => '4000000000000341', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4000000000000341', :expiration_month => '03', :expiration_year => '17', :cv_code => '111').should be_true
         @profile.transactions.count.should == 0
         @invoice.paid?.should be_false
         @profile.pay_invoice!(@invoice).should be_false

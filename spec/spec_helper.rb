@@ -25,14 +25,15 @@ Spork.prefork do
     # config.filter_run_including :current => true
     config.filter_run_excluding :broken => true
 
-    # Live api tests...
-    config.filter_run_excluding :live_stripe => true
-    config.filter_run_excluding :live_authorizenet => true
-
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
     LIVE_WEB_TESTS.each do |filter|
-      config.filter_run_excluding filter => true
+      # Invert the next two lines, depending on what you're doing,
+      # unless you actually intend to run the entire test suite.
+      # config.filter_run_excluding filter => true
+      config.filter_run_including filter => true
     end
+
+    live_test_being_run = !LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
 
     # config.backtrace_clean_patterns = [
     #   # /\/lib\d*\/ruby\//,
@@ -46,9 +47,8 @@ Spork.prefork do
       DatabaseCleaner.clean_with(:truncation)
       DatabaseCleaner.strategy = :transaction
 
-      # Ensure no net connect, normally.
-      WebMock.disable_net_connect! if LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
-      # WebMock.disable!
+      # Allow net connect if at least one live group is not excluded
+      WebMock.disable! if live_test_being_run
 
       FactoryGirl.create(:marketing_front_end)
     end
@@ -60,7 +60,7 @@ Spork.prefork do
       Business.current = nil
       RequestSettings.reset
 
-      ApiStubs.generic_stripe_stub!
+      ApiStubs.generic_stripe_stub! if !live_test_being_run
       DatabaseCleaner.start
    end
 
