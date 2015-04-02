@@ -29,8 +29,8 @@ Spork.prefork do
     LIVE_WEB_TESTS.each do |filter|
       # Invert the next two lines, depending on what you're doing,
       # unless you actually intend to run the entire test suite.
-      # config.filter_run_excluding filter => true
-      config.filter_run_including filter => true
+      config.filter_run_excluding filter => true
+      # config.filter_run_including filter => true
     end
 
     live_test_being_run = !LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
