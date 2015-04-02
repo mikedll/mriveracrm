@@ -239,7 +239,6 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     save!
   end
 
-
   protected
 
   def _create_remote

@@ -18,7 +18,10 @@ describe StripePaymentGatewayProfile do
     end
 
     it "should be able to reload remotely with vendor_id, including getting payment profile" do
-      token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 314})
+      token = nil
+      @profile.send(:_with_stripe_key) do
+        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 314})
+      end
 
       @profile.update_payment_info(:token => token.id).should be_true
       @profile.card_last_4 = ""
@@ -46,7 +49,11 @@ describe StripePaymentGatewayProfile do
         @profile.card_profile_id.should be_nil
         @profile.card_last_4.should be_nil
 
-        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
+        token = nil
+        @profile.send(:_with_stripe_key) do
+          token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
+        end
+
         @profile.update_payment_info(:token => token.id).should be_true
 
         @profile.card_last_4.should == "4242"
@@ -90,7 +97,7 @@ describe StripePaymentGatewayProfile do
     context "pay" do
       before(:each) do
         @profile = FactoryGirl.create(:stripe_payment_gateway_profile)
-        @invoice = FactoryGirl.create(:pending_invoice, :client => @profile.client)
+        @invoice = FactoryGirl.create(:pending_invoice, :client => @profile.payment_gateway_profilable)
       end
 
       it "should fail unless payment info confgured" do
@@ -119,7 +126,7 @@ describe StripePaymentGatewayProfile do
         @invoice.transactions.first.vendor_id.should_not be_blank
         @invoice.transactions.first.amount.should == @invoice.total
 
-        invoice2 = FactoryGirl.create(:pending_invoice, :client => @profile.client, :total => 1823.34)
+        invoice2 = FactoryGirl.create(:pending_invoice, :client => @profile.payment_gateway_profilable, :total => 1823.34)
         invoice2.transactions.count.should == 0
         @profile.pay_invoice!(invoice2)
         invoice2.transactions.count.should == 1
@@ -135,7 +142,7 @@ describe StripePaymentGatewayProfile do
         @profile.transactions.first.should == @invoice.transactions.first
         @invoice.transactions.first.failed?.should be_true
         @invoice.failed_payment?.should be_true
-        @profile.last_error.should == 'Your card was declined'
+        @profile.last_error.should == 'Your card was declined.'
       end
     end
 
@@ -146,23 +153,25 @@ describe StripePaymentGatewayProfile do
         @f3 = FactoryGirl.create(:feature)
         Feature.ensure_minimal_pricings!
         @profile = FactoryGirl.create(:stripe_payment_gateway_profile_for_us)
-        @ug = @profile.payment_gateway_profilable
-        FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f1)
-        FactoryGirl.create(:feature_selection, :usage_subscription => @ug, :feature => @f2)
+        @us = @profile.payment_gateway_profilable
+        FactoryGirl.create(:feature_selection, :usage_subscription => @us, :feature => @f1)
+        FactoryGirl.create(:feature_selection, :usage_subscription => @us, :feature => @f2)
       end
 
       it "should be able to create a usage subscription's plan" do
-        @profile.ensure_plan_created!(@ug.calculated_plan_id, @ug.calculated_price).should be_true
+        @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
       end
 
-      it "should be able to update a plan and have it update usage subscription" do
-        before = @ug.plan
-        expected_plan = @ug.calculated_plan_id
-        @profile.ensure_plan_created!(@ug.calculated_plan_id, @ug.calculated_price).should be_true
-        @ug.payment_gateway_profile.update_plan!(@ug.calculated_plan_id).should be_true
-        @ug.reload.plan.should_not == before
-        @ug.plan.should == expected_plan
-        @ug.remote_status.should == PaymentGatewayProfile::Status::TRIALING
+      it "should be able to update a plan and have it update usage subscription", :current => true do
+        before = @profile.stripe_plan
+        expected_plan = @us.calculated_plan_id
+        @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
+        @us.payment_gateway_profile.update_plan!(@us.calculated_plan_id, @us).should be_true
+        @profile.reload
+        @profile.stripe_plan.should_not == before
+        @profile.stripe_plan.should == expected_plan
+        @profile.remote_status.should == @profile.stripe_status
+        @profile.remote_status.should == PaymentGatewayProfile::Status::TRIALING
       end
     end
   end

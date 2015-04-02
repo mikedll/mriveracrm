@@ -158,7 +158,22 @@ FactoryGirl.define do
   end
 
   factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
-    payment_gateway_profilable { FactoryGirl.create(:usage_subscription) }
+
+    # have to do this before even the create call.
+    # before :build's effect is ambiguous.
+    payment_gateway_profilable do
+      UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
+      UsageSubscription.any_instance.stub(:ensure_correct_plan!)
+      UsageSubscription.any_instance.stub(:notify_signup!)
+      FactoryGirl.create(:usage_subscription)
+    end
+
+    after :create do |profile|
+      UsageSubscription.any_instance.unstub(:notify_signup!)
+      UsageSubscription.any_instance.unstub(:ensure_correct_plan!)
+      UsageSubscription.any_instance.unstub(:require_payment_gateway_profile)
+      profile.payment_gateway_profilable.send(:ensure_correct_plan!)
+    end
   end
 
   factory :invoice do
