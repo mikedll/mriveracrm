@@ -32,7 +32,7 @@ ActiveAdmin.register Business do
     end
   end
 
-  sidebar "Project Details", only: [:show] do
+  sidebar "More", only: [:show] do
     ul do
       li link_to "Users",    abdiel_business_users_path(business)
     end
@@ -43,19 +43,13 @@ ActiveAdmin.register Business do
     controller do
       skip_before_filter :_require_business_or_mfe
       skip_before_filter :require_business_and_current_user_belongs_to_it
-
-      def update
-        resource.is_admin = params[:user].delete(:is_admin) if params[:user] && params[:user][:is_admin]
-        super
-      end
-
     end
 
     belongs_to :business, :parent_class => Business
     navigation_menu :business
 
 
-    actions :all, :except => [:new, :create, :destroy]
+    actions :all, :except => [:new, :create, :edit, :update, :destroy]
 
     index do
       column :id
@@ -105,13 +99,6 @@ ActiveAdmin.register Business do
         end
       end
     end
-
-    form do |f|
-      f.semantic_errors
-      f.inputs   :is_admin
-      f.actions
-    end
-
   end
 
 end
