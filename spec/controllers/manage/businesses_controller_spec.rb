@@ -21,7 +21,6 @@ describe Manage::BusinessesController do
       response.should_not be_success
       flash[:error].should == I18n.t('unauthorized.manage.business', :action => "manage")
     end
-
   end
 
 end
