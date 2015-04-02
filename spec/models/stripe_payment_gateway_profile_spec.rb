@@ -162,7 +162,7 @@ describe StripePaymentGatewayProfile do
         @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
       end
 
-      it "should be able to update a plan and have it update usage subscription", :current => true do
+      it "should be able to update a plan and have it update usage subscription" do
         before = @profile.stripe_plan
         expected_plan = @us.calculated_plan_id
         @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
