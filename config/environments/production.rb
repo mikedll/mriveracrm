@@ -10,7 +10,7 @@ MikedllCrm::Application.configure do
 
   config.active_support.deprecation = :notify
 
-  config.action_mailer.default_url_options = { :host => 'www.mriveracrm.com:80' }
+  config.action_mailer.default_url_options = { :host => 'www.mriveracrm.com' }
   config.action_mailer.delivery_method = :ses
 
   config.action_controller.asset_host = 'd1dmxqf6tri91s.cloudfront.net'
