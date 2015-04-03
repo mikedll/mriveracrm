@@ -50,34 +50,58 @@
       .controls
 
         %p
-          %strong
-            By continuing, you agree to the following Terms of Service:
-
-            %ol.terms-of-service
-              %li
-                The software application you are about to use, MRivera CRM
-                ("the app"), does not guarentee or promise anything.  Your
-                privacy is not guaranteed. Your data's persistence is not
-                guaranteed. No functionality is guaranteed.
-
-              %li
-                If you are paying a fee to use the app, you agree that you are paying
-                for the opportunity that the app might work, and that
-                it might benefit your business. No such benefit is guaranteed.
-                
-              %li
-                In no event shall the owner of the app
-                be liable for any claim, damages or other
-                liability, whether in an action of contract, tort or otherwise, arising from,
-                out of or in connection with the app or the use or other dealings in
-                the app.
-
-              %li
-                The owner of the app reserves the
-                right to arbitrarily terminate your account and all data
-                related to your account at any time, without notice and without
-                giving a reason for termination.
+          By continuing, you agree to the following Terms of Service:
           
+          %ol.terms-of-service
+            %li
+              The software application you are about to use, MRivera
+              CRM ("the app"), does not guarentee or promise feature
+              correctness, product availability, or privacy of data. The
+              app's owner has spent a significant amount of
+              time taking measures to provide the aforementioned, but their
+              provision is not guarenteed or promised.
+
+            %li
+              If you are paying a fee to use the app, you agree that you are paying
+              for the opportunity that the app might work, and that
+              it might benefit your business. No such benefit is guaranteed
+              or promised.
+
+            %li
+              A fixed amount of support time per week is provided by
+              the app's owner and this allocation of time is shared by
+              all customers of the app. This allocation of time is
+              typically a few hours. The support during this time is
+              over email. Further support may be arranged to be
+              provided over channels such as phone, video
+              conference, or in-person visit, but such channels of
+              support are to be negotiated over email between the
+              customer and support provider appointed by the app's owner. Support is provided on
+              a first come first serve basis, and if demand for
+              support exceeds the couple of hours reserved for
+              support time per week, then incoming support requests
+              may go unanswered until the overflow of requests can
+              be relieved. The app's owner acknowledges here that he risks
+              losing you as a customer due to a possible failure to
+              provide enough support hours per week.
+
+            %li
+              In no event shall the app's owner 
+              be liable for any claim, damages or other
+              liability, whether in an action of contract, tort or otherwise, arising from,
+              out of or in connection with the app or the use or other dealings in
+              the app.
+
+            %li
+              The app's owner may terminate your account and delete all data
+              related to your account at any time. Written notification
+              and a reason for such a termination and deletion is available upon request.
+
+            .control-group
+              %label{:for => "user_tos_agreement", :class => "checkbox"}
+                = f.check_box :tos_agreement
+                I have read and agree to the above Terms of Service.
+
         = f.submit t('sign_up'), :class => "btn"
 
     .already

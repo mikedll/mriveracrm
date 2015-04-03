@@ -1,6 +1,6 @@
 require 'spec_helper'
 
-describe StripePaymentGatewayProfile do 
+describe StripePaymentGatewayProfile do
 
   context "basics" do
     before(:each) { @profile = FactoryGirl.create(:stubbed_client).payment_gateway_profile }
@@ -18,13 +18,16 @@ describe StripePaymentGatewayProfile do
     end
 
     it "should be able to reload remotely with vendor_id, including getting payment profile" do
-      token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 314})
-      
+      token = nil
+      @profile.send(:_with_stripe_key) do
+        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 314})
+      end
+
       @profile.update_payment_info(:token => token.id).should be_true
       @profile.card_last_4 = ""
       @profile.card_brand = ""
       @profile.save!
-      
+
       @profile.card_last_4.should == ''
       @profile.card_brand.should == ''
       @profile.reload_remote
@@ -39,14 +42,18 @@ describe StripePaymentGatewayProfile do
         @profile.card_prompt.should == "No card on file"
         @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
         @profile.card_last_4.should == "1881"
-        @profile.card_prompt.should == "Visa ending in 1881"        
+        @profile.card_prompt.should == "Visa ending in 1881"
       end
 
       it "should be able to create credit card info with token instaed of raw data" do
         @profile.card_profile_id.should be_nil
         @profile.card_last_4.should be_nil
 
-        token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
+        token = nil
+        @profile.send(:_with_stripe_key) do
+          token = Stripe::Token.create(:card => { :number => "4242424242424242", :exp_month => 3, :exp_year => Time.now.year + 1, :cvc => 777})
+        end
+
         @profile.update_payment_info(:token => token.id).should be_true
 
         @profile.card_last_4.should == "4242"
@@ -54,14 +61,14 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should be able to update credit card info" do
-        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.card_last_4.should == "4242"
-        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '17', :cv_code => '111').should be_true
         @profile.card_last_4.should == "1881"
       end
 
       it "should leave record alone on update failure." do
-        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.card_last_4.should == "4242"
         @profile.update_payment_info({}).should be_false
         @profile.errors.should_not be_empty
@@ -90,7 +97,7 @@ describe StripePaymentGatewayProfile do
     context "pay" do
       before(:each) do
         @profile = FactoryGirl.create(:stripe_payment_gateway_profile)
-        @invoice = FactoryGirl.create(:pending_invoice, :client => @profile.client)
+        @invoice = FactoryGirl.create(:pending_invoice, :client => @profile.payment_gateway_profilable)
       end
 
       it "should fail unless payment info confgured" do
@@ -104,7 +111,7 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should be able to pay normal invoice" do
-        @profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.transactions.count.should == 0
         @invoice.transactions.count.should == 0
         @invoice.paid?.should be_false
@@ -119,7 +126,7 @@ describe StripePaymentGatewayProfile do
         @invoice.transactions.first.vendor_id.should_not be_blank
         @invoice.transactions.first.amount.should == @invoice.total
 
-        invoice2 = FactoryGirl.create(:pending_invoice, :client => @profile.client, :total => 1823.34)
+        invoice2 = FactoryGirl.create(:pending_invoice, :client => @profile.payment_gateway_profilable, :total => 1823.34)
         invoice2.transactions.count.should == 0
         @profile.pay_invoice!(invoice2)
         invoice2.transactions.count.should == 1
@@ -127,7 +134,7 @@ describe StripePaymentGatewayProfile do
       end
 
       it "should capture error when transaction fails due to declined card" do
-        @profile.update_payment_info(:card_number => '4000000000000341', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+        @profile.update_payment_info(:card_number => '4000000000000341', :expiration_month => '03', :expiration_year => '17', :cv_code => '111').should be_true
         @profile.transactions.count.should == 0
         @invoice.paid?.should be_false
         @profile.pay_invoice!(@invoice).should be_false
@@ -135,7 +142,36 @@ describe StripePaymentGatewayProfile do
         @profile.transactions.first.should == @invoice.transactions.first
         @invoice.transactions.first.failed?.should be_true
         @invoice.failed_payment?.should be_true
-        @profile.last_error.should == 'Your card was declined'
+        @profile.last_error.should == 'Your card was declined.'
+      end
+    end
+
+    context "plan update" do
+      before do
+        @f1 = FactoryGirl.create(:feature)
+        @f2 = FactoryGirl.create(:feature)
+        @f3 = FactoryGirl.create(:feature)
+        Feature.ensure_minimal_pricings!
+        @profile = FactoryGirl.create(:stripe_payment_gateway_profile_for_us)
+        @us = @profile.payment_gateway_profilable
+        FactoryGirl.create(:feature_selection, :usage_subscription => @us, :feature => @f1)
+        FactoryGirl.create(:feature_selection, :usage_subscription => @us, :feature => @f2)
+      end
+
+      it "should be able to create a usage subscription's plan" do
+        @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
+      end
+
+      it "should be able to update a plan and have it update usage subscription" do
+        before = @profile.stripe_plan
+        expected_plan = @us.calculated_plan_id
+        @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
+        @us.payment_gateway_profile.update_plan!(@us.calculated_plan_id, @us).should be_true
+        @profile.reload
+        @profile.stripe_plan.should_not == before
+        @profile.stripe_plan.should == expected_plan
+        @profile.remote_status.should == @profile.stripe_status
+        @profile.remote_status.should == PaymentGatewayProfile::Status::TRIALING
       end
     end
   end

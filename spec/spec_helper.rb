@@ -9,7 +9,7 @@ Spork.prefork do
   require File.expand_path("../../config/environment", __FILE__)
   require 'rspec/rails'
   require 'rspec/autorun'
-
+  require 'webmock/rspec'
   require 'factory_girl'
 
   RSpec.configure do |config|
@@ -23,18 +23,46 @@ Spork.prefork do
     config.include Devise::TestHelpers, :type => :controller
 
     # config.filter_run_including :current => true
-    config.filter_run_excluding :live_authorizenet => true
-    config.filter_run_excluding :live_stripe => true
     config.filter_run_excluding :broken => true
 
+    LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
+    LIVE_WEB_TESTS.each do |filter|
+      # Invert the next two lines, depending on what you're doing,
+      # unless you actually intend to run the entire test suite.
+      config.filter_run_excluding filter => true
+      # config.filter_run_including filter => true
+    end
+
+    live_test_being_run = !LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
+
+    # config.backtrace_clean_patterns = [
+    #   # /\/lib\d*\/ruby\//,
+    #   # /bin\//,
+    #   #/gems/,
+    #   # /spec\/spec_helper\.rb/,
+    #   # /lib\/rspec\/(core|expectations|matchers|mocks)/
+    # ]
+
     config.before(:suite) do
-      DatabaseCleaner.strategy = :transaction
       DatabaseCleaner.clean_with(:truncation)
+      DatabaseCleaner.strategy = :transaction
+
+      # Allow net connect if at least one live group is not excluded
+      WebMock.disable! if live_test_being_run
+
+      FactoryGirl.create(:marketing_front_end)
+    end
+
+    config.before(:all) do
     end
 
     config.before(:each) do
+      Business.current = nil
+      RequestSettings.reset
+
+      ApiStubs.generic_stripe_stub! if !live_test_being_run
       DatabaseCleaner.start
-    end
+   end
 
     config.after(:each) do
       DatabaseCleaner.clean
@@ -42,13 +70,20 @@ Spork.prefork do
 
 
     # Cleanup carrierwave images
-    config.after(:all) do
+    config.after(:suite) do
       if Rails.env.test? || Rails.env.cucumber?
-        tmp = FactoryGirl.create(:image)
-        store_path = File.dirname(File.dirname(tmp.data.url))
-        temp_path = tmp.data.cache_dir
-        FileUtils.rm_rf(Dir["#{Rails.root}/public/#{store_path}/[^.]*"])
-        FileUtils.rm_rf(Dir["#{Rails.root}/public/#{temp_path}/[^.]*"])
+        if :asdf.respond_to?(:stub)
+          ApiStubs.generic_stripe_stub!
+
+          tmp = FactoryGirl.create(:image)
+          store_path = File.dirname(File.dirname(tmp.data.url))
+          temp_path = tmp.data.cache_dir
+          FileUtils.rm_rf(Dir["#{Rails.root}/public/#{store_path}/[^.]*"])
+          FileUtils.rm_rf(Dir["#{Rails.root}/public/#{temp_path}/[^.]*"])
+
+          ApiStubs.release_stripe_stub!
+        end
+        DatabaseCleaner.clean_with(:truncation)
       end
     end
   end

@@ -87,4 +87,11 @@ class Manage::ProductImagesController < Manage::BaseController
   def object_parameters
     params.slice(* ProductImage.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
+
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::PRODUCTS)
+  end
+
 end

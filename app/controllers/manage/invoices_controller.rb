@@ -82,5 +82,11 @@ class Manage::InvoicesController < Manage::BaseController
     params.slice(* Invoice.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::INVOICING)
+  end
+
 end
 

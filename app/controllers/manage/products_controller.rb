@@ -60,4 +60,10 @@ class Manage::ProductsController < Manage::BaseController
     @parent_name = "business" # hack; parent_object isnt enough.
   end
 
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::PRODUCTS)
+  end
+
 end

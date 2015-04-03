@@ -36,4 +36,10 @@ class Client::PaymentGatewayProfilesController < Client::BaseController
     @current_object ||= current_user.client.payment_gateway_profile
   end
 
+  protected
+
+  def _require_business_support
+    _bsupports?(Feature::Names::INVOICING)
+  end
+
 end

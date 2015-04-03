@@ -12,7 +12,7 @@ class Invitation < ActiveRecord::Base
   scope :open_for_handle_and_email, lambda { |handle, email| handled.open.where(:email => email, :handle => handle) }
 
   before_validation { @virtual_path = 'invitation' }
-  before_validation :_strip_fields
+  before_validation :_format_fields
   before_validation :_capture_client_email
   before_validation :_capture_business
 
@@ -21,7 +21,6 @@ class Invitation < ActiveRecord::Base
   validates :email, :format => { :with => Regexes::EMAIL }, :allow_blank => true
   validate :_no_email_conflict, :if => lambda { |i| !i.email.blank? }
   validates :business_id, :presence => true, :if => lambda { |i| i.handle.blank? }
-  validate :_is_beta_tester, :if => lambda { |i| !i.handle.blank? }
 
   attr_accessible :email, :handle
 
@@ -63,9 +62,10 @@ class Invitation < ActiveRecord::Base
     end
   end
 
-  def _strip_fields
+  def _format_fields
     self.handle.strip!
     self.email.strip!
+    self.email.downcase!
   end
 
   def _capture_client_email
@@ -93,12 +93,6 @@ class Invitation < ActiveRecord::Base
       finder = Invitation.open_for_handle_and_email(handle, email)
       finder = finder.where('id <> ?', self.id) if persisted?
       errors.add(:email, t('.errors.email_conflict_handle')) if finder.first
-    end
-  end
-
-  def _is_beta_tester
-    if (new_record? || open?) && BetaTester.find_by_email(email).nil?
-      errors.add(:email, t(".errors.email_not_beta_tester"))
     end
   end
 

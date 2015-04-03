@@ -25,7 +25,9 @@ gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
 gem 'rest-client'
 gem 'activeadmin'
-
+gem 'aws-ses', '~> 0.4.4', require: 'aws/ses'
+gem 'cancan'
+gem 'excon', '>= 0.27.5'
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 
 group :assets do
@@ -53,6 +55,11 @@ group :test, :development do
   gem 'rspec-rails'
   gem "capybara"
   gem "factory_girl_rails"
+  gem "faker"
+end
+
+group :test do
+  gem 'webmock'
 end
 
 group :production do

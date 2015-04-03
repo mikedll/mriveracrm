@@ -3,10 +3,26 @@ require 'spec_helper'
 
 describe Manage::InvoicesController do
 
+  context "security" do
+    before :each do
+      @user = FactoryGirl.create(:employee_user)
+      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
+      sign_in @user
+      request.host = @user.employee.business.host
+    end
+
+    it "should deny access without feature selection" do
+      SpecSupport.without_feature(@user, Feature::Names::INVOICING)
+      get :index
+      flash[:error].should == I18n.t('business.errors.feature_not_supported')
+      response.should_not be_success
+    end
+  end
+
   context "typical usage" do
     before(:each) do
       @user = FactoryGirl.create(:employee_user)
-      @client = FactoryGirl.create(:client, :business => @user.business)
+      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
       sign_in @user
       request.host = @user.employee.business.host
     end
@@ -22,13 +38,11 @@ describe Manage::InvoicesController do
 
   context "filters" do
     it "should bounce a client if he tries to login to this view" do
-      Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
-
       @user = FactoryGirl.create(:client_user)
-      @client = FactoryGirl.create(:client, :business => @user.business)
+      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
       sign_in @user
       request.host = @user.client.business.host
-      
+
       get :index, {:format => 'js', :client_id => @client.id}
 
       response.should redirect_to new_user_session_path

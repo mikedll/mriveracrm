@@ -12,10 +12,26 @@ en:
   delete_confirm: "Delete this?"
   revert_confirm: "Are you sure you want to revert all your changes?"
 
+  unauthorized:
+    default: "You are not authorized to access that part of this business's online service."
+    manage:
+      all: "You are not authorized to %{action} %{subject}."
+      business: "You are not authorized to %{action} the business."
+      usage_subscription: "You are not authorized to %{action} billing settings."
+      user: "Not allowed to manage other user accounts."
+    read:
+      business: "You are not authorized to monitor the business."
+
+  main_nav:
+    home: "Home"
+    products: "Products"
+    contact: "Contact"
+
   user:
     errors:
       no_invitation: "No open invitation could be found for your email, %{email}."
       cancelled_oauth: "Your OAuth (Google or other) login failed."
+      tos_agreement_required: "You must agree to the Terms of Service (TOS) to sign up."
 
   client:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
@@ -24,22 +40,24 @@ en:
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 
-  business: 
-    confirm_delete: "This will delete your entire business' data. All users, all clients...Everything. You will lose access to it immediately. It will not be recoverable. Really delete this?"
+  business:
+    confirm_delete: "This will delete your entire business's data. All users, all clients...Everything. You will lose access to it immediately. It will not be recoverable. Really delete this?"
     signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
     mfe_host_conflict: is not available.
     errors:
       handle_format: can only contain letters and numbers
+      inactive_plan_internal: "Your business's subscription is not active. See the Billing page to rectify this."
+      inactive_plan_public: "This business's support for this online service is not active. Contact a representative of the business if you think they are unaware of this."
+      feature_not_supported: "That feature is not presently supported by this business's online service."
 
   employment:
     errors:
-      user_unique_in_business_employment: 'is already employed as anothe employee at this business'
+      user_unique_in_business_employment: 'is already employed as another employee at this business'
       one_user_per_employee: 'already has a user assigned'
 
   invitation:
     errors:
-      email_not_beta_tester: "email is not recognized as an approved beta tester."
       email_conflict_handle: "is already in use for a pending new business by this handle."
       email_conflict: "is already in use by an existing user."
       only_one: 'if handle for new business is blank, then must have either a client or an employee, and not both'
@@ -59,13 +77,23 @@ en:
     cannot_delete: 'cannot be deleted in its current state'
     cannot_generate_pdf: 'cannot be generated in this state'
 
+  usage_subscriptions:
+    no_payment_gateway_profile: "An internal error has occured. There is no payment profile available for your business. Please contact support if this error persists."
+    trial_expired: "Trial Expired"
+    welcome: Welcome to %{title}
+
   payment_gateway_profile:
     cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."
+    plan_update_error: "Subscription plan failed to update. Check your inputs. If this persists. please contact your business representative."
+    custom_plan_update_error: "Subscription plan failed to update: %{message}"
 
   users:
     new_business_failed: "Unable to relate this new user to the new business as its owner. Contact support if the problem persists."
     new_business_employee_failed: "Unable to relate this new user as an employee of the newly created business. Contact support if the problem persists."
+
+  feature_pricing:
+    cant_change_index: "cannot be changed once decided"
 
   date:
     abbr_day_names:
@@ -274,6 +302,7 @@ en:
       long: ! '%B %d, %Y %H:%M'
       dateonly: ! '%B %d, %Y'
       short: ! '%d %b %H:%M'
+      full: ! '%B %d, %Y %l:%M%P %Z'
     pm: pm
   # remove these aliases after 'activemodel' and 'activerecord' namespaces are removed from Rails repository
 

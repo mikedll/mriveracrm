@@ -4,10 +4,11 @@
   .control-group
     .control-label
     .controls
-      .btn-group
-        %a.invoices.btn{ :data => { :hotkey => 'i' }}
-          %i.icon-book
-          Invoices
+      - if bcan?(Feature::Names::INVOICING)
+        .btn-group
+          %a.invoices.btn{ :data => { :hotkey => 'i' }}
+            %i.icon-book
+            Invoices
       .btn-group
         %a.notes.btn
           %i.icon-comment
@@ -67,9 +68,9 @@
       = render :partial => 'shared/model_view_basic_buttons'
 
       .btn-group.pull-right
-        %button.archive.put_action.btn.btn-danger{ :data => {:action => 'archive', :attribute_enabler => 'archived', :enabled_when => 'false', :confirm => t('client.archive_confirm') } }
+        %button.archive.put_action.btn.btn-danger{ :type => "button", :data => {:action => 'archive', :attribute_enabler => 'archived', :enabled_when => 'false', :confirm => t('client.archive_confirm') } }
           Archive
-        %button.unarchive.put_action.btn.btn-danger{ :data => {:action => 'unarchive', :attribute_enabler => 'archived', :enabled_when => 'true', :confirm => t('client.unarchive_confirm')}}
+        %button.unarchive.put_action.btn.btn-danger{ :type => "button", :data => {:action => 'unarchive', :attribute_enabler => 'archived', :enabled_when => 'true', :confirm => t('client.unarchive_confirm')}}
           Unarchive
 
 

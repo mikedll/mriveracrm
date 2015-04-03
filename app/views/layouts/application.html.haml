@@ -20,10 +20,10 @@
     = render :partial => "shared/flash", :locals => { :flash => flash }
     = yield
 
-    = render :partial => "shared/ganalytics" if Rails.env.production?
+    = render :partial => "shared/remote_prod_includes"
 
     - if @current_business
-      = render :partial => "shared/login"
+      = render :partial => "shared/menu"
 
 
     = render :partial => 'shared/apps_general_templates'

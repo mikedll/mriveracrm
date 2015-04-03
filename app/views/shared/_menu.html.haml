@@ -1,0 +1,40 @@
+.login.menu.major
+  %ul.nav.nav-pills
+    - if user_signed_in?
+      %li.disabled.informational
+        %a
+          Logged In:
+          = current_user.login_name
+      %li
+        = link_to "Home", business_path, :tabIndex => '-1'
+      - if current_user.employee
+        - if bcan? Feature::Names::PRODUCTS
+          %li
+            = link_to 'Products', manage_products_path, :tabIndex => '-1'
+        - if bcan? Feature::Names::CLIENTS
+          %li
+            = link_to 'Clients', manage_clients_path, :tabIndex => '-1'
+        - if can? :manage, current_business
+          %li.dropdown
+            %a.dropdown-toggle{:data => { :toggle => "dropdown" }, :href => "#", :tabIndex => "-1"}
+              Settings
+              %b{:class => "caret"}
+            %ul.dropdown-menu
+              %li
+                = link_to 'Business Settings', manage_business_path, :tabIndex => '-1'
+              %li
+                = link_to 'Billing', manage_billing_settings_path, :tabIndex => '-1'
+              %li
+                = link_to 'System Status', manage_status_monitor_path, :tabIndex => '-1'
+
+      - else
+        %li
+          = link_to 'Invoices', client_invoices_path, :tabIndex => '-1'
+      - if current_user.is_admin?
+        %li
+          = link_to 'Admin', abdiel_root_path, :tabIndex => "-1"
+      %li
+        = link_to 'Logout', destroy_user_session_path, :tabIndex => '-1', :method => :delete
+    - else
+      %li
+        = link_to 'Login', new_user_session_path

@@ -10,6 +10,7 @@ describe Users::ConfirmationsController do
 
       @user = FactoryGirl.create(:unconfirmed_new_employee_user)
       get :show, :confirmation_token => @user.confirmation_token
+
       expect(response).to redirect_to(bhandle_manage_clients_path(:business_handle => @user.employee.business.handle))
     end
   end

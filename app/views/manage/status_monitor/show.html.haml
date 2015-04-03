@@ -25,10 +25,11 @@
 
     = simple_form_for :status, :remote => true, :html => { :class => 'form-horizontal' } do |f|
 
-      .control-group.read-only-field{ :data => { :name => 'status' } }
+      .control-group
         .control-label
           Status Result:
         .controls
+          .read-only-field{ :data => { :name => 'status_monitor[status]' } }
 
       .control-group
         .controls

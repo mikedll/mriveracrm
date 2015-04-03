@@ -1,5 +1,8 @@
 class Manage::BusinessesController < Manage::BaseController
 
+  skip_before_filter :require_active_plan
+  before_filter :_can_manage_current_object
+
   make_resourceful do
     actions :show, :update, :destroy
 
@@ -35,6 +38,9 @@ class Manage::BusinessesController < Manage::BaseController
       current_object.stripe_publishable_key = params[:stripe_publishable_key] if params[:stripe_publishable_key]
       current_object.google_oauth2_client_id = params[:google_oauth2_client_id] if params[:google_oauth2_client_id]
       current_object.google_oauth2_client_secret = params[:google_oauth2_client_secret] if params[:google_oauth2_client_secret]
+
+      current_object.google_analytics_id = params[:google_analytics_id] if params[:google_analytics_id]
+
       current_object.splash_html = params[:splash_html] if params[:splash_html]
       # current_object. = params[:] if params[:]
       # current_object. = params[:] if params[:]
@@ -53,12 +59,22 @@ class Manage::BusinessesController < Manage::BaseController
     else
       save_failed!
       after :update_fails
-      response_for :update_fails     
+      response_for :update_fails
     end
   end
 
   def object_parameters
     [] # too worried about mass assignment
+  end
+
+  protected
+
+  def _require_business_support
+    true
+  end
+
+  def _can_manage_current_object
+    authorize! :manage, current_object
   end
 
 end

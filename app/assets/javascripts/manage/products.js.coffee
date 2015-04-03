@@ -12,6 +12,7 @@ class window.Product extends BaseModel
 
   initialize: () ->
     BaseModel.prototype.initialize.apply(this, arguments)
+    @ignoredAttributes['product_images'] = true
     @images = new RelatedImages(@get('product_images'), parent: @)
     @unset('product_images', silent: true)
 
