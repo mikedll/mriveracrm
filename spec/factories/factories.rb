@@ -77,6 +77,7 @@ FactoryGirl.define do
   end
 
   factory :user_base, :class => User do
+    tos_agreement { true }
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }

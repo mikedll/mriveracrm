@@ -2,10 +2,10 @@ class User < ActiveRecord::Base
 
   include ActionView::Helpers::TranslationHelper
 
-  attr_accessor :use_google_oauth_registration, :conflicting_invitation
+  attr_accessor :use_google_oauth_registration, :conflicting_invitation, :tos_agreement
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration, :tos_agreement
 
   belongs_to :business
   belongs_to :employee
@@ -26,6 +26,7 @@ class User < ActiveRecord::Base
   validates :password, :length => { :minimum => 8 }, :if => lambda { |u| !u.new_oauthed_user? && u.credentials.empty?  }
   validates_confirmation_of :password, :if => lambda { |u| u.credentials.empty? }
   validate :_employee_or_client
+  validate :_agrees_to_tos, :if => :new_record?
 
   #
   # CHECK THIS OUT; ISNT WORKING RIGHT.
@@ -125,6 +126,10 @@ class User < ActiveRecord::Base
     @use_google_oauth_registration = ActiveRecord::ConnectionAdapters::Column.value_to_boolean(value)
   end
 
+  def tos_agreement=(value)
+    @tos_agreement = ActiveRecord::ConnectionAdapters::Column.value_to_boolean(value)
+  end
+
   def new_oauthed_user?
     new_record? && use_google_oauth_registration
   end
@@ -169,6 +174,10 @@ class User < ActiveRecord::Base
   end
 
   protected
+
+  def _agrees_to_tos
+    errors.add(:base, I18n.t('user.errors.tos_agreement_required')) if !tos_agreement
+  end
 
   def _notify_subscription
     employee.business.usage_subscription.reload # trial is inserted into the db on post-create hook.
