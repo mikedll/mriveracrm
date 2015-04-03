@@ -120,6 +120,13 @@ class Business < ActiveRecord::Base
     host.blank? ? default_mfe.host : host
   end
 
+  def lifecycle_deliver!(identifier, mail)
+    ln = lifecycle_notifications.build(:identifier => 'welcome', :body => mail.body.to_s)
+    ln.save!
+    mail.deliver!
+  end
+
+
   private
 
 

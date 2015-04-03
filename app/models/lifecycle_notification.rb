@@ -7,7 +7,7 @@ class LifecycleNotification < ActiveRecord::Base
 
   scope :by_identifier, lambda { |id| where('identifier = ?', id) }
 
-  attr_accessible :identifier
+  attr_accessible :identifier, :body
 
   module Common
     WELCOME = 'welcome'

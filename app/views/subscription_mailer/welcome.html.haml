@@ -5,7 +5,7 @@
 %p
   This is to welcome you to
   = "#{@us.business.default_mfe.title}."
-  Your business' handle is 
+  Your business's handle is 
   = "#{@us.business.handle},"
   and you can reach its home page and login at
   = "#{link_to(business_home_url(@us.business), business_home_url(@us.business))}.".html_safe
@@ -14,8 +14,13 @@
   %p
     Your trial will end
     = "#{l(@us.payment_gateway_profile.stripe_trial_ends_at, :format => :full)}."
-    No action is required after that date if you don't want
-    to continue to use the product.
+    No action is required after that date and time if you don't want
+    to continue to use the product. If you do want to continue to use
+    the product, your subscription will cost
+    = number_to_currency(@us.calculated_price)
+    per month, and you will have to supply a valid credit card as a
+    payment method. You can visit the "Billing" settings page to view
+    your billing information at any time.
 
-= render :partial => 'shared/email_contact_info', :locals => { :business => @us.business }
+= render :partial => 'shared/email_contact_info', :locals => { :business => @us.business, :sincerely => true }
 

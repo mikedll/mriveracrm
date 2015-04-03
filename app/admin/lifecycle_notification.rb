@@ -17,4 +17,16 @@ ActiveAdmin.register LifecycleNotification do
     end
     actions
   end
+
+  show do
+    attributes_table do
+      row :id
+      row :business
+      row :identifier
+      row :body do
+        raw lifecycle_notification.body
+      end
+      row :updated_at
+    end
+  end
 end

@@ -154,9 +154,7 @@ class UsageSubscription < ActiveRecord::Base
     if o
       welcomed = business.lifecycle_notifications.by_identifier(LifecycleNotification::Common::WELCOME).first
       if !welcomed
-        SubscriptionMailer.welcome(self).deliver!
-        ln = business.lifecycle_notifications.build(:identifier => 'welcome')
-        ln.save!
+        business.lifecycle_deliver!(LifecycleNotification::Common::WELCOME, SubscriptionMailer.welcome(self))
       end
     end
   end

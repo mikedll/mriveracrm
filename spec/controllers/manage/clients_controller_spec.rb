@@ -45,7 +45,7 @@ describe Manage::ClientsController do
       response.status.should == 404
     end
 
-    context "business' plan and feature support" do
+    context "business's plan and feature support" do
 
       render_views
 

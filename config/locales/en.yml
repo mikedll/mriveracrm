@@ -13,7 +13,7 @@ en:
   revert_confirm: "Are you sure you want to revert all your changes?"
 
   unauthorized:
-    default: "You are not authorized to access that part of this business' online service."
+    default: "You are not authorized to access that part of this business's online service."
     manage:
       all: "You are not authorized to %{action} %{subject}."
       business: "You are not authorized to %{action} the business."
@@ -40,19 +40,19 @@ en:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 
   business:
-    confirm_delete: "This will delete your entire business' data. All users, all clients...Everything. You will lose access to it immediately. It will not be recoverable. Really delete this?"
+    confirm_delete: "This will delete your entire business's data. All users, all clients...Everything. You will lose access to it immediately. It will not be recoverable. Really delete this?"
     signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
     mfe_host_conflict: is not available.
     errors:
       handle_format: can only contain letters and numbers
-      inactive_plan_internal: "Your business' subscription is not active. See the Billing page to rectify this."
-      inactive_plan_public: "This business' support for this online service is not active. Contact a representative of the business if you think they are unaware of this."
-      feature_not_supported: "That feature is not presently supported by this business' online service."
+      inactive_plan_internal: "Your business's subscription is not active. See the Billing page to rectify this."
+      inactive_plan_public: "This business's support for this online service is not active. Contact a representative of the business if you think they are unaware of this."
+      feature_not_supported: "That feature is not presently supported by this business's online service."
 
   employment:
     errors:
-      user_unique_in_business_employment: 'is already employed as anothe employee at this business'
+      user_unique_in_business_employment: 'is already employed as another employee at this business'
       one_user_per_employee: 'already has a user assigned'
 
   invitation:
