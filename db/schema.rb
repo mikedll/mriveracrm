@@ -29,7 +29,6 @@ ActiveRecord::Schema.define(:version => 20150403122215) do
     t.string   "handle",                          :default => "",    :null => false
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
-    t.string   "google_analytics_id",             :default => "",    :null => false
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
   end
 

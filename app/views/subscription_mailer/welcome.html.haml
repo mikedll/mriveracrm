@@ -14,9 +14,9 @@
   %p
     Your trial will end
     = "#{l(@us.payment_gateway_profile.stripe_trial_ends_at, :format => :full)}."
-    No action is required after that date and time if you don't want
-    to continue to use the product. If you do want to continue to use
-    the product, your subscription will cost
+    No action is required if you don't want to continue to use the
+    product after that date and time. If you do want to continue to
+    use the product, your subscription will cost
     = number_to_currency(@us.calculated_price)
     per month, and you will have to supply a valid credit card as a
     payment method. You can visit the "Billing" settings page to view
