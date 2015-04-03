@@ -72,7 +72,7 @@ class User < ActiveRecord::Base
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
         return nil if !invitation.accept_user!(user)
       else
-        u = User.new
+        u = User.new(:tos_agreement => true)
         u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
         return u
       end
@@ -81,7 +81,7 @@ class User < ActiveRecord::Base
       # invitation or new business. why? log him out.
       return nil
     else
-      u = User.new
+      u = User.new(:tos_agreement => true)
       u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
       return u
     end
@@ -91,6 +91,7 @@ class User < ActiveRecord::Base
 
   def self.new_from_auth(info)
     user = new
+    user.tos_agreement = true
     user.email = info[:email]
     user.first_name = info[:first_name]
     user.last_name = info[:last_name]
