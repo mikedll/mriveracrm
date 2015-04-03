@@ -15,7 +15,9 @@ namespace :data_migrations do
     end
 
     Business.unscoped.all.each do |b|
-      b.acquire_default_features!
+      b.usage_subscription.require_payment_gateway_profile
+
+      b.acquire_default_features! if b.usage_subscription.features.count == 0
 
       if b.an_owner.nil?
         e = b.employees.first
@@ -23,8 +25,6 @@ namespace :data_migrations do
         e.save!
       end
 
-      b.usage_subscription.require_payment_gateway_profile
-      b.usage_subscription.reload
       b.usage_subscription.ensure_correct_plan!
     end
   end
