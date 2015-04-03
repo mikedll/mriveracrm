@@ -16,7 +16,7 @@ describe Product do
       image = FactoryGirl.create(:image)
       image2 = FactoryGirl.create(:image)
       @product.images.push(image2)
-      
+
       product2 = FactoryGirl.create(:product)
       product2.images.push(image2)
       product2.images.push(image)
@@ -45,7 +45,7 @@ describe Product do
       FactoryGirl.create(:product, :name => "Dog Food")
       FactoryGirl.create(:product, :name => "Forks")
       FactoryGirl.create(:product, :name => "Luxury Knives")
-      
+
       p = Product.index_or_search(:query => "knive").all
 
       p.count.should == 1

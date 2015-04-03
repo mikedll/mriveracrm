@@ -1,4 +1,17 @@
 
+@import "../variables";
+
+/* top right menu getting a little cramped */
+
+.nav-pills .dropdown-menu {
+  padding: 16px 0;
+
+  li { 
+    margin: 10px 0; 
+  }
+}
+
+
 /* product images */
 
 .model-view {
@@ -78,3 +91,22 @@
   }
 
 }
+
+.features-menu {
+
+  margin-top: $standard-vertical-break;
+
+  .feature-display {
+    margin: 12px 16px;
+    border-bottom: dotted #000 1px;
+  }
+
+  .price-display {
+    margin-top: 50px;
+  }
+}
+
+input.card_number {
+  width: 18em;
+}
+

@@ -2,14 +2,27 @@ require 'factory_girl'
 
 FactoryGirl.define do
 
+  sequence(:random_title) { |n| "#{Faker::Name.name}#{n}" }
+
+  sequence(:random_name) { |n| "asdfas#{n}" } # #{Fake::Name.name}#{n}
+
+  sequence(:settings_key) { |n| "key#{n}" }
+
+  sequence(:feature_bit_index) { |n| Feature.count + n - 1 }
+
+  sequence(:guest_email) { |n| "someone#{n}" + SecureRandom.base64(8) + "@example.com" }
+
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
 
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
 
+  sequence(:customer_vendor_id) { |n| "cus_5TT8tt" + ("0" * ((8 - n.to_s.length)) + n.to_s) }
+
   factory :business do
+    default_mfe { FactoryGirl.create(:marketing_front_end) }
     name "my small business"
     handle { generate(:business_handle) }
-    host { "www.#{handle}.com" }
+    host { "www.#{handle.strip}.com" }
 
     google_oauth2_client_id "google_oauth2_client_idxxx"
     google_oauth2_client_secret "google_oauth2_client_secretxxx"
@@ -17,9 +30,15 @@ FactoryGirl.define do
     stripe_secret_key "sk_test_SoDXR6QkygrYnlnFhDWKNbB2"
     stripe_publishable_key "pk_test_rPvMBvyuzsgRIXZFCW2xMmxz"
 
-    after(:create) do |business|
-      Business.current = business
-      RequestSettings.host = MarketingFrontEnd.first.try(:host) || FactoryGirl.create(:marketing_front_end).host
+    after(:create) do |business, eval|
+      if Business.current.nil? || RequestSettings.host.nil?
+        Business.current = business
+        RequestSettings.host = business.default_mfe.host
+      end
+
+      # Ensure owner exists.
+      e = FactoryGirl.build(:employee, :business => business, :role => Employee::Roles::OWNER)
+      FactoryGirl.create(:employee_user, :employee => e)
     end
 
     factory :emerging_papacy do
@@ -28,8 +47,12 @@ FactoryGirl.define do
       after(:create) do |business, evaluator|
         FactoryGirl.create(:employee, :business => business, :first_name => "Gregory", :last_name => "the Great")
         FactoryGirl.create(:employee, :business => business, :first_name => "Saint", :last_name => "Benedict")
-      end   
+      end
     end
+  end
+
+  factory :lifecycle_notification do
+    business
   end
 
   factory :employee do
@@ -54,6 +77,7 @@ FactoryGirl.define do
   end
 
   factory :user_base, :class => User do
+    tos_agreement { true }
     first_name "Phil"
     last_name "Watson"
     email { "user" + SecureRandom.base64(8) + "@example.com" }
@@ -65,21 +89,25 @@ FactoryGirl.define do
     factory :user do
       client { FactoryGirl.create(:stubbed_client) }
 
-      factory :client_user
+      factory :client_user do
+        business { client.business }
+      end
+    end
 
-      factory :employee_user do
-        employee { FactoryGirl.create(:employee) }
-        client nil
+    factory :employee_user do
+      employee { FactoryGirl.create(:employee) }
+      business { employee.business }
+      client nil
 
-        factory :unconfirmed_new_employee_user do
-          after :create do |user, evaluator|
-            user.send(:generate_confirmation_token!)
-          end
+      factory :unconfirmed_new_employee_user do
+        after :create do |user, evaluator|
+          user.confirmed_at = nil
+          user.send(:generate_confirmation_token!) # saves
         end
-
       end
 
     end
+
   end
 
   factory :client do
@@ -89,16 +117,17 @@ FactoryGirl.define do
     last_name "Watson"
 
     factory :stubbed_client do
-      before(:create) { |profile, evaluator| 
-        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) } 
+      before(:create) { |profile, evaluator|
+        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
 
         Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
+        Stripe::Charge.stub(:create) { ApiStubs.stripe_charge }
       }
     end
   end
 
   factory :invitation do
-
+    email { generate(:guest_email) }
 
     factory :client_invitation, :parent => :invitation do
       client { FactoryGirl.create(:stubbed_client) }
@@ -109,14 +138,13 @@ FactoryGirl.define do
     end
 
     factory :new_business_invitation, :parent => :invitation do
-      email { generate(:employee_email) }
       handle { generate(:business_handle) }
     end
 
   end
 
   factory :authorize_net_payment_gateway_profile do
-    client { FactoryGirl.create(:client) }
+    payment_gateway_profilable { FactoryGirl.create(:client) }
 
     factory :authorize_net_payment_gateway_profile_ready, :parent => :authorize_net_payment_gateway_profile do
       client { FactoryGirl.create(:client) }
@@ -127,7 +155,26 @@ FactoryGirl.define do
   end
 
   factory :stripe_payment_gateway_profile do
-    client { FactoryGirl.create(:client) }
+    payment_gateway_profilable { FactoryGirl.create(:client) }
+  end
+
+  factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
+
+    # have to do this before even the create call.
+    # before :build's effect is ambiguous.
+    payment_gateway_profilable do
+      UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
+      UsageSubscription.any_instance.stub(:ensure_correct_plan!)
+      UsageSubscription.any_instance.stub(:notify_signup!)
+      FactoryGirl.create(:usage_subscription)
+    end
+
+    after :create do |profile|
+      UsageSubscription.any_instance.unstub(:notify_signup!)
+      UsageSubscription.any_instance.unstub(:ensure_correct_plan!)
+      UsageSubscription.any_instance.unstub(:require_payment_gateway_profile)
+      profile.payment_gateway_profilable.send(:ensure_correct_plan!)
+    end
   end
 
   factory :invoice do
@@ -143,7 +190,16 @@ FactoryGirl.define do
 
     factory :pending_invoice do
       status { "pending" }
+
+      factory :paid_invoice do
+        after (:create) do |invoice, evaluator|
+          FactoryGirl.create(:successul_outside_transaction, :invoice => invoice)
+          invoice.mark_paid!
+        end
+      end
     end
+
+
   end
 
   factory :transaction do
@@ -152,6 +208,10 @@ FactoryGirl.define do
     factory :outside_transaction, :class => OutsideTransaction do
       outside_vendor { 'Paypal' }
       outside_id { '3434334' }
+
+      factory :successul_outside_transaction do
+        status "successful"
+      end
     end
 
     factory :authorize_net_transaction, :class => AuthorizeNetTransaction do
@@ -165,21 +225,30 @@ FactoryGirl.define do
   end
 
   factory :product do
-    business { FactoryGirl.create(:business) }
+    business
     name { "Widget " + SecureRandom.base64(3) }
     active { true }
   end
 
   factory :image do
-    business { FactoryGirl.create(:business) }
+    business
     data { File.new(Rails.root.join('spec', 'support', 'testphoto.jpg'), 'r') }
   end
 
   factory :marketing_front_end do
+    title { FactoryGirl.generate(:random_title) }
     host { "www.mfe#{SecureRandom.hex(4)}.com" }
+
+    # Create some default features.
+    after(:create) do |mfe, eval|
+      if Feature.count == 0
+        Feature.ensure_master_list_created!
+      end
+      mfe.features = Feature.all
+    end
   end
 
-  factory :product_image do 
+  factory :product_image do
     ignore do
       seed_business { FactoryGirl.create(:business) }
     end
@@ -198,6 +267,52 @@ FactoryGirl.define do
       record.image = FactoryGirl.create(:image, :business => sb) if record.image.nil?
       record.product = FactoryGirl.create(:product, :business => sb) if record.product.nil?
     end
+  end
+
+  factory :setting do
+    key { generate(:settings_key) }
+    value "good"
+    value_type { "String" }
+  end
+
+  factory :usage_subscription_base, :class => UsageSubscription do
+    business
+    generation { 0 }
+
+    factory :usage_subscription
+  end
+
+  factory :feature_base, :class => Feature do
+    bit_index { generate(:feature_bit_index).to_i }
+    name { generate(:random_name) }
+    public_name { |r| r.name.titleize }
+
+    factory :feature_no_pricing
+
+    factory :feature do
+      after(:create) do |f, eval|
+        if !Feature::ALL.include?(f.name)
+          # pricing will fail if we don't do it here.
+          FactoryGirl.create(:feature_pricing, :feature => f)
+        end
+      end
+    end
+  end
+
+  factory :feature_pricing do
+    feature
+    generation { 0 }
+    price "9.99"
+  end
+
+  factory :feature_selection do
+    feature
+    usage_subscription
+  end
+
+  factory :feature_provision do
+    feature
+    marketing_front_end
   end
 
 end

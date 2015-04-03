@@ -27,7 +27,7 @@ describe Invoice do
   end
 
   context "scopes" do
-    it "should not allow cancelled or open invoices to be shown to user." do
+    it "should not allow cancelled or open invoices to be shown to user" do
       invoice = FactoryGirl.create(:invoice, :status => :open)
       Invoice.count.should == 1
       Invoice.viewable_to_client.count.should == 0
@@ -36,6 +36,7 @@ describe Invoice do
       Invoice.count.should == 2
       Invoice.viewable_to_client.count.should == 0
 
+
       invoice = FactoryGirl.create(:invoice, :status => :pending)
       Invoice.viewable_to_client.count.should == 1
 
@@ -43,10 +44,9 @@ describe Invoice do
       Invoice.count.should == 3
       Invoice.viewable_to_client.count.should == 0
 
-
       FactoryGirl.create(:invoice, :status => :pending)
       FactoryGirl.create(:invoice, :status => :failed_payment)
-      FactoryGirl.create(:invoice, :status => :paid)
+      FactoryGirl.create(:paid_invoice)
       FactoryGirl.create(:invoice, :status => :closed)
       Invoice.count.should == 7
       Invoice.viewable_to_client.count.should == 4
@@ -58,7 +58,7 @@ describe Invoice do
       invoice = FactoryGirl.create(:invoice, :status => :pending)
       invoice.cancel!.should be_true
       invoice.cancelled?.should be_true
-      
+
       invoice = FactoryGirl.create(:invoice, :status => :open)
       expect { invoice.cancel! }.to raise_error(StateMachine::InvalidTransition)
     end
@@ -80,13 +80,22 @@ describe Invoice do
       (Invoice.find_by_id id).should_not be_nil
       @invoice.errors.full_messages.should == [I18n.t('invoice.cannot_delete')]
     end
+
+    # See case 146
+    it "should destroy related transactions", :broken => true do
+      @invoice.mark_pending!
+      t = FactoryGirl.create(:outside_transaction, :invoice => @invoice)
+      @invoice.transactions.count.should == 1
+      @invoice.destroy
+      # expect { t.reload }.to raise_error(ActiveRecord::RecordNotFound)
+    end
   end
 
   context "typical pay cycle" do
-    it "should allow basic payable transactions under normal operations" do
+    it "should allow basic payable transactions under normal operations", :live_stripe => true do
       i = FactoryGirl.create(:unstubbed_client_invoice)
       i.mark_pending!
-      i.client.payment_gateway_profile.update_payment_info(:card_number => '4242424242424242', :expiration_month => '03', :expiration_year => '15', :cv_code => '111').should be_true
+      i.client.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
       i.charge!.should be_true
     end
   end
@@ -106,7 +115,7 @@ describe Invoice do
     end
   end
 
-  context "pdf_gen" do
+  context "pdf_gen"  do
     before do
       @uuid = SecureRandom.uuid
       SecureRandom.stub(:uuid) { @uuid }

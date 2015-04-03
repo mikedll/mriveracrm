@@ -25,7 +25,7 @@ class window.NoteListItemView extends ListItemView
   className: 'note-list-item list-item'
 
   title: () ->
-    @toHumanReadableDateTimeFormat('recorded_at')
+    @toHumanReadableDateTimeFormat(@model.get('recorded_at'))
 
 class window.NoteAppView extends CollectionAppView
   modelNamePlural: 'notes'

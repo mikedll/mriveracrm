@@ -1,12 +1,12 @@
 
 %p
   Thank you for signing up for
-  = t('app_title')
+  = "#{t('app_title')}."
 
 %p
-  Confirm your email here to begin using the app:
+  = link_to('Confirm your email here', confirmation_url(@resource, :host => RequestSettings.full_host, :confirmation_token => @resource.confirmation_token))
+  to begin using the product.
 
-%p
-  = link_to 'Confirm my account', confirmation_url(@resource, :host => RequestSettings.full_host, :confirmation_token => @resource.confirmation_token)
+= render :partial => 'shared/email_contact_info', :locals => { :business => @resource.business }
 
 

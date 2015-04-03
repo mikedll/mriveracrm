@@ -1,14 +1,14 @@
 class Client < ActiveRecord::Base
 
   belongs_to :business
-  has_many :notes
   has_many :users
   has_many :invitations
+  has_many :notes, :dependent => :destroy
   has_many :invoices
-  has_one :payment_gateway_profile
+  has_one :payment_gateway_profile, as: :payment_gateway_profilable
 
 
-  attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
+  attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone_2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
 
   validates :business_id, :presence => true
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }, :if => Proc.new { |c| !c.email.blank? }
@@ -27,16 +27,16 @@ class Client < ActiveRecord::Base
 
   def archive!
     if archived?
-      self.errors.add(:base, "Client is already archived") 
+      self.errors.add(:base, "Client is already archived")
       return false
     end
-      
+
     self.update_attributes(:archived => true)
   end
 
   def unarchive!
     if !archived?
-      self.errors.add(:base, "Client is not archived") 
+      self.errors.add(:base, "Client is not archived")
       return false
     end
 
@@ -78,6 +78,26 @@ class Client < ActiveRecord::Base
       id
     end
   end
+
+  def payment_gateway_profilable_remote_app_key
+    business.stripe_secret_key
+  end
+
+  def payment_gateway_profilable_subscribable?
+    false
+  end
+
+  def payment_gateway_profilable_desc_attrs
+    { :description => payment_profile_description, :email => email}
+  end
+
+  def payment_profile_profilable_card_args
+    {
+      :first_name => first_name,
+      :last_name => last_name,
+    }
+  end
+
 
   def _strip_fields
     self.zip.strip!

@@ -23,11 +23,25 @@ window.AppsConfig =
   dateJsRubyDatetimeFormat: 'yyyy-MM-ddTHH:mm:ss'
   dateJsReadableDatetimeFormat: 'ddd yyyy-MM-dd h:mmtt'
   dateJsReadableDateFormat: 'ddd yyyy-MM-dd'
+  dateJsReadonlyDateTime: 'dddd, MMMM dd, h:mmtt'
   datePickerDateFormat: 'D yy-mm-dd'
   datetimePickerTimeFormat: 'h:mmTT'
   fadeDuration: 1000
   balloonDuration: 2000
 
+class window.TextRenderer
+  toFixed: (value, precision) ->
+    precision = precision || 0
+    power = Math.pow(10, precision)
+    absValue = Math.abs(Math.round(value * power))
+    result = (if value < 0 then '-' else '') + String(Math.floor(absValue / power))
+
+    if precision > 0
+      fraction = String(absValue % power)
+      padding = new Array(Math.max(precision - fraction.length, 0) + 1).join('0')
+      result += '.' + padding + fraction
+
+    result
 
 class window.AppsLog
   log: (s) ->
@@ -91,11 +105,16 @@ class window.BaseModel extends Backbone.Model
 
     @_lastRequestError = null
     @_attributesSinceSync = {}
+
+    @ignoredAttributes = {}
+
     @listenTo(@, 'invalid', @onInvalid)
     @listenTo(@, 'change', @onChange)
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
     @listenTo(@, 'error', @onError)
+
+    @dumpOnChange = false
 
   isDirty: () ->
     return @_isDirty
@@ -115,10 +134,16 @@ class window.BaseModel extends Backbone.Model
     # todo: should check if we are out of date
     delete attrs['updated_at']
 
+    # ignore any attrs we're told to...
+    _.each(attrs, (v, k) =>
+      if _.has(@ignoredAttributes, k)
+        delete attrs[k]
+    )
+
     _.each(attrs, (value, attribute_name) =>
       if not _.has(@_attributesSinceSync, attribute_name)
         @_attributesSinceSync[attribute_name] = @previous(attribute_name)
-      else if @_attributesSinceSync[attribute_name] == @get(attribute_name)
+      else if _.isEqual(@_attributesSinceSync[attribute_name], @get(attribute_name))
         delete @_attributesSinceSync[attribute_name]
     )
     @_isDirty = !$.isEmptyObject(@_attributesSinceSync)
@@ -130,6 +155,108 @@ class window.BaseModel extends Backbone.Model
       @validationError = null
       @_isInvalid = false
 
+    if @dumpOnChange
+      console.log(@attributes)
+
+  # hook for subclasses to adjust the set attrs
+  adjustSetAttrs: (attrs) ->
+    attrs
+
+
+  #
+  # Originally overridden to handle hasrelation relations from checkboxes.
+  #
+  # There are so many nested loops here. This may need
+  # to be performance improved with some hashes.
+  #
+  set: (attrs) ->
+    _.each(attrs, (v, attributeName) =>
+      if typeof(@hasManyRelations) != "undefined" && attributeName of @hasManyRelations
+        idField = @hasManyRelations[attributeName]
+        cur_related_set = @get(attributeName)
+        orig_related_set = if attributeName of @_attributesSinceSync then @_attributesSinceSync[attributeName] else cur_related_set
+
+        # if relation is already in cur relation set, preserve all current existing keys
+        # and not just the foreign key.
+        # (n * m) where n == size(v array) and m == size(current array value of this attribute)
+        _.each(v, (relation, i) ->
+          relation_before = _.find(cur_related_set, (r) -> r[idField] == relation[idField])
+
+          if typeof(relation_before) != "undefined"
+            relation = _.extend({}, relation_before, relation)
+
+          # if key '_destroy' is present, this relation was present originally,
+          # then was removed (added _destroy), then has been returned as of this set operation.
+          # cancel the destroy by removing the '_destroy' key.
+          if _.has(relation, '_destroy')
+            delete relation['_destroy']
+
+          v[i] = relation
+        )
+
+
+        # originally present. removed. mark with '_destroy'.
+        # (o * n) where o == size(original value of this attribute) and n == size(v array)
+        _.each(orig_related_set, (orig_relation) ->
+          if not _.some(v, (relation) -> relation[idField] == orig_relation[idField])
+            v.push(_.extend({}, orig_relation, {'_destroy': '1'}))
+        )
+    )
+
+    @adjustSetAttrs(attrs)
+
+    Backbone.Model.prototype.set.apply(@, [attrs])
+
+  deepSet: (attrsArray) ->
+    attrs = {}
+    _.each(attrsArray, (packedAssignment, l) =>
+      if !_.isArray(packedAssignment[0])
+        attrs[packedAssignment[0]] = packedAssignment[1]
+      else
+        # need to traverse deeper into contained hash and make one
+        # with the proper value set.
+        curHash = @get(packedAssignment[0][0])
+
+        _.each(packedAssignment[0].slice(1,-1), (hashIndex, i) =>
+          curHash = curHash[hashIndex]
+        )
+
+        if curHash[packedAssignment[0][packedAssignment[0].length - 1]] != packedAssignment[1]
+
+          if !_.has(attrs, packedAssignment[0][0])
+            # this is tricky. don't modify the nested hash that's
+            # already in the backbone model object. you have to make an
+            # assignment to a new hash object, or you'll modify the
+            # attributes of the backbone object directly here, even
+            # though 'set' has yet to be called.
+            curHash = _.clone(curHash)
+          else
+            # if we already constructed a new hash, there will be an
+            # assignment in attrs. you can make changes to it freely.
+            curHash = attrs[packedAssignment[0][0]]
+
+          # invariant: curHash no longer points to anything associated with the original
+          # backbone model object.
+
+          curHash[packedAssignment[0][packedAssignment[0].length - 1]] = packedAssignment[1]
+
+          attrs[packedAssignment[0][0]] = curHash
+
+    )
+
+    @set(attrs)
+
+  deepGet: (attrs) ->
+    return @get(attrs) if !_.isArray(attrs)
+
+    fetched = null
+    _.each(attrs, (v, i) =>
+      if fetched?
+        fetched = fetched[v]
+      else
+        fetched = @get(v)
+    )
+    fetched
 
   changedAttributesSinceSync: () ->
     _.clone(@_attributesSinceSync)
@@ -143,13 +270,32 @@ class window.BaseModel extends Backbone.Model
   # sync(...)  or fetch to verify that.
   #
   # Can be used if one is confident that a change elsewhere on a view
-  # has forced a change to this model in the database (rate).
+  # has forced a change to this model in the database (rare).
   #
   setAndAssumeSync: (attrs) ->
     @set(attrs)
     @trigger('sync', @, null, {})
 
   onSync: () ->
+    # purge any destroyed attrs, before deleting history.
+    retainedHasRelations = {}
+    destroyingRelations = {}
+    _.each(@hasManyRelations, (idField, attributeName, l) =>
+      retainable = _.partition(@get(attributeName), (r) -> not _.has(r, '_destroy'))
+      retainedHasRelations[attributeName] = retainable[0]
+      destroyingRelations[attributeName] = retainable[1]
+    )
+
+    # purge history of destroyed to prevent _destroy additions in set(...).
+    _.each(destroyingRelations, (destroyed, attributeName, l) =>
+      # delete orig_set history, to prevent _destroy markings
+      @unset(attributeName, silent: true)
+      delete @_attributesSinceSync[attributeName]
+    )
+
+    if _.size(retainedHasRelations) > 0
+      @set(retainedHasRelations) # remove those elements.
+
     @_attributesSinceSync = {}
     @_isRequesting = false
     @_isInvalid = false
@@ -164,7 +310,9 @@ class window.BaseView extends Backbone.View
   initialize: (options) ->
     @useDirty = true
 
-    @events = {}
+    @events =
+      'click a,button': 'checkDisabled'
+
     @parent = options.parent if options
 
   childViewPushed: (view) ->
@@ -191,24 +339,30 @@ class window.BaseView extends Backbone.View
     d.toString(AppsConfig.dateJsRubyDatetimeFormat) +
       $.timepicker.timezoneOffsetString(-d.getTimezoneOffset(), true)
 
-  toHumanReadableDateFormat: (field) ->
-    date = Date.parse(@model.get(field))
+  toHumanReadableDateFormat: (dateString) ->
+    date = Date.parse(dateString)
     date.toString(AppsConfig.dateJsReadableDateFormat)
 
-  toHumanReadableDateTimeFormat: (field) ->
-    v = @model.get(field)
-    return "" if !v?
-    date = Date.parse(v)
-    date.toString(AppsConfig.dateJsReadableDatetimeFormat)
+  toHumanReadableDateTimeFormat: (dateString, format) ->
+    return "" if !dateString?
+    date = Date.parse(dateString)
+    date.toString(if typeof(format) != "undefined" then AppsConfig[format] else AppsConfig.dateJsReadableDatetimeFormat)
 
-  onSync: (model, resp, options) ->
-
+  checkDisabled: (e) ->
+    if $(e.target).hasClass('disabled')
+      e.stopPropagation()
+      e.stopImmediatePropagation()
+      return false
+    return true
 
 class window.ModelBaseView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
+
     @listenTo(@model, 'change', @onModelChanged)
+    @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
+    @listenTo(@model, 'error', @onError)
 
   dirtyRegistration: () ->
     return if !@useDirty
@@ -220,8 +374,25 @@ class window.ModelBaseView extends BaseView
   onModelChanged: (e) ->
     @dirtyRegistration()
 
+  onRequest: (model, xhr, options) ->
+    if @model.isRequesting()
+      @$('.save').addClass('disabled')
+      @$('.revert').addClass('disabled')
+
   onSync: (model, resp, options) ->
+    @resolveButtonAvailability() if !@model.isRequesting()
     @dirtyRegistration()
+
+  onError: (model, resp, options) ->
+    @resolveButtonAvailability() if !@model.isRequesting()
+
+  resolveButtonAvailability: () ->
+    if @model.isDirty()
+      @$('.save').removeClass('disabled')
+      @$('.revert').removeClass('disabled')
+    else
+      @$('.save').addClass('disabled')
+      @$('.revert').addClass('disabled')
 
 
 class window.BaseCollection extends Backbone.Collection
@@ -239,7 +410,6 @@ class window.BaseCollection extends Backbone.Collection
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
-    $.extend(@events, 'click a,button': 'checkDisabled')
 
     $(window).resize( () => @resizeView() )
     @resizeView()
@@ -276,13 +446,6 @@ class window.WithChildrenView extends BaseView
         $(el).removeAttr('tabIndex')
     )
 
-
-  checkDisabled: (e) ->
-    if $(e.target).hasClass('disabled')
-      e.stopPropagation()
-      return false
-    return true
-
   focusTopModelView: () ->
     throw "Must implement in child class."
 
@@ -304,17 +467,15 @@ class window.ListItemView extends ModelBaseView
 
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
-    @events =
+    @events = $.extend(@events,
       'click a': 'show'
+    )
+
     @parent = options.parent
-    # these two should be in ModelBaseView
-    # @listenTo(@model, 'sync', @onSync)
-    # @listenTo(@model, 'change', @onModelChanged)
-    @listenTo(@model, 'error', @onError)
+    # 'sync', 'change', 'request', and 'error' are in ModelBaseView
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
-    @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'resorted', @onResorted)
 
   onRemove: () ->
@@ -395,7 +556,8 @@ class window.ListItemView extends ModelBaseView
     @decorateError()
     @decorateRequesting()
 
-  onError: (model, xhr, options) ->
+  onError: (model, resp, options) ->
+    ModelBaseView.prototype.onError.apply(@, arguments)
     @decorateError()
     @decorateRequesting()
 
@@ -424,27 +586,27 @@ class window.CrmModelView extends ModelBaseView
 
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
-    @events =
+    @events = $.extend(@events,
       'keyup :input': 'onInputChange'
       'change :input': 'onInputChange'
       'ajax:beforeSend form': 'noSubmit'
       'click .btn.save': 'save'
+      'click button[type=button][data-confirm]': 'startConfirmation'
       'confirm:complete .btn.revert': 'revert'
       'confirm:complete .btn.destroy': 'destroy'
       'confirm:complete .btn.put_action': 'putActionConfirmed'
       'click .btn.put_action:not([data-confirm])': 'putAction'
-
+    )
 
     @parent = options.parent
-    @listenTo(@model, 'request', @onRequest)
-    @listenTo(@model, 'sync', @onSync)
+    # 'sync', 'change', 'error', and 'request' are in ModelBaseView
     @listenTo(@model, 'destroy', @onDestroy)
     @listenTo(@model, 'remove', @onRemove)
-    @listenTo(@model, 'error', @onError)
     @listenTo(@model, 'invalid', @onInvalid)
-    @listenTo(@model, 'change', @onModelChanged)
 
-    @attributeMatcher = new RegExp(@modelName + "\\[(\\w+)\\]")
+    @attributeMatcher = new RegExp("^" + @modelName + "\\[(\\w+)\\]")
+    @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
+    @textRenderer = new TextRenderer()
 
     @inputsCache = []
     @readonlyInputsCache = []
@@ -482,35 +644,50 @@ class window.CrmModelView extends ModelBaseView
 
   decorateDirty: () ->
     return if !@useDirty
-    changed = @model.changedAttributesSinceSync()
-    @inputsCache.each((i, domEl)  =>
-      el$ = $(domEl)
-      attribute_name = @nameFromInput( el$ )
-      if attribute_name?
-        if @model.isDirty() and _.has(changed, attribute_name)
-          el$.closest('.control-group').addClass('warning')
-        else
-          el$.closest('.control-group').removeClass('warning')
-      else
-        # this may not be an input related to our model
-    )
 
-    @$('.read-only-field').each((i, domEl) =>
+    if !@model.isDirty()
+      @inputsCache.each((i, domEl)  =>
+        $(domEl).closest('.control-group,.inline-control-group').removeClass('warning')
+      )
+    else
+      current = @model.attributes
+      changed = @model.changedAttributesSinceSync()
+      @inputsCache.each((i, domEl)  =>
+        el$ = $(domEl)
+        attributeName = @nameFromInput( el$ )
+        if attributeName?
+          markChanged = false
+          if _.isArray(attributeName)
+            changedO = changed[attributeName[0]]
+            currentO = current[attributeName[0]]
+            if typeof(changedO) != "undefined"
+              _.each(attributeName.slice(1,-1), (el, i) =>
+                currentO = currentO[el]
+                changedO = changedO[el]
+              )
+              if changedO[attributeName[attributeName.length - 1]] != currentO[attributeName[attributeName.length - 1]]
+                markChanged = true
+          else if _.has(changed, attributeName)
+            markChanged = true
+
+          if markChanged
+            el$.closest('.control-group,.inline-control-group').addClass('warning')
+          else
+            el$.closest('.control-group,.inline-control-group').removeClass('warning')
+        else
+          # this may not be an input related to our model
+      )
+
+    @readonlyInputsCache.each((i, domEl) =>
       el$ = $(domEl)
-      attribute_name = el$.data('name')
-      if attribute_name? and @model.isDirty() and _.has(changed, attribute_name)
+      attributeName = @nameFromInput(el$, true)
+      if attributeName? and @model.isDirty() and _.has(changed, attributeName)
         el$.closest('.control-group').addClass('warning')
       else
         el$.closest('.control-group').removeClass('warning')
     )
 
-    if @model.isDirty()
-      @$('.save').removeClass('disabled')
-      @$('.revert').removeClass('disabled')
-    else
-      @$('.save').addClass('disabled')
-      @$('.revert').addClass('disabled')
-
+    @resolveButtonAvailability()
 
   onModelChanged: (e) ->
     # since this is the primary editing area of this model,
@@ -525,6 +702,7 @@ class window.CrmModelView extends ModelBaseView
     # we do recorate the form, though.
     #
     ModelBaseView.prototype.onModelChanged.apply(@, arguments)
+    @copyReadOnlyFieldsToForm()
     @decorateDirty()
     if @model.validationError?
       @renderErrors(@model.validationError)
@@ -532,43 +710,61 @@ class window.CrmModelView extends ModelBaseView
       @clearErrors(@model.changedAttributes())
 
   onInputChange: (e) ->
+    # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
-    if(e.ctrlKey == false && e.keyCode == 13 && !$(e.target).is('textarea'))
-      @save()
-      e.stopPropagation()
-      return false
+
+    if e.keyCode == 13
+      if $(e.target).is('button')
+        return false # ignore 'enter' on a button key. it will be triggered elsewhere.
+
+      if(e.ctrlKey == false && !$(e.target).is('textarea'))
+        e.stopPropagation()
+        e.preventDefault()
+        @save()
+        return false
 
     nameAndValue = @nameAndValueFromInput($(e.target))
-    if nameAndValue?
-      attrs = {}
-      attrs[nameAndValue[0]] = nameAndValue[1]
-      @model.set(attrs)
+    @model.deepSet([nameAndValue]) if nameAndValue?
 
     return true
 
-  nameFromInput: (elSelection) ->
-    attribute_name = null
+  nameFromInput: (elSelection, readOnly) ->
+    attributeName = null
+    readOnly = readOnly || elSelection.hasClass('read-only-field')
 
-    if elSelection.hasClass('read-only-field')
-      if elSelection.data('name')?
-        attribute_name = elSelection.data('name')
+    n = ""
+    if readOnly && elSelection.data('name')?
+      n = elSelection.data('name')
     else
-      matched = @attributeMatcher.exec(elSelection.prop('name'))
-      if matched? && matched.length == 2
-        attribute_name = matched[1]
-    attribute_name
+      n = elSelection.prop('name')
+
+    cumulativeMatchedLength = 0
+    matched = @attributeMatcher.exec(n)
+
+    while matched? && matched.length == 2 && cumulativeMatchedLength != n.length
+      if !attributeName?
+        attributeName = matched[1]
+      else if _.isArray(attributeName)
+        attributeName.push(matched[1])
+      else
+        attributeName = [attributeName, matched[1]]
+
+      cumulativeMatchedLength += matched[0].length
+      matched = @subAttributeMatcher.exec(n.substring(cumulativeMatchedLength, n.length))
+
+    attributeName
 
   #
   # returns null if it can't get the attribute name and value
   #
-  # returns [attribute_name, value] otherwise.
+  # returns [attributeName, value] otherwise.
   #
   # e.g. ['company', 'Smith and Son']
   #
   nameAndValueFromInput: (elSelection) ->
-    attribute_name = @nameFromInput(elSelection)
-    if attribute_name?
+    attributeName = @nameFromInput(elSelection)
+    if attributeName?
       if elSelection.hasClass('datetimepicker') or elSelection.hasClass('datepicker')
         val = @toRubyDatetime(elSelection.val())
       else if elSelection.hasClass('float')
@@ -584,17 +780,25 @@ class window.CrmModelView extends ModelBaseView
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
+        else if elSelection.hasClass('has-many-relation') && typeof(@model.hasManyRelations) != "undefined"
+          id_field = @model.hasManyRelations[attributeName]
+          val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() ->
+            h = {}
+            h[id_field] = parseInt($(this).val())
+            h
+          ).toArray()
+
         else
           val = @$('input[type=checkbox][name="' + elSelection.attr('name') + '"]:checked').map(() -> $(this).val()).toArray()
       else
         val = elSelection.val()
-      return [attribute_name, val]
+      return [attributeName, val]
     else
       return null
 
   fromForm: () ->
     updated = {}
-    _.each(@$(':input'), (el) =>
+    _.each(@inputsCache, (el) =>
       nameAndValue = @nameAndValueFromInput($(el))
       updated[ nameAndValue[0] ] = nameAndValue[1] if nameAndValue?
     )
@@ -611,33 +815,47 @@ class window.CrmModelView extends ModelBaseView
     @[collectionName].reset([]) # this reset should be replaced by a full re-render of the view
     @[collectionName].fetch()
 
+  copyReadOnlyFieldsToForm: () ->
+    @readonlyInputsCache.each((i, el) =>
+      el$ = $(el)
+      attributeName = @nameFromInput(el$, true)
+      if attributeName? && @model.deepGet(attributeName)?
+        v = @model.deepGet(attributeName)
+        if el$.hasClass('datetime')
+          v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
+        else if el$.hasClass('date')
+          v = @toHumanReadableDateFormat(v)
+        else if el$.hasClass('money')
+          v = "$#{@textRenderer.toFixed(v, 2)}"
+        el$.text(v)
+    )
+
   copyModelToForm: () ->
     @inputsCache.each((i, el) =>
       el$ = $(el)
-      attribute_name = @nameFromInput(el$)
-      if attribute_name? && @model.get(attribute_name)?
-        v = @model.get(attribute_name)
+      attributeName = @nameFromInput(el$, false)
+      if attributeName? && @model.deepGet(attributeName)?
+        v = @model.deepGet(attributeName)
         if el$.is('[type=checkbox]') && el$.hasClass('boolean')
           el$.prop('checked', (v != "false" && v != false))
+        else if el$.is('[type=checkbox]') && el$.hasClass('has-many-relation')
+          idField = if (typeof(@model.hasManyRelations) != "undefined" and (attributeName of @model.hasManyRelations)) then @model.hasManyRelations[attributeName] else 'id'
+          valAsInt = parseInt(el$.val())
+          if Object.prototype.toString.call( v ) == '[object Array]'
+            el$.prop('checked', _.some(v, (related) -> related[idField] == valAsInt && not _.has(related, '_destroy')))
+          else
+            el$.prop('checked', v[idField] == valAsInt)
         else
           if el$.hasClass('datetimepicker')
-            v = @toHumanReadableDateTimeFormat(attribute_name)
+            v = @toHumanReadableDateTimeFormat(v)
           else if el$.hasClass('hasDatepicker')
-            v = @toHumanReadableDateFormat(attribute_name)
+            v = @toHumanReadableDateFormat(v)
+          else if el$.hasClass('money')
+            v = "$#{@textRenderer.toFixed(v, 2)}"
           el$.val(v)
     )
 
-    @readonlyInputsCache.each((i, el) =>
-      el$ = $(el)
-      attribute_name = el$.data('name')
-      if (attribute_name? && @model.get(attribute_name)?)
-        v = @model.get(attribute_name)
-        if el$.hasClass('datetimepicker')
-          v = @toHumanReadableDateTimeFormat(attribute_name)
-        else if el$.hasClass('hasDatepicker')
-          v = @toHumanReadableDateFormat(attribute_name)
-        el$.find('.controls').text(v)
-    )
+    @copyReadOnlyFieldsToForm()
 
     _.each( @$('.put_action, .destroy'), (el) =>
       el$ = $(el)
@@ -648,6 +866,21 @@ class window.CrmModelView extends ModelBaseView
         else
           el$.addClass('disabled')
     )
+
+  startConfirmation: (e) ->
+    # we do this because type => button on the %button tag disables
+    # the rails UJS handling of the confirm event.
+    element = $(e.target)
+    message = element.data('confirm')
+
+    if !message?
+      return true
+
+    if ($.rails.fire(element, 'confirm'))
+      answer = $.rails.confirm(message);
+      callback = $.rails.fire(element, 'confirm:complete', [answer]);
+
+    return answer && callback
 
   revert: (e, answer) ->
     return false if @buttonsCache.filter(e.target).length == 0
@@ -678,6 +911,9 @@ class window.CrmModelView extends ModelBaseView
     @renderErrors(@model.validationError) if @model.validationError?
 
   clearErrors: (changedAttributesw) ->
+
+    @$('.errors').hide() # full messages
+
     toFix = @inputsCache
 
     if arguments.length > 0 and changedAttributes?
@@ -689,16 +925,28 @@ class window.CrmModelView extends ModelBaseView
         .find('span.help-inline').remove()
 
 
+  renderFullMessages: (response) ->
+    s = ""
+    _.chain(response.full_messages).filter((m) ->
+      /\w/.test(m)
+    ).each((m) ->
+      s = "#{s} #{m}"
+      s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
+    )
+    @$('.errors').text(s).show()
+
   onError: (model, xhr, options) ->
+    ModelBaseView.prototype.onError.apply(@, arguments)
     response = jQuery.parseJSON( xhr.responseText )
     @clearErrors()
+    @renderFullMessages(response)
     @renderErrors(response.errors)
 
   noSubmit: (e) ->
     false
 
-  onRequest: (e) ->
-
+  onRequest: (model, xhr, options) ->
+    ModelBaseView.prototype.onRequest.apply(@, arguments)
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
@@ -755,11 +1003,9 @@ class window.SingleModelAppView extends WithChildrenView
     @modelShowContainer.append(@modelView.render().el) if @modelShowContainer? && @modelShowContainer.length > 0 && !$.contains( @modelShowContainer.get(0), @modelView.el)
 
   #
-  # Become the parent of the view and show it.
+  # Become the parent of a view.
   #
-  # It's possible to show a view before this view has been rendered.
-  #
-  show: (view) ->
+  husband: (view) ->
     if !@modelView?
       @modelView = view
       @modelView.parent = @
@@ -768,6 +1014,13 @@ class window.SingleModelAppView extends WithChildrenView
       @modelView = view
       @modelView.parent = @
 
+  #
+  # Become the parent of the view and show it.
+  #
+  # It's possible to show a view before this view has been rendered.
+  #
+  show: (view) ->
+    @husband(view)
     @showModelView()
 
   render: () ->
@@ -782,9 +1035,11 @@ class window.SingleModelAppView extends WithChildrenView
 class window.SearchAndListView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
-    @events =
+
+    @events = $.extend(@events,
       'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
+    )
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)

@@ -1,0 +1,18 @@
+api_key: sk_test_SoDXR6QkygrYnlnFhDWKNbB2
+values:
+  :id: sub_5YsMBio0yTogO3
+  :object: subscription
+  :start: <%= subscription_start.to_i %>
+  :status: trialing
+  :customer: <%= customer_profile_id %>
+  :cancel_at_period_end: false
+  :current_period_start: <%= subscription_start.to_i %>
+  :current_period_end: <%= (subscription_start + 1.month).to_i %>
+  :ended_at: 
+  :trial_start: <%= trial_end_timestamp ? subscription_start.to_i : nil %>
+  :trial_end: <%= trial_end_timestamp ? trial_end_timestamp : nil %>
+  :canceled_at: 
+  :quantity: 1
+  :application_fee_percent: 
+  :discount: 
+  :tax_percent: 

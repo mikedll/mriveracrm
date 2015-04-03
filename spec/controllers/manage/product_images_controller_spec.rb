@@ -17,7 +17,7 @@ describe Manage::ProductImagesController do
       post :create, {:format => "json", :product_id => @product.id, :data => file}
       @product.images.count.should == 1
 
-      Image.count.should == 1      
+      Image.count.should == 1
     end
 
     it "should be able to make a product_image primary" do

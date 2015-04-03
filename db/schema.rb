@@ -11,13 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20140721015616) do
-
-  create_table "beta_testers", :force => true do |t|
-    t.string   "email"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-  end
+ActiveRecord::Schema.define(:version => 20150403122215) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -36,6 +30,7 @@ ActiveRecord::Schema.define(:version => 20140721015616) do
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
     t.string   "google_analytics_id",             :default => "",    :null => false
+    t.integer  "default_mfe_id",                  :default => 0,     :null => false
   end
 
   create_table "clients", :force => true do |t|
@@ -97,6 +92,36 @@ ActiveRecord::Schema.define(:version => 20140721015616) do
     t.string   "role",        :default => "", :null => false
   end
 
+  create_table "feature_pricings", :force => true do |t|
+    t.integer  "feature_id",                                :default => 0,   :null => false
+    t.decimal  "price",      :precision => 10, :scale => 2, :default => 0.0, :null => false
+    t.integer  "generation",                                :default => 0,   :null => false
+    t.datetime "created_at",                                                 :null => false
+    t.datetime "updated_at",                                                 :null => false
+  end
+
+  create_table "feature_provisions", :force => true do |t|
+    t.integer  "feature_id",             :default => 0, :null => false
+    t.integer  "marketing_front_end_id", :default => 0, :null => false
+    t.datetime "created_at",                            :null => false
+    t.datetime "updated_at",                            :null => false
+  end
+
+  create_table "feature_selections", :force => true do |t|
+    t.integer  "feature_id",            :default => 0, :null => false
+    t.integer  "usage_subscription_id", :default => 0, :null => false
+    t.datetime "created_at",                           :null => false
+    t.datetime "updated_at",                           :null => false
+  end
+
+  create_table "features", :force => true do |t|
+    t.integer  "bit_index",   :default => 0,  :null => false
+    t.string   "name",        :default => "", :null => false
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
+    t.string   "public_name", :default => "", :null => false
+  end
+
   create_table "images", :force => true do |t|
     t.string   "data"
     t.integer  "project_id"
@@ -132,6 +157,14 @@ ActiveRecord::Schema.define(:version => 20140721015616) do
     t.string   "pdf_file_original_filename"
   end
 
+  create_table "lifecycle_notifications", :force => true do |t|
+    t.integer  "business_id", :default => 0,  :null => false
+    t.string   "identifier",  :default => "", :null => false
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
+    t.text     "body",        :default => "", :null => false
+  end
+
   create_table "marketing_front_ends", :force => true do |t|
     t.string   "title",                       :default => "", :null => false
     t.string   "host",                        :default => "", :null => false
@@ -151,13 +184,18 @@ ActiveRecord::Schema.define(:version => 20140721015616) do
 
   create_table "payment_gateway_profiles", :force => true do |t|
     t.string   "type"
-    t.integer  "client_id"
+    t.integer  "payment_gateway_profilable_id"
     t.string   "vendor_id"
     t.string   "card_profile_id"
     t.string   "card_last_4"
     t.string   "card_brand"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.string   "payment_gateway_profilable_type", :default => "", :null => false
+    t.datetime "stripe_trial_ends_at"
+    t.datetime "stripe_current_period_ends_at"
+    t.string   "stripe_plan",                     :default => ""
+    t.string   "stripe_status",                   :default => ""
   end
 
   create_table "product_images", :force => true do |t|
@@ -191,6 +229,14 @@ ActiveRecord::Schema.define(:version => 20140721015616) do
     t.integer  "business_id"
   end
 
+  create_table "settings", :force => true do |t|
+    t.string   "key",        :default => "",       :null => false
+    t.string   "value",      :default => "",       :null => false
+    t.string   "value_type", :default => "String", :null => false
+    t.datetime "created_at",                       :null => false
+    t.datetime "updated_at",                       :null => false
+  end
+
   create_table "transactions", :force => true do |t|
     t.integer  "invoice_id"
     t.integer  "payment_gateway_profile_id"
@@ -205,6 +251,13 @@ ActiveRecord::Schema.define(:version => 20140721015616) do
     t.string   "type",                                                                                      :null => false
     t.string   "outside_id"
     t.string   "outside_vendor"
+  end
+
+  create_table "usage_subscriptions", :force => true do |t|
+    t.integer  "business_id", :default => 0, :null => false
+    t.integer  "generation",  :default => 0, :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
   end
 
   create_table "users", :force => true do |t|

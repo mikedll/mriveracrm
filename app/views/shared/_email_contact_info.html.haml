@@ -1,0 +1,9 @@
+%p
+  - if defined?(sincerely) && sincerely != false
+    Sincerely,
+    %br
+  Michael Rivera
+  %br
+  mrivera@michaelriveraco.com
+  %br
+  = link_to "#{business.default_mfe.title}", root_url(:host => business.default_mfe.host)

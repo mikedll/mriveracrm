@@ -1,0 +1,18 @@
+
+%p
+  Hi 
+  = "#{@us.business.an_owner.first_name},"
+
+%p
+  Your
+  = "#{@us.business.default_mfe.title}"
+  subscription is no longer active.  You may login and check your
+  "Billing" page to update payment and plan information to activate it.
+  Features will no longer function until you do.
+
+%p
+  You may ignore this message if you no longer want to use the product.
+
+= render :partial => 'shared/email_contact_info', :locals => { :business => @us.business }
+
+

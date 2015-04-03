@@ -1,5 +1,8 @@
 class Manage::BusinessesController < Manage::BaseController
 
+  skip_before_filter :require_active_plan
+  before_filter :_can_manage_current_object
+
   make_resourceful do
     actions :show, :update, :destroy
 
@@ -56,12 +59,22 @@ class Manage::BusinessesController < Manage::BaseController
     else
       save_failed!
       after :update_fails
-      response_for :update_fails     
+      response_for :update_fails
     end
   end
 
   def object_parameters
     [] # too worried about mass assignment
+  end
+
+  protected
+
+  def _require_business_support
+    true
+  end
+
+  def _can_manage_current_object
+    authorize! :manage, current_object
   end
 
 end

@@ -2,10 +2,10 @@ class User < ActiveRecord::Base
 
   include ActionView::Helpers::TranslationHelper
 
-  attr_accessor :use_google_oauth_registration, :conflicting_invitation
+  attr_accessor :use_google_oauth_registration, :conflicting_invitation, :tos_agreement
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration
+  attr_accessible :email, :password, :password_confirmation, :remember_me, :first_name, :last_name, :use_google_oauth_registration, :tos_agreement
 
   belongs_to :business
   belongs_to :employee
@@ -26,7 +26,7 @@ class User < ActiveRecord::Base
   validates :password, :length => { :minimum => 8 }, :if => lambda { |u| !u.new_oauthed_user? && u.credentials.empty?  }
   validates_confirmation_of :password, :if => lambda { |u| u.credentials.empty? }
   validate :_employee_or_client
-  validate :_is_beta_tester
+  validate :_agrees_to_tos, :if => :new_record?
 
   #
   # CHECK THIS OUT; ISNT WORKING RIGHT.
@@ -34,6 +34,16 @@ class User < ActiveRecord::Base
   # validates :employee_id, :uniqueness => { :message => "is already associated with another user" }
 
   before_save :_create_new_business_if_necessary
+
+  after_save :_notify_subscription, :if => lambda { |r|
+    r.employee && r.employee.owner? &&
+
+    # confirmed with non-oauth login
+    ((!r.new_record? && r.confirmed_at_changed? && !confirmed_at.nil?) ||
+
+      # immediately confirmed with new business via oauth
+      (r.new_record? && r.business_id_changed?))
+  }
 
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
@@ -44,11 +54,7 @@ class User < ActiveRecord::Base
     return user if user
 
     # does not exist. require open invite.
-    invitation = if cb.first
-                   Invitation.cb.open.find_by_email auth[:info][:email]
-                 else
-                   nil
-                 end
+    invitation = Invitation.cb.open.find_by_email auth[:info][:email].downcase
     if invitation
       # invited user
       user = if current_user.nil?
@@ -60,13 +66,13 @@ class User < ActiveRecord::Base
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return user if !invitation.accept_user!(user) # credential likely is already in use for this business
     elsif current_user.nil? && cb.first.nil?
-      invitation = Invitation.handled.open.find_by_email auth[:info][:email]
+      invitation = Invitation.handled.open.find_by_email auth[:info][:email].downcase
       if invitation
         user = User.new_from_auth(auth[:info])
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
         return nil if !invitation.accept_user!(user)
       else
-        u = User.new
+        u = User.new(:tos_agreement => true)
         u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
         return u
       end
@@ -75,7 +81,7 @@ class User < ActiveRecord::Base
       # invitation or new business. why? log him out.
       return nil
     else
-      u = User.new
+      u = User.new(:tos_agreement => true)
       u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
       return u
     end
@@ -85,6 +91,7 @@ class User < ActiveRecord::Base
 
   def self.new_from_auth(info)
     user = new
+    user.tos_agreement = true
     user.email = info[:email]
     user.first_name = info[:first_name]
     user.last_name = info[:last_name]
@@ -120,6 +127,10 @@ class User < ActiveRecord::Base
     @use_google_oauth_registration = ActiveRecord::ConnectionAdapters::Column.value_to_boolean(value)
   end
 
+  def tos_agreement=(value)
+    @tos_agreement = ActiveRecord::ConnectionAdapters::Column.value_to_boolean(value)
+  end
+
   def new_oauthed_user?
     new_record? && use_google_oauth_registration
   end
@@ -149,13 +160,13 @@ class User < ActiveRecord::Base
     if employee && employee.business && (employee.business.new_record? || employee.business.changed?) && (!employee.business.errors.empty? || !employee.business.save)
       errors.add(:base, I18n.t('users.new_business_failed'))
       employee.business.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.business')}: #{m}") }
-      return
+      return false
     end
 
     if employee && (employee.new_record? || employee.changed?) && (!employee.errors.empty? && !employee.save)
       employee.errors.full_messages.each { |m| errors.add(:base, "#{I18n.t('activemodel.models.employee')}: #{m}") }
       errors.add(:base, I18n.t('users.new_business_employee_failed'))
-      return
+      return false
     end
   end
 
@@ -163,10 +174,15 @@ class User < ActiveRecord::Base
     self.use_google_oauth_registration = true if new_record? && self.use_google_oauth_registration.nil?
   end
 
-  def _is_beta_tester
-    if new_record? && employee && employee.role == Employee::Roles::OWNER && BetaTester.find_by_email(email).nil?
-      errors.add(:email, t("invitation.errors.email_not_beta_tester"))
-    end
+  protected
+
+  def _agrees_to_tos
+    errors.add(:base, I18n.t('user.errors.tos_agreement_required')) if !tos_agreement
+  end
+
+  def _notify_subscription
+    employee.business.usage_subscription.reload # trial is inserted into the db on post-create hook.
+    employee.business.usage_subscription.notify_signup!
   end
 
 end

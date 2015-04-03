@@ -38,7 +38,7 @@ describe Invitation do
   context "accept" do
     it "should move invitation from available to accepted" do
       invitation = FactoryGirl.create(:client_invitation)
-      user = FactoryGirl.create(:employee_user)
+      user = FactoryGirl.create(:client_user)
       invitation.accept_user!(user)
       invitation.accepted?.should be_true
     end
@@ -46,8 +46,9 @@ describe Invitation do
     it "should be able to create a business" do
       Business.first.should be_nil
       invitation = FactoryGirl.create(:new_business_invitation)
-      u = FactoryGirl.build(:user_base)
+      u = FactoryGirl.build(:user_base, :email => invitation.email)
       u.business.should be_nil
+
       invitation.accept_user!(u).should be_true
       u.business.should_not be_nil
       b = Business.first
