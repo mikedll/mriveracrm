@@ -1,0 +1,12 @@
+
+- content_for :head do
+  - if apps_configuration[:manage]
+    = javascript_include_tag 'manage'
+
+.gui-container.container-fluid
+  .app-gui{:class => ["#{apps_configuration[:app_class]}-gui ", (apps_configuration[:multiplicity] == 'single' ? 'single-model' : nil)].compact}
+    = render :partial => 'shared/app', :locals => apps_configuration
+
+.templates.hide
+  - apps_configuration[:model_templates].each do |klass|
+    %div{ :class => "#{klass.to_s.underscore}_view_example"}

@@ -8,13 +8,7 @@ class Manage::SeoRankerController < Manage::BaseController
     actions :show
 
     response_for(:show) do |format|
-      format.html do
-        apps_configuration.merge!({
-            :multiplicity => 'single',
-            :bootstrap => rendered_current_object
-          })
-        render :partial => "shared/app_container", :locals => apps_configuration
-      end
+      format.html { render :template => "app_container" }
       format.json { render :json => rendered_current_object }
     end
   end
@@ -26,6 +20,10 @@ class Manage::SeoRankerController < Manage::BaseController
   def show
     current_object.rank!
     super
+    apps_configuration.merge!({
+        :multiplicity => 'single',
+        :bootstrap => rendered_current_object
+      })
   end
 
   protected
