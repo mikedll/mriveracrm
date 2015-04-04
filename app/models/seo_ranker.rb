@@ -1,5 +1,6 @@
 class SeoRanker
   include ActiveModel::Serializers::JSON
+  self.include_root_in_json = false
 
   attr_accessor :results
 
