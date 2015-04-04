@@ -616,6 +616,7 @@ class window.CrmModelView extends ModelBaseView
       'confirm:complete .btn.destroy': 'destroy'
       'confirm:complete .btn.put_action': 'putActionConfirmed'
       'click .btn.put_action:not([data-confirm])': 'putAction'
+      'click .refresh': 'refresh'
     )
 
     @parent = options.parent
@@ -644,6 +645,9 @@ class window.CrmModelView extends ModelBaseView
   putActionConfirmed: (e, answer) ->
     return false if @buttonsCache.filter(e.target).length == 0
     @putAction(e) if answer
+
+  refresh: () ->
+    @model.fetch()
 
   onDestroy: () ->
     @removeDom()
