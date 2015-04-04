@@ -208,6 +208,7 @@ GEM
       jruby-pageant (>= 1.1.1)
     net-ssh-gateway (1.1.0)
       net-ssh (>= 1.99.1)
+    netrc (0.7.9)
     nokogiri (1.5.5)
     oauth2 (0.8.1)
       faraday (~> 0.8)
@@ -267,6 +268,8 @@ GEM
     rest-client (1.6.8)
       mime-types (~> 1.16)
       rdoc (>= 2.4.2)
+    rest_client (1.8.3)
+      netrc (~> 0.7.7)
     right_aws (3.1.0)
       right_http_connection (>= 1.2.5)
     right_http_connection (1.4.0)
@@ -384,6 +387,7 @@ DEPENDENCIES
   haml-rails
   jquery-rails (~> 2.1)
   make_resourceful
+  nokogiri
   omniauth
   omniauth-google-oauth2
   pg (~> 0.11)
@@ -391,6 +395,7 @@ DEPENDENCIES
   rake (>= 10.0.0)
   rb-inotify
   rest-client
+  rest_client
   right_aws
   rmagick
   rspec-rails
