@@ -355,6 +355,12 @@ class window.BaseView extends Backbone.View
       return false
     return true
 
+  notifyRequestStarted: (e) ->
+    @parent.notifyRequestStarted() if @parent?
+
+  notifyRequestCompleted: (e) ->
+    @parent.notifyRequestCompleted() if @parent?
+
 class window.ModelBaseView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
@@ -378,13 +384,18 @@ class window.ModelBaseView extends BaseView
     if @model.isRequesting()
       @$('.save').addClass('disabled')
       @$('.revert').addClass('disabled')
+      @notifyRequestStarted()
 
   onSync: (model, resp, options) ->
-    @resolveButtonAvailability() if !@model.isRequesting()
+    if !@model.isRequesting()
+      @resolveButtonAvailability()
+      @notifyRequestCompleted()
     @dirtyRegistration()
 
   onError: (model, resp, options) ->
-    @resolveButtonAvailability() if !@model.isRequesting()
+    if !@model.isRequesting()
+      @resolveButtonAvailability()
+      @notifyRequestCompleted()
 
   resolveButtonAvailability: () ->
     if @model.isDirty()
@@ -1293,8 +1304,6 @@ class window.StackedChildrenView extends WithChildrenView
     @children = []
     @dirtyModels = []
     @eventHotKeys = new EventHotKeys()
-    $(document).ajaxStart(() => @toBusy())
-    $(document).ajaxStop(() => @toNotBusy())
 
     @transforms =
       out:
@@ -1344,9 +1353,15 @@ class window.StackedChildrenView extends WithChildrenView
     return if @children.length == 0
     @children[ @children.length - 1].$('.spinner-container').show()
 
+  notifyRequestStarted: () ->
+    @toBusy()
+
   toNotBusy: () ->
     return if @children.length == 0
     @children[ @children.length - 1].$('.spinner-container').hide()
+
+  notifyRequestCompleted: () ->
+    @toNotBusy()
 
   childViewPushed: (view) ->
     if @children.length > 0
