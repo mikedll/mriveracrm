@@ -34,7 +34,7 @@ Fix any bugs. Do assets compilation and deploy, if assets have changed.
 
 Commit manifest.
 
-    # whatever you git commit manuver is
+    # whatever your git commit maneuver is
     g add public/assets/manifest.yml
     g ci -m "Updated manifest."
     
