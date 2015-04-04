@@ -116,6 +116,12 @@ class window.BaseModel extends Backbone.Model
 
     @dumpOnChange = false
 
+  url: () ->
+    if typeof(@urlFragment) != "undefined"
+      gUrlManager.url(@urlFragment)
+    else
+      Backbone.Model.prototype.url.apply(@, arguments)
+
   isDirty: () ->
     return @_isDirty
 

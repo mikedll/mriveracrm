@@ -1,0 +1,16 @@
+
+= simple_form_for :seo_ranker, :remote => true, :html => { :class => 'form-horizontal' } do |f|
+
+  .control-group
+    .control-label
+      SEO Result:
+    .controls
+      .read-only-field{ :data => { :name => 'seo_ranker[results]' } }
+
+  .control-group
+    .controls
+      .btn-group
+        %a.btn.refresh
+          Refresh
+
+

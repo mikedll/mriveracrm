@@ -55,7 +55,7 @@ MikedllCrm::Application.routes.draw do
     resource :billing_settings, :only => [:show, :update]
     resource :business, :only => [:show, :update, :destroy]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
-
+    resource :seo_ranker, :controller => :seo_ranker, :only => [:show]
 
     resources :products do
       resources :product_images, :path => "images" do
@@ -155,7 +155,7 @@ MikedllCrm::Application.routes.draw do
       resource :billing_settings, :only => [:show, :update]
       resource :business, :only => [:show, :update, :destroy]
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
-
+      resource :seo_ranker, :controller => :seo_ranker, :only => [:show]
 
       resources :products do
         resources :product_images, :path => "images" do

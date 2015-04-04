@@ -25,7 +25,7 @@ class ApplicationController < ActionController::Base
 
   around_filter :business_keys
 
-  attr_accessor :current_business, :current_mfe
+  attr_accessor :current_business, :current_mfe, :apps_configuration
 
   def require_business_and_current_user_belongs_to_it
     if current_business.nil?
@@ -148,7 +148,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
   def force_www
     return if Rails.env.development? # Doesn't work with certain CRM addresses. Might not even keep this feature.
 
@@ -244,6 +243,22 @@ class ApplicationController < ActionController::Base
       flash[:error] = t('path_not_found')
       redirect_to root_path
     end
+  end
+
+  def _activate_apps
+    @apps_configuration ||= {
+      :app_top => false,
+      :app_class => '',
+      :title => "Application",
+      :model_templates => [],
+      :resource_multiplicity => 'multiple',
+      :manage => false
+    }
+  end
+
+  def _configure_app
+    # apps_configuration.merge!({})
+    Logger.warn "Override this in a sub class."
   end
 
 

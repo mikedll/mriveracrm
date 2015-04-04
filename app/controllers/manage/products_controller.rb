@@ -31,14 +31,6 @@ class Manage::ProductsController < Manage::BaseController
     {:include => { :product_images => { :include => :image } }}
   end
 
-  def rendered_current_objects
-    current_objects.to_json(json_config)
-  end
-
-  def rendered_current_object
-    current_object.to_json(json_config)
-  end
-
   def current_objects
     top_scope = current_model
     @current_objects ||= top_scope.order("updated_at DESC")

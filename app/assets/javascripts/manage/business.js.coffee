@@ -8,6 +8,8 @@ class window.Business extends BaseModel
       return {name: 'cannot be blank'}
     return
 
+  isNew: () ->
+    false
 
 class window.BusinessView extends CrmModelView
   modelName: 'business'

@@ -41,5 +41,9 @@ module ApplicationHelper
 
   end
 
+  def apps_configuration
+    @apps_configuration
+  end
+
 
 end
