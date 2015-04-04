@@ -21,7 +21,26 @@ Michael Rivera, also known as Mike De La Loza, Owner
   Future uses will allowed the Stack gui-container to have all kinds
   of creative animations, beyond what is shown here.
 
+# Creating a single resource in manage
 
+  1. Add any gem dependencies, especially for API fetches.
+  - Create a controller that implements at least show. You can render app_container.
+    Configure any object retrieval changes.
+  - Add routes.
+  - Create yourModel.js.coffee.
+  - Extend BaseModel with window.YourModel. Specify `urlSuffix`
+  with something. Override isNew to be false if you have a singleton model
+  - Extend and CrmModelView with window.YourModelView. Specific `modelName`
+  in the YourModelView with a *snake case* form of your model. Add any events
+  and attach them to buttons as needed.
+  - Add to manage.js. If you created this in the manage directory,
+  it'll automatically be picked up for you.
+  - Insert a bootstrapper in bootDetector.js.coffee.
+  - Add to _menu.html.haml, a Feature, feature default generation 0 price.
+  - Add controller and model specs.
+  - Add background scheduling support.
+  - Deploy. Migrate in your feature. Add to default MFE if necessary.
+    
 # Deploying to production
 
 Cut a release.
