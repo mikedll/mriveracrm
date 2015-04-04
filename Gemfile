@@ -30,7 +30,7 @@ gem 'cancan'
 gem 'excon', '>= 0.27.5'
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 gem "nokogiri"
-gem "rest_client"
+gem "rest-client"
 
 group :assets do
   gem 'yui-compressor'
