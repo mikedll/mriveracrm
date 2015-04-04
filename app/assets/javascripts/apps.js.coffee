@@ -415,13 +415,16 @@ class window.WithChildrenView extends BaseView
     @resizeView()
 
   resizeView: () ->
-    h = Math.max( 200, parseInt( $(window).height() * 0.8 ))
-    w = Math.max(200, parseInt( $(window).width() * 0.8 ))
+    h = Math.max(200, Math.round( $(window).height() * 0.8 ))
+    w = Math.max(200, Math.round( $(window).width() * 0.8 ))
     @$el.css(
       'height': h + "px"
       'width': w + "px"
       'margin-left': -(w / 2) + "px"
       'margin-top': -(h / 2) + "px"
+    )
+    @$('.models-list').css(
+      'height': Math.round(h * 0.8) + 'px'
     )
 
   disableWithShield: () ->
@@ -1146,8 +1149,8 @@ class window.CollectionAppView extends WithChildrenView
     @listenTo(@collection, 'error', @onError)
 
   resizeView: () ->
-    h = Math.max( 200, parseInt( $(window).height() * 0.8 ))
-    w = Math.max(200, parseInt( $(window).width() * 0.8 ))
+    h = Math.max(200, Math.round( $(window).height() * 0.8 ))
+    w = Math.max(200, Math.round( $(window).width() * 0.8 ))
     @$el.css(
       'height': h + "px"
       'width': w + "px"
