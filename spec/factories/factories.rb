@@ -314,4 +314,8 @@ FactoryGirl.define do
     marketing_front_end
   end
 
+  factory :seo_ranker do
+    search_phrase { "admitting unhappiness" }
+    name { generate(:random_name) }
+  end
 end

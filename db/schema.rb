@@ -31,6 +31,7 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.text     "contact_text",                    :default => "",    :null => false
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
     t.string   "google_public_api_key",           :default => "",    :null => false
+    t.string   "google_analytics_id",             :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
@@ -227,6 +228,17 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "business_id"
+  end
+
+  create_table "seo_rankers", :force => true do |t|
+    t.string   "name",                      :default => "", :null => false
+    t.datetime "last_window_started_at",                    :null => false
+    t.integer  "runs_since_window_started", :default => 0,  :null => false
+    t.string   "search_phrase",             :default => "", :null => false
+    t.string   "search_engine",             :default => "", :null => false
+    t.integer  "ranking",                   :default => 0,  :null => false
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
   end
 
   create_table "settings", :force => true do |t|
