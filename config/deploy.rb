@@ -25,9 +25,15 @@ namespace :deploy do
   task :configs do
     run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     run "ln -nfs #{shared_path}/config/credentials.yml #{release_path}/config/credentials.yml"
+    run "ln -nfs #{shared_path}/config/redis.conf #{release_path}/config/redis.conf"
     run "ln -nfs #{shared_path}/sockets #{release_path}/tmp/sockets"
     run "ln -nfs #{shared_path}/pdfs #{release_path}/tmp/pdfs"
   end
+
+  task :install_configs, :roles => [:web] do
+    put File.read("config/redis.conf"), "{shared_path}/config/redis.conf"
+  end
+
 end
 
 task :production do
