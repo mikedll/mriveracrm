@@ -22,7 +22,9 @@ class SeoRanker < ActiveRecord::Base
 
   def rank!
     return if !runnable?
+  end
 
+  def rank_remote
     self.ranking = 3
   end
 
