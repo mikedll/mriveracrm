@@ -1,6 +1,10 @@
 class GeneralWorker
   extend ActiveModel::Naming
 
+  module Queues
+    DEFAULT = 'default'
+  end
+
   attr_accessor :id, :invoked_method
 
   class << self
@@ -8,7 +12,7 @@ class GeneralWorker
       o = new
       o.id = obj.id
       o.invoked_method = invoked_method
-      Resque.push('general', o)
+      Resque.push(Queues::DEFAULT, o)
     end
   end
 
