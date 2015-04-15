@@ -2,7 +2,7 @@ class GeneralWorker
   extend ActiveModel::Naming
 
   module Queues
-    DEFAULT = 'default'
+    DEFAULT = :default
   end
 
   attr_accessor :id, :invoked_method
@@ -12,8 +12,18 @@ class GeneralWorker
       o = new
       o.id = obj.id
       o.invoked_method = invoked_method
-      Resque.push(Queues::DEFAULT, o)
+      Resque.enqueue_to(Queues::DEFAULT, o.class, o)
     end
+  end
+
+  #
+  # Resque is supposed to do this already but it doesn't.
+  # development is apparently delayed on that front.
+  #
+  def self.perform(*args)
+    job = new
+    args.first.each {|k, v| job.instance_variable_set("@#{k}", v) }
+    job.work
   end
 
   def work
@@ -25,7 +35,7 @@ class GeneralWorker
     return @obj_found if @obj_found
 
     fully_qualified_name = self.class.to_s
-    klass_container = fully_qualified_name.sub(Regexp.new("::#{fully_qualified_name.demodulize}$", ''))
+    klass_container = fully_qualified_name.gsub(Regexp.new("::#{fully_qualified_name.demodulize}$"), '')
     return nil if klass_container.blank?
 
     containing_klass = klass_container.constantize
