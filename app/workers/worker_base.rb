@@ -1,4 +1,4 @@
-class GeneralWorker
+class WorkerBase
   extend ActiveModel::Naming
 
   module Queues

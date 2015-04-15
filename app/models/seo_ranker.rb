@@ -17,7 +17,7 @@ class SeoRanker < ActiveRecord::Base
 
   MAX_RUNS_PER_WINDOW = 10
 
-  class Worker < GeneralWorker
+  class Worker < WorkerBase
   end
 
   def runnable?
