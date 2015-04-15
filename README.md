@@ -45,6 +45,10 @@ Start resque worker
   - Extend and CrmModelView with window.YourModelView. Specific `modelName`
   in the YourModelView with a *snake case* form of your model. Add any events
   and attach them to buttons as needed.
+  - If you're making a collection, extend CollectionAppView and define
+  `modelName`, `modelNamePlural`, `spawnListItemType`, and `title`.
+  Extend ListItemView and define `modelName`, `spawnViewType`, `className`,
+  and a `title` method. `className` should retain the `list-item` class.
   - Add to manage.js. If you created this in the manage directory,
   it'll automatically be picked up for you.
   - Insert a bootstrapper in bootDetector.js.coffee.
