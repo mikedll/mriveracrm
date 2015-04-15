@@ -9,7 +9,7 @@ Bundler.require(:default, Rails.env) if defined?(Bundler)
 module MikedllCrm
   class Application < Rails::Application
 
-    config.autoload_paths += %W( #{Rails.root}/app/observers #{Rails.root}/app/uploaders )
+    config.autoload_paths += %W( #{Rails.root}/app/observers #{Rails.root}/app/uploaders #{Rails.root}/app/workers)
 
     config.time_zone = "Pacific Time (US & Canada)"
 
