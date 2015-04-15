@@ -20,7 +20,7 @@ class Manage::BaseController < ApplicationController
 
     response_for(:index) do |format|
       format.html do
-        apps_configuration.merge!(:bootstrap => rendered_current_object)
+        apps_configuration.merge!(:bootstrap => rendered_current_objects)
         render :template => "app_container"
       end
       format.json { render :json => rendered_current_objects }
@@ -28,7 +28,10 @@ class Manage::BaseController < ApplicationController
 
     response_for(:show) do |format|
       format.html do
-        apps_configuration.merge!(:bootstrap => rendered_current_object)
+        apps_configuration.merge!({
+            :bootstrap => rendered_current_object,
+            :app_class => apps_configuration[:app_class].underscore.camelize.singularize.underscore.dasherize # thank you
+        })
         render :template => "app_container"
       end
       format.json { render :json => rendered_current_object }

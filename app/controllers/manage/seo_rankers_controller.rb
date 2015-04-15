@@ -30,10 +30,10 @@ class Manage::SeoRankersController < Manage::BaseController
 
   def _configure_apps
     apps_configuration.merge!({
-        :app_top => false,
-        :app_class => 'seo-ranker',
-        :title => "SEO Ranker"
-        # :model_templates => [SeoRanker]
+        :app_top => true,
+        :app_class => 'seo-rankers',
+        :title => "SEO Ranker",
+        :model_templates => [::SeoRanker]
       })
   end
 
