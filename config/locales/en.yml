@@ -39,6 +39,7 @@ en:
 
   seo_ranker:
     run_confirm: "Are you sure you want to run this ranker?"
+    parse_error: "An error occurred while processing the search. This may be a programming error that needs engineering. Please contact support if this problem persists."
 
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"

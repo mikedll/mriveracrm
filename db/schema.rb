@@ -31,8 +31,6 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.text     "contact_text",                    :default => "",    :null => false
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
     t.string   "google_public_api_key",           :default => "",    :null => false
-    t.string   "google_analytics_id",             :default => "",    :null => false
-    t.string   "google_public_api_key",           :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
@@ -241,6 +239,10 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.integer  "ranking",                   :default => 0,  :null => false
     t.datetime "created_at",                                :null => false
     t.datetime "updated_at",                                :null => false
+    t.string   "host_to_match",             :default => "", :null => false
+    t.string   "last_error",                :default => "", :null => false
+    t.string   "matching_url",              :default => "", :null => false
+    t.string   "matching_title",            :default => "", :null => false
   end
 
   create_table "settings", :force => true do |t|

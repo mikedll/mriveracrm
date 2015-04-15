@@ -5,6 +5,8 @@
 
   = f.input :search_phrase
 
+  = f.input :host_to_match
+
   .control-group
     .control-label
       %label
@@ -25,6 +27,20 @@
         Search Engine
     .controls
       .read-only-field{ :data => { :name => 'seo_ranker[search_engine]' } }
+
+  .control-group
+    .control-label
+      %label
+        Matching URL:
+    .controls
+      .read-only-field{ :data => { :name => 'seo_ranker[matching_url]' } }
+
+  .control-group
+    .control-label
+      %label
+        Last Error:
+    .controls
+      .read-only-field{ :data => { :name => 'seo_ranker[last_error]' } }
 
   .control-group
     .controls

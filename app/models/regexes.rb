@@ -8,4 +8,6 @@ module Regexes
   ZIP = /[\-0-9]+/
 
   HOST = /\A[A-Za-z0-9-]+\.[A-Za-z0-9-]+(\.[A-Za-z0-9-]+)*\z/
+
+  PROTOCOL = /\Ahttp(s)?/
 end
