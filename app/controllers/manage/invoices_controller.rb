@@ -2,7 +2,9 @@ class Manage::InvoicesController < Manage::BaseController
 
   make_resourceful do
     actions :index, :show, :update, :create, :destroy
+    member_actions :mark_pending, :regenerate_pdf, :cancel, :charge, :mark_paid
     belongs_to :client
+
     response_for :new do
       render :layout => nil
     end
@@ -26,7 +28,6 @@ class Manage::InvoicesController < Manage::BaseController
   end
 
   def mark_pending
-    load_object
     if current_object.update_attributes(object_parameters)
       if current_object.mark_pending!
         response_for :update
@@ -39,7 +40,6 @@ class Manage::InvoicesController < Manage::BaseController
   end
 
   def regenerate_pdf
-    load_object
     if current_object.regenerate_pdf
       response_for :update
     else
@@ -48,7 +48,6 @@ class Manage::InvoicesController < Manage::BaseController
   end
 
   def cancel
-    load_object
     if current_object.cancel!
       response_for :update
     else
@@ -57,7 +56,6 @@ class Manage::InvoicesController < Manage::BaseController
   end
 
   def charge
-    load_object
     if current_object.charge!
       response_for :update
     else
