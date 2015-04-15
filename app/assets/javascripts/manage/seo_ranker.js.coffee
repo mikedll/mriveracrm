@@ -6,7 +6,7 @@ class window.SeoRankerView extends CrmModelView
 
 class window.SeoRankers extends BaseCollection
   model: SeoRanker
-  urlFragement: '/manage/seo_rankers'
+  urlFragment: '/manage/seo_rankers'
 
 class window.SeoRankerListItemView extends ListItemView
   modelName: 'seo_ranker'
