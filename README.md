@@ -33,11 +33,12 @@ Start resque worker
   Future uses will allowed the Stack gui-container to have all kinds
   of creative animations, beyond what is shown here.
 
-# Creating a single resource in manage
+# Creating Features
 
   1. Add any gem dependencies, especially for API fetches.
-  - Create a controller that implements at least show. You can render app_container.
-    Configure any object retrieval changes.
+  - Create a controller with make_resourceful actions, member_actions, and belongs_to.
+  Setup `object_parameters`, `parent_name`, `parent_object`, `business_support`
+  by feature and any plan requirement. Configure the controller with a model.
   - Add routes.
   - Create yourModel.js.coffee.
   - Extend BaseModel with window.YourModel. Specify `urlSuffix`
