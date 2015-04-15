@@ -250,6 +250,7 @@ class ApplicationController < ActionController::Base
       :app_top => false,
       :app_class => '',
       :title => "Application",
+      :multiplicity => plural_action? ? 'plural' : 'single',
       :model_templates => [],
       :resource_multiplicity => 'multiple',
       :manage => false
