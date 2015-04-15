@@ -32,6 +32,7 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
     t.string   "google_public_api_key",           :default => "",    :null => false
     t.string   "google_analytics_id",             :default => "",    :null => false
+    t.string   "google_public_api_key",           :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|

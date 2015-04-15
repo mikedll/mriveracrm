@@ -1,13 +1,13 @@
 
-= simple_form_for :business, :remote => true, :url => manage_business_path, :html => { :class => 'form-horizontal' } do |f|
+= simple_form_for :business, :url => manage_business_path, :html => { :class => 'form-horizontal' } do |f|
 
   = f.input :name
   = f.input :stripe_secret_key
   = f.input :stripe_publishable_key
-  = f.input :google_oauth2_client_id
+  = f.input :google_oauth2_client_id, :hint => t('business.oauth2_fields')
   = f.input :google_oauth2_client_secret
 
-  = f.input :splash_html, :as => :text
+  = f.input :splash_html, :as => :text, :label => "Homepage Splash Text"
 
   = render :partial => 'shared/model_view_basic_buttons'
   = render :partial => 'shared/model_view_delete_button', :locals => { :data => { :confirm => t('business.confirm_delete') } }

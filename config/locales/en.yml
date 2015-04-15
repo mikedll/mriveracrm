@@ -48,6 +48,9 @@ en:
     signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
     mfe_host_conflict: is not available.
+    google_public_api_key: "This is not used yet."
+    oauth2_fields: "This and the client secret allow visitors (clients, employees, etc) to login to your business website without creating a username and password. They can use Google's OAuth login feature."
+    google_analytics_id: "No need to modify HTML. Simply give us your Google Anlytics key and we'll insert it into every one of your pages for you."
     errors:
       handle_format: can only contain letters and numbers
       inactive_plan_internal: "Your business's subscription is not active. See the Billing page to rectify this."
