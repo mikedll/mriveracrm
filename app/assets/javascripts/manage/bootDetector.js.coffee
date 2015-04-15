@@ -23,8 +23,7 @@ $(() ->
       modelViewKlass: StatusMonitorView
       rootAppViewKlass: SingleModelAppView
     '.seo-rankers-gui':
-      modelKlass: SeoRanker
-      modelViewKlass: SeoRankerView
+      modelCollectionKlass: SeoRankers
       rootAppViewKlass: SeoRankerAppView
 
   lazyGetBootstrap = (selector) ->
