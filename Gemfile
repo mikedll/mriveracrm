@@ -31,7 +31,7 @@ gem 'excon', '>= 0.27.5'
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 gem "nokogiri"
 gem "rest-client"
-gem "sidekiq"
+gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
 
 group :assets do
   gem 'yui-compressor'

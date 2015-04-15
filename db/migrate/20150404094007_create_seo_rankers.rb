@@ -1,6 +1,7 @@
 class CreateSeoRankers < ActiveRecord::Migration
   def up
     create_table :seo_rankers do |t|
+      t.integer  :business_id,               :null => false
       t.string   :name,                      :null => false, :default => ""
       t.datetime :last_window_started_at,    :null => false
       t.integer  :runs_since_window_started, :null => false, :default => 0

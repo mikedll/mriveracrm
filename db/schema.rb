@@ -231,6 +231,7 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
   end
 
   create_table "seo_rankers", :force => true do |t|
+    t.integer  "business_id",                               :null => false
     t.string   "name",                      :default => "", :null => false
     t.datetime "last_window_started_at",                    :null => false
     t.integer  "runs_since_window_started", :default => 0,  :null => false

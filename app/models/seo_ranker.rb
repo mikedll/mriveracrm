@@ -6,15 +6,19 @@ class SeoRanker < ActiveRecord::Base
 
   SEARCH_ENGINES = SearchEngines.constants.map { |c| SeoRanker::SearchEngines.const_get(c) }
 
-  belongs_to :business
+  belongs_to :business, :inverse_of => :seo_rankers
 
   before_validation :_defaults, :if => :new_record?
 
+  validates :business_id, :presence => true
   validates :name, :presence => true
   validates :search_phrase, :presence => true, :length => { :minimum => 3 }
   validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
 
   MAX_RUNS_PER_WINDOW = 10
+
+  class Worker < GeneralWorker
+  end
 
   def runnable?
     runs_since_window_started < MAX_RUNS_PER_WINDOW
@@ -22,10 +26,12 @@ class SeoRanker < ActiveRecord::Base
 
   def rank!
     return if !runnable?
+    Worker.obj_enqueue(self, :rank_background)
   end
 
-  def rank_remote
+  def rank_background
     self.ranking = 3
+    save!
   end
 
   def reset_window
