@@ -1,28 +1,21 @@
 class Manage::BusinessesController < Manage::BaseController
 
+
   skip_before_filter :require_active_plan
+
   before_filter :_can_manage_current_object
 
   make_resourceful do
     actions :show, :update, :destroy
 
-    response_for :destroy do |format|
+    response_for(:show) do |format|
       format.html
       format.json { render :json => current_object }
-    end
-
-    response_for(:show, :update) do |format|
-      format.html
-      format.json { render :json => current_object }
-    end
-
-    response_for(:update_fails) do |format|
-      format.json { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
   end
 
   def current_object
-    @current_object ||= @current_business
+    @current_object ||= current_business
   end
 
   def current_objects
