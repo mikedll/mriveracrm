@@ -94,3 +94,10 @@ That's it. If you're sure you don't have migrations:
 # Production config
 
 See `doc/server_setup.md`.
+
+# Troubleshooting
+
+## undefined method `const_defined?' for "business":String
+
+Sometimes this happens in a controller when referring
+to a model. Use :: module global qualifier.
