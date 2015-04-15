@@ -7,7 +7,16 @@ class Manage::SeoRankersController < Manage::BaseController
 
   make_resourceful do
     actions :index, :show, :create, :update, :destroy
+    member_actions :rank
     belongs_to :business
+  end
+
+  def json_config
+    { :methods => [:runnable?] }
+  end
+
+  def rank
+    with_update_and_transition { current_object.rank! }
   end
 
   def object_parameters

@@ -37,6 +37,9 @@ en:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."
 
+  seo_ranker:
+    run_confirm: "Are you sure you want to run this ranker?"
+
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 

@@ -32,6 +32,7 @@ class SeoRanker < ActiveRecord::Base
   end
 
   def rank_background
+    self.runs_since_window_started += 1
     self.ranking = 3
     save!
   end
