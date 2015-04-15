@@ -3,8 +3,6 @@ class Manage::BaseController < ApplicationController
   before_filter :require_employee
   before_filter :require_active_plan
   before_filter :_require_business_support
-  before_filter :_activate_apps
-  before_filter :_configure_apps_base
 
   make_resourceful do
     # Provide our own defaults.
@@ -30,7 +28,6 @@ class Manage::BaseController < ApplicationController
       format.html do
         apps_configuration.merge!({
             :bootstrap => rendered_current_object,
-            :app_class => apps_configuration[:app_class].underscore.camelize.singularize.underscore.dasherize # thank you
         })
         render :template => "app_container"
       end
@@ -84,10 +81,6 @@ class Manage::BaseController < ApplicationController
     else
       response_for :update_fails
     end
-  end
-
-  def _configure_apps_base
-    apps_configuration.merge!(:manage => true)
   end
 
 end

@@ -1,24 +1,26 @@
 
-class window.SeoRanker extends BaseModel
+class window.SEORanker extends BaseModel
+  defaults:
+    'runnable?': false
 
-class window.SeoRankerView extends CrmModelView
+class window.SEORankerView extends CrmModelView
   modelName: 'seo_ranker'
 
-class window.SeoRankers extends BaseCollection
-  model: SeoRanker
+class window.SEORankers extends BaseCollection
+  model: SEORanker
   urlFragment: '/manage/seo_rankers'
 
-class window.SeoRankerListItemView extends ListItemView
+class window.SEORankerListItemView extends ListItemView
   modelName: 'seo_ranker'
-  spawnViewType: SeoRankerView
+  spawnViewType: SEORankerView
   className: 'seo-ranker-list-item list-item'
 
   title: () ->
     @model.get('name')
 
-class window.SeoRankerAppView extends CollectionAppView
+class window.SEORankerAppView extends CollectionAppView
   modelNamePlural: 'seo_rankers'
   modelName: 'seo_ranker'
-  spawnListItemType: SeoRankerListItemView
+  spawnListItemType: SEORankerListItemView
   title: () ->
     'SEO Rankers'

@@ -1,9 +1,10 @@
-class Manage::SeoRankersController < Manage::BaseController
+class Manage::SEORankersController < Manage::BaseController
+
+  configure_apps :model => ::SEORanker
 
   skip_before_filter :require_active_plan
 
   before_filter :_parent_name
-  before_filter :_configure_apps
 
   make_resourceful do
     actions :index, :show, :create, :update, :destroy
@@ -20,7 +21,7 @@ class Manage::SeoRankersController < Manage::BaseController
   end
 
   def object_parameters
-    params.slice(* SeoRanker.accessible_attributes.map { |k| k.underscore.to_sym } )
+    params.slice(* SEORanker.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
   def parent_object
@@ -35,15 +36,6 @@ class Manage::SeoRankersController < Manage::BaseController
 
   def _require_business_support
     true # _bsupports?(Feature::Names::SEO_RANKER)
-  end
-
-  def _configure_apps
-    apps_configuration.merge!({
-        :app_top => true,
-        :app_class => 'seo-rankers',
-        :title => "SEO Ranker",
-        :model_templates => [::SeoRanker]
-      })
   end
 
 end

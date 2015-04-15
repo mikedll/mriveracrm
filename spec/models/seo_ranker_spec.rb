@@ -1,7 +1,7 @@
 
 require 'spec_helper'
 
-describe SeoRanker do
+describe SEORanker do
   context "live", :uses_search_engine => true do
     context "rank" do
       it "should connect to public servers and come up with a ranking", :current => true do

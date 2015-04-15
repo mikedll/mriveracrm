@@ -23,8 +23,8 @@ $(() ->
       modelViewKlass: StatusMonitorView
       rootAppViewKlass: SingleModelAppView
     '.seo-rankers-gui':
-      modelCollectionKlass: SeoRankers
-      rootAppViewKlass: SeoRankerAppView
+      modelCollectionKlass: SEORankers
+      rootAppViewKlass: SEORankerAppView
 
   lazyGetBootstrap = (selector) ->
     # prevent undefined reference. can be removed if we make __XXX generic

@@ -1,7 +1,7 @@
 
 - content_for :head do
-  - if apps_configuration[:manage]
-    = javascript_include_tag 'manage'
+  - apps_configuration[:javascript_modules].each do |mod|
+    = javascript_include_tag mod.to_s
 
 .gui-container.container-fluid
   .app-gui{:class => ["#{apps_configuration[:app_class]}-gui ", (apps_configuration[:multiplicity] == 'single' ? 'single-model' : nil)].compact}

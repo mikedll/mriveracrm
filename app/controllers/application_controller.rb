@@ -4,6 +4,7 @@
 class ApplicationController < ActionController::Base
 
   include ActionView::Helpers::TranslationHelper
+  include AppsModelInspection
 
   protect_from_forgery
 
@@ -25,7 +26,7 @@ class ApplicationController < ActionController::Base
 
   around_filter :business_keys
 
-  attr_accessor :current_business, :current_mfe, :apps_configuration
+  attr_accessor :current_business, :current_mfe
 
   def require_business_and_current_user_belongs_to_it
     if current_business.nil?
@@ -244,23 +245,5 @@ class ApplicationController < ActionController::Base
       redirect_to root_path
     end
   end
-
-  def _activate_apps
-    @apps_configuration ||= {
-      :app_top => false,
-      :app_class => '',
-      :title => "Application",
-      :multiplicity => plural_action? ? 'plural' : 'single',
-      :model_templates => [],
-      :resource_multiplicity => 'multiple',
-      :manage => false
-    }
-  end
-
-  def _configure_app
-    # apps_configuration.merge!({})
-    Logger.warn "Override this in a sub class."
-  end
-
 
 end

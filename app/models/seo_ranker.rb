@@ -1,10 +1,10 @@
-class SeoRanker < ActiveRecord::Base
+class SEORanker < ActiveRecord::Base
 
   module SearchEngines
     GOOGLE = 'Google'
   end
 
-  SEARCH_ENGINES = SearchEngines.constants.map { |c| SeoRanker::SearchEngines.const_get(c) }
+  SEARCH_ENGINES = SearchEngines.constants.map { |c| SearchEngines.const_get(c) }
 
   attr_accessible :search_phrase, :search_engine, :name
 
