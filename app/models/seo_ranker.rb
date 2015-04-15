@@ -6,6 +6,8 @@ class SeoRanker < ActiveRecord::Base
 
   SEARCH_ENGINES = SearchEngines.constants.map { |c| SeoRanker::SearchEngines.const_get(c) }
 
+  attr_accessible :search_phrase, :search_engine, :name
+
   belongs_to :business, :inverse_of => :seo_rankers
 
   before_validation :_defaults, :if => :new_record?
