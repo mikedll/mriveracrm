@@ -11,15 +11,9 @@ class window.Client extends BaseModel
       return {email: "is invalid"}
     return
 
-class window.Clients extends Backbone.Collection
+class window.Clients extends BaseCollection
   model: Client
-  url: () ->
-    gUrlManager.url('/manage/clients')
-
-  initialize: () ->
-    Backbone.Collection.prototype.initialize.apply(this, arguments)
-    @comparator = (client) ->
-      client.get('id')
+  urlFragment: '/manage/clients'
 
 class window.ClientView extends CrmModelView
   modelName: 'client'

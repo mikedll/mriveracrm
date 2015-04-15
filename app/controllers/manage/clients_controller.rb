@@ -1,7 +1,5 @@
 class Manage::ClientsController < Manage::BaseController
 
-  before_filter :_parent_name
-
   make_resourceful do
     actions :new, :index, :show, :update, :create
     belongs_to :business
@@ -56,7 +54,7 @@ class Manage::ClientsController < Manage::BaseController
   end
 
   def parent_object
-    @parent_object ||= Business.current
+    @parent_object ||= current_business
   end
 
   def with_update_and_transition
@@ -70,10 +68,6 @@ class Manage::ClientsController < Manage::BaseController
     else
       response_for :update_fails
     end
-  end
-
-  def _parent_name
-    @parent_name = "business" # hack; parent_object isnt enough.
   end
 
   protected

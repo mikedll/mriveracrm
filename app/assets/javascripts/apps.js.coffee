@@ -423,6 +423,11 @@ class window.BaseCollection extends Backbone.Collection
     @comparator = (model) ->
       model.get('id')
 
+  url: () ->
+    if typeof(@urlFragment) != "undefined"
+      gUrlManager.url(@urlFragment)
+    else
+      Backbone.Collection.prototype.url.apply(@, arguments)
 
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
