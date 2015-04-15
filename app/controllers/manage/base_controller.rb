@@ -52,6 +52,18 @@ class Manage::BaseController < ApplicationController
 
   protected
 
+  def with_update_and_transition
+    if current_object.update_attributes(object_parameters)
+      if yield
+        response_for :update
+      else
+        response_for :update_fails
+      end
+    else
+      response_for :update_fails
+    end
+  end
+
   def ssl_required?; Rails.env.production?; end
 
   def json_config

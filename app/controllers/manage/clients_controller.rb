@@ -2,6 +2,7 @@ class Manage::ClientsController < Manage::BaseController
 
   make_resourceful do
     actions :new, :index, :show, :update, :create
+    member_actions :archive, :unarchive
     belongs_to :business
     response_for :new do
       render :layout => nil
@@ -55,19 +56,6 @@ class Manage::ClientsController < Manage::BaseController
 
   def parent_object
     @parent_object ||= current_business
-  end
-
-  def with_update_and_transition
-    load_object
-    if current_object.update_attributes(object_parameters)
-      if yield
-        response_for :update
-      else
-        response_for :update_fails
-      end
-    else
-      response_for :update_fails
-    end
   end
 
   protected
