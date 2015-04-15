@@ -5,6 +5,18 @@ You can contact me by email at mrivera@michaelriveraco.com.
 
 Michael Rivera, also known as Mike De La Loza, Owner
 
+# Development setup
+
+See `doc/server_setup.md`.
+
+Start server:
+
+    > rails s
+
+Start resque worker
+
+    > bundle exec resque work
+
 # Typical Views
 
   We have a gui-container class which is typically tied to a Stacked view,

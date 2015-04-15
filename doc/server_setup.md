@@ -43,6 +43,12 @@ Max backlog:
 Which is a Linux default on Ubuntu 12. See the redis config
 if you want to raise it.
 
+In development:
+
+    redis-server config/redis.conf
+
+Then Resque will have something to connect to.
+
 # Production config
 
 Nginx is configured at `/etc/nginx/nginx.conf`:
