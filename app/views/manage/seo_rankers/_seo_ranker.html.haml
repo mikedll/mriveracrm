@@ -72,7 +72,7 @@
           Refresh
 
       .btn-group
-        %button.rank.put_action.btn.btn-warning{ :type => "button", :data => {:action => 'rank', :attribute_enabler => 'runnable?', :enabled_when => 'true', :confirm => t('seo_ranker.run_confirm') } }
+        %button.rank.put_action.btn{ :type => "button", :data => {:action => 'rank', :attribute_enabler => 'runnable?', :enabled_when => 'true', :confirm => t('seo_ranker.run_confirm') } }
           Run
 
       = render :partial => 'shared/model_view_delete_button', :locals => { :data => { :attribute_enabler => 'destroyable', :enabled_when => 'true' } }
