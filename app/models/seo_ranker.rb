@@ -139,7 +139,7 @@ class SEORanker < ActiveRecord::Base
           end
         end
       rescue => e
-        self.last_error = I18n.t('seo_ranker.parse_error')
+        self.last_error = t('seo_ranker.parse_error')
         done = true
         break
       end
