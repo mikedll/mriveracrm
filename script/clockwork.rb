@@ -1,4 +1,4 @@
-gemfile = File.expand_path('../../Gemfile', File.dirname(__FILE__))
+gemfile = File.expand_path('../Gemfile', File.dirname(__FILE__))
 begin
   ENV['BUNDLE_GEMFILE'] = gemfile
   require 'bundler'
