@@ -4,7 +4,7 @@ class window.SEORanker extends BaseModel
     'runnable?': false
 
   isRequesting: () ->
-    @_isRequesting || !@get('available_for_request?')
+    @_isRequesting || (!@get('available_for_request?') && !@isNew())
 
 class window.SEORankerView extends CrmModelView
   modelName: 'seo_ranker'

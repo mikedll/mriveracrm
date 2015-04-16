@@ -16,7 +16,7 @@ module PersistentRequestable
     self.requests_allowed = PersistentRequestable::DEFAULT_CONCURRENT_REQUESTS
 
     def available_for_request?
-      persistent_requests_count < requests_allowed
+      !new_record? && persistent_requests_count < requests_allowed
     end
 
     def start_persistent_request(request_name)
