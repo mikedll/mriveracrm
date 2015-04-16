@@ -27,6 +27,7 @@ Spork.prefork do
     # config.filter_run_including :current => true
     config.filter_run_excluding :broken => true
 
+    SEARCH_ENGINE_TESTS = [:uses_search_engine]
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
     LIVE_WEB_TESTS.each do |filter|
       # Invert the next two lines, depending on what you're doing,
