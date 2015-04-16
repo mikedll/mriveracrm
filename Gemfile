@@ -32,6 +32,10 @@ gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this i
 gem "nokogiri"
 gem "rest-client"
 gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
+gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :branch => "resque-2"
+
+# In dev mode.
+# gem "resque-web", :require => "resque_web", :path => '../resque-web'
 
 group :assets do
   gem 'yui-compressor'

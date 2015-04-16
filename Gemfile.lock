@@ -1,4 +1,16 @@
 GIT
+  remote: git://github.com/mikedll/resque-web.git
+  revision: 81b366bbd0fe010da3a9199f83af3ab8b1c95515
+  branch: resque-2
+  specs:
+    resque-web (0.0.6)
+      coffee-rails
+      jquery-rails
+      resque
+      sass-rails
+      twitter-bootstrap-rails
+
+GIT
   remote: git://github.com/resque/resque.git
   revision: cb337e134c21a8c87db2a9d6bf090e083af6a950
   specs:
@@ -406,6 +418,7 @@ DEPENDENCIES
   rake (>= 10.0.0)
   rb-inotify
   resque (~> 2.0.0.pre.1)!
+  resque-web!
   rest-client
   right_aws
   rmagick
