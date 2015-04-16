@@ -56,6 +56,7 @@ group :development do
   gem "capistrano"
   gem "rvm-capistrano", :require => false
   gem "rvm"
+  gem "foreman"
 end
 
 group :test, :development do

@@ -9,6 +9,10 @@ Michael Rivera, also known as Mike De La Loza, Owner
 
 See `doc/server_setup.md`.
 
+Start everyting:
+
+    > foreman start
+    
 Start server:
 
     > rails s

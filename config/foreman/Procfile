@@ -1,0 +1,3 @@
+web: bundle exec rails s
+worker: bundle exec resque work
+scheduler: bundle exec clockwork ./app/workers/clockwork.rb
