@@ -39,7 +39,7 @@ class SEORanker < ActiveRecord::Base
   MAX_RUNS_PER_WINDOW = 10
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
-  scope :resettable, lambda { where('last_window_started_at < ?', Time.now - WINDOW_DURATION) }
+  scope :resettable, lambda { where('last_window_started_at is null OR last_window_started_at < ?', Time.now - WINDOW_DURATION) }
   scope :live, lambda { where('active = ?', true) }
   scope :has_runs_available, lambda { where('runs_since_window_started < ?', MAX_RUNS_PER_WINDOW) }
   scope :not_ranked_this_window, lambda { where('last_ranked_at is null ') }
