@@ -108,7 +108,15 @@ class SEORanker < ActiveRecord::Base
               url_found = CGI::parse(google_uri.query)['q'].first
             end
 
-            uri = URI(url_found)
+            begin
+              uri = URI(url_found)
+            rescue => e
+              if e.message.include?("bad argument (expected URI object or URI string)")
+                # for later debugging.
+                # puts "Found bad url in: #{url_found} from #{a_node.to_s}"
+                raise
+              end
+            end
             if uri.host =~ Regexp.new("#{Regexp.escape(host_to_match)}\\z")
               self.matching_url = url_found
               self.matching_title = a_node.text()
