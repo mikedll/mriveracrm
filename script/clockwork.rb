@@ -11,18 +11,21 @@ end
 
 # Clockwork environment's includes
 require 'active_model'
+require 'active_support/core_ext'
 SafeYAML::OPTIONS[:default_mode] = :safe
-
 
 # Clockwork environment's configuration
 ENV['RACK_ENV'] ||= "development"
-Resque.redis = YAML.load_file(File.join(Bundler.root, "config", "resque.yml"))[ENV['RACK_ENV']]
-
 
 # Clockwork environment's app-specific loads
 $LOAD_PATH << Bundler.root
+require 'lib/app_configuration'
 require 'app/workers/worker_base'
 require 'app/workers/scheduled_event'
+
+# Clockwork environment's initializing setup
+Resque.redis = AppConfiguration.get('redis')
+
 
 module Clockwork
   handler { |job| Resque.enqueue_to(WorkerBase::Queues::DEFAULT, 'ScheduledEvent', job) }

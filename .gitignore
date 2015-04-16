@@ -9,7 +9,6 @@ db/*.sqlite3
 config/credentials.yml
 config/database.yml
 config/redis.conf
-config/resque.yml
 
 public/javascripts/generated/
 public/stylesheets/active_admin.css

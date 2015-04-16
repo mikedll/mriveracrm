@@ -32,7 +32,7 @@ namespace :deploy do
 
   task :install_configs, :roles => [:web] do
     put File.read("config/redis.conf.sample"), "#{shared_path}/config/redis.conf"
-    put File.read("config/resque.yml.sample"), "#{shared_path}/config/resque.yml"
+    put File.read("config/credentials.yml.sample"), "#{shared_path}/config/credentials.yml"
   end
 
 end

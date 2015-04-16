@@ -1,5 +1,5 @@
 # Load the redis configuration from resque.yml
-Resque.redis = YAML.load_file(File.join(Rails.root, "config", "resque.yml"))[Rails.env.to_s]
+Resque.redis = AppConfiguration.get('redis')
 
 # Get own connection to PostgreSQL
 # https://devcenter.heroku.com/articles/forked-pg-connections#resque-ruby-queuing
