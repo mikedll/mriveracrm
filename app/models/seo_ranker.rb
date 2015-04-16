@@ -33,13 +33,14 @@ class SEORanker < ActiveRecord::Base
   end
 
   WINDOW_DURATION = 3.days
+  MAX_RUNS_PER_WINDOW = 10
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
   scope :resettable, lambda { where('last_window_started_at < ?', Time.now - WINDOW_DURATION) }
   scope :live, lambda { where('active = ?', true) }
-  scope :not_run_this_window, lambda { where('runs_since_window_started = ?', 0) }
-
-  MAX_RUNS_PER_WINDOW = 10
+  scope :has_runs_available, lambda { where('runs_since_window_started < ?', MAX_RUNS_PER_WINDOW) }
+  scope :not_ranked_this_window, lambda { where('last_ranked_at is null ') }
+  scope :auto_rankable, lambda { live.not_ranked_this_window.has_runs_available }
 
   class Worker < WorkerBase
   end
@@ -52,7 +53,7 @@ class SEORanker < ActiveRecord::Base
   end
 
   def self.run_live!
-    live.not_run_this_window.find_each do |s|
+    auto_rankable.find_each do |s|
       s.rank!
     end
   end
