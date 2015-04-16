@@ -81,7 +81,8 @@ class SEORanker < ActiveRecord::Base
 
     runs = 0
     per_search = GOOGLE_RESULTS_PER_SEARCH
-    while runs < MAX_RUNS_PER_WINDOW
+    done = false
+    while !done && runs < MAX_RUNS_PER_WINDOW
       q_params = { :q => search_phrase }
       q_params.merge!(:start => runs * per_search) if runs >= 1
 
@@ -91,6 +92,7 @@ class SEORanker < ActiveRecord::Base
         result = RestClient.get GOOGLE_API, :params => q_params
       rescue => e
         self.last_error = e.response
+        done = true
         break
       end
 
@@ -122,12 +124,14 @@ class SEORanker < ActiveRecord::Base
               self.matching_title = a_node.text()
               self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
               self.last_ranked_at = Time.now
+              done = true
               break
             end
           end
         end
       rescue => e
         self.last_error = I18n.t('seo_ranker.parse_error')
+        done = true
         break
       end
     end
