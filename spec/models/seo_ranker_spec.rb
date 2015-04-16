@@ -15,17 +15,33 @@ describe SEORanker do
     end
   end
 
-  context "validations" do
+  context "persistent requests" do
+    it "should disable repetitive ranking attempts with PersistentRequestable", :current => true do
+      @seo_ranker = FactoryGirl.create(:seo_ranker)
 
-    it "should not allow more than one persistent request at a time" do
-      @seo_ranker = FactoryGirl.create(:seo_ranker) do
-        @seo_ranker.start_persistent_request('rank!')
-        @seo_ranker.rank!.should be_false
+      @seo_ranker.start_persistent_request('rank!').should be_true
+      @seo_ranker.available_for_request?.should be_false
 
-        @seo_ranker.stop_persistent_request('rank!')
-        @seo_ranker.rank!.should be_true
-      end
+      @seo_ranker.start_persistent_request('rank!').should be_false
+      @seo_ranker.rank!.should be_false
+      @seo_ranker.rank!.should be_false
+
+      @seo_ranker.stop_persistent_request('rank!')
+      @seo_ranker.available_for_request?.should be_true
+      @seo_ranker.rank!.should be_true
+
+      @seo_ranker.start_persistent_request('rank!')
+      @seo_ranker.available_for_request?.should be_false
+      @seo_ranker.rank!.should be_false
+      @seo_ranker.rank!.should be_false
+
+      @seo_ranker.stop_persistent_request('rank!')
+      @seo_ranker.available_for_request?.should be_true
+      @seo_ranker.rank!.should be_true
     end
+  end
+
+  context "validations" do
 
     it "should enforce validation tiers" do
       @seo_ranker = FactoryGirl.build(:seo_ranker, :search_phrase => "")

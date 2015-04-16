@@ -38,6 +38,7 @@ en:
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."
 
   seo_ranker:
+    already_requesting: 'This SEO Ranker is already busy. Please wait for the current request to finish.'
     run_confirm: "Are you sure you want to run this ranker?"
     parse_error: "An error occurred while processing the search. This may be a programming error that needs engineering. Please contact support if this problem persists."
     errors:

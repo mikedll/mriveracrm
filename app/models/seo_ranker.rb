@@ -10,6 +10,8 @@ class SEORanker < ActiveRecord::Base
     GOOGLE = 'Google'
   end
 
+  RANKING_REQUEST = 'ranking'
+
   SEARCH_ENGINES = SearchEngines.constants.map { |c| SearchEngines.const_get(c) }
 
   attr_accessible :search_phrase, :search_engine, :name, :host_to_match, :active
@@ -69,6 +71,10 @@ class SEORanker < ActiveRecord::Base
 
   def rank!
     return false if !runnable?
+    if !start_persistent_request(RANKING_REQUEST)
+      errors.add(:base, t('seo_ranker.already_requesting'))
+      return false
+    end
     Worker.obj_enqueue(self, :rank_background)
     true
   end
@@ -141,6 +147,7 @@ class SEORanker < ActiveRecord::Base
 
     self.runs_since_window_started += runs
     save!
+    stop_persistent_request(RANKING_REQUEST)
   end
 
   def reset_window
