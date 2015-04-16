@@ -99,8 +99,15 @@ class SEORanker < ActiveRecord::Base
         doc.css('#search li.g').each_with_index do |li_node, page_offset|
           a_node = li_node.css('a').first
           if a_node
-            google_uri = URI("http://www.example.com/#{a_node['href']}")
-            url_found = CGI::parse(google_uri.query)['q'].first
+            url_found = a_node['href']
+
+            if url_found !~ Regexes::PROTOCOL
+              # asssuming google embedded the url in 'q' param
+              url_found = "http://www.dummydomain.com/#{url_found}"
+              google_uri = URI(url_found)
+              url_found = CGI::parse(google_uri.query)['q'].first
+            end
+
             uri = URI(url_found)
             if uri.host =~ Regexp.new("#{Regexp.escape(host_to_match)}\\z")
               self.matching_url = url_found
