@@ -162,7 +162,7 @@ class window.BaseModel extends Backbone.Model
       @_isInvalid = false
 
     if @dumpOnChange
-      AppLogger.log(@attributes)
+      AppsLogger.log(@attributes)
 
   # hook for subclasses to adjust the set attrs
   adjustSetAttrs: (attrs) ->
