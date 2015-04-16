@@ -49,6 +49,18 @@ In development:
 
 Then Resque will have something to connect to.
 
+# App setup
+
+Install app environment.
+
+    > cap envname deploy:setup
+    
+Install configs.
+
+    > cap envname deploy:install_configs
+
+Go to the machine and edit the configs.
+
 # Production config
 
 Nginx is configured at `/etc/nginx/nginx.conf`:
