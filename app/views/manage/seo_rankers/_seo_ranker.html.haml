@@ -20,6 +20,8 @@
     .controls
       .read-only-field{ :data => { :name => 'seo_ranker[ranking]' } }
 
+  = read_only_field(:seo_ranker, :last_ranked_at, ["datetime"])
+
   .control-group
     .control-label
       %label

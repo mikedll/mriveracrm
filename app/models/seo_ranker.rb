@@ -75,6 +75,7 @@ class SEORanker < ActiveRecord::Base
   def rank_background
     self.matching_url = ""
     self.matching_title = ""
+    self.last_ranked_at = nil
     self.last_error = ""
     self.ranking = 0
 
@@ -105,6 +106,7 @@ class SEORanker < ActiveRecord::Base
               self.matching_url = url_found
               self.matching_title = a_node.text()
               self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
+              self.last_ranked_at = Time.now
               break
             end
           end

@@ -244,6 +244,7 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.string   "matching_url",              :default => "",    :null => false
     t.string   "matching_title",            :default => "",    :null => false
     t.boolean  "active",                    :default => false, :null => false
+    t.datetime "last_ranked_at"
   end
 
   create_table "settings", :force => true do |t|
