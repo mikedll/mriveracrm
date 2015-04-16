@@ -398,6 +398,7 @@ DEPENDENCIES
   activemerchant (~> 1.31)
   activemodel
   activerecord-postgresql-adapter
+  activesupport
   aws-s3 (>= 0.6.3)
   aws-ses (~> 0.4.4)
   cancan

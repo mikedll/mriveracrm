@@ -38,6 +38,7 @@ gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :br
 group :default, :scheduler do
   gem 'resque', "~> 2.0.0.pre.1", github: "resque/resque"
   gem 'activemodel'
+  gem 'activesupport'
   gem "clockwork"
   gem "safe_yaml"
 end
