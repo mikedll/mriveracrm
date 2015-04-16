@@ -29,6 +29,8 @@
     .controls
       .read-only-field{ :data => { :name => 'seo_ranker[runs_since_window_started]' } }
 
+  = read_only_field(:seo_ranker, :window_resets_at, ["datetime"])
+
   .control-group
     .control-label
       %label

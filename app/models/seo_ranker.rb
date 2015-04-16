@@ -61,6 +61,10 @@ class SEORanker < ActiveRecord::Base
     validation_level >= 0
   end
 
+  def window_resets_at
+    last_window_started_at + WINDOW_DURATION
+  end
+
   def runnable?
     runs_since_window_started < MAX_RUNS_PER_WINDOW
   end

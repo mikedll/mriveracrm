@@ -13,7 +13,7 @@ class Manage::SEORankersController < Manage::BaseController
   end
 
   def json_config
-    { :methods => [:runnable?] }
+    { :methods => [:runnable?, :window_resets_at] }
   end
 
   def rank
