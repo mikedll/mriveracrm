@@ -32,7 +32,7 @@ class SEORanker < ActiveRecord::Base
     t.validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
   end
 
-  WINDOW_DURATION = 24.hours
+  WINDOW_DURATION = 3.days
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
   scope :resettable, lambda { where('last_window_started_at < ?', Time.now - WINDOW_DURATION) }
