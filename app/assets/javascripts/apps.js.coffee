@@ -383,6 +383,23 @@ class window.ModelBaseView extends BaseView
     else
       @parent.unregisterDirty(@model)
 
+  decorateDirty: () ->
+
+  decorateError: () ->
+
+  decorateRequesting: () ->
+
+  copyModelToForm: () ->
+    throw "Override in base class of ModelBaseView."
+
+  repaintEditable: () ->
+    @copyModelToForm()
+
+  repaintNonEditable: () ->
+    @decorateDirty()
+    @decorateError()
+    @decorateRequesting()
+
   onModelChanged: (e) ->
     @dirtyRegistration()
 
@@ -519,11 +536,13 @@ class window.ListItemView extends ModelBaseView
     s = @title()
     @$('a .titleText').text(if s? && s.trim() != "" then s else "-")
 
+  repaintNonEditable: () ->
+    ModelBaseView.prototype.repaintNonEditable.apply(@, arguments)
+    @setTitle()
+
   onModelChanged: (e) ->
     ModelBaseView.prototype.onModelChanged.apply(@, arguments)
-    @decorateDirty()
-    @decorateError()
-    @setTitle()
+    @repaintNonEditable()
 
   decorateDirty: () ->
     if @model.isDirty()
@@ -558,7 +577,7 @@ class window.ListItemView extends ModelBaseView
 
   render: () ->
     @$el.html($('.list-item-view-title-template a').clone()) if @$('a').length == 0
-    @setTitle()
+    @repaintNonEditable()
     @
 
   clearHighlightedModelErrors: () ->
@@ -566,12 +585,11 @@ class window.ListItemView extends ModelBaseView
     @parent.clearHighlightedModelErrors() if @parent?
 
   onRequest: () ->
-    @decorateError()
-    @decorateRequesting()
+    ModelBaseView.prototype.onRequest.apply(@, arguments)
+    @repaintNonEditable()
 
   onInvalid: () ->
-    @decorateError()
-    @decorateRequesting()
+    @repaintNonEditable()
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
@@ -744,7 +762,7 @@ class window.CrmModelView extends ModelBaseView
     @copyReadOnlyFieldsToForm()
     @decorateDirty()
     if @model.validationError?
-      @renderErrors(@model.validationError)
+      @decorateError()
     else
       @clearErrors(@model.changedAttributes())
 
@@ -936,6 +954,9 @@ class window.CrmModelView extends ModelBaseView
     @clearErrors()
     @model.save()
 
+  decorateError: (errors) ->
+    renderErrors(@model.validationError) if @model.validationError?
+
   renderErrors: (errors) ->
     _.each(errors, (value, key, list) =>
       @$el
@@ -947,7 +968,7 @@ class window.CrmModelView extends ModelBaseView
       )
 
   onInvalid: () ->
-    @renderErrors(@model.validationError) if @model.validationError?
+    @repaintNonEditable()
 
   clearErrors: (changedAttributesw) ->
 
@@ -987,14 +1008,16 @@ class window.CrmModelView extends ModelBaseView
   onRequest: (model, xhr, options) ->
     ModelBaseView.prototype.onRequest.apply(@, arguments)
 
+  resetInputDevice: () ->
+    @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
+
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @clearErrors()
-    @copyModelToForm()
-    @decorateDirty()
-    @renderErrors(@model.validationError) if @model.validationError?
-    @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
+    @repaintEditable()
+    @repaintNonEditable()
+    @resetInputDevice()
     @parent.rebindGlobalHotKeys()
 
   buildDom: () ->
@@ -1012,9 +1035,9 @@ class window.CrmModelView extends ModelBaseView
       dateFormat: AppsConfig.datePickerDateFormat,
       timeFormat: AppsConfig.datetimePickerTimeFormat
     )
-    @copyModelToForm()
-    @decorateDirty()
-    @renderErrors(@model.validationError) if @model.validationError?
+    @repaintEditable()
+    @repaintNonEditable()
+    @resetInputDevice()
     @
 
 class window.SingleModelAppView extends WithChildrenView
