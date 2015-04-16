@@ -13,46 +13,55 @@
         = check_box_tag 'seo_ranker[active]', 'true', false, :class => 'active boolean'
         Active
 
-  .control-group
-    .control-label
-      %label
-        SEO Ranking:
-    .controls
-      .read-only-field{ :data => { :name => 'seo_ranker[ranking]' } }
+  .row-fluid
+    .span6
+      .control-group
+        .control-label
+          %label
+            SEO Ranking:
+        .controls
+          .read-only-field{ :data => { :name => 'seo_ranker[ranking]' } }
+    .span6
+      = read_only_field(:seo_ranker, :last_ranked_at, ["datetime"])
 
-  = read_only_field(:seo_ranker, :last_ranked_at, ["datetime"])
+  .row-fluid
+    .span12
+      .control-group
+        .control-label
+          %label
+            Matching URL:
+        .controls
+          .read-only-field{ :data => { :name => 'seo_ranker[matching_url]' } }
 
-  .control-group
-    .control-label
-      %label
-        Runs this window:
-    .controls
-      .read-only-field{ :data => { :name => 'seo_ranker[runs_since_window_started]' } }
+      = read_only_field(:seo_ranker, :matching_title)
 
-  = read_only_field(:seo_ranker, :window_resets_at, ["datetime"])
+  .row-fluid
+    .span6
+      .control-group
+        .control-label
+          %label
+            Runs this window:
+        .controls
+          .read-only-field{ :data => { :name => 'seo_ranker[runs_since_window_started]' } }
 
-  .control-group
-    .control-label
-      %label
-        Search Engine
-    .controls
-      .read-only-field{ :data => { :name => 'seo_ranker[search_engine]' } }
+      .control-group
+        .control-label
+          %label
+            Search Engine
+        .controls
+          .read-only-field{ :data => { :name => 'seo_ranker[search_engine]' } }
 
-  .control-group
-    .control-label
-      %label
-        Matching URL:
-    .controls
-      .read-only-field{ :data => { :name => 'seo_ranker[matching_url]' } }
+    .span6
+      = read_only_field(:seo_ranker, :window_resets_at, ["datetime"])
 
-  = read_only_field(:seo_ranker, :matching_title)
-
-  .control-group
-    .control-label
-      %label
-        Last Error:
-    .controls
-      .read-only-field{ :data => { :name => 'seo_ranker[last_error]' } }
+  .row-fluid
+    .span12
+      .control-group.error
+        .control-label
+          %label
+            Last Error:
+        .controls
+          .read-only-field{ :data => { :name => 'seo_ranker[last_error]' } }
 
   .control-group
     .controls
