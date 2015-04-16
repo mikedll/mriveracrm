@@ -61,7 +61,7 @@ class SEORanker < ActiveRecord::Base
     end
   end
 
-  def window_resets_at
+  def window_will_reset_at
     last_window_started_at + WINDOW_DURATION
   end
 
