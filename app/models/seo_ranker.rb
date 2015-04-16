@@ -32,11 +32,21 @@ class SEORanker < ActiveRecord::Base
     t.validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
   end
 
+  WINDOW_DURATION = 24.hours
+
   scope :by_business, lambda { |id| where('business_id = ?', id) }
+  scope :resettable, lambda { where('last_window_started_at < ?', Time.now - WINDOW_DURATION) }
 
   MAX_RUNS_PER_WINDOW = 10
 
   class Worker < WorkerBase
+  end
+
+  def self.reset_windows!
+    resettable.find_each do |s|
+      s.reset_window
+      s.save!
+    end
   end
 
   def valid_to?(n)

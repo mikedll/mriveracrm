@@ -3,6 +3,7 @@ class ScheduledEvent
   # we don't have inflections defined in railsless clockwork
   # environment, so use camelcase class name.
   module Events
+    RESET_SEO_RANKERS = 'SEORanker.reset_windows!'
   end
 
   def self.perform(event)
