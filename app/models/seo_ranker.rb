@@ -62,7 +62,7 @@ class SEORanker < ActiveRecord::Base
   end
 
   def window_will_reset_at
-    last_window_started_at + WINDOW_DURATION
+    (last_window_started_at + WINDOW_DURATION).end_of_hour + 1.second # coordinate this with scheduler
   end
 
   def runs_available?
