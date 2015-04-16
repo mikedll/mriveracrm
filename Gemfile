@@ -31,11 +31,16 @@ gem 'excon', '>= 0.27.5'
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 gem "nokogiri"
 gem "rest-client"
-gem "resque", "~> 2.0.0.pre.1", github: "resque/resque"
-gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :branch => "resque-2"
 
-# In dev mode.
-# gem "resque-web", :require => "resque_web", :path => '../resque-web'
+gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :branch => "resque-2"
+# gem "resque-web", :require => "resque_web", :path => '../resque-web' # For dev mode
+
+group :default, :scheduler do
+  gem 'resque', "~> 2.0.0.pre.1", github: "resque/resque"
+  gem 'activemodel'
+  gem "clockwork"
+  gem "safe_yaml"
+end
 
 group :assets do
   gem 'yui-compressor'

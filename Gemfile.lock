@@ -1,6 +1,6 @@
 GIT
   remote: git://github.com/mikedll/resque-web.git
-  revision: 81b366bbd0fe010da3a9199f83af3ab8b1c95515
+  revision: c0851be4fce479427f779b87ee8df832c48495ed
   branch: resque-2
   specs:
     resque-web (0.0.6)
@@ -118,6 +118,9 @@ GEM
       json (>= 1.7)
     childprocess (0.3.9)
       ffi (~> 1.0, >= 1.0.11)
+    clockwork (1.2.0)
+      activesupport
+      tzinfo
     coderay (1.0.9)
     coffee-rails (3.2.2)
       coffee-script (>= 2.2.0)
@@ -389,6 +392,7 @@ PLATFORMS
 DEPENDENCIES
   activeadmin
   activemerchant (~> 1.31)
+  activemodel
   activerecord-postgresql-adapter
   aws-s3 (>= 0.6.3)
   aws-ses (~> 0.4.4)
@@ -397,6 +401,7 @@ DEPENDENCIES
   capistrano-unicorn
   capybara
   carrierwave
+  clockwork
   coffee-rails (~> 3.2.1)
   database_cleaner
   devise
@@ -425,6 +430,7 @@ DEPENDENCIES
   rspec-rails
   rvm
   rvm-capistrano
+  safe_yaml
   sass-rails (~> 3.2.3)
   simple_form
   state_machine
