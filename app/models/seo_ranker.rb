@@ -92,7 +92,6 @@ class SEORanker < ActiveRecord::Base
           end
         end
       rescue => e
-        puts e.message
         self.last_error = I18n.t('seo_ranker.parse_error')
         break
       end
