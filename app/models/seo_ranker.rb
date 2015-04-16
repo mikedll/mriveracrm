@@ -83,7 +83,7 @@ class SEORanker < ActiveRecord::Base
             google_uri = URI("http://www.example.com/#{a_node['href']}")
             url_found = CGI::parse(google_uri.query)['q'].first
             uri = URI(url_found)
-            if uri.host =~ Regexp.new("\\A#{Regexp.escape(host_to_match)}\\z")
+            if uri.host =~ Regexp.new("#{Regexp.escape(host_to_match)}\\z")
               self.matching_url = url_found
               self.matching_title = a_node.text()
               self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
