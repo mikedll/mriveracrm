@@ -6,6 +6,22 @@ class window.SEORanker extends BaseModel
 class window.SEORankerView extends CrmModelView
   modelName: 'seo_ranker'
 
+  initialize: (options) ->
+    CrmModelView.prototype.initialize.apply(@, arguments)
+    @listenTo(@model, 'change', @showHideSensitive)
+
+  render: () ->
+    CrmModelView.prototype.render.apply(@, arguments)
+    @showHideSensitive()
+
+  showHideSensitive: () ->
+    lastError$ = @inputFor$('last_error')
+    if @model.get('last_error') == ""
+      lastError$.closest('.control-group').hide()
+    else
+      AppsLogger.log("trying to show")
+      lastError$.closest('.control-group').show()
+
 class window.SEORankers extends BaseCollection
   model: SEORanker
   urlFragment: '/manage/seo_rankers'

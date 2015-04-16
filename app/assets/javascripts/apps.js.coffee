@@ -643,6 +643,16 @@ class window.CrmModelView extends ModelBaseView
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
 
+  inputFor$: (attributeName, readOnly) ->
+    readOnly = readOnly || true
+    toSearch = if readOnly then @readonlyInputsCache else @inputsCache.add(@readonlyInputsCache)
+    input =_.find(toSearch, (el) => @nameFromInput($(el)) == attributeName)
+    if typeof(input) == "undefined"
+      AppsLogger.log("CrmModelView.inputFor failed to find input for attribute named #{attributeName}")
+      return input
+    else
+      return $(input)
+
   putAction: (e) ->
     return false if @buttonsCache.filter(e.target).length == 0
     @model.save(@fromForm(), url: "#{@model.url()}/#{$(e.target).data('action')}", wait: true)
