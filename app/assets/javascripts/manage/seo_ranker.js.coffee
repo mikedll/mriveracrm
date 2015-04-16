@@ -22,7 +22,6 @@ class window.SEORankerView extends CrmModelView
     if @model.get('last_error') == ""
       lastError$.closest('.control-group').hide()
     else
-      AppsLogger.log("trying to show")
       lastError$.closest('.control-group').show()
 
 class window.SEORankers extends BaseCollection
