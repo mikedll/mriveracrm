@@ -35,6 +35,8 @@ gem "rest-client"
 gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :branch => "resque-2"
 # gem "resque-web", :require => "resque_web", :path => '../resque-web' # For dev mode
 
+gem 'redis-objects'
+
 group :default, :scheduler do
   gem 'resque', "~> 2.0.0.pre.1", github: "resque/resque"
   gem 'activemodel'

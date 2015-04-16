@@ -2,6 +2,7 @@ require 'cgi'
 
 class SEORanker < ActiveRecord::Base
 
+  include PersistentRequestable
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
 
@@ -71,8 +72,9 @@ class SEORanker < ActiveRecord::Base
   end
 
   def rank!
-    return if !runnable?
+    return false if !runnable?
     Worker.obj_enqueue(self, :rank_background)
+    true
   end
 
   GOOGLE_API = 'http://www.google.com/search'

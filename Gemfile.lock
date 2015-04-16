@@ -295,6 +295,8 @@ GEM
     redis (3.2.1)
     redis-namespace (1.5.2)
       redis (~> 3.0, >= 3.0.4)
+    redis-objects (1.1.0)
+      redis (>= 3.0.2)
     responders (1.1.0)
       railties (>= 3.2, < 5)
     rest-client (1.6.8)
@@ -428,6 +430,7 @@ DEPENDENCIES
   rails (~> 3.2.0)
   rake (>= 10.0.0)
   rb-inotify
+  redis-objects
   resque (~> 2.0.0.pre.1)!
   resque-web!
   rest-client

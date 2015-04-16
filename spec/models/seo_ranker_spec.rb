@@ -13,6 +13,17 @@ describe SEORanker do
   end
 
   context "validations" do
+
+    it "should not allow more than one persistent request at a time" do
+      @seo_ranker = FactoryGirl.create(:seo_ranker) do
+        @seo_ranker.start_persistent_request('rank!')
+        @seo_ranker.rank!.should be_false
+
+        @seo_ranker.stop_persistent_request('rank!')
+        @seo_ranker.rank!.should be_true
+      end
+    end
+
     it "should enforce validation tiers" do
       @seo_ranker = FactoryGirl.build(:seo_ranker, :search_phrase => "")
       b = @seo_ranker.business
