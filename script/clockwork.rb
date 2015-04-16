@@ -26,5 +26,5 @@ require 'app/workers/scheduled_event'
 
 module Clockwork
   handler { |job| Resque.enqueue_to(WorkerBase::Queues::DEFAULT, 'ScheduledEvent', job) }
-  every(10.seconds, ScheduledEvent::Events::RESET_SEO_RANKERS)
+  every(1.hour, ScheduledEvent::Events::RESET_SEO_RANKERS)
 end
