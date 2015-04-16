@@ -45,7 +45,7 @@ class SEORanker < ActiveRecord::Base
   def self.reset_windows!
     resettable.find_each do |s|
       s.reset_window
-      s.save!
+      s.save!(:validate => false)
     end
   end
 
