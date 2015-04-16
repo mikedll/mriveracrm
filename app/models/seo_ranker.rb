@@ -2,6 +2,9 @@ require 'cgi'
 
 class SEORanker < ActiveRecord::Base
 
+  include ValidationTier
+  include ActionView::Helpers::TranslationHelper
+
   module SearchEngines
     GOOGLE = 'Google'
   end
@@ -14,15 +17,30 @@ class SEORanker < ActiveRecord::Base
 
   before_validation :_defaults, :if => :new_record?
 
-  validates :business_id, :presence => true
-  validates :name, :presence => true
-  validates :host_to_match, :presence => true
-  validates :search_phrase, :presence => true, :length => { :minimum => 3 }
-  validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
+  validation_tier do |t|
+    t.validates :business_id, :presence => true
+  end
+
+  validation_tier do |t|
+    t.validate :_limit_seo_rankers, :if => :new_record?
+  end
+
+  validation_tier do |t|
+    t.validates :name, :presence => true
+    t.validates :host_to_match, :presence => true
+    t.validates :search_phrase, :presence => true, :length => { :minimum => 3 }
+    t.validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
+  end
+
+  scope :by_business, lambda { |id| where('business_id = ?', id) }
 
   MAX_RUNS_PER_WINDOW = 10
 
   class Worker < WorkerBase
+  end
+
+  def valid_to?(n)
+    validation_level >= 0
   end
 
   def runnable?
@@ -93,8 +111,13 @@ class SEORanker < ActiveRecord::Base
 
   def _defaults
     self.search_engine = SearchEngines::GOOGLE if search_engine.blank?
-    self.host_to_match = business.host if host_to_match.blank?
+    self.host_to_match = business.host if host_to_match.blank? && business
     reset_window
+  end
+
+  MAX_SEO_RANKERS = 10
+  def _limit_seo_rankers
+    errors.add(:base, t('seo_ranker.errors.max', :max => MAX_SEO_RANKERS)) if self.class.by_business(business_id).count >= MAX_SEO_RANKERS
   end
 
 end
