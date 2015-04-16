@@ -59,10 +59,6 @@ class SEORanker < ActiveRecord::Base
     end
   end
 
-  def valid_to?(n)
-    validation_level >= 0
-  end
-
   def window_resets_at
     last_window_started_at + WINDOW_DURATION
   end
