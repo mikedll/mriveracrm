@@ -36,6 +36,8 @@ class SEORanker < ActiveRecord::Base
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
   scope :resettable, lambda { where('last_window_started_at < ?', Time.now - WINDOW_DURATION) }
+  scope :live, lambda { where('active = ?', true) }
+  scope :not_run_this_window, lambda { where('runs_since_window_started = ?', 0) }
 
   MAX_RUNS_PER_WINDOW = 10
 
@@ -46,6 +48,12 @@ class SEORanker < ActiveRecord::Base
     resettable.find_each do |s|
       s.reset_window
       s.save!(:validate => false)
+    end
+  end
+
+  def self.run_live!
+    live.not_run_this_window.find_each do |s|
+      s.rank!
     end
   end
 

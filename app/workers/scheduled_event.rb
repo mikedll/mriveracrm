@@ -4,6 +4,7 @@ class ScheduledEvent
   # environment, so use camelcase class name.
   module Events
     RESET_SEO_RANKERS = 'SEORanker.reset_windows!'
+    RUN_SEO_RANKERS = 'SEORanker.run_live!'
   end
 
   def self.perform(event)
