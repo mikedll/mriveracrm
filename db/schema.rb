@@ -230,19 +230,20 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
   end
 
   create_table "seo_rankers", :force => true do |t|
-    t.integer  "business_id",                               :null => false
-    t.string   "name",                      :default => "", :null => false
-    t.datetime "last_window_started_at",                    :null => false
-    t.integer  "runs_since_window_started", :default => 0,  :null => false
-    t.string   "search_phrase",             :default => "", :null => false
-    t.string   "search_engine",             :default => "", :null => false
-    t.integer  "ranking",                   :default => 0,  :null => false
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
-    t.string   "host_to_match",             :default => "", :null => false
-    t.string   "last_error",                :default => "", :null => false
-    t.string   "matching_url",              :default => "", :null => false
-    t.string   "matching_title",            :default => "", :null => false
+    t.integer  "business_id",                                  :null => false
+    t.string   "name",                      :default => "",    :null => false
+    t.datetime "last_window_started_at",                       :null => false
+    t.integer  "runs_since_window_started", :default => 0,     :null => false
+    t.string   "search_phrase",             :default => "",    :null => false
+    t.string   "search_engine",             :default => "",    :null => false
+    t.integer  "ranking",                   :default => 0,     :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+    t.string   "host_to_match",             :default => "",    :null => false
+    t.string   "last_error",                :default => "",    :null => false
+    t.string   "matching_url",              :default => "",    :null => false
+    t.string   "matching_title",            :default => "",    :null => false
+    t.boolean  "active",                    :default => false, :null => false
   end
 
   create_table "settings", :force => true do |t|

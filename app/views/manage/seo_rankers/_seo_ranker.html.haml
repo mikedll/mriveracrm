@@ -8,6 +8,12 @@
   = f.input :host_to_match
 
   .control-group
+    .controls
+      %label.checkbox
+        = check_box_tag 'seo_ranker[active]', 'true', false, :class => 'active boolean'
+        Active
+
+  .control-group
     .control-label
       %label
         SEO Result:

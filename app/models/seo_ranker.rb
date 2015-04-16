@@ -11,7 +11,7 @@ class SEORanker < ActiveRecord::Base
 
   SEARCH_ENGINES = SearchEngines.constants.map { |c| SearchEngines.const_get(c) }
 
-  attr_accessible :search_phrase, :search_engine, :name, :host_to_match
+  attr_accessible :search_phrase, :search_engine, :name, :host_to_match, :active
 
   belongs_to :business, :inverse_of => :seo_rankers
 
