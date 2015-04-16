@@ -65,12 +65,16 @@ class SEORanker < ActiveRecord::Base
     last_window_started_at + WINDOW_DURATION
   end
 
-  def runnable?
+  def runs_available?
     runs_since_window_started < MAX_RUNS_PER_WINDOW
   end
 
+  def runnable?
+    runs_available? && available_for_request?
+  end
+
   def rank!
-    return false if !runnable?
+    return false if !runs_available?
     if !start_persistent_request(RANKING_REQUEST)
       errors.add(:base, t('seo_ranker.already_requesting'))
       return false
