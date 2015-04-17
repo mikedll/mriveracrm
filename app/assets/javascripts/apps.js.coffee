@@ -117,6 +117,15 @@ class window.BaseModel extends Backbone.Model
 
     @dumpOnChange = false
 
+  #
+  # Override in subclass that is persistent requestable.
+  #
+  isPersistentRequestingAvailable: () ->
+    true
+
+  isPersistentRequesting: () ->
+    !@isPersistentRequestingAvailable() && !@isNew()
+
   url: () ->
     if typeof(@urlFragment) != "undefined"
       gUrlManager.url(@urlFragment)
@@ -130,7 +139,7 @@ class window.BaseModel extends Backbone.Model
     return @_isInvalid
 
   isRequesting: () ->
-    return @_isRequesting
+    @_isRequesting || @isPersistentRequesting()
 
   onInvalid: () ->
     @_isInvalid = true

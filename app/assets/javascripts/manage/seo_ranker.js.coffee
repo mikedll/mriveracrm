@@ -3,8 +3,8 @@ class window.SEORanker extends BaseModel
   defaults:
     'runnable?': false
 
-  isRequesting: () ->
-    @_isRequesting || (!@get('available_for_request?') && !@isNew())
+  isPersistentRequestingAvailable: () ->
+    @deepGet('available_for_request?')
 
 class window.SEORankerView extends CrmModelView
   modelName: 'seo_ranker'
