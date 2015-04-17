@@ -113,6 +113,7 @@ class window.BaseModel extends Backbone.Model
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
     @listenTo(@, 'error', @onError)
+    @listenTo(@, 'destroy', @onDestroy)
 
     @dumpOnChange = false
 
@@ -312,6 +313,9 @@ class window.BaseModel extends Backbone.Model
     @_isInvalid = true
     @_lastRequestError = jQuery.parseJSON( xhr.responseText )
 
+  onDestroy: () ->
+    @_isRequesting = false
+
 class window.BaseView extends Backbone.View
   initialize: (options) ->
     @useDirty = true
@@ -375,6 +379,7 @@ class window.ModelBaseView extends BaseView
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
+    @listenTo(@model, 'destroy', @onDestroy)
 
   detachFromModel: () ->
     @stopListening(@model)
@@ -411,6 +416,10 @@ class window.ModelBaseView extends BaseView
       @$('.save').addClass('disabled')
       @$('.revert').addClass('disabled')
       @notifyRequestStarted()
+
+  onDestroy: (model, resp, options) ->
+    if !@model.isRequesting() && !@model.isNew() # isNew() => a request just finished to delete this on the server
+      @notifyRequestCompleted()
 
   onSync: (model, resp, options) ->
     if !@model.isRequesting()
@@ -517,8 +526,7 @@ class window.ListItemView extends ModelBaseView
     )
 
     @parent = options.parent
-    # 'sync', 'change', 'request', and 'error' are in ModelBaseView
-    @listenTo(@model, 'destroy', @onDestroy)
+    # 'sync', 'change', 'request', 'destroy', and 'error' are in ModelBaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'resorted', @onResorted)
@@ -527,6 +535,7 @@ class window.ListItemView extends ModelBaseView
     @removeDom()
 
   onDestroy: () ->
+    ModelBaseView.prototype.onDestroy.apply(@, arguments)
     @removeDom()
 
   onResorted: () ->
@@ -647,8 +656,7 @@ class window.CrmModelView extends ModelBaseView
     )
 
     @parent = options.parent
-    # 'sync', 'change', 'error', and 'request' are in ModelBaseView
-    @listenTo(@model, 'destroy', @onDestroy)
+    # 'sync', 'change', 'error', 'destroy', and 'request' are in ModelBaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
 
@@ -687,6 +695,7 @@ class window.CrmModelView extends ModelBaseView
     @model.fetch()
 
   onDestroy: () ->
+    ModelBaseView.prototype.onDestroy.apply(@, arguments)
     @removeDom()
 
   onRemove: () ->
