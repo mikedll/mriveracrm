@@ -75,6 +75,7 @@ $(() ->
       stack.childViewPushed(rootApp)
       if config.modelCollectionKlass?
         rootCollection.reset(rootCollectionBootstrap)
+        rootCollection.trigger('bootstrapped')
       else if config.modelKlass?
         model.setAndAssumeSync(modelBootstrap) if modelBootstrap? && modelBootstrap != [] # some pages dont have one
       else

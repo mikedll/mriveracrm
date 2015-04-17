@@ -293,6 +293,13 @@ class window.BaseModel extends Backbone.Model
     @set(attrs)
     @trigger('sync', @, null, {})
 
+  pollIfNeeded: () ->
+    if !@_refreshTimeout? && @isPersistentRequesting()
+      @_refreshTimeout = setTimeout( () =>
+        @_refreshTimeout = null
+        @fetch()
+      , AppsConfig.refreshFrequency)
+
   onSync: () ->
     # purge any destroyed attrs, before deleting history.
     retainedHasRelations = {}
@@ -318,11 +325,7 @@ class window.BaseModel extends Backbone.Model
     @_isInvalid = false
     @_isDirty = false
 
-    if !@_refreshTimeout? && @isPersistentRequesting()
-      @_refreshTimeout = setTimeout( () =>
-        @_refreshTimeout = null
-        @fetch()
-      , AppsConfig.refreshFrequency)
+    @pollIfNeeded()
 
   onError: (model, xhr, options) ->
     @_isRequesting = false
@@ -469,11 +472,16 @@ class window.BaseCollection extends Backbone.Collection
     @comparator = (model) ->
       model.get('id')
 
+    @listenTo(@, 'bootstrapped', @onBootstrapped)
+
   url: () ->
     if typeof(@urlFragment) != "undefined"
       gUrlManager.url(@urlFragment)
     else
       Backbone.Collection.prototype.url.apply(@, arguments)
+
+  onBootstrapped: () ->
+    @each((model) -> model.pollIfNeeded())
 
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
