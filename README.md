@@ -46,7 +46,7 @@ Start resque worker
   - Add routes.
   - Create yourModel.js.coffee.
   - Extend BaseModel with window.YourModel. Specify `urlSuffix`
-  with something. Override isNew to be false if you have a singleton model
+  with something. Override isNew to be false if you have a singleton model.
   - Extend and CrmModelView with window.YourModelView. Specific `modelName`
   in the YourModelView with a *snake case* form of your model. Add any events
   and attach them to buttons as needed.
