@@ -28,6 +28,7 @@ window.AppsConfig =
   datetimePickerTimeFormat: 'h:mmTT'
   fadeDuration: 1000
   balloonDuration: 2000
+  refreshFrequency: 3000
 
 class window.TextRenderer
   toFixed: (value, precision) ->
@@ -105,7 +106,7 @@ class window.BaseModel extends Backbone.Model
 
     @_lastRequestError = null
     @_attributesSinceSync = {}
-
+    @_refreshTimeout = null
     @ignoredAttributes = {}
 
     @listenTo(@, 'invalid', @onInvalid)
@@ -317,12 +318,19 @@ class window.BaseModel extends Backbone.Model
     @_isInvalid = false
     @_isDirty = false
 
+    if !@_refreshTimeout? && @isPersistentRequesting()
+      @_refreshTimeout = setTimeout( () =>
+        @_refreshTimeout = null
+        @fetch()
+      , AppsConfig.refreshFrequency)
+
   onError: (model, xhr, options) ->
     @_isRequesting = false
     @_isInvalid = true
     @_lastRequestError = jQuery.parseJSON( xhr.responseText )
 
   onDestroy: () ->
+    clearTimeout(@_refreshTimeout) if @_refreshTimeout?
     @_isRequesting = false
 
 class window.BaseView extends Backbone.View
