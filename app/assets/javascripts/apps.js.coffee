@@ -376,6 +376,9 @@ class window.ModelBaseView extends BaseView
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
 
+  detachFromModel: () ->
+    @stopListening(@model)
+
   dirtyRegistration: () ->
     return if !@useDirty
     if @model.isDirty()
@@ -563,6 +566,7 @@ class window.ListItemView extends ModelBaseView
       @$el.removeClass('error')
 
   removeDom: () ->
+    @detachFromModel()
     if @showview?
       @showview.remove()
     @$el.remove() # remove DOM element
@@ -689,6 +693,7 @@ class window.CrmModelView extends ModelBaseView
     @removeDom()
 
   removeDom: () ->
+    @detachFromModel()
     @parent = null # remove pointer to parent.
     @$el.remove() if @$el? # isn't this event redundant? review with onDestroy event. http://backbonejs.org/#View-remove
 
