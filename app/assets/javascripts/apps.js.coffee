@@ -1113,6 +1113,9 @@ class window.SearchAndListView extends BaseView
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
 
+  detachFromCollection: () ->
+    @stopListening(@collection)
+
   filtersChanged: (e) ->
     if @collection.any( (model) -> model.isDirty() )
       e.stopPropagation()
@@ -1160,6 +1163,7 @@ class window.SearchAndListView extends BaseView
       @modelsListCache.find(".list-item a").first().trigger('click')
 
   remove: () ->
+    @detachFromCollection()
     @$el.remove()
 
   next: () ->
@@ -1211,6 +1215,9 @@ class window.CollectionAppView extends WithChildrenView
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
+
+  detachFromCollection: () ->
+    @stopListening(@collection)
 
   resizeView: () ->
     h = Math.max(200, Math.round( $(window).height() * 0.8 ))
@@ -1279,6 +1286,7 @@ class window.CollectionAppView extends WithChildrenView
     @modelListItemLink(model).trigger('click')
 
   remove: () ->
+    @detachFromCollection
     @$el.remove()
 
   back: () ->
