@@ -91,6 +91,7 @@ module BackgroundedPolling
         begin
           handle_result(result)
           if last_result_halted_poll
+            self.last_polled_at = Time.now
             done = true
             break
           end

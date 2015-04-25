@@ -73,7 +73,6 @@ class SEORanker < ActiveRecord::Base
           self.matching_url = url_found
           self.matching_title = a_node.text()
           self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
-          self.last_polled_at = Time.now
           self.last_result_halted_poll = true
         end
       end
