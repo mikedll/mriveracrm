@@ -9,6 +9,13 @@ require 'active_support/concern'
 #   handle_result
 #   params_for_poll_request(n)
 #
+# And these fields in db:
+#
+#  last_polld_at
+#  last_window_started_at
+#  active
+#  runs_since_window_started
+#
 module BackgroundedPolling
   extend ActiveSupport::Concern
 

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150618085553) do
+ActiveRecord::Schema.define(:version => 20150425113654) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -244,7 +244,7 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.string   "matching_url",              :default => "",    :null => false
     t.string   "matching_title",            :default => "",    :null => false
     t.boolean  "active",                    :default => false, :null => false
-    t.datetime "last_ranked_at"
+    t.datetime "last_polled_at"
   end
 
   create_table "settings", :force => true do |t|
