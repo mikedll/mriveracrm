@@ -2,7 +2,7 @@ require 'cgi'
 
 class SEORanker < ActiveRecord::Base
 
-  include PersistentRequestable
+  include BackgroundedPolling
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
 
@@ -36,57 +36,25 @@ class SEORanker < ActiveRecord::Base
     t.validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
   end
 
-  WINDOW_DURATION = 3.days
-  MAX_RUNS_PER_WINDOW = 10
-
   scope :by_business, lambda { |id| where('business_id = ?', id) }
-  scope :resettable, lambda { where('last_window_started_at is null OR last_window_started_at < ?', Time.now - WINDOW_DURATION) }
-  scope :live, lambda { where('active = ?', true) }
-  scope :has_runs_available, lambda { where('runs_since_window_started < ?', MAX_RUNS_PER_WINDOW) }
-  scope :not_ranked_this_window, lambda { where('last_ranked_at is null ') }
-  scope :auto_rankable, lambda { live.not_ranked_this_window.has_runs_available }
 
-  class Worker < WorkerBase
+  def target_endpoint
+    GOOGLE_API
   end
 
-  def self.reset_windows!
-    resettable.find_each do |s|
-      s.reset_window
-      s.save!(:validate => false)
-    end
+  def before_poll
+    self.matching_url = ""
+    self.matching_title = ""
+    self.ranking = 0
   end
 
-  def self.run_live!
-    auto_rankable.find_each do |s|
-      s.rank!
-    end
+  def params_for_poll_request(n)
+    q_params = { :q => search_phrase }
+    q_params.merge!(:start => n * per_search) if n >= 2
+    q_params
   end
 
-  def window_will_reset_at
-    (last_window_started_at + WINDOW_DURATION).end_of_hour + 1.second # coordinate this with scheduler
-  end
-
-  def runs_available?
-    runs_since_window_started < MAX_RUNS_PER_WINDOW
-  end
-
-  def runnable?
-    runs_available? && available_for_request?
-  end
-
-  GOOGLE_API = 'http://www.google.com/search'
-  GOOGLE_RESULTS_PER_SEARCH = 10
-  def poll!
-    return false if !runs_available?
-    if !start_persistent_request(RANKING_REQUEST)
-      errors.add(:base, t('seo_ranker.already_requesting'))
-      return false
-    end
-    Worker.obj_enqueue(self, :rank_background)
-    true
-  end
-
-  def handle_result(result)
+  def handle_poll_result(result)
     doc = Nokogiri::HTML(result)
     doc.css('#search li.g').each_with_index do |li_node, page_offset|
       a_node = li_node.css('a').first
@@ -113,65 +81,11 @@ class SEORanker < ActiveRecord::Base
           self.matching_url = url_found
           self.matching_title = a_node.text()
           self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
-          self.last_ranked_at = Time.now
+          self.last_polled_at = Time.now
           self.last_result_halted_poll = true
         end
       end
     end
-  end
-
-  def target_endpoint
-    GOOGLE_API
-  end
-
-  def params_for_request(n)
-    q_params = { :q => search_phrase }
-    q_params.merge!(:start => n * per_search) if n >= 2
-    q_params
-  end
-
-  def poll_background
-    self.matching_url = ""
-    self.matching_title = ""
-    self.last_ranked_at = nil
-    self.last_error = ""
-    self.ranking = 0
-
-    requests = 0
-    self.last_result_halted_poll = false
-    done = false
-    while !done && requests < MAX_REQUESTS_PER_RUN
-      result = nil
-      begin
-        requests += 1
-        result = RestClient.get target_endpoint, :params => params_for_request(requests)
-      rescue => e
-        self.last_error = e.response
-        done = true
-        break
-      end
-
-      begin
-        handle_result(result)
-        if last_result_halted_poll
-          done = true
-          break
-        end
-      rescue => e
-        self.last_error = t('seo_ranker.parse_error')
-        done = true
-        break
-      end
-    end
-
-    self.runs_since_window_started += 1
-    save!
-    stop_persistent_request(RANKING_REQUEST)
-  end
-
-  def reset_window
-    self.last_window_started_at = Time.now
-    self.runs_since_window_started = 0
   end
 
   protected
@@ -179,7 +93,7 @@ class SEORanker < ActiveRecord::Base
   def _defaults
     self.search_engine = SearchEngines::GOOGLE if search_engine.blank?
     self.host_to_match = business.host if host_to_match.blank? && business
-    reset_window
+    reset_polling_window
   end
 
   MAX_SEO_RANKERS = 10
