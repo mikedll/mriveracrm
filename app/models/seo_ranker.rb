@@ -15,6 +15,7 @@ class SEORanker < ActiveRecord::Base
   SEARCH_ENGINES = SearchEngines.constants.map { |c| SearchEngines.const_get(c) }
 
   attr_accessible :search_phrase, :search_engine, :name, :host_to_match, :active
+  attr_accessor :last_result_halted_poll
 
   belongs_to :business, :inverse_of => :seo_rankers
 
@@ -73,7 +74,9 @@ class SEORanker < ActiveRecord::Base
     runs_available? && available_for_request?
   end
 
-  def rank!
+  GOOGLE_API = 'http://www.google.com/search'
+  GOOGLE_RESULTS_PER_SEARCH = 10
+  def poll!
     return false if !runs_available?
     if !start_persistent_request(RANKING_REQUEST)
       errors.add(:base, t('seo_ranker.already_requesting'))
@@ -83,9 +86,51 @@ class SEORanker < ActiveRecord::Base
     true
   end
 
-  GOOGLE_API = 'http://www.google.com/search'
-  GOOGLE_RESULTS_PER_SEARCH = 10
-  def rank_background
+  def handle_result(result)
+    doc = Nokogiri::HTML(result)
+    doc.css('#search li.g').each_with_index do |li_node, page_offset|
+      a_node = li_node.css('a').first
+      if a_node
+        url_found = a_node['href']
+
+        if url_found !~ Regexes::PROTOCOL
+          # asssuming google embedded the url in 'q' param
+          url_found = "http://www.dummydomain.com/#{url_found}"
+          google_uri = URI(url_found)
+          url_found = CGI::parse(google_uri.query)['q'].first
+        end
+
+        begin
+          uri = URI(url_found)
+        rescue => e
+          if e.message.include?("bad argument (expected URI object or URI string)")
+            # for later debugging.
+            # puts "Found bad url in: #{url_found} from #{a_node.to_s}"
+            raise
+          end
+        end
+        if uri.host =~ Regexp.new("#{Regexp.escape(host_to_match)}\\z")
+          self.matching_url = url_found
+          self.matching_title = a_node.text()
+          self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
+          self.last_ranked_at = Time.now
+          self.last_result_halted_poll = true
+        end
+      end
+    end
+  end
+
+  def target_endpoint
+    GOOGLE_API
+  end
+
+  def params_for_request(n)
+    q_params = { :q => search_phrase }
+    q_params.merge!(:start => n * per_search) if n >= 2
+    q_params
+  end
+
+  def poll_background
     self.matching_url = ""
     self.matching_title = ""
     self.last_ranked_at = nil
@@ -93,16 +138,13 @@ class SEORanker < ActiveRecord::Base
     self.ranking = 0
 
     runs = 0
-    per_search = GOOGLE_RESULTS_PER_SEARCH
+    self.last_result_halted_poll = false
     done = false
-    while !done && runs < MAX_RUNS_PER_WINDOW
-      q_params = { :q => search_phrase }
-      q_params.merge!(:start => runs * per_search) if runs >= 1
-
+    while !done && requests < MAX_REQUESTS_PER_RUN
       result = nil
       begin
         runs += 1
-        result = RestClient.get GOOGLE_API, :params => q_params
+        result = RestClient.get target_endpoint, :params => params_for_request(runs)
       rescue => e
         self.last_error = e.response
         done = true
@@ -110,37 +152,10 @@ class SEORanker < ActiveRecord::Base
       end
 
       begin
-        doc = Nokogiri::HTML(result)
-        doc.css('#search li.g').each_with_index do |li_node, page_offset|
-          a_node = li_node.css('a').first
-          if a_node
-            url_found = a_node['href']
-
-            if url_found !~ Regexes::PROTOCOL
-              # asssuming google embedded the url in 'q' param
-              url_found = "http://www.dummydomain.com/#{url_found}"
-              google_uri = URI(url_found)
-              url_found = CGI::parse(google_uri.query)['q'].first
-            end
-
-            begin
-              uri = URI(url_found)
-            rescue => e
-              if e.message.include?("bad argument (expected URI object or URI string)")
-                # for later debugging.
-                # puts "Found bad url in: #{url_found} from #{a_node.to_s}"
-                raise
-              end
-            end
-            if uri.host =~ Regexp.new("#{Regexp.escape(host_to_match)}\\z")
-              self.matching_url = url_found
-              self.matching_title = a_node.text()
-              self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
-              self.last_ranked_at = Time.now
-              done = true
-              break
-            end
-          end
+        handle_result(result)
+        if last_result_halted_poll
+          done = true
+          break
         end
       rescue => e
         self.last_error = t('seo_ranker.parse_error')
