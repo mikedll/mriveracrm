@@ -44,13 +44,6 @@
         .controls
           .read-only-field{ :data => { :name => 'seo_ranker[runs_since_window_started]' } }
 
-      .control-group
-        .control-label
-          %label
-            Search Engine
-        .controls
-          .read-only-field{ :data => { :name => 'seo_ranker[search_engine]' } }
-
     .span6
       = read_only_field(:seo_ranker, :window_will_reset_at, ["datetime"])
 

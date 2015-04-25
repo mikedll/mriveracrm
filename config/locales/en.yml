@@ -41,8 +41,6 @@ en:
     already_requesting: 'This SEO Ranker is already busy. Please wait for the current request to finish.'
     run_confirm: "Are you sure you want to run this ranker?"
     parse_error: "An error occurred while processing the search. This may be a programming error that needs engineering. Please contact support if this problem persists."
-    errors:
-      max: "Only %{max} SEO Rankers are permitted per business. You have reached the limit for your business."
 
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
@@ -205,6 +203,7 @@ en:
     not_found_redirect_home: "You tried to access a location that was not recognized. Redirecting you to your entry page."
     unexpected_internal_error: "Unexpected internal system error"
     no_access: "You tried to access a resource that you don't have access to. You've been redirected."
+    max_records_limit: "Only %{max} SEO Rankers are permitted per business. You have reached the limit for your business."
 
     format: ! '%{attribute} %{message}'
     messages:

@@ -12,9 +12,7 @@ class SEORanker < ActiveRecord::Base
 
   RANKING_REQUEST = 'ranking'
 
-  SEARCH_ENGINES = SearchEngines.constants.map { |c| SearchEngines.const_get(c) }
-
-  attr_accessible :search_phrase, :search_engine, :name, :host_to_match, :active
+  attr_accessible :search_phrase, :name, :host_to_match, :active
   attr_accessor :last_result_halted_poll
 
   belongs_to :business, :inverse_of => :seo_rankers
@@ -26,14 +24,12 @@ class SEORanker < ActiveRecord::Base
   end
 
   validation_tier do |t|
-    t.validate :_limit_seo_rankers, :if => :new_record?
+    t.validate :_limit_records, :if => :new_record?
   end
 
   validation_tier do |t|
     t.validates :name, :presence => true
     t.validates :host_to_match, :presence => true
-    t.validates :search_phrase, :presence => true, :length => { :minimum => 3 }
-    t.validates :search_engine, :presence => true, :inclusion => { :in => SEARCH_ENGINES }
   end
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
@@ -91,14 +87,13 @@ class SEORanker < ActiveRecord::Base
   protected
 
   def _defaults
-    self.search_engine = SearchEngines::GOOGLE if search_engine.blank?
     self.host_to_match = business.host if host_to_match.blank? && business
     reset_polling_window
   end
 
-  MAX_SEO_RANKERS = 10
-  def _limit_seo_rankers
-    errors.add(:base, t('seo_ranker.errors.max', :max => MAX_SEO_RANKERS)) if self.class.by_business(business_id).count >= MAX_SEO_RANKERS
+  MAX_RECORDS_ALLOWED = 10
+  def _limit_records
+    errors.add(:base, t('errors.max_records_limit', :max => MAX_RECORDS_ALLOWED)) if self.class.by_business(business_id).count >= MAX_RECORDS_ALLOWED
   end
 
 end
