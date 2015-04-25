@@ -137,14 +137,14 @@ class SEORanker < ActiveRecord::Base
     self.last_error = ""
     self.ranking = 0
 
-    runs = 0
+    requests = 0
     self.last_result_halted_poll = false
     done = false
     while !done && requests < MAX_REQUESTS_PER_RUN
       result = nil
       begin
-        runs += 1
-        result = RestClient.get target_endpoint, :params => params_for_request(runs)
+        requests += 1
+        result = RestClient.get target_endpoint, :params => params_for_request(requests)
       rescue => e
         self.last_error = e.response
         done = true
@@ -164,7 +164,7 @@ class SEORanker < ActiveRecord::Base
       end
     end
 
-    self.runs_since_window_started += runs
+    self.runs_since_window_started += 1
     save!
     stop_persistent_request(RANKING_REQUEST)
   end
