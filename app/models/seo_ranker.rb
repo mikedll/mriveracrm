@@ -6,10 +6,6 @@ class SEORanker < ActiveRecord::Base
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
 
-  module SearchEngines
-    GOOGLE = 'Google'
-  end
-
   RANKING_REQUEST = 'ranking'
 
   attr_accessible :search_phrase, :name, :host_to_match, :active
@@ -35,7 +31,7 @@ class SEORanker < ActiveRecord::Base
   scope :by_business, lambda { |id| where('business_id = ?', id) }
 
   def target_endpoint
-    GOOGLE_API
+    "http://www.google.com/search"
   end
 
   def before_poll
