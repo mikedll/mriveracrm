@@ -20,8 +20,7 @@ class ODeskLister < ActiveRecord::Base
   end
 
   validation_tier do |t|
-    t.validates :name, :presence => true
-    t.validates :host_to_match, :presence => true
+    t.validates :search_phrase, :presence => true
   end
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
