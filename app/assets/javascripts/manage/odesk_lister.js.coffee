@@ -41,4 +41,4 @@ class window.ODeskListerAppView extends CollectionAppView
   modelName: 'odesk_lister'
   spawnListItemType: ODeskListerListItemView
   title: () ->
-    'ODeskListers'
+    'ODesk Listers'
