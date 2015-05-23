@@ -20,10 +20,6 @@ class SEORanker < ActiveRecord::Base
   end
 
   validation_tier do |t|
-    t.validate :_limit_records, :if => :new_record?
-  end
-
-  validation_tier do |t|
     t.validates :name, :presence => true
     t.validates :host_to_match, :presence => true
   end
@@ -84,11 +80,6 @@ class SEORanker < ActiveRecord::Base
   def _defaults
     self.host_to_match = business.host if host_to_match.blank? && business
     reset_polling_window
-  end
-
-  MAX_RECORDS_ALLOWED = 10
-  def _limit_records
-    errors.add(:base, t('errors.max_records_limit', :max => MAX_RECORDS_ALLOWED)) if self.class.by_business(business_id).count >= MAX_RECORDS_ALLOWED
   end
 
 end
