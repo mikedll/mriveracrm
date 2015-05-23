@@ -22,9 +22,9 @@ $(() ->
       modelKlass: StatusMonitor
       modelViewKlass: StatusMonitorView
       rootAppViewKlass: SingleModelAppView
-    '.seo-rankers-gui':
-      modelCollectionKlass: SEORankers
-      rootAppViewKlass: SEORankerAppView
+    '.odesk-listers-gui':
+      modelCollectionKlass: ODeskListers
+      rootAppViewKlass: ODeskListerAppView
 
   lazyGetBootstrap = (selector) ->
     # prevent undefined reference. can be removed if we make __XXX generic
@@ -38,7 +38,7 @@ $(() ->
     else if selector == '.billing-settings-gui'
       return __billing_settings
     else if selector == '.seo-rankers-gui'
-      return __seo_rankers
+      return __odesk_listers
     else
       # something went wrong here.
       return []
