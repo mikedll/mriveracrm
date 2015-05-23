@@ -318,7 +318,6 @@ FactoryGirl.define do
     business
     search_phrase { "admitting unhappiness" }
     name { generate(:random_name) }
-    host_to_match { "www.#{generate(:random_name)}.com" }
 
     factory :odesk_lister do
       after :create do |r|

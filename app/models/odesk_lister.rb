@@ -8,7 +8,7 @@ class ODeskLister < ActiveRecord::Base
 
   RANKING_REQUEST = 'ranking'
 
-  attr_accessible :search_phrase, :name, :host_to_match, :active
+  attr_accessible :search_phrase, :name, :active
   attr_accessor :last_result_halted_poll
 
   belongs_to :business, :inverse_of => :odesk_listers
@@ -41,6 +41,7 @@ class ODeskLister < ActiveRecord::Base
     q_params
   end
 
+  EXPECTED_RESULTS_PER_POLL = 10
   def handle_poll_result(result)
     doc = Nokogiri::HTML(result)
     doc.css('#search li.g').each_with_index do |li_node, page_offset|
@@ -64,12 +65,8 @@ class ODeskLister < ActiveRecord::Base
             raise
           end
         end
-        if uri.host =~ Regexp.new("#{Regexp.escape(host_to_match)}\\z")
-          self.matching_url = url_found
-          self.matching_title = a_node.text()
-          self.ranking = (GOOGLE_RESULTS_PER_SEARCH * (runs - 1)) + (page_offset + 1)
-          self.last_result_halted_poll = true
-        end
+
+        self.ranking = (EXPECTED_RESULTS_PER_POLL * (runs - 1)) + (page_offset + 1)
       end
     end
   end
@@ -77,7 +74,6 @@ class ODeskLister < ActiveRecord::Base
   protected
 
   def _defaults
-    self.host_to_match = business.host if host_to_match.blank? && business
     reset_polling_window
   end
 

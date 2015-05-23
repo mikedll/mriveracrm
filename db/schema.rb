@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150523162625) do
+ActiveRecord::Schema.define(:version => 20150523163756) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -192,7 +192,6 @@ ActiveRecord::Schema.define(:version => 20150523162625) do
     t.integer  "ranking",                   :default => 0,     :null => false
     t.datetime "created_at",                                   :null => false
     t.datetime "updated_at",                                   :null => false
-    t.string   "host_to_match",             :default => "",    :null => false
     t.string   "last_error",                :default => "",    :null => false
     t.string   "matching_url",              :default => "",    :null => false
     t.string   "matching_title",            :default => "",    :null => false
