@@ -30,7 +30,7 @@ class window.ODeskListers extends BaseCollection
 
 class window.ODeskListerListItemView extends ListItemView
   modelName: 'odesk_lister'
-  spawnViewType: ODeskLister
+  spawnViewType: ODeskListerView
   className: 'odesk-lister-list-item list-item'
 
   title: () ->
