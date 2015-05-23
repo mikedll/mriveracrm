@@ -1,6 +1,6 @@
-class Manage::SEORankersController < Manage::BaseController
+class Manage::ODeskListersController < Manage::BaseController
 
-  configure_apps :model => ::SEORanker
+  configure_apps :model => ::ODeskLister
 
   skip_before_filter :require_active_plan
 
@@ -21,7 +21,7 @@ class Manage::SEORankersController < Manage::BaseController
   end
 
   def object_parameters
-    params.slice(* SEORanker.accessible_attributes.map { |k| k.underscore.to_sym } )
+    params.slice(* ODeskLister.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
   def parent_object
@@ -35,7 +35,7 @@ class Manage::SEORankersController < Manage::BaseController
   end
 
   def _require_business_support
-    true # _bsupports?(Feature::Names::SEO_RANKER)
+    true # _bsupports?(Feature::Names::ODESK_LISTER)
   end
 
 end
