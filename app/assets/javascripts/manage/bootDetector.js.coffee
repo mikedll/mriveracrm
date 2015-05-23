@@ -37,7 +37,7 @@ $(() ->
       return __business
     else if selector == '.billing-settings-gui'
       return __billing_settings
-    else if selector == '.seo-rankers-gui'
+    else if selector == '.odesk-listers-gui'
       return __odesk_listers
     else
       # something went wrong here.
