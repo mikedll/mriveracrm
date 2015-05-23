@@ -63,7 +63,7 @@ module BackgroundedPolling
     def poll!
       return false if !runs_available?
       if !start_persistent_request(RANKING_REQUEST)
-        errors.add(:base, t('seo_ranker.already_requesting'))
+        errors.add(:base, t('backgrounded_polling.backgrounded_polling'))
         return false
       end
       Worker.obj_enqueue(self, :poll_background)
@@ -97,7 +97,7 @@ module BackgroundedPolling
             break
           end
         rescue => e
-          self.last_error = t('seo_ranker.parse_error')
+          self.last_error = t('backgrounded_polling.parse_error')
           done = true
           break
         end
