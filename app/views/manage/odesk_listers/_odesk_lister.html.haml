@@ -1,16 +1,14 @@
 
-= simple_form_for :seo_ranker, :html => { :class => 'form-horizontal' } do |f|
+= simple_form_for :odesk_lister, :html => { :class => 'form-horizontal' } do |f|
 
   = f.input :name
 
   = f.input :search_phrase
 
-  = f.input :host_to_match
-
   .control-group
     .controls
       %label.checkbox
-        = check_box_tag 'seo_ranker[active]', 'true', false, :class => 'active boolean'
+        = check_box_tag 'odesk_lister[active]', 'true', false, :class => 'active boolean'
         Active
 
   .row-fluid
@@ -18,11 +16,11 @@
       .control-group
         .control-label
           %label
-            SEO Ranking:
+            Ranking:
         .controls
-          .read-only-field{ :data => { :name => 'seo_ranker[ranking]' } }
+          .read-only-field{ :data => { :name => 'odesk_lister[ranking]' } }
     .span6
-      = read_only_field(:seo_ranker, :last_ranked_at, ["datetime"])
+      = read_only_field(:odesk_lister, :last_ranked_at, ["datetime"])
 
   .row-fluid
     .span12
@@ -31,9 +29,9 @@
           %label
             Matching URL:
         .controls
-          .read-only-field{ :data => { :name => 'seo_ranker[matching_url]' } }
+          .read-only-field{ :data => { :name => 'odesk_lister[matching_url]' } }
 
-      = read_only_field(:seo_ranker, :matching_title)
+      = read_only_field(:odesk_lister, :matching_title)
 
   .row-fluid
     .span6
@@ -42,10 +40,10 @@
           %label
             Runs this window:
         .controls
-          .read-only-field{ :data => { :name => 'seo_ranker[runs_since_window_started]' } }
+          .read-only-field{ :data => { :name => 'odesk_lister[runs_since_window_started]' } }
 
     .span6
-      = read_only_field(:seo_ranker, :window_will_reset_at, ["datetime"])
+      = read_only_field(:odesk_lister, :window_will_reset_at, ["datetime"])
 
   .row-fluid
     .span12
@@ -54,7 +52,7 @@
           %label
             Last Error:
         .controls
-          .read-only-field{ :data => { :name => 'seo_ranker[last_error]' } }
+          .read-only-field{ :data => { :name => 'odesk_lister[last_error]' } }
 
   .control-group
     .controls
