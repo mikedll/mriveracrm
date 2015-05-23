@@ -30,8 +30,15 @@ Spork.prefork do
     SEARCH_ENGINE_TESTS = [:uses_search_engine]
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
     LIVE_WEB_TESTS.each do |filter|
-      # Invert the next two lines, depending on what you're doing,
-      # unless you actually intend to run the entire test suite.
+      # Invert these lines to focus on remote tests if you want, or
+      # disable it if you want to run the entire suite. It depends on
+      # what you're doing.
+      config.filter_run_excluding filter => true
+      # config.filter_run_including filter => true
+    end
+
+    # As above
+    SEARCH_ENGINE_TESTS.each do |filter|
       config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end

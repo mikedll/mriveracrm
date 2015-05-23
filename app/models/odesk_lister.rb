@@ -1,6 +1,6 @@
 require 'cgi'
 
-class SEORanker < ActiveRecord::Base
+class ODeskLister < ActiveRecord::Base
 
   include BackgroundedPolling
   include ValidationTier
@@ -11,7 +11,7 @@ class SEORanker < ActiveRecord::Base
   attr_accessible :search_phrase, :name, :host_to_match, :active
   attr_accessor :last_result_halted_poll
 
-  belongs_to :business, :inverse_of => :seo_rankers
+  belongs_to :business, :inverse_of => :odesk_listers
 
   before_validation :_defaults, :if => :new_record?
 

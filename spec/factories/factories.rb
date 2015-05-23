@@ -314,21 +314,21 @@ FactoryGirl.define do
     marketing_front_end
   end
 
-  factory :seo_ranker_base, :class => SEORanker do
+  factory :odesk_lister_base, :class => ODeskLister do
     business
     search_phrase { "admitting unhappiness" }
     name { generate(:random_name) }
     host_to_match { "www.#{generate(:random_name)}.com" }
 
-    factory :seo_ranker do
+    factory :odesk_lister do
       after :create do |r|
         r.persistent_requests_count.reset
         r.persistent_requests.clear
-        SEORanker.any_instance.stub(:rank_background) { false }
+        ODeskLister.any_instance.stub(:rank_background) { false }
       end
     end
 
-    factory :live_seo_ranker do
+    factory :live_odesk_lister do
     end
 
   end

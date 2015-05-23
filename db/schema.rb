@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150425113654) do
+ActiveRecord::Schema.define(:version => 20150523162625) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -182,6 +182,24 @@ ActiveRecord::Schema.define(:version => 20150425113654) do
     t.datetime "updated_at"
   end
 
+  create_table "odesk_listers", :force => true do |t|
+    t.integer  "business_id",                                  :null => false
+    t.string   "name",                      :default => "",    :null => false
+    t.datetime "last_window_started_at",                       :null => false
+    t.integer  "runs_since_window_started", :default => 0,     :null => false
+    t.string   "search_phrase",             :default => "",    :null => false
+    t.string   "search_engine",             :default => "",    :null => false
+    t.integer  "ranking",                   :default => 0,     :null => false
+    t.datetime "created_at",                                   :null => false
+    t.datetime "updated_at",                                   :null => false
+    t.string   "host_to_match",             :default => "",    :null => false
+    t.string   "last_error",                :default => "",    :null => false
+    t.string   "matching_url",              :default => "",    :null => false
+    t.string   "matching_title",            :default => "",    :null => false
+    t.boolean  "active",                    :default => false, :null => false
+    t.datetime "last_polled_at"
+  end
+
   create_table "payment_gateway_profiles", :force => true do |t|
     t.string   "type"
     t.integer  "payment_gateway_profilable_id"
@@ -227,24 +245,6 @@ ActiveRecord::Schema.define(:version => 20150425113654) do
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "business_id"
-  end
-
-  create_table "seo_rankers", :force => true do |t|
-    t.integer  "business_id",                                  :null => false
-    t.string   "name",                      :default => "",    :null => false
-    t.datetime "last_window_started_at",                       :null => false
-    t.integer  "runs_since_window_started", :default => 0,     :null => false
-    t.string   "search_phrase",             :default => "",    :null => false
-    t.string   "search_engine",             :default => "",    :null => false
-    t.integer  "ranking",                   :default => 0,     :null => false
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-    t.string   "host_to_match",             :default => "",    :null => false
-    t.string   "last_error",                :default => "",    :null => false
-    t.string   "matching_url",              :default => "",    :null => false
-    t.string   "matching_title",            :default => "",    :null => false
-    t.boolean  "active",                    :default => false, :null => false
-    t.datetime "last_polled_at"
   end
 
   create_table "settings", :force => true do |t|
