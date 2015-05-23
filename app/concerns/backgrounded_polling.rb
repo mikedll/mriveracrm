@@ -71,6 +71,7 @@ module BackgroundedPolling
     end
 
     def poll_background
+      before_poll
       self.last_polled_at = nil
       self.last_error = ""
 
