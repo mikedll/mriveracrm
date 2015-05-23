@@ -16,7 +16,7 @@
             = link_to 'Clients', manage_clients_path, :tabIndex => '-1'
         - if true # bcan? Feature::Names::SEO_RANKER
           %li
-            = link_to 'SEO Rankers', manage_seo_rankers_path, :tabIndex => '-1'
+            = link_to 'SEO Rankers', manage_odesk_listers_path, :tabIndex => '-1'
         - if can? :manage, current_business
           %li.dropdown
             %a.dropdown-toggle{:data => { :toggle => "dropdown" }, :href => "#", :tabIndex => "-1"}
