@@ -51,10 +51,17 @@ Then Resque will have something to connect to.
 
 # App setup
 
+Use RVM to install the rvm version as needed.
+Create the remote rvm gemset if you must.
+
+    rvm install rubyversion
+    rvm use rubyversion
+    rvm gemset use gemsetname --create
+
 Install app environment.
 
     > cap envname deploy:setup
-    
+
 Install configs.
 
     > cap envname deploy:install_configs
