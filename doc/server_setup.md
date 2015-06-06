@@ -1,5 +1,28 @@
 
-Pick a package directory.
+# Machines
+
+A typical machine, dev or server, should be setup with Ubuntu.
+A user should be created and have sudo access for administrative
+tasks, although that is not required. The applications
+are expected to be served from that user's home directory.
+
+# Directory Structure
+
+The following directory structure is expected:
+
+    ~/backups
+    ~/packages
+
+These aliases may be setup in `.bash_aliases`:
+
+    alias cdapp="cd $HOME/mikedllcrm/current && rvm use 2.0.0@mikedllcrm"
+
+This may go in `~/.gemrc`:
+
+    gem: --no-document
+
+Pick a package directory like the packages directory described
+above for doing package building.
 
 # Redis
 
