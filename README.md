@@ -96,6 +96,12 @@ That's it. If you're sure you don't have migrations:
 
     cap production deploy
 
+# Backups
+
+Check backups capture:
+
+    cknifeaws afew --count=150 mikedllcrm-backups
+
 ## To restart without deploying:
 
     cap production unicorn:restart
