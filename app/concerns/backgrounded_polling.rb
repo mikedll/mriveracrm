@@ -4,7 +4,8 @@ require 'active_support/concern'
 #
 # Client must define:
 #
-#   handle_result
+#   before_poll
+#   handle_poll_result(response, request, result)
 #   target_endpoint
 #
 #   class Worker < WorkerBase
@@ -40,17 +41,19 @@ module BackgroundedPolling
         errors.add(:base, t('backgrounded_polling.backgrounded_polling'))
         return false
       end
-      Worker.obj_enqueue(self, :poll_background)
+      self.class::Worker.obj_enqueue(self, :poll_background)
       true
     end
 
     def poll_background
+      before_poll
       self.last_error = ""
       self.last_polled_at = nil
 
       begin
-        result = RestClient.get target_endpoint, :params => {}, :from => from_header
-        handle_result(result)
+        result = RestClient.get target_endpoint, :params => {}, :from => from_header do |response, request, result|
+          handle_poll_result(response, request, result)
+        end
       rescue => e
         self.last_error = e.message
       end

@@ -10,8 +10,10 @@ describe IT::ComputerMonitor do
       end
 
       it "should connect to public servers and come up with a ranking" do
-        @cm.poll!
+        @cm.poll!.should be_true
+        @cm.reload
         @cm.last_error.should == ""
+        @cm.last_result.should == 200
       end
     end
   end
@@ -43,7 +45,6 @@ describe IT::ComputerMonitor do
   end
 
   context "validations" do
-
     it "should enforce validation tiers" do
       @cm = FactoryGirl.build(:it_computer_monitor, :search_phrase => "")
       b = @cm.business

@@ -6,7 +6,7 @@ class IT::ComputerMonitor < ActiveRecord::Base
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
 
-  belongs_to :business, :inverse_of => :it_monitors
+  belongs_to :business, :inverse_of => :it_computer_monitors
 
   before_validation :_defaults, :if => :new_record?
 
@@ -24,15 +24,19 @@ class IT::ComputerMonitor < ActiveRecord::Base
   end
 
   def from_header
-    @from_header ||= business.owner.email
+    @from_header ||= business.an_owner.email
   end
 
   def target_endpoint
     "http://#{hostname}:#{port}#{path}"
   end
 
-  def handle_poll_result(result)
-    puts "Found success."
+  def before_poll
+    self.last_result = nil
+  end
+
+  def handle_poll_result(response, request, result)
+    self.last_result = response.net_http_res.code.to_i
   end
 
   protected

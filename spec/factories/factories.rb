@@ -332,6 +332,7 @@ FactoryGirl.define do
 
     factory :live_it_computer_monitor do
       hostname "mexicoinsurance.michaelriveraco.com"
+      port 80
     end
 
   end

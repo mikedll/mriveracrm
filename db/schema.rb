@@ -169,6 +169,7 @@ ActiveRecord::Schema.define(:version => 20150612010122) do
     t.string   "hostname",       :default => "",    :null => false
     t.integer  "port",                              :null => false
     t.string   "path",           :default => "",    :null => false
+    t.integer  "last_result"
   end
 
   create_table "lifecycle_notifications", :force => true do |t|

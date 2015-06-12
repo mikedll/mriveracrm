@@ -13,9 +13,11 @@ class ReplaceOdeskListersWithITComputerMonitors < ActiveRecord::Migration
     add_column :it_computer_monitors, :hostname, :string, :default => "", :null => false
     add_column :it_computer_monitors, :port, :integer,    :null => false
     add_column :it_computer_monitors, :path, :string,     :default => "", :null => false
+    add_column :it_computer_monitors, :last_result, :integer
   end
 
   def down
+    remove_column :it_computer_monitors, :last_result
     remove_column :it_computer_monitors, :hostname
     remove_column :it_computer_monitors, :port
     remove_column :it_computer_monitors, :path

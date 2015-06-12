@@ -43,7 +43,7 @@ Spork.prefork do
       config.filter_run_including filter => true
     end
 
-    live_test_being_run = !LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
+    live_test_being_run = !(LIVE_WEB_TESTS + GENERIC_WEB_TESTS).all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
 
     # config.backtrace_clean_patterns = [
     #   # /\/lib\d*\/ruby\//,
