@@ -1,6 +1,6 @@
-class Manage::ITComputerMonitorController < Manage::BaseController
+class Manage::IT::ComputerMonitorsController < Manage::BaseController
 
-  configure_apps :model => ::IT::Monitor
+  configure_apps :model => ::IT::ComputerMonitor
 
   skip_before_filter :require_active_plan
 

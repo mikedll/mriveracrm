@@ -1,8 +1,7 @@
 
-
 require 'spec_helper'
 
-describe Manage::ODeskListersController do
+describe Manage::IT::ComputerMonitorsController do
 
   context "creation" do
     before :each do
@@ -12,9 +11,9 @@ describe Manage::ODeskListersController do
     end
 
     it "should allow create" do
-      @user.business.odesk_listers.count.should == 0
-      post :create, { :odesk_lister => { 'search_phrase' => "rails" } }
-      @user.business.odesk_listers.count.should == 1
+      @user.business.it_computer_monitors.count.should == 0
+      post :create, { :computer_monitor => { 'name' => "my searcher" } }
+      @user.business.it_computer_monitors.count.should == 1
     end
   end
 
