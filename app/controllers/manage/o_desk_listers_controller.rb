@@ -1,6 +1,6 @@
-class Manage::ODeskListersController < Manage::BaseController
+class Manage::ItMonitorController < Manage::BaseController
 
-  configure_apps :model => ::ODeskLister
+  configure_apps :model => ::It::Monitor
 
   skip_before_filter :require_active_plan
 
@@ -13,7 +13,7 @@ class Manage::ODeskListersController < Manage::BaseController
   end
 
   def json_config
-    { :methods => [:runnable?, :window_will_reset_at, :available_for_request?] }
+    { :methods => [:available_for_request?] }
   end
 
   def rank
@@ -21,7 +21,7 @@ class Manage::ODeskListersController < Manage::BaseController
   end
 
   def object_parameters
-    params.slice(* ODeskLister.accessible_attributes.map { |k| k.underscore.to_sym } )
+    params.slice(* It::Monitor.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
   def parent_object
@@ -35,7 +35,7 @@ class Manage::ODeskListersController < Manage::BaseController
   end
 
   def _require_business_support
-    true # _bsupports?(Feature::Names::ODESK_LISTER)
+    true # _bsupports?(Feature::Names::IT_MONITOR)
   end
 
 end

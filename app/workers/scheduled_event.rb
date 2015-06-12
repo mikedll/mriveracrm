@@ -3,8 +3,7 @@ class ScheduledEvent
   # we don't have inflections defined in railsless clockwork
   # environment, so use camelcase class name.
   module Events
-    RESET_ODESK_LISTERS = 'ODeskLister.reset_windows!'
-    RUN_ODESK_LISTERS = 'ODeskLister.run_live!'
+    RUN_IT_MONITORS = 'It::Monitor.run_live!'
   end
 
   def self.perform(event)

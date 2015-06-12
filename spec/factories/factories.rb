@@ -314,20 +314,19 @@ FactoryGirl.define do
     marketing_front_end
   end
 
-  factory :odesk_lister_base, :class => ODeskLister do
+  factory :it_monitor_base, :class => It::Monitor do
     business
-    search_phrase { "admitting unhappiness" }
     name { generate(:random_name) }
 
-    factory :odesk_lister do
+    factory :it_monitor do
       after :create do |r|
         r.persistent_requests_count.reset
         r.persistent_requests.clear
-        ODeskLister.any_instance.stub(:rank_background) { false }
+        It::Monitor.any_instance.stub(:rank_background) { false }
       end
     end
 
-    factory :live_odesk_lister do
+    factory :live_it_monitor do
     end
 
   end
