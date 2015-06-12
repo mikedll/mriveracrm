@@ -52,7 +52,7 @@ module BackgroundedPolling
         result = RestClient.get target_endpoint, :params => {}, :from => from_header
         handle_result(result)
       rescue => e
-        self.last_error = e.response
+        self.last_error = e.message
       end
 
       self.last_polled_at = Time.now
