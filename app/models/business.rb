@@ -17,7 +17,7 @@ class Business < ActiveRecord::Base
   has_many :images, :dependent => :destroy
   has_many :lifecycle_notifications, :dependent => :destroy
   has_one :usage_subscription, :dependent => :destroy
-  has_many :it_monitors, :inverse_of => :business, :dependent => :destroy, :class_name => 'It::Monitor'
+  has_many :it_monitors, :inverse_of => :business, :dependent => :destroy, :class_name => 'IT::Monitor'
 
   belongs_to :default_mfe, :class_name => "MarketingFrontEnd"
 

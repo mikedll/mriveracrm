@@ -314,19 +314,21 @@ FactoryGirl.define do
     marketing_front_end
   end
 
-  factory :it_monitor_base, :class => It::Monitor do
+  factory :it_computer_monitor_base, :class => IT::ComputerMonitor do
     business
     name { generate(:random_name) }
 
-    factory :it_monitor do
+    factory :it_computer_monitor do
+      hostname "mexicoinsurance.michaelriveraco.com"
+
       after :create do |r|
         r.persistent_requests_count.reset
         r.persistent_requests.clear
-        It::Monitor.any_instance.stub(:rank_background) { false }
+        IT::ComputerMonitor.any_instance.stub(:rank_background) { false }
       end
     end
 
-    factory :live_it_monitor do
+    factory :live_it_computer_monitor do
     end
 
   end

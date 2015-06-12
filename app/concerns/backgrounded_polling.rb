@@ -5,10 +5,15 @@ require 'active_support/concern'
 # Client must define:
 #
 #   handle_result
-#   target_url
+#   target_endpoint
+#
+#   class Worker < WorkerBase
+#   end
+#
 #
 # And these fields in db:
 #
+#  last_error
 #  last_polled_at
 #  active
 #
@@ -23,9 +28,6 @@ module BackgroundedPolling
 
     scope :live, lambda { where('active = ?', true) }
     scope :pollable, lambda { live.where('last_polled_at is null OR last_polled_at < ?', Time.now - POLL_PERIOD) }
-
-    class Worker < WorkerBase
-    end
 
     def self.run_live!
       pollable.find_each do |s|
@@ -43,9 +45,15 @@ module BackgroundedPolling
     end
 
     def poll_background
+      self.last_error = ""
       self.last_polled_at = nil
 
-      handle_result(result)
+      begin
+        result = RestClient.get target_endpoint, :params => {}, :from => from_header
+        handle_result(result)
+      rescue => e
+        self.last_error = e.response
+      end
 
       self.last_polled_at = Time.now
       save!
