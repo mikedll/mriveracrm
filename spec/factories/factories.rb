@@ -318,17 +318,20 @@ FactoryGirl.define do
     business
     name { generate(:random_name) }
 
+    after :create do |r|
+      r.persistent_requests_count.reset
+      r.persistent_requests.clear
+    end
+
     factory :it_computer_monitor do
-      hostname "mexicoinsurance.michaelriveraco.com"
 
       after :create do |r|
-        r.persistent_requests_count.reset
-        r.persistent_requests.clear
         IT::ComputerMonitor.any_instance.stub(:rank_background) { false }
       end
     end
 
     factory :live_it_computer_monitor do
+      hostname "mexicoinsurance.michaelriveraco.com"
     end
 
   end
