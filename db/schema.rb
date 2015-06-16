@@ -29,8 +29,8 @@ ActiveRecord::Schema.define(:version => 20150612010122) do
     t.string   "handle",                          :default => "",    :null => false
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
-    t.string   "google_analytics_id",             :default => "",    :null => false
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
+    t.string   "google_analytics_id",             :default => "",    :null => false
     t.string   "google_public_api_key",           :default => "",    :null => false
   end
 
@@ -167,7 +167,7 @@ ActiveRecord::Schema.define(:version => 20150612010122) do
     t.boolean  "active",                  :default => false, :null => false
     t.datetime "last_polled_at"
     t.string   "hostname",                :default => "",    :null => false
-    t.integer  "port",                                       :null => false
+    t.integer  "port",                    :default => 0,     :null => false
     t.integer  "last_result"
     t.integer  "consecutive_error_count", :default => 0,     :null => false
   end

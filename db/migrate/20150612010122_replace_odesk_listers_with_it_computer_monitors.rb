@@ -11,9 +11,13 @@ class ReplaceOdeskListersWithITComputerMonitors < ActiveRecord::Migration
     remove_column :it_computer_monitors, :last_window_started_at
 
     add_column :it_computer_monitors, :hostname, :string, :default => "", :null => false
-    add_column :it_computer_monitors, :port, :integer,    :null => false
+    add_column :it_computer_monitors, :port, :integer,    :default => 0, :null => false
+    default_port_at_migrate_authorship = 8150
+    execute "UPDATE it_computer_monitors SET port = #{default_port_at_migrate_authorship}"
+
     add_column :it_computer_monitors, :last_result, :integer
     add_column :it_computer_monitors, :consecutive_error_count, :integer, :null => false, :default => 0
+
   end
 
   def down
