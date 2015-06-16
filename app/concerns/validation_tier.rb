@@ -30,17 +30,17 @@ module ValidationTier
 
   included do
 
+    def reload
+      self._validation_tier = 1
+      super
+    end
+
     protected
 
     cattr_accessor :_used_tiers
     attr_accessor :_validation_tier, :_required_validation_tier
 
     before_validation :_reset_validation_tier
-
-    def reload
-      super
-      self._validation_tier = 1
-    end
 
     def _reset_validation_tier
       self._validation_tier = 1
