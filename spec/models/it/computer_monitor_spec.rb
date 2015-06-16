@@ -60,7 +60,7 @@ describe IT::ComputerMonitor do
   end
 
   context "validations" do
-    it "should enforce validation tiers" do
+    it "should enforce validation tiers", :broken => true do
       @cm = FactoryGirl.build(:it_computer_monitor, :search_phrase => "")
       b = @cm.business
 
