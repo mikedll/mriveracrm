@@ -1,4 +1,4 @@
-class Manage::IT::ComputerMonitorsController < Manage::BaseController
+class Manage::ComputerMonitorsController < Manage::BaseController
 
   configure_apps :model => ::IT::ComputerMonitor
 
@@ -21,10 +21,15 @@ class Manage::IT::ComputerMonitorsController < Manage::BaseController
   end
 
   def object_parameters
-    params.slice(* IT::Monitor.accessible_attributes.map { |k| k.underscore.to_sym } )
+    params.slice(* IT::ComputerMonitor.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
   def parent_object
+
+    puts "*************** #{__FILE__} #{__LINE__} *************"
+    puts "#{self.class.made_resourceful?}"
+
+
     @parent_object ||= current_business
   end
 

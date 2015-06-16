@@ -21,6 +21,18 @@ Start resque worker
 
     > bundle exec resque work
 
+# Modules
+
+Model modules are for designated sociopathic boundaries between
+applications.
+
+Higher-level marketing front ends may use models from modules, but
+it's unlikely that lower-level marketing front ends will use models
+from the root namespace. This is not decided, however.
+
+Controller modules are for security restrictions around roles.  We do
+not mirror model namespaces in controllers.
+
 # Typical Views
 
   We have a gui-container class which is typically tied to a Stacked view,
