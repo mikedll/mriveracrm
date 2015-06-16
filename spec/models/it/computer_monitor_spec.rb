@@ -37,25 +37,25 @@ describe IT::ComputerMonitor do
     it "should disable repetitive ranking attempts with PersistentRequestable", :current => true do
       @cm = FactoryGirl.create(:it_computer_monitor)
 
-      @cm.start_persistent_request('rank!').should be_true
+      @cm.start_persistent_request('poll!').should be_true
       @cm.available_for_request?.should be_false
 
-      @cm.start_persistent_request('rank!').should be_false
-      @cm.rank!.should be_false
-      @cm.rank!.should be_false
+      @cm.start_persistent_request('poll!').should be_false
+      @cm.poll!.should be_false
+      @cm.poll!.should be_false
 
-      @cm.stop_persistent_request('rank!')
+      @cm.stop_persistent_request('poll!')
       @cm.available_for_request?.should be_true
-      @cm.rank!.should be_true
+      @cm.poll!.should be_true
 
-      @cm.start_persistent_request('rank!')
+      @cm.start_persistent_request('poll!')
       @cm.available_for_request?.should be_false
-      @cm.rank!.should be_false
-      @cm.rank!.should be_false
+      @cm.poll!.should be_false
+      @cm.poll!.should be_false
 
-      @cm.stop_persistent_request('rank!')
+      @cm.stop_persistent_request('poll!')
       @cm.available_for_request?.should be_true
-      @cm.rank!.should be_true
+      @cm.poll!.should be_true
     end
   end
 
