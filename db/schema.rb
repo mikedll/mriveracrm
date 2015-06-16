@@ -159,17 +159,17 @@ ActiveRecord::Schema.define(:version => 20150612010122) do
   end
 
   create_table "it_computer_monitors", :force => true do |t|
-    t.integer  "business_id",                       :null => false
-    t.string   "name",           :default => "",    :null => false
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
-    t.string   "last_error",     :default => "",    :null => false
-    t.boolean  "active",         :default => false, :null => false
+    t.integer  "business_id",                                :null => false
+    t.string   "name",                    :default => "",    :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
+    t.string   "last_error",              :default => "",    :null => false
+    t.boolean  "active",                  :default => false, :null => false
     t.datetime "last_polled_at"
-    t.string   "hostname",       :default => "",    :null => false
-    t.integer  "port",                              :null => false
-    t.string   "path",           :default => "",    :null => false
+    t.string   "hostname",                :default => "",    :null => false
+    t.integer  "port",                                       :null => false
     t.integer  "last_result"
+    t.integer  "consecutive_error_count", :default => 0,     :null => false
   end
 
   create_table "lifecycle_notifications", :force => true do |t|

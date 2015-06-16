@@ -317,6 +317,7 @@ FactoryGirl.define do
   factory :it_computer_monitor_base, :class => IT::ComputerMonitor do
     business
     name { generate(:random_name) }
+    active true
 
     after :create do |r|
       r.persistent_requests_count.reset
@@ -324,7 +325,6 @@ FactoryGirl.define do
     end
 
     factory :it_computer_monitor do
-
       after :create do |r|
         IT::ComputerMonitor.any_instance.stub(:rank_background) { false }
       end
@@ -333,6 +333,10 @@ FactoryGirl.define do
     factory :live_it_computer_monitor do
       hostname "mexicoinsurance.michaelriveraco.com"
       port 80
+
+      factory :live_it_computer_monitor_of_down_site do
+        port 9010
+      end
     end
 
   end

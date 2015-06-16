@@ -18,17 +18,8 @@ class IT::ComputerMonitor < ActiveRecord::Base
   class Worker < WorkerBase
   end
 
-  def reload
-    @from_header = nil
-    super
-  end
-
-  def from_header
-    @from_header ||= business.an_owner.email
-  end
-
   def target_endpoint
-    "http://#{hostname}:#{port}#{path}"
+    "http://#{hostname}:#{port}"
   end
 
   def before_poll
@@ -42,7 +33,6 @@ class IT::ComputerMonitor < ActiveRecord::Base
   protected
 
   def _defaults
-    self.path = "/" if path.blank?
     self.port = DEFAULT_PORT if port.nil?
   end
 

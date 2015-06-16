@@ -5,15 +5,30 @@ describe IT::ComputerMonitor do
 
   context "live", :generic_web_test => true do
     context "poll" do
-      before do
-        @cm = FactoryGirl.create(:live_it_computer_monitor)
-      end
-
       it "should connect to public servers and come up with a ranking" do
+        @cm = FactoryGirl.create(:live_it_computer_monitor)
         @cm.poll!.should be_true
         @cm.reload
         @cm.last_error.should == ""
         @cm.last_result.should == 200
+      end
+
+      it "should count errors and halt after three" do
+        @cm = FactoryGirl.create(:live_it_computer_monitor_of_down_site)
+        @cm.poll!.should be_true
+        @cm.reload
+        @cm.last_error.should == "Connection refused - connect(2)"
+        @cm.consecutive_error_count.should == 1
+
+        @cm.poll!.should be_true
+        @cm.reload
+        @cm.consecutive_error_count.should == 2
+
+        @cm.active.should be_true
+        @cm.poll!.should be_true
+        @cm.reload
+        @cm.consecutive_error_count.should == 3
+        @cm.active.should be_false
       end
     end
   end

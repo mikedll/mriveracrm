@@ -12,15 +12,15 @@ class ReplaceOdeskListersWithITComputerMonitors < ActiveRecord::Migration
 
     add_column :it_computer_monitors, :hostname, :string, :default => "", :null => false
     add_column :it_computer_monitors, :port, :integer,    :null => false
-    add_column :it_computer_monitors, :path, :string,     :default => "", :null => false
     add_column :it_computer_monitors, :last_result, :integer
+    add_column :it_computer_monitors, :consecutive_error_count, :integer, :null => false, :default => 0
   end
 
   def down
+    remove_column :it_computer_monitors, :consecutive_error_count
     remove_column :it_computer_monitors, :last_result
-    remove_column :it_computer_monitors, :hostname
     remove_column :it_computer_monitors, :port
-    remove_column :it_computer_monitors, :path
+    remove_column :it_computer_monitors, :hostname
 
     add_column :it_computer_monitors, :last_window_started_at,    :datetime, :null => false
     add_column :it_computer_monitors, :runs_since_window_started, :integer,  :default => 0, :null => false

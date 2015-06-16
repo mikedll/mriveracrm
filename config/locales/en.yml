@@ -27,6 +27,10 @@ en:
     products: "Products"
     contact: "Contact"
 
+  computer_monitor:
+    errors:
+      unexpected_http_result:  "Unexpected HTTP Result: %{code}"
+
   user:
     errors:
       no_invitation: "No open invitation could be found for your email, %{email}."
