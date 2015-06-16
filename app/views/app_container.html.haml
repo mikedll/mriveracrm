@@ -9,5 +9,5 @@
 
 .templates.hide
   - apps_configuration[:model_templates].each do |klass|
-    %div{ :class => "#{klass.to_s.underscore}_view_example"}
+    %div{ :class => "#{klass.to_s.demodulize.underscore}_view_example"}
       = render klass.new
