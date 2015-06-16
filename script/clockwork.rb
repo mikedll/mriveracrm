@@ -29,6 +29,5 @@ Resque.redis = AppConfiguration.get('redis')
 
 module Clockwork
   handler { |job| Resque.enqueue_to(WorkerBase::Queues::DEFAULT, 'ScheduledEvent', job) }
-  every(1.hour, ScheduledEvent::Events::RESET_ODESK_LISTERS)
-  every(1.hour, ScheduledEvent::Events::RUN_ODESK_LISTERS)
+  every(1.minute, ScheduledEvent::Events::RUN_IT_COMPUTER_MONITORS)
 end
