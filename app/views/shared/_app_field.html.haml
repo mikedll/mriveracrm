@@ -4,8 +4,4 @@
 - elsif attr.respond_to?(:[])
   - attr_name = attr.keys.first.to_sym
   - attribute_mixins = attr.values.first.respond_to?(:each) ? attr.values.first : [attr.values.first]
-  - if attribute_mixins.include?(:read_only)
-    - remaining_mixins = attribute_mixins.reject { |e| e == :read_only }
-    = read_only_field(klass_name.underscore.to_sym, attr_name, remaining_mixins)
-  - else
-    = f.input attr_name, :input_html => { :class => attribute_mixins.join(' ') }
+  = f.input attr_name, :input_html => { :class => attribute_mixins.join(' ') }

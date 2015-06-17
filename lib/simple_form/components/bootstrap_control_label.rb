@@ -2,9 +2,6 @@ module SimpleForm
   module Components
     module BootstrapControlLabel
 
-      def initialize(*)
-      end
-
       def bootstrap_control_label
         options[:label_html] ||= {}
         options[:label_html][:class] = [] if !options[:label_html].key?(:class)

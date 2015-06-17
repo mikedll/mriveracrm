@@ -120,7 +120,10 @@ SimpleForm.setup do |config|
 
   # Custom wrappers for input types. This should be a hash containing an input
   # type as key and the wrapper that will be used for all inputs with specified type.
-  config.wrapper_mappings = { :boolean => :inline_label }
+  config.wrapper_mappings = {
+    :boolean => :inline_label,
+    :readonly => :readonly
+  }
 
   # Default priority for time_zone inputs.
   # config.time_zone_priority = nil

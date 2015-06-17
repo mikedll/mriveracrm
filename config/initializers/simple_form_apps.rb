@@ -9,4 +9,12 @@ SimpleForm.setup do |config|
     end
   end
 
+  config.wrappers :readonly, :tag => 'div', :class=> 'control-group', :error_class => 'error' do |b|
+    b.use :bootstrap_control_label
+    b.use :label
+    b.wrapper :tag => 'div', :class => 'controls' do |ba|
+      # ba.use :read_only_display
+    end
+  end
+
 end
