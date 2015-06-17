@@ -12,13 +12,18 @@ class IT::ComputerMonitor < ActiveRecord::Base
 
   validates :business_id, :presence => true
   validates :name, :presence => true
+  validates :hostname, :presence => true
   validates :port, :presence => true
+  validates :port, :numericality => { :only_integer => true }
+
+  attr_accessible :name, :hostname, :port, :active
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
 
   cattr_accessor :apps_attributes
   self.apps_attributes = [
     [:name],
+    [:hostname],
     [:port],
     [:active => [:active, :boolean]],
     [{ :last_result => [:read_only] }, { :last_polled_at => [:read_only, :datetime] }],
