@@ -9,12 +9,6 @@
     = read_only_field(klass_name.underscore.to_sym, attr_name, remaining_mixins)
   - else
     - if attribute_mixins.include?(:boolean)
-      .control-group
-        .controls
-          %label.checkbox
-            = check_box_tag "#{klass_name.underscore}[#{attr_name}]", 'true', false, :class => attribute_mixins.join(' ')
-            = attr_name.to_s.titleize
+      = f.input attr_name, :as => :boolean, :wrapper => :inline_label, :input_html => { :class => attribute_mixins.join(' ') }
     - else
       = f.input attr_name, :class => attribute_mixins
-
-

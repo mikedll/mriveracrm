@@ -1,7 +1,7 @@
 
 - klass_name = computer_monitor.class.to_s.underscore.tr('/', '_')
 - demodulized_klass_name = computer_monitor.class.to_s.demodulize
-= simple_form_for computer_monitor, :url => url_for(:use_route => "manage_#{demodulized_klass_name.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' } do |f|
+= apps_form_for computer_monitor, :url => url_for(:use_route => "manage_#{demodulized_klass_name.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' } do |f|
 
   - computer_monitor.class.apps_attributes.each do |row|
     - if row.length == 1
