@@ -1,7 +1,4 @@
 
-# Form Builder
-require 'apps_form_builder'
-
 SimpleForm.setup do |config|
 
   config.wrappers :inline_label, :tag => 'div', :class=> 'control-group', :error_class => 'error' do |b|
