@@ -1,0 +1,20 @@
+
+- if attr.is_a?(Symbol) || attr.is_a?(String)
+  = f.input attr
+- elsif attr.respond_to?(:[])
+  - attr_name = attr.keys.first.to_sym
+  - attribute_mixins = attr.values.first.respond_to?(:each) ? attr.values.first : [attr.values.first]
+  - if attribute_mixins.include?(:read_only)
+    - remaining_mixins = attribute_mixins.reject { |e| e == :read_only }
+    = read_only_field(klass_name.underscore.to_sym, attr_name, remaining_mixins)
+  - else
+    - if attribute_mixins.include?(:boolean)
+      .control-group
+        .controls
+          %label.checkbox
+            = check_box_tag "#{klass_name.underscore}[#{attr_name}]", 'true', false, :class => attribute_mixins.join(' ')
+            = attr_name.to_s.titleize
+    - else
+      = f.input attr_name, :class => attribute_mixins
+
+

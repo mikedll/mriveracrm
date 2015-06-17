@@ -46,13 +46,20 @@ module ApplicationHelper
   end
 
   def read_only_field(model_name, attribute_name, type_mods = [])
+
+    control_group_mod = ""
+    if type_mods.include?(:error)
+      control_group_mod = "error"
+      type_mods.reject! { |mod| mod == :error }
+    end
+
     opts = {
       :class => ['read-only-field'],
       :data => { :name => "#{model_name}[#{attribute_name}]" },
     }
     opts[:class] += type_mods if type_mods
 
-    content_tag(:div, :class => "control-group") do
+    content_tag(:div, :class => ["control-group", control_group_mod]) do
       concat content_tag(:div, :class => "control-label") { concat(label_tag("#{attribute_name.to_s.titleize}:")) }
       concat content_tag(:div, content_tag(:div, '', opts), :class => 'controls')
     end

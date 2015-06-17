@@ -25,11 +25,6 @@ class Manage::ComputerMonitorsController < Manage::BaseController
   end
 
   def parent_object
-
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{self.class.made_resourceful?}"
-
-
     @parent_object ||= current_business
   end
 

@@ -9,7 +9,7 @@ module AppsModelInspection
   included do
 
     cattr_accessor :apps_primary_model
-    attr_accessor :apps_configuration, :apps_model_inspector, :model_namespace_aware_name
+    attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name
 
     before_filter :_check_for_primary_model
 
@@ -17,24 +17,25 @@ module AppsModelInspection
       activate_default_apps
       model_namespaced_klass_name = klass.to_s
       klass_name = model_namespaced_klass_name.demodulize
+      model_namespaced_klass_name_underscored = model_namespaced_klass_name.underscore.tr('/', '_')
       controller_klass = self.class.to_s
+      controller_klass_name = controller_klass.demodulize
+      controller_name = controller_klass_name.gsub("Controller", '')
       controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass.demodulize}$"), '')
 
-      # assert overlap between controller and model modules, as an
-      # integrity check.
-
       if klass_name != model_namespaced_klass_name
-        self.model_namespace_aware_name = (plural_action? ? model_namespaced_klass_name.pluralize : model_namespaced_klass_name).underscore.tr("/", "_")
+        self.model_variable_name = model_namespaced_klass_name_underscored
+        self.model_variable_name = model_namespaced_klass_name_underscored.pluralize if (controller_name.singularize != controller_name)
       end
 
       apps_configuration.merge!({
-          :app_top => plural_action? ? true : false,
-          :app_class => plural_action? ? klass_name.pluralize.underscore.dasherize : klass_name.singularize.underscore.dasherize,
-          :title => klass_name.titleize
+          :app_top => singular? ? false : true,
+          :app_class => (singular? ? model_namespaced_klass_name_underscored : model_namespaced_klass_name_underscored.pluralize).dasherize,
+          :title => (singular? ? klass_name : klass_name.pluralize).titleize
         })
 
       apps_configuration[:model_templates].push(klass)
-      apps_configuration[:javascript_modules] += [controller_klass_container.split("::").map(&:underscore).join('/')]
+      apps_configuration[:javascript_modules] += [controller_klass_container.underscore]
     end
 
     def default_apps_configuration
@@ -54,7 +55,7 @@ module AppsModelInspection
     end
 
     def instance_variable_name_with_model_namespace_awareness
-      return model_namespace_aware_name if model_namespace_aware_name
+      return model_variable_name if model_variable_name
       instance_variable_name
     end
 

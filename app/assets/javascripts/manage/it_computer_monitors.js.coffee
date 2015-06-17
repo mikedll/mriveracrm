@@ -1,13 +1,13 @@
 
-class window.ComputerMonitor extends BaseModel
+class window.ItComputerMonitor extends BaseModel
   defaults:
     'runnable?': false
 
   isPersistentRequestingAvailable: () ->
     @deepGet('available_for_request?')
 
-class window.ComputerMonitorView extends CrmModelView
-  modelName: 'computer_monitor'
+class window.ItComputerMonitorView extends CrmModelView
+  modelName: 'it_computer_monitor'
 
   initialize: (options) ->
     CrmModelView.prototype.initialize.apply(@, arguments)
@@ -24,21 +24,21 @@ class window.ComputerMonitorView extends CrmModelView
     else
       lastError$.closest('.control-group').show()
 
-class window.ComputerMonitors extends BaseCollection
-  model: ComputerMonitor
+class window.ItComputerMonitors extends BaseCollection
+  model: ItComputerMonitor
   urlFragment: '/manage/computer_monitors'
 
-class window.ComputerMonitorListItemView extends ListItemView
-  modelName: 'computer_monitor'
-  spawnViewType: ComputerMonitorView
-  className: 'computer-monitor-list-item list-item'
+class window.ItComputerMonitorListItemView extends ListItemView
+  modelName: 'it_computer_monitor'
+  spawnViewType: ItComputerMonitorView
+  className: 'it-computer-monitor-list-item list-item'
 
   title: () ->
     @model.get('name')
 
-class window.ComputerMonitorAppView extends CollectionAppView
-  modelNamePlural: 'computer_monitors'
-  modelName: 'computer_monitor'
-  spawnListItemType: ComputerMonitorListItemView
+class window.ItComputerMonitorAppView extends CollectionAppView
+  modelNamePlural: 'it_computer_monitors'
+  modelName: 'it_computer_monitor'
+  spawnListItemType: ItComputerMonitorListItemView
   title: () ->
-    'Computer Monitor'
+    'Computer Monitors'

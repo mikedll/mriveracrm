@@ -1,58 +1,22 @@
 
-= simple_form_for :odesk_lister, :html => { :class => 'form-horizontal' } do |f|
+- klass_name = computer_monitor.class.to_s.underscore.tr('/', '_')
+- demodulized_klass_name = computer_monitor.class.to_s.demodulize
+= simple_form_for computer_monitor, :url => url_for(:use_route => "manage_#{demodulized_klass_name.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' } do |f|
 
-  = f.input :name
-
-  = f.input :search_phrase
-
-  .control-group
-    .controls
-      %label.checkbox
-        = check_box_tag 'odesk_lister[active]', 'true', false, :class => 'active boolean'
-        Active
-
-  .row-fluid
-    .span6
-      .control-group
-        .control-label
-          %label
-            Ranking:
-        .controls
-          .read-only-field{ :data => { :name => 'odesk_lister[ranking]' } }
-    .span6
-      = read_only_field(:odesk_lister, :last_ranked_at, ["datetime"])
-
-  .row-fluid
-    .span12
-      .control-group
-        .control-label
-          %label
-            Matching URL:
-        .controls
-          .read-only-field{ :data => { :name => 'odesk_lister[matching_url]' } }
-
-      = read_only_field(:odesk_lister, :matching_title)
-
-  .row-fluid
-    .span6
-      .control-group
-        .control-label
-          %label
-            Runs this window:
-        .controls
-          .read-only-field{ :data => { :name => 'odesk_lister[runs_since_window_started]' } }
-
-    .span6
-      = read_only_field(:odesk_lister, :window_will_reset_at, ["datetime"])
-
-  .row-fluid
-    .span12
-      .control-group.error
-        .control-label
-          %label
-            Last Error:
-        .controls
-          .read-only-field{ :data => { :name => 'odesk_lister[last_error]' } }
+  - computer_monitor.class.apps_attributes.each do |row|
+    - if row.length == 1
+      = render :partial => "shared/app_field", :locals => { :f => f, :attr => row.first, :klass_name => klass_name }
+    - else
+      - div_class = "span6" if row.length == 2
+      - div_class = "span4" if row.length == 3
+      - div_class = "span3" if row.length == 4
+      - if row.length > 4
+        - div_class = nil 
+        - inline_mode = true
+      .row-fluid
+        - row.each do |attr|
+          %div{:class => div_class}
+            = render :partial => "shared/app_field", :locals => { :f => f, :attr => attr, :klass_name => klass_name }
 
   .control-group
     .controls

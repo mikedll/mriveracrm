@@ -12,8 +12,18 @@ class IT::ComputerMonitor < ActiveRecord::Base
 
   validates :business_id, :presence => true
   validates :name, :presence => true
+  validates :port, :presence => true
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
+
+  cattr_accessor :apps_attributes
+  self.apps_attributes = [
+    [:name],
+    [:port],
+    [:active => [:active, :boolean]],
+    [{ :last_result => [:read_only] }, { :last_polled_at => [:read_only, :datetime] }],
+    [{ :last_error => [:read_only, :error] }]
+  ]
 
   class Worker < WorkerBase
   end
