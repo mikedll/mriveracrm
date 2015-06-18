@@ -6,6 +6,10 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   cattr_accessor :action_button_defaults
   self.action_button_defaults = { :action_type => :put_action }
 
+  def derived_inputs_buttons
+    derived_inputs.safe_concat(derived_buttons)
+  end
+
   def derived_inputs
     return nil if object.nil?
 

@@ -2,6 +2,5 @@
 - demodulized_klass_name = computer_monitor.class.to_s.demodulize
 = apps_form_for computer_monitor, :url => url_for(:use_route => "manage_#{demodulized_klass_name.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' } do |f|
 
-  = f.derived_inputs
-  = f.derived_buttons
+  = f.derived_inputs_buttons
 
