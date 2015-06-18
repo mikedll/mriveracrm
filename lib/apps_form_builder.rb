@@ -3,6 +3,10 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   include ActionView::Helpers::FormTagHelper
   include ActionView::Helpers::TranslationHelper
 
+  cattr_accessor :action_button_defaults
+  self.action_button_defaults = { :action_type => :put_action }
+
+
   def derived_buttons
     output = ActiveSupport::SafeBuffer.new
     output.safe_concat(content_tag('div', :class => 'btn-group') do
@@ -12,6 +16,37 @@ class AppsFormBuilder < SimpleForm::FormBuilder
     output.safe_concat(content_tag('div', :class => 'btn-group sensitive') do
                          content_tag('button', 'Revert', :class => 'revert btn btn-warning', :type => 'button', :data => { :confirm => t('revert_confirm') })
                        end)
+
+    if object
+      object.apps_actions.each do |action_descriptor|
+        name = action_descriptor.keys.first.to_s
+        label = name.titleize
+        btn_css_classes = ['btn', name.to_s]
+        data_opts = { :data => { :action => name} }
+        action_button_defaults.merge(action_descriptor.values.first).each do |k, v|
+          case k
+          when :action_type
+            if v == :basic
+              data_opts = { :data => {}}
+            else
+              btn_css_classes.push('put_action')
+            end
+          when :enabled_on
+            # bug: useage in button_tag fails to preserve underscore if we index [:data]
+            data_opts['data-attribute_enabler'] = v.to_s
+            data_opts['data-enabled_when'] = 'true'
+          when :confirm
+            data_opts[:data][:confirm] = v
+          when :label
+            label = v
+          end
+        end
+
+        output.safe_concat(content_tag('div', :class => 'btn-group') do
+                             button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
+                           end)
+      end
+    end
 
     if object.nil? || object.class.apps_destroyable == true
       data_opts = { :data => { :confirm => t('delete_confirm') } }
@@ -24,7 +59,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
                          end)
     end
 
-    output
+    content_tag('div', content_tag('div', output, :class => 'controls'), :class => 'control-group')
   end
 
 

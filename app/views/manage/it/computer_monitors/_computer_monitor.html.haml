@@ -17,16 +17,5 @@
           %div{:class => div_class}
             = f.derived_input attr
 
-  .control-group
-    .controls
-      = f.derived_buttons
-
-      .btn-group
-        %button.btn.refresh{:type => "button"}
-          Refresh
-
-      .btn-group
-        %button.rank.put_action.btn{ :type => "button", :data => {:action => 'rank', :attribute_enabler => 'runnable?', :enabled_when => 'true', :confirm => t('backgrounded_polling.run_confirm') } }
-          Run
-
+  = f.derived_buttons
 

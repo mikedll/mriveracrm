@@ -36,6 +36,12 @@ class IT::ComputerMonitor < ActiveRecord::Base
   cattr_accessor :apps_destroyable_enabler
   self.apps_destroyable_enabler = nil
 
+  cattr_accessor :apps_actions
+  self.apps_actions = [
+    {:refresh => { :action_type => :basic }},
+    {:rank => { :label => "Run", :enabled_on => :runnable?, :confirm => I18n.t('backgrounded_polling.run_confirm') } }
+  ]
+
   class Worker < WorkerBase
   end
 
