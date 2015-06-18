@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150403122215) do
+ActiveRecord::Schema.define(:version => 20150618085553) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -29,8 +29,8 @@ ActiveRecord::Schema.define(:version => 20150403122215) do
     t.string   "handle",                          :default => "",    :null => false
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
-    t.string   "google_analytics_id",             :default => "",    :null => false
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
+    t.string   "google_public_api_key",           :default => "",    :null => false
   end
 
   create_table "clients", :force => true do |t|
