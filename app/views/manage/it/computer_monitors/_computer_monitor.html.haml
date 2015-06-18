@@ -2,20 +2,6 @@
 - demodulized_klass_name = computer_monitor.class.to_s.demodulize
 = apps_form_for computer_monitor, :url => url_for(:use_route => "manage_#{demodulized_klass_name.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' } do |f|
 
-  - computer_monitor.class.apps_attributes.each do |row|
-    - if row.length == 1
-      = f.derived_input row.first
-    - else
-      - div_class = "span6" if row.length == 2
-      - div_class = "span4" if row.length == 3
-      - div_class = "span3" if row.length == 4
-      - if row.length > 4
-        - div_class = nil 
-        - inline_mode = true
-      .row-fluid
-        - row.each do |attr|
-          %div{:class => div_class}
-            = f.derived_input attr
-
+  = f.derived_inputs
   = f.derived_buttons
 

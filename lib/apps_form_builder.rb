@@ -6,6 +6,35 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   cattr_accessor :action_button_defaults
   self.action_button_defaults = { :action_type => :put_action }
 
+  def derived_inputs
+    return nil if object.nil?
+
+    output = ActiveSupport::SafeBuffer.new
+    object.class.apps_attributes.each do |row|
+      if row.length == 1
+        output.safe_concat(derived_input(row.first))
+      else
+        div_class = nil
+        if row.length > 4
+          # inline mode. assume class describer knows what he's doing.
+          div_class = nil
+        else
+          div_class = "span6" if row.length == 2
+          div_class = "span4" if row.length == 3
+          div_class = "span3" if row.length == 4
+        end
+
+        inputs_html = ActiveSupport::SafeBuffer.new
+        row.each do |attr|
+          inputs_html.safe_concat(content_tag('div', derived_input(attr), :class => div_class))
+        end
+        output.safe_concat(div_class.nil? ? inputs_html : content_tag('div', inputs_html, :class => 'row-fluid'))
+      end
+    end
+
+    output
+  end
+
 
   def derived_buttons
     output = ActiveSupport::SafeBuffer.new
