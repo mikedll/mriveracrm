@@ -12,7 +12,7 @@ set :keep_releases, 10
 set :user, "mrmike"
 set :scm_username, "mrmike"
 set :use_sudo, false
-set :rvm_ruby_string, '2.0.0@mikedllcrm'
+set :rvm_ruby_string, '2.0.0-p247@mikedllcrm'
 set :rvm_type, :user
 
 namespace :deploy do
