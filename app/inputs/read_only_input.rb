@@ -1,6 +1,4 @@
-
 class ReadOnlyInput < SimpleForm::Inputs::Base
-
   include ActionView::Helpers::FormTagHelper
 
   def input

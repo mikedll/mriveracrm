@@ -30,6 +30,12 @@ class IT::ComputerMonitor < ActiveRecord::Base
     [{ :last_error => [:read_only, :error] }]
   ]
 
+  cattr_accessor :apps_destroyable
+  self.apps_destroyable = true
+
+  cattr_accessor :apps_destroyable_enabler
+  self.apps_destroyable_enabler = nil
+
   class Worker < WorkerBase
   end
 

@@ -1,5 +1,4 @@
 
-- klass_name = computer_monitor.class.to_s.underscore.tr('/', '_')
 - demodulized_klass_name = computer_monitor.class.to_s.demodulize
 = apps_form_for computer_monitor, :url => url_for(:use_route => "manage_#{demodulized_klass_name.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' } do |f|
 
@@ -20,7 +19,7 @@
 
   .control-group
     .controls
-      = render :partial => 'shared/model_view_basic_buttons'
+      = f.derived_buttons
 
       .btn-group
         %button.btn.refresh{:type => "button"}
@@ -30,5 +29,4 @@
         %button.rank.put_action.btn{ :type => "button", :data => {:action => 'rank', :attribute_enabler => 'runnable?', :enabled_when => 'true', :confirm => t('backgrounded_polling.run_confirm') } }
           Run
 
-      = render :partial => 'shared/model_view_delete_button', :locals => { :data => { :attribute_enabler => 'destroyable', :enabled_when => 'true' } }
 
