@@ -122,7 +122,7 @@ SimpleForm.setup do |config|
   # type as key and the wrapper that will be used for all inputs with specified type.
   config.wrapper_mappings = {
     :boolean => :inline_label,
-    :readonly => :readonly
+    :read_only => :read_only
   }
 
   # Default priority for time_zone inputs.

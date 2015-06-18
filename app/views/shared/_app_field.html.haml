@@ -1,7 +1,5 @@
 
-- if attr.is_a?(Symbol) || attr.is_a?(String)
+- if attr.is_a?(Hash)
+  = f.input attr.keys.first.to_sym, :apps_traits => Array.wrap(attr.values.first)
+- else
   = f.input attr
-- elsif attr.respond_to?(:[])
-  - attr_name = attr.keys.first.to_sym
-  - attribute_mixins = attr.values.first.respond_to?(:each) ? attr.values.first : [attr.values.first]
-  = f.input attr_name, :input_html => { :class => attribute_mixins.join(' ') }

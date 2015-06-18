@@ -16,6 +16,7 @@ module MikedllCrm
       #{Rails.root}/app/apps_concerns
       #{Rails.root}/app/concerns
       #{Rails.root}/app/morality
+      #{Rails.root}/app/inputs
     )
 
     config.time_zone = "Pacific Time (US & Canada)"
