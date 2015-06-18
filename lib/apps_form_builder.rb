@@ -1,4 +1,14 @@
 class AppsFormBuilder < SimpleForm::FormBuilder
+
+
+  def derived_input(attr)
+    if attr.is_a?(Hash)
+      input(attr.keys.first.to_sym, :apps_traits => Array.wrap(attr.values.first))
+    else
+      input(attr)
+    end
+  end
+
   def input(attribute_name, options={}, &block) #:nodoc:
     apps_traits = options.delete(:apps_traits)
     if apps_traits
