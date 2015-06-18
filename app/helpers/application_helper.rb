@@ -46,7 +46,8 @@ module ApplicationHelper
   end
 
   def apps_form_render(object)
-    apps_form_for(object, :url => url_for(:use_route => "manage_#{object.class.to_s.demodulize.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' }) do |f|
+    route_name = "#{apps_configuration[:controller_klass_container]}_#{apps_configuration[:subject_klass_name]}"
+    apps_form_for(object, :url => url_for(:use_route => route_name), :html => { :id => nil, :class => 'form-horizontal' }) do |f|
       f.derived_inputs_buttons
     end
   end

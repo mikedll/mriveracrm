@@ -28,6 +28,9 @@ module AppsModelInspection
         self.model_variable_name = model_namespaced_klass_name_underscored.pluralize if (controller_name.singularize != controller_name)
       end
 
+
+      apps_configuration[:controller_klass_container] = controller_klass_container.underscore
+      apps_configuration[:subject_klass_name] = (singular? ? klass_name : klass_name.pluralize).underscore
       apps_configuration.merge!({
           :app_top => singular? ? false : true,
           :app_class => (singular? ? model_namespaced_klass_name_underscored : model_namespaced_klass_name_underscored.pluralize).dasherize,
@@ -40,6 +43,7 @@ module AppsModelInspection
 
     def default_apps_configuration
       {
+        :subject_klass_name => '',
         :app_top => false,
         :app_class => '',
         :title => "Application",
