@@ -39,8 +39,6 @@ class Manage::BusinessesController < Manage::BaseController
       current_object.google_oauth2_client_id = params[:google_oauth2_client_id] if params[:google_oauth2_client_id]
       current_object.google_oauth2_client_secret = params[:google_oauth2_client_secret] if params[:google_oauth2_client_secret]
 
-      current_object.google_analytics_id = params[:google_analytics_id] if params[:google_analytics_id]
-
       current_object.splash_html = params[:splash_html] if params[:splash_html]
       # current_object. = params[:] if params[:]
       # current_object. = params[:] if params[:]
