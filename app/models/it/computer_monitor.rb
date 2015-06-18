@@ -25,7 +25,7 @@ class IT::ComputerMonitor < ActiveRecord::Base
     [:name],
     [:hostname],
     [:port],
-    [:active => [:active, :boolean]],
+    [:active => [:active]],
     [{ :last_result => [:read_only] }, { :last_polled_at => [:read_only, :datetime] }],
     [{ :last_error => [:read_only, :error] }]
   ]
