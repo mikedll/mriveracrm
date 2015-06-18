@@ -42,7 +42,7 @@ group :development do
   gem 'taps', '> 0.3.23'
   gem 'capistrano-unicorn', :require => false
   gem "capistrano"
-  gem "rvm-capistrano"
+  gem "rvm-capistrano", :require => false
   gem "rvm"
 end
 
