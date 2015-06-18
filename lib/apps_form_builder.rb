@@ -3,9 +3,6 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   include ActionView::Helpers::FormTagHelper
   include ActionView::Helpers::TranslationHelper
 
-  cattr_accessor :action_button_defaults
-  self.action_button_defaults = { :action_type => :put_action }
-
   def derived_inputs_buttons
     derived_inputs.safe_concat(derived_buttons)
   end
@@ -14,7 +11,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
     return nil if object.nil?
 
     output = ActiveSupport::SafeBuffer.new
-    object.class.apps_attributes.each do |row|
+    object.class.introspectable_configuration.attributes.each do |row|
       if row.length == 1
         output.safe_concat(derived_input(row.first))
       else
@@ -51,14 +48,14 @@ class AppsFormBuilder < SimpleForm::FormBuilder
                        end)
 
     if object
-      object.apps_actions.each do |action_descriptor|
+      object.class.introspectable_configuration.actions.each do |action_descriptor|
         name = action_descriptor.keys.first.to_s
         label = name.titleize
         btn_css_classes = ['btn', name.to_s]
         data_opts = { :data => { :action => name} }
-        action_button_defaults.merge(action_descriptor.values.first).each do |k, v|
+        action_descriptor.values.first.each do |k, v|
           case k
-          when :action_type
+          when :type
             if v == :basic
               data_opts = { :data => {}}
             else
@@ -81,10 +78,10 @@ class AppsFormBuilder < SimpleForm::FormBuilder
       end
     end
 
-    if object.nil? || object.class.apps_destroyable == true
+    if object.nil? || object.class.introspectable_configuration.destroyable == true
       data_opts = { :data => { :confirm => t('delete_confirm') } }
-      if object && object.class.apps_destroyable_enabler
-        data_opts = data_opts[:data][:attribute_enabler] = object.class.apps_destroyable_enabler
+      if object && object.class.introspectable_configuration.destroyable_enabler
+        data_opts = data_opts[:data][:attribute_enabler] = object.class.introspectable_configuration.destroyable_enabler
       end
 
       output.safe_concat(content_tag('div', :class => 'btn-group pull-right') do

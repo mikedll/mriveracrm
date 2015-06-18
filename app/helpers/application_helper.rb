@@ -45,6 +45,12 @@ module ApplicationHelper
     @apps_configuration
   end
 
+  def apps_form_render(object)
+    apps_form_for(object, :url => url_for(:use_route => "manage_#{object.class.to_s.demodulize.pluralize}"), :html => { :id => nil, :class => 'form-horizontal' }) do |f|
+      f.derived_inputs_buttons
+    end
+  end
+
   def apps_form_for(object, *args, &block)
     options = args.extract_options!
     simple_form_for(object, *(args << options.merge(:builder => AppsFormBuilder)), &block)

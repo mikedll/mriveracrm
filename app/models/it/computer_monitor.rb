@@ -2,6 +2,7 @@ class IT::ComputerMonitor < ActiveRecord::Base
 
   DEFAULT_PORT = 8150
 
+  include Introspectable
   include BackgroundedPolling
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
@@ -20,27 +21,22 @@ class IT::ComputerMonitor < ActiveRecord::Base
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
 
-  cattr_accessor :apps_attributes
-  self.apps_attributes = [
-    [:name],
-    [:hostname],
-    [:port],
-    [:active => [:active]],
-    [{ :last_result => [:read_only] }, { :last_polled_at => [:read_only, :datetime] }],
-    [{ :last_error => [:read_only, :error] }]
-  ]
+  introspect do
+    can :destroy, :enabler => nil
 
-  cattr_accessor :apps_destroyable
-  self.apps_destroyable = true
+    attr :name
+    attr :hostname
+    attr :port
+    attr :active
+    group do
+      attr :last_result, :read_only
+      attr :last_polled_at, [:read_only, :datetime]
+    end
+    attr :last_error, [:read_only]
 
-  cattr_accessor :apps_destroyable_enabler
-  self.apps_destroyable_enabler = nil
-
-  cattr_accessor :apps_actions
-  self.apps_actions = [
-    {:refresh => { :action_type => :basic }},
-    {:rank => { :label => "Run", :enabled_on => :runnable?, :confirm => I18n.t('backgrounded_polling.run_confirm') } }
-  ]
+    action :refresh, :type => :basic
+    action :rank, :label => "Run", :enabled_on => :runnable?, :confirm => I18n.t('backgrounded_polling.run_confirm')
+  end
 
   class Worker < WorkerBase
   end
