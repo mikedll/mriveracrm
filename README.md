@@ -156,4 +156,16 @@ Dependencies:
     sudo pip install Pillow xhtml2pdf
 
 
-Certificates are in: `/etc/ssl/private/mikedll.{crt,key}`
+Certificates are in: `/etc/ssl/private/mikedll.{crt,key}`.  If you
+have intermediate certificates, append those after your
+certificates. They make a difference in efficiency computation for the
+SSL handshake and certificate authentication negotiation.
+
+# SSL DH Group
+
+    > openssl dhparam -out dhparams.pem 2048 
+    > sudo mv dhparams.pem /etc/ssl/private/
+
+# Backups
+
+Schedule `config/deploy/cron.sh` on the serer.
