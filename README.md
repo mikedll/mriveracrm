@@ -143,39 +143,7 @@ Nginx is configured at `/etc/nginx/nginx.conf`:
         }
       }
 
-      server {
-        listen                443;
-        server_name           secure.example.com;
-        ssl                   on;
-        ssl_certificate       /etc/ssl/private/mikedll.crt;
-        ssl_certificate_key   /etc/ssl/private/mikedll.key;
-        ssl_protocols         SSLv3 TLSv1 TLSv1.1 TLSv1.2;
-        ssl_ciphers           ALL:-ADH:+HIGH:+MEDIUM:-LOW:-SSLv2:-EXP;
-        ssl_session_cache     shared:SSL:10m;
-        ssl_prefer_server_ciphers on;
-
-        root /home/mrmike/mikedllcrm/current/public;
-
-        location ^~ /assets/ {
-          gzip_static on;
-          expires max;
-          add_header Cache-Control public;
-        }
-
-        try_files $uri/index.html $uri @unicorn;
-        location @unicorn {
-          proxy_set_header  X-Real-IP       $remote_addr;
-          proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
-          proxy_set_header  X-Forwarded-Proto https;
-          proxy_set_header  Host $http_host;
-          proxy_redirect    off;
-          proxy_pass        http://app_server;
-        }
-
-        error_page 500 502 503 504 /500.html;
-        client_max_body_size 4G;
-        keepalive_timeout 10;
-      }
+      # For SSL configuration, see nginx config in config/nginx.conf.
     }
     
 Dependencies: 
