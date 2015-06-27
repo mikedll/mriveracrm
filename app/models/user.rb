@@ -50,11 +50,11 @@ class User < ActiveRecord::Base
 
   def self.find_for_google_oauth2(auth, current_user)
     # user exists
-    user = cb.google_oauth2(auth[:info][:email]).first
+    user = cb.google_oauth2(auth[:extra][:raw_info][:email]).first
     return user if user
 
     # does not exist. require open invite.
-    invitation = Invitation.cb.open.find_by_email auth[:info][:email].downcase
+    invitation = Invitation.cb.open.find_by_email auth[:extra][:raw_info][:email].downcase
     if invitation
       # invited user
       user = if current_user.nil?
@@ -66,14 +66,14 @@ class User < ActiveRecord::Base
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return user if !invitation.accept_user!(user) # credential likely is already in use for this business
     elsif current_user.nil? && cb.first.nil?
-      invitation = Invitation.handled.open.find_by_email auth[:info][:email].downcase
+      invitation = Invitation.handled.open.find_by_email auth[:extra][:raw_info][:email].downcase
       if invitation
         user = User.new_from_auth(auth[:info])
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
         return nil if !invitation.accept_user!(user)
       else
         u = User.new(:tos_agreement => true)
-        u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
+        u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:extra][:raw_info][:email]))
         return u
       end
     elsif current_user
@@ -82,7 +82,7 @@ class User < ActiveRecord::Base
       return nil
     else
       u = User.new(:tos_agreement => true)
-      u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
+      u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:extra][:raw_info][:email]))
       return u
     end
 
