@@ -112,7 +112,7 @@ That's it. If you're sure you don't have migrations:
 
 Check backups capture:
 
-    cknifeaws afew --count=150 mikedllcrm-backups
+    cknifeaws afew mikedllcrm-backups --count=150 
 
 ## To restart without deploying:
 
