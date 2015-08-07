@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150618085553) do
+ActiveRecord::Schema.define(:version => 20150612010122) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -29,6 +29,7 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.string   "handle",                          :default => "",    :null => false
     t.text     "splash_html",                     :default => "",    :null => false
     t.text     "contact_text",                    :default => "",    :null => false
+    t.string   "google_analytics_id",             :default => "",    :null => false
     t.integer  "default_mfe_id",                  :default => 0,     :null => false
     t.string   "google_public_api_key",           :default => "",    :null => false
   end
@@ -157,6 +158,19 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.string   "pdf_file_original_filename"
   end
 
+  create_table "it_monitored_computers", :force => true do |t|
+    t.integer  "business_id",                                   :null => false
+    t.string   "name",                       :default => "",    :null => false
+    t.datetime "created_at",                                    :null => false
+    t.datetime "updated_at",                                    :null => false
+    t.string   "last_error",                 :default => "",    :null => false
+    t.boolean  "active",                     :default => false, :null => false
+    t.datetime "last_heartbeat_received_at"
+    t.string   "hostname",                   :default => "",    :null => false
+    t.integer  "last_result"
+    t.boolean  "missing",                    :default => false, :null => false
+  end
+
   create_table "lifecycle_notifications", :force => true do |t|
     t.integer  "business_id", :default => 0,  :null => false
     t.string   "identifier",  :default => "", :null => false
@@ -180,23 +194,6 @@ ActiveRecord::Schema.define(:version => 20150618085553) do
     t.text     "body"
     t.datetime "created_at"
     t.datetime "updated_at"
-  end
-
-  create_table "odesk_listers", :force => true do |t|
-    t.integer  "business_id",                                  :null => false
-    t.string   "name",                      :default => "",    :null => false
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-    t.string   "last_error",                :default => "",    :null => false
-    t.boolean  "active",                    :default => false, :null => false
-    t.datetime "last_polled_at"
-    t.datetime "last_window_started_at",                       :null => false
-    t.integer  "runs_since_window_started", :default => 0,     :null => false
-    t.string   "matching_title",            :default => "",    :null => false
-    t.string   "matching_url",              :default => "",    :null => false
-    t.integer  "ranking",                   :default => 0,     :null => false
-    t.string   "search_engine",             :default => "",    :null => false
-    t.string   "search_phrase",             :default => "",    :null => false
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|

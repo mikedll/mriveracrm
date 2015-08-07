@@ -314,11 +314,12 @@ FactoryGirl.define do
     marketing_front_end
   end
 
-  factory :it_monitored_computer_base, :class => IT::MonitoredComputer do
+  factory :it_monitored_computer, :class => IT::MonitoredComputer do
     business
     name { generate(:random_name) }
     active true
     missing false
+    hostname { "crmdev.michaelriveraco.com" }
 
     after :create do |r|
       r.persistent_requests_count.reset

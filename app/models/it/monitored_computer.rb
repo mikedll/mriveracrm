@@ -7,7 +7,7 @@ class IT::MonitoredComputer < ActiveRecord::Base
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
 
-  belongs_to :business, :inverse_of => :it_computer_monitors
+  belongs_to :business, :inverse_of => :it_monitored_computers
 
   before_validation :_defaults, :if => :new_record?
 
