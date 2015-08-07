@@ -124,6 +124,20 @@ See `doc/server_setup.md`.
 
 # Troubleshooting
 
+## uninitialized constant Invoice::Worker
+
+This was caused by backgrounded workers
+that were not cleaned up in the past, and that
+were running older versions of the Rails environment.
+
+Another symptom was that you could see workers
+in the Resque web worker list, two more beyond
+what was obvious to us from foreman invocations.
+
+Killing these other workers stopped the queue
+from being depleted by old workers. They had
+to be killed at the command line.
+
 ## undefined method `const_defined?' for "business":String
 
 Sometimes this happens in a controller when referring

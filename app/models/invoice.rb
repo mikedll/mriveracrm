@@ -5,8 +5,11 @@ class Invoice < ActiveRecord::Base
   has_many :outside_transactions
   has_many :stripe_transactions
 
+  include PersistentRequestable
   include ActionView::Helpers::TranslationHelper
   include ActionView::Helpers::NumberHelper
+
+  PDF_GENERATION = 'PDFGeneration'
 
   mount_uploader :pdf_file, PdfUploader
 
@@ -88,7 +91,6 @@ class Invoice < ActiveRecord::Base
 
   attr_accessible :description, :total, :date, :title
 
-
   before_validation { @virtual_path = 'invoice' }
   before_validation :_defaults_and_formatting
   before_validation :_verify_can_edit?
@@ -97,7 +99,7 @@ class Invoice < ActiveRecord::Base
   validates :description, :length => { :minimum => 3 }
   validate :_can_mark_paid
 
-  before_save :generate_and_assign_pdf
+  after_save :_enqueue_pdf_generation
 
   before_destroy :_verify_destroyable
 
@@ -106,6 +108,9 @@ class Invoice < ActiveRecord::Base
   }
 
   default_scope { order('created_at asc') }
+
+  class Worker < WorkerBase
+  end
 
   def pretty_date
     I18n.l(date, :format => :dateonly)
@@ -145,45 +150,8 @@ class Invoice < ActiveRecord::Base
     }
   end
 
-  def generate_pdf
-    if can_edit?
-      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
-      return nil
-    end
-
-    pdf_root = Rails.root.join("tmp/pdfs")
-    html_filename = pdf_root.join("invoice#{self.id}.html")
-    pdf_filename = "#{File.dirname(html_filename)}/#{File.basename(html_filename, ".*")}.pdf"
-
-    invoice = self
-    File.open(html_filename, "w") do |f| 
-      f.write ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding) 
-    end
-
-    Dir.chdir(pdf_root) do
-      cmd = "xhtml2pdf #{html_filename}"
-      result = %x[#{cmd}]
-    end
-
-    FileUtils.rm_rf(html_filename)
-    File.new(pdf_filename, "r")
-  end
-
   def regenerate_pdf
-    if !can_edit?
-      file = generate_pdf # have to do this to allow us to remove the File object
-      self.pdf_file = file
-      FileUtils.rm_rf(file)
-    end
-    save
-  end
-
-  def generate_and_assign_pdf
-    if !pdf_file? && !can_edit?
-      file = generate_pdf # have to do this to allow us to remove the File object
-      self.pdf_file = file
-      FileUtils.rm_rf(file)
-    end
+    _capture_as_pdf
   end
 
   private
@@ -206,15 +174,56 @@ class Invoice < ActiveRecord::Base
 
   def _verify_destroyable
     if !can_delete?
-      errors.add(:base, I18n.t('invoice.cannot_delete')) 
+      errors.add(:base, I18n.t('invoice.cannot_delete'))
       return false
-    end    
+    end
   end
 
   def _can_mark_paid
     if status_changed? && status == 'paid' && self.transactions.successful.empty?
-      self.errors.add(:transactions, 'must include at least one successful transaction') 
+      self.errors.add(:transactions, 'must include at least one successful transaction')
     end
+  end
+
+  def _capture_as_pdf
+    if can_edit?
+      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
+      return false
+    end
+
+    if !start_persistent_request(PDF_GENERATION)
+      errors.add(:base, t('persistent_requestable.already_requesting', :model => self.class.to_s.humanize.downcase))
+      return false
+    end
+
+    Worker.obj_enqueue(self, :capture_as_pdf_background)
+    true
+  end
+
+  def capture_as_pdf_background
+    pdf_root = Rails.root.join("tmp/pdfs")
+    html_filename = pdf_root.join("invoice#{self.id}.html")
+    pdf_filename = "#{File.dirname(html_filename)}/#{File.basename(html_filename, ".*")}.pdf"
+
+    invoice = self
+    File.open(html_filename, "w") do |f|
+      f.write ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding)
+    end
+
+    Dir.chdir(pdf_root) do
+      cmd = "xhtml2pdf #{html_filename}"
+      result = %x[#{cmd}]
+    end
+
+    FileUtils.rm_rf(html_filename)
+    self.pdf_file = File.new(pdf_filename, "r")
+    save!
+    FileUtils.rm_rf(pdf_filename)
+    stop_persistent_request(PDF_GENERATION)
+  end
+
+  def _enqueue_pdf_generation
+    _capture_as_pdf if !pdf_file? && !can_edit?
   end
 
 end

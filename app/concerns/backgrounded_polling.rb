@@ -29,7 +29,6 @@ module BackgroundedPolling
   BACKGROUND_POLL = 'background_poll'
 
   included do
-    include PersistentRequestable
 
     scope :live, lambda { where('active = ?', true) }
     scope :pollable, lambda { live.where('last_polled_at is null OR last_polled_at < ?', Time.now - POLL_PERIOD) }
@@ -38,17 +37,6 @@ module BackgroundedPolling
       pollable.find_each do |s|
         s.poll!
       end
-    end
-
-    def poll!
-      raise IneligibleToPoll if !active?
-
-      if !start_persistent_request(BACKGROUND_POLL)
-        errors.add(:base, t('backgrounded_polling.backgrounded_polling'))
-        return false
-      end
-      self.class::Worker.obj_enqueue(self, :poll_background)
-      true
     end
 
     def poll_background
@@ -78,7 +66,6 @@ module BackgroundedPolling
 
       self.last_polled_at = Time.now
       save!
-      stop_persistent_request(BACKGROUND_POLL)
     end
 
     def reset_last_poll
