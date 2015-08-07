@@ -183,6 +183,11 @@ FactoryGirl.define do
     total { 2500.00 }
     status { "open" }
 
+    after :create do |r|
+      r.persistent_requests_count.reset
+      r.persistent_requests.clear
+    end
+
     factory :unstubbed_client_invoice do
       client { FactoryGirl.create(:client) }
     end
@@ -197,8 +202,6 @@ FactoryGirl.define do
         end
       end
     end
-
-
   end
 
   factory :transaction do
@@ -320,11 +323,5 @@ FactoryGirl.define do
     active true
     missing false
     hostname { "crmdev.michaelriveraco.com" }
-
-    after :create do |r|
-      r.persistent_requests_count.reset
-      r.persistent_requests.clear
-    end
-
   end
 end
