@@ -25,20 +25,9 @@ module BackgroundedPolling
   class IneligibleToPoll < StandardError
   end
 
-  POLL_PERIOD = 1.hour
   BACKGROUND_POLL = 'background_poll'
 
   included do
-
-    scope :live, lambda { where('active = ?', true) }
-    scope :pollable, lambda { live.where('last_polled_at is null OR last_polled_at < ?', Time.now - POLL_PERIOD) }
-
-    def self.run_live!
-      pollable.find_each do |s|
-        s.poll!
-      end
-    end
-
     def poll_background
       before_poll
       self.last_error = ""

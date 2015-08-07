@@ -1,6 +1,6 @@
-class IT::ComputerMonitor < ActiveRecord::Base
+class IT::MonitoredComputer < ActiveRecord::Base
 
-  DEFAULT_PORT = 8150
+  HEARTBEAT_PERIOD = 10.minutes
 
   include Introspectable
   include BackgroundedPolling
@@ -14,19 +14,19 @@ class IT::ComputerMonitor < ActiveRecord::Base
   validates :business_id, :presence => true
   validates :name, :presence => true
   validates :hostname, :presence => true
-  validates :port, :presence => true
-  validates :port, :numericality => { :only_integer => true }
 
-  attr_accessible :name, :hostname, :port, :active
+  attr_accessible :name, :hostname, :active
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
+  scope :live, lambda { where('active = ?', true) }
+  scope :missing, lambda { live.where('missing = ? AND last_heartbeat_received_at < ?', false, Time.now - HEARTBEAT_PERIOD) }
+  # last_heartbeat_received_at is null OR
 
   introspect do
     can :destroy, :enabler => nil
 
     attr :name
     attr :hostname
-    attr :port
     attr :active
     group do
       attr :last_result, :read_only
@@ -35,10 +35,14 @@ class IT::ComputerMonitor < ActiveRecord::Base
     attr :last_error, [:read_only]
 
     action :refresh, :type => :basic
-    action :rank, :label => "Run", :enabled_on => :runnable?, :confirm => I18n.t('backgrounded_polling.run_confirm')
   end
 
-  class Worker < WorkerBase
+  def self.detect_missing!
+    missing.find_each do |mc|
+      mc.missing = true
+      mc.save!
+      # notify business, or something. s.poll!
+    end
   end
 
   def target_endpoint
@@ -56,7 +60,7 @@ class IT::ComputerMonitor < ActiveRecord::Base
   protected
 
   def _defaults
-    self.port = DEFAULT_PORT if port.nil?
+    self.missing = false if missing.nil?
   end
 
 end

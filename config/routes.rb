@@ -60,7 +60,7 @@ MikedllCrm::Application.routes.draw do
     resource :business, :only => [:show, :update, :destroy]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
-    resources :computer_monitors, :only => [:index, :show, :create, :update, :destroy] do
+    resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy] do
       member do
         put :rank
       end
@@ -165,7 +165,7 @@ MikedllCrm::Application.routes.draw do
       resource :business, :only => [:show, :update, :destroy]
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
-      resources :computer_monitors, :only => [:index, :show, :create, :update, :destroy] do
+      resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy] do
         member do
           put :rank
         end

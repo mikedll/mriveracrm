@@ -314,29 +314,15 @@ FactoryGirl.define do
     marketing_front_end
   end
 
-  factory :it_computer_monitor_base, :class => IT::ComputerMonitor do
+  factory :it_monitored_computer_base, :class => IT::MonitoredComputer do
     business
     name { generate(:random_name) }
     active true
+    missing false
 
     after :create do |r|
       r.persistent_requests_count.reset
       r.persistent_requests.clear
-    end
-
-    factory :it_computer_monitor do
-      after :create do |r|
-        IT::ComputerMonitor.any_instance.stub(:rank_background) { false }
-      end
-    end
-
-    factory :live_it_computer_monitor do
-      hostname "mexicoinsurance.michaelriveraco.com"
-      port 80
-
-      factory :live_it_computer_monitor_of_down_site do
-        port 9010
-      end
     end
 
   end

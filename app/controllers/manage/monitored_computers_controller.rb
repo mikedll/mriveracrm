@@ -1,6 +1,6 @@
-class Manage::ComputerMonitorsController < Manage::BaseController
+class Manage::MonitoredComputersController < Manage::BaseController
 
-  configure_apps :model => ::IT::ComputerMonitor
+  configure_apps :model => ::IT::MonitoredComputer
 
   skip_before_filter :require_active_plan
 
@@ -21,7 +21,7 @@ class Manage::ComputerMonitorsController < Manage::BaseController
   end
 
   def object_parameters
-    params.slice(* IT::ComputerMonitor.accessible_attributes.map { |k| k.underscore.to_sym } )
+    params.slice(* IT::MonitoredComputer.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
   def parent_object

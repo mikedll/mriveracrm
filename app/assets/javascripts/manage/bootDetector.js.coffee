@@ -22,7 +22,7 @@ $(() ->
       modelKlass: StatusMonitor
       modelViewKlass: StatusMonitorView
       rootAppViewKlass: SingleModelAppView
-    '.it-computer-monitors-gui':
+    '.it-monitored-computers-gui':
       modelCollectionKlass: ItComputerMonitors
       rootAppViewKlass: ItComputerMonitorAppView
 
@@ -37,7 +37,7 @@ $(() ->
       return __business
     else if selector == '.billing-settings-gui'
       return __billing_settings
-    else if selector == '.it-computer-monitors-gui'
+    else if selector == '.it-monitored-computers-gui'
       return __it_computer_monitors
     else
       # something went wrong here.
