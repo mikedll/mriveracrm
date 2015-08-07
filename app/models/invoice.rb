@@ -142,7 +142,7 @@ class Invoice < ActiveRecord::Base
       :can_edit => can_edit?,
       :date => date,
       :status => status
-    }    
+    }
   end
 
   def generate_pdf
