@@ -3,7 +3,8 @@ require 'spec_helper'
 
 describe IT::MonitoredComputer do
 
-  context "live", :generic_web_test => true, :ignore => true do
+  context "old polling", :ignore => true do
+    # This should be moved to cknife.
     context "poll" do
       it "should connect to public servers and come up with a ranking" do
         @mc = FactoryGirl.create(:live_it_monitored_computer)
@@ -30,6 +31,17 @@ describe IT::MonitoredComputer do
         @mc.consecutive_error_count.should == 3
         @mc.active.should be_false
       end
+    end
+  end
+
+  context "live", :current => true do
+    it "should notify business owner when a monitored computer is down" do
+      @mc = FactoryGirl.create(:it_monitored_computer)
+      @mc.down.should be_false
+      @mc.last_heartbeat_received_at = Time.now - (IT::MonitoredComputer::HEARTBEAT_PERIOD + 3.seconds)
+      @mc.save
+      IT::MonitoredComputer.detect_missing!
+      @mc.reload.down.should be_true
     end
   end
 

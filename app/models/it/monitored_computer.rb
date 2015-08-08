@@ -19,7 +19,8 @@ class IT::MonitoredComputer < ActiveRecord::Base
 
   scope :by_business, lambda { |id| where('business_id = ?', id) }
   scope :live, lambda { where('active = ?', true) }
-  scope :missing, lambda { live.where('missing = ? AND last_heartbeat_received_at < ?', false, Time.now - HEARTBEAT_PERIOD) }
+  scope :missing, lambda { live.where('down = ? AND last_heartbeat_received_at < ?', false, Time.now - HEARTBEAT_PERIOD) }
+  scope :down, lambda { live.where('down = ?', true) }
   # last_heartbeat_received_at is null OR
 
   introspect do
@@ -30,7 +31,7 @@ class IT::MonitoredComputer < ActiveRecord::Base
     attr :active
     group do
       attr :last_result, :read_only
-      attr :last_polled_at, [:read_only, :datetime]
+      attr :last_heartbeat_received_at, [:read_only, :datetime]
     end
     attr :last_error, [:read_only]
 
@@ -38,8 +39,8 @@ class IT::MonitoredComputer < ActiveRecord::Base
   end
 
   def self.detect_missing!
-    missing.find_each do |mc|
-      mc.missing = true
+    missing.each do |mc|
+      mc.down = true
       mc.save!
       # notify business, or something. s.poll!
     end
@@ -60,7 +61,7 @@ class IT::MonitoredComputer < ActiveRecord::Base
   protected
 
   def _defaults
-    self.missing = false if missing.nil?
+    self.down = false if down.nil?
   end
 
 end

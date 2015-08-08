@@ -167,8 +167,8 @@ ActiveRecord::Schema.define(:version => 20150612010122) do
     t.boolean  "active",                     :default => false, :null => false
     t.datetime "last_heartbeat_received_at"
     t.string   "hostname",                   :default => "",    :null => false
-    t.integer  "last_result"
-    t.boolean  "missing",                    :default => false, :null => false
+    t.string   "last_result",                :default => "",    :null => false
+    t.boolean  "down",                       :default => false, :null => false
   end
 
   create_table "lifecycle_notifications", :force => true do |t|

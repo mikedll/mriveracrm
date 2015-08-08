@@ -14,14 +14,13 @@ class ReplaceOdeskListersWithITMonitoredComputers < ActiveRecord::Migration
 
     add_column :it_monitored_computers, :hostname, :string, :default => "", :null => false
 
-    add_column :it_monitored_computers, :last_result, :integer
-    add_column :it_monitored_computers, :missing, :boolean, :null => false, :default => false
+    add_column :it_monitored_computers, :last_result, :string, :null => false, :default => ""
+    add_column :it_monitored_computers, :down, :boolean, :null => false, :default => false
   end
 
   def down
-    remove_column :it_monitored_computers, :missing
+    remove_column :it_monitored_computers, :down
     remove_column :it_monitored_computers, :last_result
-    remove_column :it_monitored_computers, :port
     remove_column :it_monitored_computers, :hostname
 
     add_column :it_monitored_computers, :last_window_started_at,    :datetime

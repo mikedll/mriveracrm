@@ -321,7 +321,7 @@ FactoryGirl.define do
     business
     name { generate(:random_name) }
     active true
-    missing false
+    down false
     hostname { "crmdev.michaelriveraco.com" }
   end
 end
