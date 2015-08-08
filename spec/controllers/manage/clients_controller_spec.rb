@@ -41,7 +41,7 @@ describe Manage::ClientsController do
       get :index, :format => :html
       response.status.should == 404
 
-      get :index, :format => :js
+      get :index, :format => :json
       response.status.should == 404
     end
 
