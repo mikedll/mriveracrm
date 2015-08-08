@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe Manage::MonitoredComputersController do
 
-  context "creation", :current => true do
+  context "creation" do
     before :each do
       @user = FactoryGirl.create(:employee_user)
       sign_in @user
