@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20150612010122) do
+ActiveRecord::Schema.define(:version => 20150808141320) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -194,6 +194,17 @@ ActiveRecord::Schema.define(:version => 20150612010122) do
     t.text     "body"
     t.datetime "created_at"
     t.datetime "updated_at"
+  end
+
+  create_table "notifications", :force => true do |t|
+    t.integer  "business_id", :default => 0,  :null => false
+    t.string   "identifier",  :default => "", :null => false
+    t.string   "to",          :default => "", :null => false
+    t.string   "from",        :default => "", :null => false
+    t.string   "subject",     :default => "", :null => false
+    t.text     "body",        :default => "", :null => false
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
   end
 
   create_table "payment_gateway_profiles", :force => true do |t|

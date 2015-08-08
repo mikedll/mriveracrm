@@ -1,6 +1,9 @@
 class IT::MonitoredComputer < ActiveRecord::Base
 
   HEARTBEAT_PERIOD = 10.minutes
+  module Alerts
+    COMPUTER_DOWN = 'computer_down'
+  end
 
   include Introspectable
   include BackgroundedPolling
@@ -21,6 +24,7 @@ class IT::MonitoredComputer < ActiveRecord::Base
   scope :live, lambda { where('active = ?', true) }
   scope :missing, lambda { live.where('down = ? AND last_heartbeat_received_at < ?', false, Time.now - HEARTBEAT_PERIOD) }
   scope :down, lambda { live.where('down = ?', true) }
+  scope :with_business, lambda { joins(:business).includes(:business) }
   # last_heartbeat_received_at is null OR
 
   introspect do
@@ -39,10 +43,11 @@ class IT::MonitoredComputer < ActiveRecord::Base
   end
 
   def self.detect_missing!
-    missing.each do |mc|
+    with_business.missing.each do |mc|
       mc.down = true
       mc.save!
-      # notify business, or something. s.poll!
+      mail = AlertMailer.computer_down(mc.business, mc)
+      mc.business.notification_deliver!(Alerts::COMPUTER_DOWN, mail)
     end
   end
 

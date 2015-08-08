@@ -16,6 +16,8 @@ class Business < ActiveRecord::Base
   has_many :invitations, :dependent => :destroy
   has_many :images, :dependent => :destroy
   has_many :lifecycle_notifications, :dependent => :destroy
+  has_many :notifications, :dependent => :destroy, :inverse_of => :business
+
   has_one :usage_subscription, :dependent => :destroy
   has_many :it_monitored_computers, :inverse_of => :business, :dependent => :destroy, :class_name => 'IT::MonitoredComputer'
 
@@ -124,6 +126,16 @@ class Business < ActiveRecord::Base
   def lifecycle_deliver!(identifier, mail)
     ln = lifecycle_notifications.build(:identifier => identifier, :body => mail.body.to_s)
     ln.save!
+    mail.deliver!
+  end
+
+  def notification_deliver!(identifier, mail)
+    n = notifications.build(:identifier => identifier,
+                            :to => mail.to.join(', '),
+                            :from => mail.from.join(', '),
+                            :subject => mail.subject,
+                            :body => mail.body.to_s)
+    n.save!
     mail.deliver!
   end
 

@@ -73,6 +73,9 @@ en:
       only_one: 'if handle for new business is blank, then must have either a client or an employee, and not both'
       no_client_or_employee_for_handle: "cannot have employee or client if there is a handle for a new business"
 
+  monitored_computer:
+    computer_down: "Computer Down: %{hostname}"
+
   transaction:
     errors:
       cannot_destroy_this_type: 'This type of transaction cannot be destroyed'

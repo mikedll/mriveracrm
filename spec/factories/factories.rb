@@ -323,5 +323,12 @@ FactoryGirl.define do
     active true
     down false
     hostname { "crmdev.michaelriveraco.com" }
+    factory :dead_it_monitored_computer do
+      last_heartbeat_received_at { Time.now - (IT::MonitoredComputer::HEARTBEAT_PERIOD + 5.seconds) }
+    end
+  end
+
+  factory :notification do
+    business
   end
 end

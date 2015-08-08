@@ -34,14 +34,18 @@ describe IT::MonitoredComputer do
     end
   end
 
-  context "live", :current => true do
+  context "live" do
     it "should notify business owner when a monitored computer is down" do
       @mc = FactoryGirl.create(:it_monitored_computer)
       @mc.down.should be_false
       @mc.last_heartbeat_received_at = Time.now - (IT::MonitoredComputer::HEARTBEAT_PERIOD + 3.seconds)
       @mc.save
+      @mc.business.notifications.count.should == 0
+
       IT::MonitoredComputer.detect_missing!
       @mc.reload.down.should be_true
+      @mc.business.notifications.count.should == 1
+      @mc.business.notifications.first.subject.should == I18n.t('monitored_computer.computer_down', :hostname => @mc.hostname)
     end
   end
 
