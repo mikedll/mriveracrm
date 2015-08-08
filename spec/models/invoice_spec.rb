@@ -119,7 +119,7 @@ describe Invoice do
     before do
       @uuid = SecureRandom.uuid
       SecureRandom.stub(:uuid) { @uuid }
-      @invoice = FactoryGirl.create(:invoice)      
+      @invoice = FactoryGirl.create(:invoice)
     end
 
     it "should generate pdf when invoice moves to pending" do
@@ -144,7 +144,7 @@ describe Invoice do
 
     it "should fail if pdf isnt done being edited (passed pending)" do
       @invoice.generate_pdf.should be_false
-    end    
+    end
   end
 
 end
