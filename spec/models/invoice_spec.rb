@@ -125,6 +125,7 @@ describe Invoice do
     it "should generate pdf when invoice moves to pending" do
       @invoice.pdf_file?.should be_false
       @invoice.mark_pending.should be_true
+      @invoice.reload
       @invoice.pdf_file?.should be_true
     end
 
@@ -143,7 +144,7 @@ describe Invoice do
     end
 
     it "should fail if pdf isnt done being edited (passed pending)" do
-      @invoice.generate_pdf.should be_false
+      @invoice.regenerate_pdf.should be_false
     end
   end
 
