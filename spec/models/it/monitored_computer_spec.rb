@@ -33,32 +33,6 @@ describe IT::MonitoredComputer do
     end
   end
 
-  context "persistent requests" do
-    it "should disable repetitive ranking attempts with PersistentRequestable", :current => true do
-      @mc = FactoryGirl.create(:it_monitored_computer)
-
-      @mc.start_persistent_request('poll!').should be_true
-      @mc.available_for_request?.should be_false
-
-      @mc.start_persistent_request('poll!').should be_false
-      @mc.poll!.should be_false
-      @mc.poll!.should be_false
-
-      @mc.stop_persistent_request('poll!')
-      @mc.available_for_request?.should be_true
-      @mc.poll!.should be_true
-
-      @mc.start_persistent_request('poll!')
-      @mc.available_for_request?.should be_false
-      @mc.poll!.should be_false
-      @mc.poll!.should be_false
-
-      @mc.stop_persistent_request('poll!')
-      @mc.available_for_request?.should be_true
-      @mc.poll!.should be_true
-    end
-  end
-
   context "validations" do
     it "should enforce validation tiers", :broken => true do
       @mc = FactoryGirl.build(:it_monitored_computer, :search_phrase => "")
