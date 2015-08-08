@@ -122,11 +122,10 @@ class Business < ActiveRecord::Base
   end
 
   def lifecycle_deliver!(identifier, mail)
-    ln = lifecycle_notifications.build(:identifier => 'welcome', :body => mail.body.to_s)
+    ln = lifecycle_notifications.build(:identifier => identifier, :body => mail.body.to_s)
     ln.save!
     mail.deliver!
   end
-
 
   private
 
