@@ -1,5 +1,9 @@
-# Load the redis configuration from resque.yml
-Resque.redis = AppConfiguration.get('redis')
+
+# This is picked up by redis-objects.
+Redis.current = Redis.new(:url => AppConfiguration.get('redis'))
+
+# Use same redis for resque.
+Resque.redis = Redis.current
 
 Resque.logger.level = 1 # :debug, :info, :warn, :error, :fatal
 
