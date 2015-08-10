@@ -94,6 +94,9 @@ Spork.prefork do
           ApiStubs.release_stripe_stub!
         end
         DatabaseCleaner.clean_with(:truncation)
+        Resque.backend.store.redis.keys("*").each do |k|
+          Resque.backend.store.redis.delete(k)
+        end
       end
     end
   end
