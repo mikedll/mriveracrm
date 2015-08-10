@@ -4,12 +4,15 @@ require 'spec_helper'
 describe PersistentRequestable do
 
   class Jungle
+    extend ActiveModel::Callbacks
+
+    define_model_callbacks :destroy
+
     include PersistentRequestable
+
     attr_accessor :id
     def initialize(id)
       self.id = id
-      self.persistent_requests_count.reset
-      self.persistent_requests.clear
     end
 
     def new_record?; false; end
@@ -19,6 +22,21 @@ describe PersistentRequestable do
       stop_persistent_request('grow!')
       true
     end
+
+    def destroy
+      run_callbacks :destroy do
+        # noop
+      end
+    end
+  end
+
+  it "should clean redis on destroy" do
+    j = Jungle.new(1)
+    Redis.current.keys("*").should =~ []
+    j.grow!
+    Redis.current.keys("*").should =~ [j.persistent_requests_count.key]
+    j.destroy
+    Redis.current.keys("*").should == []
   end
 
   it "should lock record to one request at a time with redis" do

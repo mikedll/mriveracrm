@@ -1,6 +1,11 @@
 
 require 'active_support/concern'
 
+#
+# Including class should have defined
+# destroy callbacks compatible with ActiveModel::Callback's
+# implementation of them.
+#
 module PersistentRequestable
   extend ActiveSupport::Concern
 
@@ -12,6 +17,8 @@ module PersistentRequestable
     cattr_accessor :requests_allowed
     counter :persistent_requests_count
     set :persistent_requests
+
+    after_destroy :_clean_persistent_requestable_redis_store
 
     self.requests_allowed = PersistentRequestable::DEFAULT_CONCURRENT_REQUESTS
 
@@ -40,5 +47,11 @@ module PersistentRequestable
       true
     end
 
+    private
+
+    def _clean_persistent_requestable_redis_store
+      persistent_requests_count.del
+      persistent_requests.del
+    end
   end
 end
