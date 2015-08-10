@@ -18,24 +18,20 @@ class AppConfiguration
     @config.merge!(config)
   end
 
-  def self.get(path)
-    cur = config
+  def self.traverse_for(h, path)
+    cur = h
     path.to_s.split('.').each do |segment|
       cur = cur[segment.force_encoding('UTF-8').to_s] if cur
     end
-
-    # retry, this time with env prefix.
-    if cur.nil?
-      cur = config[Rails.env]
-      path.to_s.split('.').each do |segment|
-        cur = cur[segment.force_encoding('UTF-8').to_s] if cur
-      end
-    end
-
-    if cur.nil?
-      cur = ENV[path]
-    end
-
     cur
+  end
+
+  def self.get(path)
+    setting = traverse_for(config, path)
+    env_setting = traverse_for(config[Rails.env], path) if config[Rails.env]
+    setting = env_setting if env_setting
+    setting = ENV[path]   if setting.nil? # try environment variable exact path match
+
+    setting
   end
 end
