@@ -120,7 +120,6 @@ class Invoice < ActiveRecord::Base
     number_to_currency(total)
   end
 
-
   def charge!
     if !can_pay?
       errors.add(:base, t('.cannot_pay'))

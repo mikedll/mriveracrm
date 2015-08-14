@@ -10,7 +10,7 @@ class AppConfiguration
     config = {}
     (defined?(Rails) ? Rails.root : Bundler.root).tap do |root|
       config = if File.exists? root.join('config', 'credentials.yml')
-                 YAML.load( File.read( root.join('config', 'credentials.yml'))).with_indifferent_access 
+                 YAML.load( File.read( root.join('config', 'credentials.yml'))).with_indifferent_access
                else
                  {}
                end
