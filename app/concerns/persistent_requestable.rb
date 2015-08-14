@@ -23,10 +23,15 @@ module PersistentRequestable
     self.requests_allowed = PersistentRequestable::DEFAULT_CONCURRENT_REQUESTS
 
     def available_for_request?
-      !new_record? && persistent_requests_count < requests_allowed
+      _pristine? && persistent_requests_count < requests_allowed
     end
 
     def start_persistent_request(request_name)
+      if !_record_ready_for_request?
+        errors.add(:base, t('persistent_requestable.not_pristine', :model => self.class.to_s.humanize.downcase))
+        return false
+      end
+
       if persistent_requests_count.increment > requests_allowed
         persistent_requests_count.decrement
         errors.add(:base, t('persistent_requestable.already_requesting', :model => self.class.to_s.humanize.downcase))
@@ -49,6 +54,10 @@ module PersistentRequestable
     end
 
     private
+
+    def _pristine?
+      !new_record? && !changed
+    end
 
     def _clean_persistent_requestable_redis_store
       persistent_requests_count.del
