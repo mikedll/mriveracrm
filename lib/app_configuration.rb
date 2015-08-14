@@ -26,9 +26,13 @@ class AppConfiguration
     cur
   end
 
-  def self.get(path)
+  #
+  # Requires opts[:env] if Rails is not defined.
+  #
+  def self.get(path, env = nil)
+    env = Rails.env if env.nil?
     setting = traverse_for(config, path)
-    env_setting = traverse_for(config[Rails.env], path) if config[Rails.env]
+    env_setting = traverse_for(config[env], path) if config[env]
     setting = env_setting if env_setting
     setting = ENV[path]   if setting.nil? # try environment variable exact path match
 

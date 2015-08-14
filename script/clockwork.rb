@@ -24,7 +24,7 @@ require 'app/workers/worker_base'
 require 'app/workers/scheduled_event'
 
 # Clockwork environment's initializing setup
-Resque.redis = AppConfiguration.get('redis')
+Resque.redis = AppConfiguration.get('redis', ENV['RACK_ENV'])
 
 
 module Clockwork
