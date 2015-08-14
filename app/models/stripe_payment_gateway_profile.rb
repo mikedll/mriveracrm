@@ -18,7 +18,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     }
   end
 
-  def can_pay?
+  def ready_for_payments?
     !self.vendor_id.nil? && !self.card_last_4.blank?
   end
 
@@ -60,8 +60,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   end
 
   def pay_invoice!(invoice)
-    if !can_pay?
-      self.last_error = I18n.t('payment_gateway_profile.cant_pay')
+    if !ready_for_payments?
+      self.last_error = I18n.t('payment_gateway_profile.not_ready_for_payments')
       return false
     end
 

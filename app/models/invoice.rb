@@ -128,7 +128,7 @@ class Invoice < ActiveRecord::Base
     end
 
     if self.client.payment_gateway_profile.nil?
-      errors.add(:base, I18n.t('payment_gateway_profile.cant_pay'))
+      errors.add(:base, I18n.t('payment_gateway_profile.not_ready_for_payments'))
       return false
     end
 
@@ -191,10 +191,7 @@ class Invoice < ActiveRecord::Base
       return false
     end
 
-    if !start_persistent_request(PDF_GENERATION)
-      errors.add(:base, t('persistent_requestable.already_requesting', :model => self.class.to_s.humanize.downcase))
-      return false
-    end
+    return false if !start_persistent_request(PDF_GENERATION)
 
     Worker.obj_enqueue(self, :capture_as_pdf_background)
     true

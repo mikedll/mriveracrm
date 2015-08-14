@@ -96,7 +96,7 @@ en:
     welcome: Welcome to %{title}
 
   payment_gateway_profile:
-    cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
+    not_ready_for_payments: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."
     plan_update_error: "Subscription plan failed to update. Check your inputs. If this persists. please contact your business representative."
     custom_plan_update_error: "Subscription plan failed to update: %{message}"

@@ -29,6 +29,7 @@ module PersistentRequestable
     def start_persistent_request(request_name)
       if persistent_requests_count.increment > requests_allowed
         persistent_requests_count.decrement
+        errors.add(:base, t('persistent_requestable.already_requesting', :model => self.class.to_s.humanize.downcase))
         return false
       end
 

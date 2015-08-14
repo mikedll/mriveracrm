@@ -23,7 +23,7 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
   def pay_invoice!(invoice)
     if self.vendor_id.nil? || self.card_profile_id.nil?
-      self.last_error = I18n.t('payment_gateway_profile.cant_pay')
+      self.last_error = I18n.t('payment_gateway_profile.not_ready_for_payments')
       return false
     end
 
