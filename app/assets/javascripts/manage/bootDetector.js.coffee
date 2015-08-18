@@ -23,8 +23,8 @@ $(() ->
       modelViewKlass: StatusMonitorView
       rootAppViewKlass: SingleModelAppView
     '.it-monitored-computers-gui':
-      modelCollectionKlass: ItComputerMonitors
-      rootAppViewKlass: ItComputerMonitorAppView
+      modelCollectionKlass: ItMonitoredComputers
+      rootAppViewKlass: ItMonitoredComputerAppView
 
   lazyGetBootstrap = (selector) ->
     # prevent undefined reference. can be removed if we make __XXX generic
@@ -38,7 +38,7 @@ $(() ->
     else if selector == '.billing-settings-gui'
       return __billing_settings
     else if selector == '.it-monitored-computers-gui'
-      return __it_computer_monitors
+      return __it_monitored_computer
     else
       # something went wrong here.
       return []
