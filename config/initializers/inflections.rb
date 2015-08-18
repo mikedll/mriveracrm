@@ -7,4 +7,5 @@ ActiveSupport::Inflector.inflections do |inflect|
 #   inflect.singular /^(ox)en/i, '\1'
 #   inflect.irregular 'person', 'people'
   inflect.acronym "IT"
+  inflect.acronym "PDF"
 end

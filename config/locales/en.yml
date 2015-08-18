@@ -90,6 +90,9 @@ en:
     uneditable: "This invoice is no longer open and not available for editing"
     cannot_delete: 'cannot be deleted in its current state'
     cannot_generate_pdf: 'cannot be generated in this state'
+    actions:
+      charge:
+        confirm: "Charge this now?"
 
   usage_subscriptions:
     no_payment_gateway_profile: "An internal error has occured. There is no payment profile available for your business. Please contact support if this error persists."

@@ -183,7 +183,12 @@ FactoryGirl.define do
     total { 2500.00 }
     status { "open" }
 
+    before :create do
+      Invoice.any_instance.stub(:_enqueue_pdf_generation)
+    end
+
     after :create do |r|
+      Invoice.any_instance.unstub(:_enqueue_pdf_generation)
       r.persistent_requests_count.reset
       r.persistent_requests.clear
     end

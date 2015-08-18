@@ -3,7 +3,7 @@ require 'spec_helper'
 
 describe Notification do
   context "associations" do
-    it "should be destroyed with a business", :current => true do
+    it "should be destroyed with a business" do
       n = FactoryGirl.create(:notification)
       b = Business.find n.business_id
       b.destroy

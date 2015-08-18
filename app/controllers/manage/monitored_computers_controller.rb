@@ -1,16 +1,14 @@
 class Manage::MonitoredComputersController < Manage::BaseController
 
-  configure_apps :model => ::IT::MonitoredComputer
-
-  skip_before_filter :require_active_plan
-
-  before_filter :_parent_name
-
-  make_resourceful do
+  configure_apps :model => ::IT::MonitoredComputer do
     actions :index, :show, :create, :update, :destroy
     member_actions :rank
     belongs_to :business
   end
+
+  skip_before_filter :require_active_plan
+
+  before_filter :_parent_name
 
   def json_config
     { :methods => [:available_for_request?] }

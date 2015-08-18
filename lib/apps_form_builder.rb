@@ -7,7 +7,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
     derived_inputs.safe_concat(derived_buttons)
   end
 
-  def derived_inputs
+  def derived_inputs(opts = {})
     return nil if object.nil?
 
     output = ActiveSupport::SafeBuffer.new

@@ -26,6 +26,7 @@ Spork.prefork do
 
     # config.filter_run_including :current => true
     config.filter_run_excluding :broken => true
+    config.filter_run_excluding :ignore => true
 
     GENERIC_WEB_TESTS = [:generic_web_test]
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]

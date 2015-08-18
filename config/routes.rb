@@ -103,7 +103,7 @@ MikedllCrm::Application.routes.draw do
   namespace "client" do
     resource :payment_gateway_profile, :only => [:create, :update, :show]
 
-    resources :invoices do
+    resources :invoices, :only => [:index, :show] do
       member do
         put :charge
       end
@@ -208,7 +208,7 @@ MikedllCrm::Application.routes.draw do
     namespace "client" do
       resource :payment_gateway_profile, :only => [:create, :update, :show]
 
-      resources :invoices do
+      resources :invoices, :only => [:index, :show]  do
         member do
           put :charge
         end

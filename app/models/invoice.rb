@@ -5,9 +5,12 @@ class Invoice < ActiveRecord::Base
   has_many :outside_transactions
   has_many :stripe_transactions
 
+  include Introspectable
   include PersistentRequestable
   include ActionView::Helpers::TranslationHelper
   include ActionView::Helpers::NumberHelper
+
+  attr_accessor :last_error
 
   PDF_GENERATION = 'PDFGeneration'
 
@@ -109,6 +112,37 @@ class Invoice < ActiveRecord::Base
 
   default_scope { order('created_at asc') }
 
+  introspect do
+    can :destory, :enabler => :destroyable
+
+    nested_association :transactions
+
+    attr :title
+    attr :date, :datetime
+    attr :total, :currency
+    attr :description
+    attr :status, :read_only
+    attr :pdf_link, :download
+
+    action :mark_pending, :enabler => :editable
+    action :regenerate_pdf, :enabler => :not_editable
+    action :mark_paid, :enabler => :payable
+    action :cancel, :enabler => :payable
+    action :charge, :enabler => :payable
+
+    view :client do
+      attr :title, :readonly
+      attr :date, :readonly
+      attr :total, :readonly
+      attr :description, :readonly
+      attr :status, :readonly
+      attr :pdf_link, :download
+
+      action :charge, :enabler => :payable
+    end
+
+  end
+
   class Worker < WorkerBase
   end
 
@@ -134,19 +168,6 @@ class Invoice < ActiveRecord::Base
     self.client.payment_gateway_profile.pay_invoice!(self).tap do |result|
       errors.add(:base, self.client.payment_gateway_profile.last_error) if !result
     end
-  end
-
-  def public
-    {
-      :id => id,
-      :title => title,
-      :description => description,
-      :total => total,
-      :can_pay => can_pay?,
-      :can_edit => can_edit?,
-      :date => date,
-      :status => status
-    }
   end
 
   def regenerate_pdf

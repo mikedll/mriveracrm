@@ -1,32 +1,21 @@
 class Client::InvoicesController < Client::BaseController
 
-  make_resourceful do
-    actions :index
-
-    response_for(:index) do |format|
-      format.html
-      format.js { render :json => current_objects }
-    end
-
-    response_for(:show, :update) do |format|
-      format.js { render :json => current_object.public }
-    end
-
-    response_for(:update_fails) do |format|
-      format.js { render :status => :unprocessable_entity, :json => { :object => current_object.public, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
-    end
+  configure_apps :model => Invoice, :view => :client do
+    actions :index, :show
+    member_actions :charge
+    belongs_to :client
   end
 
   def charge
-    if current_object.charge!
-      response_for :update
-    else
-      response_for :update_fails
-    end
+    state_transition { current_object.charge! }
   end
 
-  def current_objects
-    @current_objects ||= current_user.client.invoices.viewable_to_client.map(&:public)
+  def parent_object
+    @parent_object ||= current_user.client
+  end
+
+  def current_model
+    parent_object.invoices.viewable_to_client
   end
 
   protected

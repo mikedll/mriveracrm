@@ -17,6 +17,7 @@ module PersistentRequestable
     cattr_accessor :requests_allowed
     counter :persistent_requests_count
     set :persistent_requests
+    value :last_error
 
     after_destroy :_clean_persistent_requestable_redis_store
 
@@ -60,6 +61,7 @@ module PersistentRequestable
     end
 
     def _clean_persistent_requestable_redis_store
+      last_error.del
       persistent_requests_count.del
       persistent_requests.del
     end
