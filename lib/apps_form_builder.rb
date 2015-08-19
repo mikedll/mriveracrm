@@ -81,7 +81,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
     if object.nil? || object.class.introspectable_configuration.destroyable == true
       data_opts = { :data => { :confirm => t('delete_confirm') } }
       if object && object.class.introspectable_configuration.destroyable_enabler
-        data_opts = data_opts[:data][:attribute_enabler] = object.class.introspectable_configuration.destroyable_enabler
+        data_opts['data-attribute_enabler'] = object.class.introspectable_configuration.destroyable_enabler
       end
 
       output.safe_concat(content_tag('div', :class => 'btn-group pull-right') do

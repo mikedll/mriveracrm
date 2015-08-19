@@ -113,7 +113,7 @@ class Invoice < ActiveRecord::Base
   default_scope { order('created_at asc') }
 
   introspect do
-    can :destory, :enabler => :destroyable
+    can :destroy, :enabler => :destroyable
 
     nested_association :transactions
 
