@@ -39,13 +39,13 @@ class ApplicationController < ActionController::Base
             flash[:notice] = t('errors.not_found_redirect_home')
             redirect_to after_sign_in_path_for(current_user)
           end
-          format.js { head :not_found }
+          format.json { head :not_found }
         end
       else
         # not logged in and no business. nothing here.
         respond_to do |format|
           format.html { redirect_to root_path }
-          format.js { head :not_found }
+          format.json { head :not_found }
         end
       end
     else
