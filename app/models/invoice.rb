@@ -122,13 +122,13 @@ class Invoice < ActiveRecord::Base
     attr :total, :currency
     attr :description
     attr :status, :read_only
-    attr :pdf_link, :download
+    attr :pdf_file, [:download, :included]
 
-    action :mark_pending, :enabler => :editable
-    action :regenerate_pdf, :enabler => :not_editable
-    action :mark_paid, :enabler => :payable
-    action :cancel, :enabler => :payable
-    action :charge, :enabler => :payable
+    action :mark_pending, :enabler => :can_edit?
+    action :regenerate_pdf, :disabler => :can_edit?
+    action :mark_paid, :enabler => :can_pay?
+    action :cancel, :enabler => :can_pay?
+    action :charge, :enabler => :can_pay?
 
     view :client do
       attr :title, :readonly
@@ -136,11 +136,10 @@ class Invoice < ActiveRecord::Base
       attr :total, :readonly
       attr :description, :readonly
       attr :status, :readonly
-      attr :pdf_link, :download
+      attr :pdf_file, [:download, :included]
 
-      action :charge, :enabler => :payable
+      action :charge, :enabler => :can_pay?
     end
-
   end
 
   class Worker < WorkerBase
