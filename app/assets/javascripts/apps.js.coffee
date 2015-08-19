@@ -921,7 +921,7 @@ class window.CrmModelView extends ModelBaseView
           v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
         else if el$.hasClass('date')
           v = @toHumanReadableDateFormat(v)
-        else if el$.hasClass('money')
+        else if el$.hasClass('currency')
           v = "$#{@textRenderer.toFixed(v, 2)}"
         el$.text(v)
     )
@@ -946,7 +946,7 @@ class window.CrmModelView extends ModelBaseView
             v = @toHumanReadableDateTimeFormat(v)
           else if el$.hasClass('hasDatepicker')
             v = @toHumanReadableDateFormat(v)
-          else if el$.hasClass('money')
+          else if el$.hasClass('currency')
             v = "$#{@textRenderer.toFixed(v, 2)}"
           el$.val(v)
     )
