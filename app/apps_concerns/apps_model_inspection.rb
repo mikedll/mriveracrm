@@ -4,7 +4,14 @@ module AppsModelInspection
   extend ActiveSupport::Concern
 
   included do
-    def configure_for_model(klass, opts = {})
+    def instance_variable_name_with_model_namespace_awareness
+      return model_variable_name if model_variable_name
+      instance_variable_name_without_model_namespace_awareness
+    end
+
+    protected
+
+    def configure_render(klass, opts = {})
       activate_default_apps
       apps_configuration[:primary_model] = klass if apps_configuration[:primary_model].nil?
 
@@ -54,16 +61,9 @@ module AppsModelInspection
       @apps_configuration ||= default_apps_configuration
     end
 
-    def instance_variable_name_with_model_namespace_awareness
-      return model_variable_name if model_variable_name
-      instance_variable_name_without_model_namespace_awareness
-    end
-
-    protected
-
     def _check_for_primary_model
       if self.class.apps_primary_model
-        configure_for_model(self.class.apps_primary_model, :view => self.class.apps_selected_view)
+        configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
       end
     end
 
