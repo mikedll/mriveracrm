@@ -4,6 +4,11 @@ class Client::InvoicesController < Client::BaseController
     actions :index, :show
     member_actions :charge
     belongs_to :client
+
+    response_for :index do |format|
+      format.html
+      format.json { render :json => rendered_current_objects }
+    end
   end
 
   def charge

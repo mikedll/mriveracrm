@@ -133,7 +133,7 @@ module AppsModelInspection
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 
-      make_resourceful :include => block do
+      make_resourceful do
         # Provide our own defaults.
         # We use rendered_current_object instead of make_resourceful's publish,
         # finding it too limited. We have some tricky scenarios I think where
@@ -174,6 +174,7 @@ module AppsModelInspection
         response_for(:update_fails, :create_fails) do |format|
           format.json { render :status => :unprocessable_entity, :json => { :object => rendered_current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
         end
+        self.instance_eval(&block) if block
       end
 
       alias_method_chain :instance_variable_name, :model_namespace_awareness
