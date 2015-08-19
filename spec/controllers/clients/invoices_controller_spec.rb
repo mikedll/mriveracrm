@@ -10,19 +10,22 @@ describe Client::InvoicesController do
     request.host = @user.client.business.host
   end
 
-  it "should render an invoice" do
-    get :index
-    response.should be_success
+  context "show" do
+    it "should show a given invoice" do
+      get :show, :format => :json, :id => @invoice.id
+      result = JSON.parse(response.body)
+      result['id'].should == @invoice.id
+    end
   end
 
-  it "should show a given invoice" do
-    get :show, :format => :json, :id => @invoice.id
-    result = JSON.parse(response.body)
-    result['id'].should == @invoice.id
-  end
-
-  context "results" do
+  context "index" do
     render_views
+
+    it "should render an invoice with client view", :current => true do
+      get :index
+      response.should be_success
+    end
+
     it "should show the last transaction error if one occured" do
       response.should contain(@invoice.title)
     end
