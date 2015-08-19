@@ -162,16 +162,13 @@ FactoryGirl.define do
     # have to do this before even the create call.
     # before :build's effect is ambiguous.
     payment_gateway_profilable do
-      UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
-      UsageSubscription.any_instance.stub(:ensure_correct_plan!)
-      UsageSubscription.any_instance.stub(:notify_signup!)
-      FactoryGirl.create(:usage_subscription)
+      FactoryGirl.create(:stubbed_profilable_usage_subscription)
     end
 
     after :create do |profile|
-      UsageSubscription.any_instance.unstub(:notify_signup!)
-      UsageSubscription.any_instance.unstub(:ensure_correct_plan!)
-      UsageSubscription.any_instance.unstub(:require_payment_gateway_profile)
+      profile.payment_gateway_profilable.unstub(:require_payment_gateway_profile)
+      profile.payment_gateway_profilable.unstub(:ensure_correct_plan!)
+      profile.payment_gateway_profilable.unstub(:notify_signup!)
       profile.payment_gateway_profilable.send(:ensure_correct_plan!)
     end
   end
@@ -285,6 +282,16 @@ FactoryGirl.define do
     business
     generation { 0 }
 
+    # It is the responsibility of the caller to unstub
+    # the below stubs.
+    factory :stubbed_profilable_usage_subscription do
+      payment_gateway_profile nil
+      after :build do |r|
+        r.stub(:require_payment_gateway_profile)
+        r.stub(:ensure_correct_plan!)
+        r.stub(:notify_signup!)
+      end
+    end
     factory :usage_subscription
   end
 
