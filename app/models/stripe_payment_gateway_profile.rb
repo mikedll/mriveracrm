@@ -59,51 +59,32 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     event
   end
 
-  def pay_invoice!(invoice)
-    if !ready_for_payments?
-      self.last_error = I18n.t('payment_gateway_profile.not_ready_for_payments')
-      return false
-    end
-
-    if !invoice.can_pay?
-      self.last_error = I18n.t('invoice.cannot_pay')
-      return false
-    end
+  def pay_invoice!(amount, description)
+    result = { :error => '', :succeeded => false, :vendor_id => nil }
 
     _with_stripe_key do
-      transaction = StripeTransaction.new
-      transaction.payment_gateway_profile = self
-      transaction.invoice = invoice
-      transaction.amount = invoice.total
-      transaction.begin!
-
       charge = nil
       begin
         charge = Stripe::Charge.create({
                                          :customer => vendor_id,
-                                         :amount => (invoice.total * 100).to_i,
+                                         :amount => (amount * 100).to_i,
                                          :currency => "usd",
-                                         :description => invoice.title
+                                         :description => description
                                        })
       rescue Stripe::CardError => e
-        self.last_error = e.message
-        invoice.fail_payment!
-        transaction.has_failed!
+        result[:error] = e.message
         return false
       end
 
-      transaction.vendor_id = charge.id
+      result[:vendor_id] = charge.id
       if !charge[:captured]
         # unknown as to whether this can ever be reached
-        self.last_error = charge[:failure_message]
-        invoice.fail_payment!
-        transaction.has_failed!
-        return false
+        result[:error] = charge[:failure_message]
+        return result
       end
 
-      transaction.succeed!
-      invoice.mark_paid!
-      true
+      result[:succeeded] = true
+      result
     end
   end
 

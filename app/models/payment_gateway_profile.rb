@@ -52,7 +52,7 @@ class PaymentGatewayProfile < ActiveRecord::Base
     card_last_4.blank? ? "No card on file" : "#{card_brand.camelize} ending in #{card_last_4}"
   end
 
-  def pay_invoice!(invoice)
+  def pay_invoice!(amount, description)
     raise "Implement in subclass."
   end
 

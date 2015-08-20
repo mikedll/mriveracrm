@@ -154,20 +154,43 @@ class Invoice < ActiveRecord::Base
     number_to_currency(total)
   end
 
+  CHARGE_REQUEST = 'charge'
   def charge!
     if !can_pay?
       errors.add(:base, t('.cannot_pay'))
       return false
     end
 
-    if self.client.payment_gateway_profile.nil?
+    if client.payment_gateway_profile.nil? || !client.payment_gateway_profile.ready_for_payments?
       errors.add(:base, I18n.t('payment_gateway_profile.not_ready_for_payments'))
       return false
     end
 
-    self.client.payment_gateway_profile.pay_invoice!(self).tap do |result|
-      errors.add(:base, self.client.payment_gateway_profile.last_error) if !result
+    return false if !start_persistent_request(CHARGE_REQUEST)
+    Worker.obj_enqueue(self, :charge_background)
+  end
+
+  def charge_background
+    transaction = StripeTransaction.new
+    transaction.payment_gateway_profile = client.payment_gateway_profile
+    transaction.invoice = self
+    transaction.amount = total
+    transaction.begin!
+
+    result = client.payment_gateway_profile.pay_invoice!(total, title)
+    transaction.vendor_id = result[:vendor_id] if result[:vendor_id]
+
+    if !result[:succeeded]
+      self.last_error = result[:error]
+      fail_payment!
+      transaction.has_failed!
+    else
+      transaction.succeed!
+      mark_paid!
     end
+
+    stop_persistent_request(CHARGE_REQUEST)
+    result[:succeeded]
   end
 
   def regenerate_pdf

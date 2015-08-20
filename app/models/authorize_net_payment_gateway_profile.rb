@@ -21,7 +21,10 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     nil
   end
 
-  def pay_invoice!(invoice)
+  def pay_invoice!(amount, description)
+
+    raise "This no longer agrees with the interface's description. Rewrite it."
+
     if self.vendor_id.nil? || self.card_profile_id.nil?
       self.last_error = I18n.t('payment_gateway_profile.not_ready_for_payments')
       return false
