@@ -76,7 +76,7 @@ module Introspectable
 
     def attr(a, traits = nil)
       t = traits ? { a => Array.wrap(traits) } : a
-      stack = current_group ? current_group.last : (current_view.nil? ? attributes : current_view.last)
+      stack = current_group ? current_group.last : (current_view ? current_view.last : attributes)
       stack.push(current_group ? t : [t])
     end
 
