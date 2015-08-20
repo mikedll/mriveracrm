@@ -113,7 +113,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
         when :read_only
           acc[:as] = :read_only
           css_class = 'read-only-field'
-        when :datetime
+        when :datetime, :currency
           acc[:as] = :string if acc[:as].nil?
           css_class = trait
         end
