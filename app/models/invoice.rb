@@ -124,6 +124,7 @@ class Invoice < ActiveRecord::Base
     attr :last_error, [:read_only, :string]
 
     synth :available_for_request?
+    synth :last_error
 
     action :mark_pending, :enabler => :can_edit?
     action :regenerate_pdf, :disabler => :can_edit?
@@ -141,6 +142,7 @@ class Invoice < ActiveRecord::Base
       attr :last_error, [:read_only, :string]
 
       synth :available_for_request?
+      synth :last_error
 
       action :charge, :enabler => :can_pay?
     end
