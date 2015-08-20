@@ -40,6 +40,7 @@ module PersistentRequestable
       end
 
       persistent_requests << request_name
+      self.last_error = ""
       true
     end
 
