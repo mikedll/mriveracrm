@@ -28,13 +28,14 @@ module Introspectable
   end
 
   class Configuration
-    attr_accessor :model_name, :destroyable, :destroyable_enabler, :actions, :attributes, :nested_associations, :current_group, :views, :current_view
+    attr_accessor :model_name, :destroyable, :destroyable_enabler, :synthesized, :actions, :attributes, :nested_associations, :current_group, :views, :current_view
 
     def initialize(klass_name)
       self.model_name = klass_name
       self.destroyable = true
       self.destroyable_enabler = nil
       self.attributes = []
+      self.synthesized = []
       self.actions = []
       self.nested_associations = []
       self.current_group = nil
@@ -80,7 +81,7 @@ module Introspectable
 
       methods = actions_for_view(view).map do |action_descriptor|
         action_descriptor.values.first.select { |k, v| [:enabler, :disabler].include?(k) }.map { |k, v| v }
-      end.flatten
+      end.flatten + synthesized_for_view(view)
 
       {
         :only => attr_names,
@@ -101,6 +102,18 @@ module Introspectable
         self.destroyable_enabler = options[:enabler] if options[:enabler]
       else
       end
+    end
+
+    def synthesized_for_view(view = nil)
+      if view
+        find_view(view)[:synthesized]
+      else
+        synthesized
+      end
+    end
+
+    def synth(synth_name)
+      (current_view ? current_view.last[:synthesized] : synthesized).push(synth_name)
     end
 
     def actions_for_view(view = nil)
@@ -130,7 +143,7 @@ module Introspectable
     end
 
     def view(name, opts = {}, &block)
-      self.current_view = [name, { :attrs => [], :actions => [] }]
+      self.current_view = [name, { :attrs => [], :actions => [], :synthesized => [] }]
       instance_eval(&block)
       views.push(current_view)
       self.current_view = nil
