@@ -957,7 +957,7 @@ class window.CrmModelView extends ModelBaseView
       el$ = $(el)
       enablerValue = @model.get(el$.data('attribute_enabler'))
       if enablerValue?
-        if _.any( el$.data('enabled_when').toString().split(/,/), (val) -> val == enablerValue.toString())
+        if enablerValue != false && (enablerValue == true || _.any( el$.data('enabled_when').split(/,/), (val) -> val == enablerValue))
           el$.removeClass('disabled')
         else
           el$.addClass('disabled')

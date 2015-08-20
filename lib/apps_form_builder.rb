@@ -62,8 +62,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
             end
           when :enabler
             # bug: usage in button_tag fails to preserve underscore if we index [:data]
-            data_opts['data-attribute_enabler'] = v.to_s
-            data_opts['data-enabled_when'] = 'true'
+            data_opts['data-attribute_enabler'] = v
           when :confirm
             data_opts[:data][:confirm] = v
           when :label
