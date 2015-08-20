@@ -96,11 +96,7 @@ module IntrospectionRenderable
     private
 
     def json_config
-      if apps_configuration[:view]
-        apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
-      else
-        {}
-      end
+      apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
     end
 
   end
