@@ -10,8 +10,6 @@ class Invoice < ActiveRecord::Base
   include ActionView::Helpers::TranslationHelper
   include ActionView::Helpers::NumberHelper
 
-  attr_accessor :last_error
-
   PDF_GENERATION = 'PDFGeneration'
 
   mount_uploader :pdf_file, PdfUploader
