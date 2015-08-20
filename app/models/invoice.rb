@@ -118,7 +118,7 @@ class Invoice < ActiveRecord::Base
     nested_association :transactions
 
     attr :title
-    attr :date, :datetime
+    attr :date, [:datetime, :datepicker]
     attr :total, :currency
     attr :description
     attr :status, :read_only

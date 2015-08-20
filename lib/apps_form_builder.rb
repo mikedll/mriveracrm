@@ -115,6 +115,8 @@ class AppsFormBuilder < SimpleForm::FormBuilder
         when :datetime, :currency
           acc[:as] = :string if acc[:as].nil?
           css_class = trait
+        else
+          css_class = trait
         end
 
         acc[:input_html][:class] += "#{acc[:input_html][:class].blank? ? '' : ' '}#{css_class}" if css_class
