@@ -28,7 +28,7 @@ module Introspectable
   end
 
   class Configuration
-    attr_accessor :model_name, :destroyable, :destroyable_enabler, :actions, :attributes, :nested_associations, :current_group, :views, :view_action_sequences, :current_view, :current_view_action_sequence
+    attr_accessor :model_name, :destroyable, :destroyable_enabler, :actions, :attributes, :nested_associations, :current_group, :views, :current_view
 
     def initialize(klass_name)
       self.model_name = klass_name
@@ -39,20 +39,22 @@ module Introspectable
       self.nested_associations = []
       self.current_group = nil
       self.views = []
-      self.view_action_sequences = []
       self.current_view = nil
-      self.current_view_action_sequence = nil
     end
 
     def nested_association(na)
       self.nested_associations.push(na)
     end
 
+    def find_view(view = nil)
+      v = views.select { |v| v.first == view }.first
+      raise ViewNotFoundError("View #{view} does not exist on #{model_name}.") if v.nil?
+      v.last
+    end
+
     def attribute_stack_for_view(view = nil)
       if view
-        v = views.select { |v| v.first == view }.first
-        raise ViewNotFoundError("View #{view} does not exist on #{model_name}.") if v.nil?
-        v.last
+        find_view(view)[:attrs]
       else
         attributes
       end
@@ -78,7 +80,7 @@ module Introspectable
 
     def attr(a, traits = nil)
       t = traits ? { a => Array.wrap(traits) } : a
-      stack = current_group ? current_group.last : (current_view ? current_view.last : attributes)
+      stack = current_group ? current_group.last : (current_view ? current_view.last[:attrs] : attributes)
       stack.push(current_group ? t : [t])
     end
 
@@ -91,9 +93,17 @@ module Introspectable
       end
     end
 
+    def actions_for_view(view = nil)
+      if view
+        find_view(view)[:actions]
+      else
+        actions
+      end
+    end
+
     def action(a, traits)
       traits.reverse_merge!({ :type => :put_action })
-      (current_view ? current_view_action_sequence.last : actions).push({ a => traits })
+      (current_view ? current_view.last[:actions] : actions).push({ a => traits })
     end
 
     def group(name = nil, &block)
@@ -104,13 +114,10 @@ module Introspectable
     end
 
     def view(name, opts = {}, &block)
-      self.current_view = [name, []]
-      self.current_view_action_sequence = [name, []]
+      self.current_view = [name, { :attrs => [], :actions => [] }]
       instance_eval(&block)
       views.push(current_view)
-      view_action_sequences.push(current_view_action_sequence)
       self.current_view = nil
-      self.current_view_action_sequence = nil
     end
   end
 
