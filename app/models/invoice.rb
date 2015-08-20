@@ -123,6 +123,9 @@ class Invoice < ActiveRecord::Base
     attr :description
     attr :status, :read_only
     attr :pdf_file, [:download, :included]
+    attr :last_error, [:read_only, :string]
+
+    synth :available_for_request?
 
     action :mark_pending, :enabler => :can_edit?
     action :regenerate_pdf, :disabler => :can_edit?

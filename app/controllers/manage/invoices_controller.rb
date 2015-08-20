@@ -1,6 +1,6 @@
 class Manage::InvoicesController < Manage::BaseController
 
-  make_resourceful do
+  configure_apps :model => Invoice do
     actions :index, :show, :update, :create, :destroy
     member_actions :mark_pending, :regenerate_pdf, :cancel, :charge, :mark_paid
     belongs_to :client
@@ -9,10 +9,6 @@ class Manage::InvoicesController < Manage::BaseController
       format.html
       format.json { render :json => rendered_current_objects }
     end
-  end
-
-  def json_config
-    { :methods => [:available_for_request?] }
   end
 
   def mark_pending
