@@ -28,7 +28,7 @@ module PersistentRequestable
     end
 
     def start_persistent_request(request_name)
-      if !_record_ready_for_request?
+      if !_pristine?
         errors.add(:base, t('persistent_requestable.not_pristine', :model => self.class.to_s.humanize.downcase))
         return false
       end
