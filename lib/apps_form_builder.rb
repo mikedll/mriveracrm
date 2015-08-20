@@ -77,7 +77,10 @@ class AppsFormBuilder < SimpleForm::FormBuilder
       end
     end
 
-    if object.nil? || object.class.introspectable_configuration.destroyable == true
+    #
+    # Remove nil check on options[:view] after abilities are view-aware in Introspectable.
+    #
+    if object.nil? || (options[:view].nil? && object.class.introspectable_configuration.destroyable == true)
       data_opts = { :data => { :confirm => t('delete_confirm') } }
       if object && object.class.introspectable_configuration.destroyable_enabler
         data_opts['data-attribute_enabler'] = object.class.introspectable_configuration.destroyable_enabler
