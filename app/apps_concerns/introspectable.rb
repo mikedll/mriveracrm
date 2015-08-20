@@ -60,28 +60,30 @@ module Introspectable
       end
     end
 
+    def attr_name(attr)
+      if attr.is_a?(Hash)
+        attr.keys.first
+      else
+        attr
+      end
+    end
+
     def serializable_configuration_for_view(view = nil)
-      attrs = attribute_stack_for_view(view).map do |attr_or_group|
-        if attr_or_group.is_a?(Hash)
-          attr_or_group.keys.first
-        else
-          # This assumes groups do not nest in each other.
-          # We'd need recursion here if they did.
-          attr_or_group.map { |attr| attr.keys.first }
-        end
+      attr_names = attribute_stack_for_view(view).map do |group|
+        (group.length == 1) ? attr_name(group.first) : group.map { |attr| attr_name(attr) }
       end.flatten
 
       # It's up to the introspectable includer to except :id from
       # a given view or attributes set for json purposes. That
       # capability has not been coded as of 8/17/15.
-      attrs.push(:id) if !attrs.include?(:id)
+      attr_names.push(:id) if !attr_names.include?(:id)
 
       methods = actions_for_view(view).map do |action_descriptor|
         action_descriptor.values.first.select { |k, v| [:enabler, :disabler].include?(k) }.map { |k, v| v }
       end.flatten
 
       {
-        :only => attrs,
+        :only => attr_names,
         :methods => methods
       }
     end
