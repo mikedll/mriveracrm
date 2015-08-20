@@ -73,7 +73,7 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
                                        })
       rescue Stripe::CardError => e
         result[:error] = e.message
-        return false
+        return result
       end
 
       result[:vendor_id] = charge.id
