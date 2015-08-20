@@ -97,26 +97,7 @@ module AppsModelInspection
 
     def json_config
       if apps_configuration[:view]
-        # configure json with this view.
-
-        # klass.
-        #         :only => []
-        # {
-        #   :id => id,
-        #   :title => title,
-        #   :description => description,
-        #   :total => total,
-        #   :payable => can_pay?,
-        #   :editable => can_edit?,
-        #   :not_editable => !can_edit?,
-        #   :destroyable => can_delete?
-        #   :date => date,
-        #   :status => status,
-        #   :last_error = last_error
-        # }
-        {
-          :only => apps_configuration[:primary_model].introspectable_configuration.attributes_for_view(apps_configuration[:view])
-        }
+        apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
       else
         {}
       end

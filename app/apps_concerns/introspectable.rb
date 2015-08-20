@@ -60,7 +60,7 @@ module Introspectable
       end
     end
 
-    def attributes_for_view(view = nil)
+    def serializable_configuration_for_view(view = nil)
       attrs = attribute_stack_for_view(view).map do |attr_or_group|
         if attr_or_group.is_a?(Hash)
           attr_or_group.keys.first
@@ -75,7 +75,15 @@ module Introspectable
       # a given view or attributes set for json purposes. That
       # capability has not been coded as of 8/17/15.
       attrs.push(:id) if !attrs.include?(:id)
-      attrs
+
+      methods = actions_for_view(view).map do |action_descriptor|
+        action_descriptor.values.first.select { |k, v| [:enabler, :disabler].include?(k) }.map { |k, v| v }
+      end.flatten
+
+      {
+        :only => attrs,
+        :methods => methods
+      }
     end
 
     def attr(a, traits = nil)
@@ -101,6 +109,12 @@ module Introspectable
       end
     end
 
+    # An action description looks like this:
+    #
+    #     :action_name => { :enabler => :some_predicate?, :type => :put_action }
+    #
+    # It's a hash with one key-value pair, where the value is a hash.
+    #
     def action(a, traits)
       traits.reverse_merge!({ :type => :put_action })
       (current_view ? current_view.last[:actions] : actions).push({ a => traits })

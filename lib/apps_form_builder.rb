@@ -60,8 +60,8 @@ class AppsFormBuilder < SimpleForm::FormBuilder
             else
               btn_css_classes.push('put_action')
             end
-          when :enabled_on
-            # bug: useage in button_tag fails to preserve underscore if we index [:data]
+          when :enabler
+            # bug: usage in button_tag fails to preserve underscore if we index [:data]
             data_opts['data-attribute_enabler'] = v.to_s
             data_opts['data-enabled_when'] = 'true'
           when :confirm
