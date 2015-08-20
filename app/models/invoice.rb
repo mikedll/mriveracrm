@@ -137,7 +137,7 @@ class Invoice < ActiveRecord::Base
       attr :description, :read_only
       attr :status, :read_only
       # attr :pdf_file, [:download, :included]
-      # attr :last_error, :read_only
+      attr :last_error, [:read_only, :string]
 
       action :charge, :enabler => :can_pay?
     end
