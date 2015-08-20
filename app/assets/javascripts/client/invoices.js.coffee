@@ -1,5 +1,7 @@
 
 class window.Invoice extends BaseModel
+  isPersistentRequestingAvailable: () ->
+    @deepGet('available_for_request?')
 
 class window.Invoices extends Backbone.Collection
   model: Invoice
