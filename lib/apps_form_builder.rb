@@ -3,15 +3,15 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   include ActionView::Helpers::FormTagHelper
   include ActionView::Helpers::TranslationHelper
 
-  def derived_inputs_buttons
-    derived_inputs.safe_concat(derived_buttons)
+  def derived_inputs_buttons(options = {})
+    derived_inputs(options).safe_concat(derived_buttons(options))
   end
 
-  def derived_inputs(opts = {})
+  def derived_inputs(options = {})
     return nil if object.nil?
 
     output = ActiveSupport::SafeBuffer.new
-    object.class.introspectable_configuration.attributes.each do |row|
+    object.class.introspectable_configuration.attribute_stack_for_view(options[:view]).each do |row|
       if row.length == 1
         output.safe_concat(derived_input(row.first))
       else
@@ -37,7 +37,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   end
 
 
-  def derived_buttons
+  def derived_buttons(options = {})
     output = ActiveSupport::SafeBuffer.new
     output.safe_concat(content_tag('div', :class => 'btn-group') do
                          content_tag('button', 'Save', :class => 'save btn btn-primary', :type => 'button')

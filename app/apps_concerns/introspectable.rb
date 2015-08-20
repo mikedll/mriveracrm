@@ -48,16 +48,18 @@ module Introspectable
       self.nested_associations.push(na)
     end
 
-    def attributes_for_view(view = nil)
-      attrs_stack = if view
-                      v = views.select { |v| v.first == view }.first
-                      raise ViewNotFoundError("View #{view} does not exist on #{model_name}.") if v.nil?
-                      v.last
-                    else
-                      attributes
-                    end
+    def attribute_stack_for_view(view = nil)
+      if view
+        v = views.select { |v| v.first == view }.first
+        raise ViewNotFoundError("View #{view} does not exist on #{model_name}.") if v.nil?
+        v.last
+      else
+        attributes
+      end
+    end
 
-      attrs = attrs_stack.map do |attr_or_group|
+    def attributes_for_view(view = nil)
+      attrs = attribute_stack_for_view(view).map do |attr_or_group|
         if attr_or_group.is_a?(Hash)
           attr_or_group.keys.first
         else

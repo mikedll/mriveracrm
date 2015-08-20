@@ -131,11 +131,11 @@ class Invoice < ActiveRecord::Base
     action :charge, :enabler => :can_pay?
 
     view :client do
-      attr :title, :readonly
-      attr :date, :readonly
-      attr :total, :readonly
-      attr :description, :readonly
-      attr :status, :readonly
+      attr :title, :read_only
+      attr :date, [:read_only, :datetime]
+      attr :total, [:read_only, :currency]
+      attr :description, :read_only
+      attr :status, :read_only
       attr :pdf_file, [:download, :included]
 
       action :charge, :enabler => :can_pay?
