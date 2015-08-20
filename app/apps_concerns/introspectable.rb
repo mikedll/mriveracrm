@@ -70,7 +70,7 @@ module Introspectable
 
     def serializable_configuration_for_view(view = nil)
       attr_names = attribute_stack_for_view(view).map do |group|
-        (group.length == 1) ? attr_name(group.first) : group.map { |attr| attr_name(attr) }
+        group.map { |attr| attr_name(attr) }
       end.flatten
 
       # It's up to the introspectable includer to except :id from
