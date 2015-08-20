@@ -57,7 +57,7 @@ module PersistentRequestable
     private
 
     def _pristine?
-      !new_record? && !changed
+      !new_record? && !changed?
     end
 
     def _clean_persistent_requestable_redis_store
