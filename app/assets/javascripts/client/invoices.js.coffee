@@ -26,7 +26,7 @@ class window.InvoiceListItemView extends ListItemView
     @decoratePending()
 
   decoratePending: () ->
-    if @model.get('status') == 'pending'
+    if @model.get('can_pay?')
       @$el.addClass('labelled')
     else
       @$el.removeClass('labelled')
