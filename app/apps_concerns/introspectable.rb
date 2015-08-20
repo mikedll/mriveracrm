@@ -79,9 +79,9 @@ module Introspectable
       # capability has not been coded as of 8/17/15.
       attr_names.push(:id) if !attr_names.include?(:id)
 
-      methods = actions_for_view(view).map do |action_descriptor|
+      methods = (actions_for_view(view).map do |action_descriptor|
         action_descriptor.values.first.select { |k, v| [:enabler, :disabler].include?(k) }.map { |k, v| v }
-      end.flatten + synthesized_for_view(view)
+      end.flatten + synthesized_for_view(view)).uniq
 
       {
         :only => attr_names,
