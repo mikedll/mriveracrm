@@ -176,26 +176,27 @@ class Invoice < ActiveRecord::Base
   end
 
   def charge_background
-    transaction = StripeTransaction.new
-    transaction.payment_gateway_profile = client.payment_gateway_profile
-    transaction.invoice = self
-    transaction.amount = total
-    transaction.begin!
+    _with_stop_persistence(CHARGE_REQUEST) do
+      transaction = StripeTransaction.new
+      transaction.payment_gateway_profile = client.payment_gateway_profile
+      transaction.invoice = self
+      transaction.amount = total
+      transaction.begin!
 
-    result = client.payment_gateway_profile.pay_invoice!(total, title)
-    transaction.vendor_id = result[:vendor_id] if result[:vendor_id]
+      result = client.payment_gateway_profile.pay_invoice!(total, title)
+      transaction.vendor_id = result[:vendor_id] if result[:vendor_id]
 
-    if !result[:succeeded]
-      self.last_error = result[:error]
-      fail_payment!
-      transaction.has_failed!
-    else
-      transaction.succeed!
-      mark_paid!
+      if !result[:succeeded]
+        self.last_error = result[:error]
+        fail_payment!
+        transaction.has_failed!
+      else
+        transaction.succeed!
+        mark_paid!
+      end
+
+      result[:succeeded]
     end
-
-    stop_persistent_request(CHARGE_REQUEST)
-    result[:succeeded]
   end
 
   def regenerate_pdf

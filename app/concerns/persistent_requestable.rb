@@ -54,6 +54,19 @@ module PersistentRequestable
       true
     end
 
+    protected
+
+    def _with_stop_persistence(request_name)
+      begin
+        yield
+      rescue => e
+        self.last_error = I18n.t('internal_server_error')
+        return false
+      ensure
+        stop_persistent_request(request_name)
+      end
+    end
+
     private
 
     def _pristine?
