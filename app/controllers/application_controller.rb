@@ -4,7 +4,7 @@
 class ApplicationController < ActionController::Base
 
   include ActionView::Helpers::TranslationHelper
-  include AppsModelInspection
+  include IntrospectionRenderable
 
   protect_from_forgery
 

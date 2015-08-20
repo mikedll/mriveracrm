@@ -1,6 +1,6 @@
 require 'active_support/concern'
 
-module AppsModelInspection
+module IntrospectionRenderable
   extend ActiveSupport::Concern
 
   included do
