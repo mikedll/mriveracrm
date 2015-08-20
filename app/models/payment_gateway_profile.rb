@@ -1,10 +1,13 @@
 class PaymentGatewayProfile < ActiveRecord::Base
+
+  include PersistentRequestable
+
   belongs_to :payment_gateway_profilable, polymorphic: true
   has_many :transactions
 
   after_create :_create_remote
 
-  attr_accessor :last_error, :card_number, :expiration_month, :expiration_year, :cv_code
+  attr_accessor :card_number, :expiration_month, :expiration_year, :cv_code
 
   TRIAL_DURATION = 30.days
 

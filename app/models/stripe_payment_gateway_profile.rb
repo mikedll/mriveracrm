@@ -10,11 +10,15 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     SUBSCRIPTION_UPDATED = 'customer.subscription.updated'
   end
 
+  class Worker < WorkerBase
+  end
+
   def public
     {
       :id => id,
       :card_prompt => card_prompt,
-      :updated_at => updated_at
+      :updated_at => updated_at,
+      :available_for_request? => available_for_request?
     }
   end
 
@@ -88,11 +92,8 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
   end
 
+  UPDATE_PAYMENT_INFO_REQUEST = 'update_payment_info'
   def update_payment_info(opts)
-    if vendor_id.blank?
-      _create_remote
-    end
-
     card_param = nil
     if opts[:token].blank?
       card = card_from_opts(opts)
@@ -107,29 +108,38 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       card_param = opts[:token]
     end
 
-    _with_stripe_key do
-      customer = Stripe::Customer.retrieve(self.vendor_id)
-      customer.card = card_param
+    Worker.obj_enqueue(self, :updated_payment_info_background, opts) if start_persistent_request(UPDATE_PAYMENT_INFO_REQUEST)
+  end
 
-      begin
-        customer.save
-      rescue Stripe::CardError => e
-        errors.add(:base, e.message)
-        return false
-      rescue Stripe::InvalidRequestError => e
-        DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => payment_gateway_profilable_id)
-        errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-        return false
-      rescue => e
-        DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => payment_gateway_profilable_id)
-        errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-        return false
+  def update_payment_info_background(opts)
+    _with_stop_persistence do
+      _create_remote if vendor_id.blank?
+
+      _with_stripe_key do
+        customer = Stripe::Customer.retrieve(self.vendor_id)
+        customer.card = card_param
+
+        begin
+          customer.save
+        rescue Stripe::CardError => e
+          self.last_error = e.message
+          return false
+        rescue Stripe::InvalidRequestError => e
+          DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => payment_gateway_profilable_id)
+          self.last_error = I18n.t('payment_gateway_profile.update_error')
+          return false
+        rescue => e
+          DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => payment_gateway_profilable_id)
+          self.last_error = I18n.t('payment_gateway_profile.update_error')
+          return false
+        end
+
+        _cache_customer(customer)
+        save!
       end
-
-      _cache_customer(customer)
-      save!
     end
   end
+
 
   RECOGNIZED_ERRORS = [
     "Failed to create",

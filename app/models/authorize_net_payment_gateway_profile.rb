@@ -1,5 +1,7 @@
 class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
+  attr_accessor :last_error
+
   module AuthorizeResponses
     OK = 'Ok'
     ERROR = 'Error'
