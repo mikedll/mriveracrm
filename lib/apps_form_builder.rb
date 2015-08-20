@@ -36,7 +36,6 @@ class AppsFormBuilder < SimpleForm::FormBuilder
     output
   end
 
-
   def derived_buttons(options = {})
     output = ActiveSupport::SafeBuffer.new
     output.safe_concat(content_tag('div', :class => 'btn-group') do
@@ -48,7 +47,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
                        end)
 
     if object
-      object.class.introspectable_configuration.actions.each do |action_descriptor|
+      object.class.introspectable_configuration.actions_for_view(options[:view]).each do |action_descriptor|
         name = action_descriptor.keys.first.to_s
         label = name.titleize
         btn_css_classes = ['btn', name.to_s]
