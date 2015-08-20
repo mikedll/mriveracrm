@@ -14,7 +14,7 @@
         .span12
           = render AuthorizeNetPaymentGatewayProfile.new
   .invoices_view_example
-    = render :partial => 'shared/app', :locals => { :app_top => false, :app_class => 'invoices', :title => "Invoices", :bootstrap => current_objects }
+    = render :partial => 'shared/app', :locals => { :app_top => false, :app_class => 'invoices', :title => "Invoices", :bootstrap => rendered_current_objects }
   .container-app-example
     .payment-gateway-profile-view-container
     .invoices-app-view-container

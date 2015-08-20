@@ -9,6 +9,8 @@ module AppsModelInspection
       instance_variable_name_without_model_namespace_awareness
     end
 
+    helper_method(:rendered_current_objects, :rendered_current_object)
+
     protected
 
     def configure_render(klass, opts = {})
