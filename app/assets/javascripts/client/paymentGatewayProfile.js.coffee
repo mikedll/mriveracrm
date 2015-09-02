@@ -21,7 +21,7 @@ class window.PaymentGatewayProfileView extends CrmModelView
     @model.save(@fromForm())
 
   onSync: () ->
-    CrmModelView.prototype.onSync.apply(this, arguments)
+    CrmModelView.prototype.onSync.apply(@, arguments)
     @$(':input').val('')
 
   copyModelToForm: () ->
