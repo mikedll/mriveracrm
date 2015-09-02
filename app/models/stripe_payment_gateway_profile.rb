@@ -108,10 +108,10 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
       card_param = opts[:token]
     end
 
-    Worker.obj_enqueue(self, :updated_payment_info_background, opts) if start_persistent_request(UPDATE_PAYMENT_INFO_REQUEST)
+    Worker.obj_enqueue(self, :update_payment_info_background, options) if start_persistent_request(UPDATE_PAYMENT_INFO_REQUEST)
   end
 
-  def update_payment_info_background(opts)
+  def update_payment_info_background(options)
     _with_stop_persistence do
       _create_remote if vendor_id.blank?
 
