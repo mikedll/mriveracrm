@@ -427,15 +427,16 @@ class window.ModelBaseView extends BaseView
     @decorateDirty()
     @decorateError()
     @decorateRequesting()
+    @resolveButtonAvailability()
 
   onModelChanged: (e) ->
     @dirtyRegistration()
+    @resolveButtonAvailability()
 
   onRequest: (model, xhr, options) ->
     if @model.isRequesting()
-      @$('.save').addClass('disabled')
-      @$('.revert').addClass('disabled')
       @notifyRequestStarted()
+    @resolveButtonAvailability()
 
   onDestroy: (model, resp, options) ->
     if !@model.isRequesting() && !@model.isNew() # isNew() => a request just finished to delete this on the server
@@ -443,22 +444,20 @@ class window.ModelBaseView extends BaseView
 
   onSync: (model, resp, options) ->
     if !@model.isRequesting()
-      @resolveButtonAvailability()
       @notifyRequestCompleted()
+    @resolveButtonAvailability()
     @dirtyRegistration()
 
   onError: (model, resp, options) ->
     if !@model.isRequesting()
-      @resolveButtonAvailability()
       @notifyRequestCompleted()
+    @resolveButtonAvailability()
 
   resolveButtonAvailability: () ->
-    if @model.isDirty()
-      @$('.save').removeClass('disabled')
-      @$('.revert').removeClass('disabled')
+    if @model.isRequesting() || !@model.isDirty()
+      @$('.save, .revert').addClass('disabled')
     else
-      @$('.save').addClass('disabled')
-      @$('.revert').addClass('disabled')
+      @$('.save, .revert').removeClass('disabled')
 
 
 class window.BaseCollection extends Backbone.Collection
@@ -633,9 +632,6 @@ class window.ListItemView extends ModelBaseView
     ModelBaseView.prototype.onSync.apply(@, arguments)
     @$el.prop('id', @id()) if @$el.prop('id') == ""
     @render()
-    @decorateDirty()
-    @decorateError()
-    @decorateRequesting()
 
   onError: (model, resp, options) ->
     ModelBaseView.prototype.onError.apply(@, arguments)
@@ -777,17 +773,17 @@ class window.CrmModelView extends ModelBaseView
     @readonlyInputsCache.each((i, domEl) =>
       el$ = $(domEl)
       attributeName = @nameFromInput(el$, true)
+      # todo: this is dirty code. You're using changed which is only coincidentally
+      # defined above when @model.isDirty() is true.
       if attributeName? and @model.isDirty() and _.has(changed, attributeName)
         el$.closest('.control-group').addClass('warning')
       else
         el$.closest('.control-group').removeClass('warning')
     )
 
-    @resolveButtonAvailability()
-
   onModelChanged: (e) ->
     # since this is the primary editing area of this model,
-    # we really don't update it just because the model changes.
+    # we don't update it when the model changes.
     # in the event another editing area updates this,
     # more code needs to be written here.
     #

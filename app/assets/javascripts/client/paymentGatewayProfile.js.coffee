@@ -3,6 +3,9 @@ class window.PaymentGatewayProfile extends BaseModel
   url: () ->
     gUrlManager.url('/client/payment_gateway_profile')
 
+  isPersistentRequestingAvailable: () ->
+    @deepGet('available_for_request?')
+
 class window.PaymentGatewayProfileView extends CrmModelView
   modelName: 'payment_gateway_profile'
   className: 'payment-gateway-profile model-view'
@@ -10,11 +13,13 @@ class window.PaymentGatewayProfileView extends CrmModelView
   initialize: (options) ->
     CrmModelView.prototype.initialize.apply(this, arguments)
     @useDirty = false
-    @events =
-      'ajax:beforeSend form': 'noSubmit'
-      'click .save': 'save'
-    @listenTo(@model, 'sync', @onSync)
-    @listenTo(@model, 'error', @onError)
+
+  decorateRequesting: () ->
+    CrmModelView.prototype.decorateRequesting.apply(@, arguments)
+    if @model.isRequesting()
+      @$('.btn.save').text('Saving...')
+    else
+      @$('.btn.save').text('Save')
 
   save: () ->
     @clearErrors()
