@@ -115,6 +115,7 @@ class window.BaseModel extends Backbone.Model
     @listenTo(@, 'sync', @onSync)
     @listenTo(@, 'error', @onError)
     @listenTo(@, 'destroy', @onDestroy)
+    @listenTo(@, 'bootstrapped', @onBootstrapped)
 
     @dumpOnChange = false
 
@@ -336,6 +337,9 @@ class window.BaseModel extends Backbone.Model
     clearTimeout(@_refreshTimeout) if @_refreshTimeout?
     @_isRequesting = false
 
+  onBootstrapped: () ->
+    @pollIfNeeded()
+
 class window.BaseView extends Backbone.View
   initialize: (options) ->
     @useDirty = true
@@ -471,7 +475,7 @@ class window.BaseCollection extends Backbone.Collection
     @comparator = (model) ->
       model.get('id')
 
-    @listenTo(@, 'bootstrapped', @onBootstrapped)
+    @listenTo(@, 'reset', @onReset)
 
   url: () ->
     if typeof(@urlFragment) != "undefined"
@@ -479,8 +483,8 @@ class window.BaseCollection extends Backbone.Collection
     else
       Backbone.Collection.prototype.url.apply(@, arguments)
 
-  onBootstrapped: () ->
-    @each((model) -> model.pollIfNeeded())
+  onReset: () ->
+    @each((model) -> model.trigger('bootstrapped'))
 
 class window.WithChildrenView extends BaseView
   initialize: (options) ->

@@ -3,7 +3,7 @@ class window.Invoice extends BaseModel
   isPersistentRequestingAvailable: () ->
     @deepGet('available_for_request?')
 
-class window.Invoices extends Backbone.Collection
+class window.Invoices extends BaseCollection
   model: Invoice
   comparator: (invoice) ->
     invoice.get('id')
@@ -60,7 +60,7 @@ class window.PartitionedChildrenView extends WithChildrenView
 
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
-    @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices)), parent: @)
+    @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices, silent: false)), parent: @)
     @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile'), parent: @)
 
   resizeView: () ->
