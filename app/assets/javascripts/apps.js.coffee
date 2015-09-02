@@ -115,6 +115,10 @@ class window.BaseModel extends Backbone.Model
     @listenTo(@, 'sync', @onSync)
     @listenTo(@, 'error', @onError)
     @listenTo(@, 'destroy', @onDestroy)
+
+    # This should be replacable with onChange
+    # but onChange is not working for pollIfNeeded
+    # for some reason.
     @listenTo(@, 'bootstrapped', @onBootstrapped)
 
     @dumpOnChange = false

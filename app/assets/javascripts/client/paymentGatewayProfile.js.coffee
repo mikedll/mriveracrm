@@ -1,5 +1,14 @@
 
 class window.PaymentGatewayProfile extends BaseModel
+  initialize: (attrs, options) ->
+    BaseModel.prototype.initialize.apply(@, arguments)
+    # this should probably be done elsewhere. assumeBootstrapped
+    # is a param specific to the knowledge that this
+    # model is being used in the client section of the app
+    # and bootstrapped (code-wise) by the Invoices.js
+    # script.
+    @trigger('bootstrapped') if options.assumeBootstrapped
+
   url: () ->
     gUrlManager.url('/client/payment_gateway_profile')
 

@@ -61,7 +61,10 @@ class window.PartitionedChildrenView extends WithChildrenView
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
     @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices, silent: false)), parent: @)
-    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile'), parent: @)
+    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile,
+      assumeBootstrapped: true,
+      url: '/client/payment_gateway_profile'
+    ), parent: @)
 
   resizeView: () ->
     # override so that we dont shift the content of this box way wrong to the left/top
