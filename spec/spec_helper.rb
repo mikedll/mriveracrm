@@ -24,7 +24,7 @@ Spork.prefork do
 
     config.include Devise::TestHelpers, :type => :controller
 
-    # config.filter_run_including :current => true
+    config.filter_run_including :current => true
     config.filter_run_excluding :broken => true
     config.filter_run_excluding :ignore => true
 
