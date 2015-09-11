@@ -3,7 +3,7 @@ require "bundler/capistrano"
 require 'capistrano-unicorn'
 
 set :application, "mikedllcrm"
-set :repository,  "mrmike@ssh.mikedll.com:git/mikedll"
+set :repository,  "git@github.com:mikedll/mriveracrm.git"
 
 set :scm, :git
 set :deploy_via, :remote_cache
