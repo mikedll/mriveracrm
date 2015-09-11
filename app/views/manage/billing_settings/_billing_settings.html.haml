@@ -14,6 +14,12 @@
       %h5
         Features Enabled
 
+      %p
+        The 
+        = Feature.find_by_name(Names::APPS_FRAMEWORK).public_name
+        feature is a requisite for all other features. If you use
+        any other feature, please select this feature as well.
+
       - features = Feature.bit_index_ordered.all
       - features_in_row = []
       - features.each_with_index do |f, i|
