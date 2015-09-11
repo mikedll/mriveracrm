@@ -19,6 +19,8 @@
         = Feature.find_by_name(Names::APPS_FRAMEWORK).public_name
         feature is a requisite for all other features. If you use
         any other feature, please select this feature as well.
+        If you were a customer before this feature existed,
+        you may ignore this request.
 
       - features = Feature.bit_index_ordered.all
       - features_in_row = []
