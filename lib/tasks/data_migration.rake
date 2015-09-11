@@ -1,9 +1,8 @@
 
 namespace :data_migrations do
 
-  desc "Migration in features"
-  task :features_created => :environment do
-
+  desc "Ensure all features exist"
+  task :ensure_features_exist => :environment do
     raise "Not intended for when system has more than one mfe. " if MarketingFrontEnd.count > 1
 
     Feature.ensure_master_list_created!
@@ -13,6 +12,12 @@ namespace :data_migrations do
       mfe = MarketingFrontEnd.first
       mfe.features.push(f) if mfe.features.find_by_id(f.id).nil?
     end
+  end
+
+  # Probably shouldn't use this anymore until you modify
+  # it to respect expired trials.
+  desc "Migration in features"
+  task :features_created => [:environment, :ensure_features_exist] do
 
     Business.unscoped.all.each do |b|
       b.usage_subscription.require_payment_gateway_profile

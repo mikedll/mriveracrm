@@ -14,16 +14,30 @@
       %h5
         Features Enabled
 
-      - Feature.bit_index_ordered.all.each_with_index do |feature, i|
-        - if i % 4 == 0
-          .row
-        .span3
-          .feature-display.control-group
+      %p
+        The 
+        = Feature.find_by_name(Names::APPS_FRAMEWORK).public_name
+        feature is a requisite for all other features. If you use
+        any other feature, please select this feature as well.
+        If you were a customer before this feature existed,
+        you may ignore this request.
 
-            %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "checkbox"}
-              = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, current_object.has_feature(feature),  :id => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "has-many-relation"
-              = feature.public_name
-              .price.pull-right
+      - features = Feature.bit_index_ordered.all
+      - features_in_row = []
+      - features.each_with_index do |f, i|
+        - features_in_row.push(f)
+        - if i % 3 == 2 || i == features.count - 1
+          -# todo remove .models-show-container from the row-fluid it is under outside this view. M. Rivera, Sept 11th 2015
+          .row-fluid
+            - features_in_row.each do |feature|
+              .span3
+                .feature-display.control-group
+
+                  %label{:for => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "checkbox"}
+                    = check_box_tag 'billing_settings[feature_selections_attributes][]', feature.id, current_object.has_feature(feature),  :id => "billing_settings_feature_selections_attributes_#{feature.id}", :class => "has-many-relation"
+                    = feature.public_name
+                    .price.pull-right
+          - features_in_row = []
 
       .clear
       .control-group.price-display
