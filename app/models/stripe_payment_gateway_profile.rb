@@ -93,10 +93,10 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   end
 
   UPDATE_PAYMENT_INFO_REQUEST = 'update_payment_info'
-  def update_payment_info(opts)
+  def update_payment_info(options)
     card_param = nil
-    if opts[:token].blank?
-      card = card_from_opts(opts)
+    if options[:token].blank?
+      card = card_from_options(options)
       return false if !card_valid?(card)
       card_param = {
         :number => card.number,
@@ -105,13 +105,13 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
         :cvc => card.verification_value
       }
     else
-      card_param = opts[:token]
+      card_param = options[:token]
     end
 
     Worker.obj_enqueue(self, :update_payment_info_background, options) if start_persistent_request(UPDATE_PAYMENT_INFO_REQUEST)
   end
 
-  def update_payment_info_background(options)
+  def update_payment_info_background(opts)
     _with_stop_persistence do
       _create_remote if vendor_id.blank?
 

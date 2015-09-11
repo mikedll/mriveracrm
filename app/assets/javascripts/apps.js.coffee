@@ -993,9 +993,16 @@ class window.CrmModelView extends ModelBaseView
       @clearHighlightedModelErrors()
 
   save: () ->
-    return if !@model.isDirty()
-    @clearErrors()
-    @model.save()
+    # todo: This should be compressed if useDirty
+    # can be use to determine that fromForm should be called,
+    # and that isDirty must make use of it.
+    if @useDirty
+      return if !@model.isDirty()
+      @clearErrors()
+      @model.save()
+    else
+      @clearErrors()
+      @model.save(@fromForm)
 
   decorateError: (errors) ->
     renderErrors(@model.validationError) if @model.validationError?

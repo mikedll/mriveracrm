@@ -28,12 +28,12 @@ class PaymentGatewayProfile < ActiveRecord::Base
     raise "Implement in subclass."
   end
 
-  def card_from_opts(opts)
+  def card_from_options(options)
     ActiveMerchant::Billing::CreditCard.new({
-                                              :month => opts[:expiration_month].to_i,
-                                              :year => "20#{opts[:expiration_year]}".to_i,
-                                              :number => opts[:card_number],
-                                              :verification_value => opts[:cv_code]
+                                              :month => options[:expiration_month].to_i,
+                                              :year => "20#{options[:expiration_year]}".to_i,
+                                              :number => options[:card_number],
+                                              :verification_value => options[:cv_code]
                                             }.merge(payment_gateway_profilable.payment_profile_profilable_card_args))
   end
 
