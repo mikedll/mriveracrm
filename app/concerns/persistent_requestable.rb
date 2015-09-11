@@ -13,6 +13,7 @@ module PersistentRequestable
 
   included do
     include Redis::Objects
+    include ActionView::Helpers::TranslationHelper
 
     cattr_accessor :requests_allowed
     counter :persistent_requests_count
@@ -29,13 +30,13 @@ module PersistentRequestable
 
     def start_persistent_request(request_name)
       if !_pristine?
-        errors.add(:base, t('persistent_requestable.not_pristine', :model => self.class.to_s.humanize.downcase))
+        errors.add(:base, t('persistent_requestable.not_pristine', :model => self.class.to_s.titleize.humanize.downcase))
         return false
       end
 
       if persistent_requests_count.increment > requests_allowed
         persistent_requests_count.decrement
-        errors.add(:base, t('persistent_requestable.already_requesting', :model => self.class.to_s.humanize.downcase))
+        errors.add(:base, t('persistent_requestable.already_requesting', :model => self.class.to_s.titleize.humanize.downcase))
         return false
       end
 
