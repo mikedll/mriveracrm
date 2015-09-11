@@ -49,11 +49,12 @@ class User < ActiveRecord::Base
 
   def self.find_for_google_oauth2(auth, current_user)
     # user exists
-    user = cb.google_oauth2(auth[:info][:email]).first
+    email = auth[:info][:email] || auth[:extra][:raw_info][:email]
+    user = cb.google_oauth2(email).first
     return user if user
 
     # does not exist. require open invite.
-    invitation = Invitation.cb.open.find_by_email auth[:info][:email].downcase
+    invitation = Invitation.cb.open.find_by_email email.downcase
     if invitation
       # invited user
       user = if current_user.nil?
@@ -65,13 +66,13 @@ class User < ActiveRecord::Base
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
       return user if !invitation.accept_user!(user) # credential likely is already in use for this business
     elsif current_user.nil? && cb.first.nil?
-      invitation = Invitation.handled.open.find_by_email auth[:info][:email].downcase
+      invitation = Invitation.handled.open.find_by_email email.downcase
       if invitation
         user = User.new_from_auth(auth[:info])
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
         return nil if !invitation.accept_user!(user)
       else
-        u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
+        u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => email))
         return u
       end
     elsif current_user
@@ -79,7 +80,7 @@ class User < ActiveRecord::Base
       # invitation or new business. why? log him out.
       return nil
     else
-      u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => auth[:info][:email]))
+      u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => email))
       return u
     end
 
