@@ -12,15 +12,23 @@ class FineGrainedClient
     @incoming_buffer = ""
   end
 
+  def encode(s)
+    s.gsub("\n", "\\n")
+  end
+
+  def decode(s)
+    s.gsub("\\n", "\n")
+  end
+
   def set(k, v)
-    @client.sendmsg "SET #{k} #{v}\n"
+    @client.sendmsg "SET #{k} #{encode(v)}\n"
     read_response
   end
 
   BUFFER_SIZE = 1024
   def read(k)
     @client.sendmsg("READ #{k}\n")
-    read_response
+    decode(read_response)
   end
 
   def read_response
