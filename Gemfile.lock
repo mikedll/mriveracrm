@@ -151,6 +151,7 @@ GEM
     diff-lcs (1.2.1)
     dotenv (0.7.0)
     erubis (2.7.0)
+    eventmachine (1.0.8)
     excon (0.27.6)
     execjs (1.2.4)
       multi_json (~> 1.0)
@@ -426,6 +427,7 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   database_cleaner
   devise
+  eventmachine
   excon (>= 0.27.5)
   factory_girl_rails
   faker
