@@ -27,9 +27,5 @@ EM.run do
   Signal.trap("TERM") { EventMachine.stop }
 
   EventMachine.start_server("127.0.0.1", 7803, FineGrained)
-
-  # timer = EventMachine::PeriodicTimer.new(2) do
-  #   puts "the time is #{Time.now}"
-  # end
 end
 

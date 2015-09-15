@@ -3,10 +3,19 @@ require 'eventmachine'
 
 class FineGrained < EventMachine::Connection
 
+  AUTO_FLUSH_FREQUENCY = 10
   DB = "db/fineGrained.db"
   @@store = nil
+  @@flushing_timer = nil
 
-  def post_init
+  def self.flush
+    ensure_store_defined
+    File.open(DB, "w") do |f|
+      f.write @@store.to_yaml
+    end
+  end
+
+  def self.ensure_store_defined
     if @@store.nil?
       if File.exists?(DB)
         f = File.open(DB, "r")
@@ -22,10 +31,28 @@ class FineGrained < EventMachine::Connection
     end
   end
 
-  def unbind
-    File.open(DB, "w") do |f|
-      f.write @@store.to_yaml
+  #
+  # It's not clear why we have this
+  # if we're going to flush on every write,
+  # as shown in receive_data. This could
+  # be used to stagger journaling vs writing
+  # of the compressed form of our data.
+  #
+  def self.start_automatically_flushing
+    if @@flushing_timer.nil?
+      @@flushing_timer = EventMachine::PeriodicTimer.new(AUTO_FLUSH_FREQUENCY) do
+        flush
+      end
     end
+  end
+
+  def post_init
+    self.class.ensure_store_defined
+    self.class.start_automatically_flushing
+  end
+
+  def unbind
+    self.class.flush
   end
 
   def receive_data(line)
@@ -45,8 +72,8 @@ class FineGrained < EventMachine::Connection
 
     key = nil
     key_match = /\A(\w+)\s*/.match(key_and_params)
-    if key_match.length < 2
-      send_data "Error: Key not found."
+    if key_match.nil? || key_match.length < 2
+      send_data "Error: Key not found.\n"
       return
     end
 
@@ -61,6 +88,7 @@ class FineGrained < EventMachine::Connection
     case cmd
     when "SET"
       @@store[key] = params
+      self.class.flush
       send_data "OK\n"
     when "READ"
       r = @@store[key]
