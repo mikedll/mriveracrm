@@ -37,6 +37,7 @@ gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :br
 gem 'redis-objects'
 
 group :default, :fine_grained do
+  gem 'activesupport'
   gem 'eventmachine'
   gem "safe_yaml"
 end

@@ -3,6 +3,7 @@ require 'eventmachine'
 
 class FineGrained < EventMachine::Connection
 
+  PORT = 7803
   AUTO_FLUSH_FREQUENCY = 10
   DB = "db/fineGrained.db"
   @@store = nil
@@ -55,8 +56,8 @@ class FineGrained < EventMachine::Connection
     self.class.flush
   end
 
-  def receive_data(line)
-    data = line.chomp
+  def process_request(request)
+    data = request.chomp
 
     matches = /\A(\w+)\s+/.match(data)
 
@@ -86,6 +87,9 @@ class FineGrained < EventMachine::Connection
     end
 
     case cmd
+    when /quit/i
+      close_connection
+      return false
     when "SET"
       @@store[key] = params
       self.class.flush
@@ -97,9 +101,13 @@ class FineGrained < EventMachine::Connection
         return
       end
       send_data r + "\n"
-    when /quit/i
-      close_connection
     end
+
+    true
+  end
+
+  def receive_data(data)
+    data.split(/\r?\n/).each { |l| break if !process_request(l) }
   end
 
 end
