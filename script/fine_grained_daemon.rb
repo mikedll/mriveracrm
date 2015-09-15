@@ -32,12 +32,11 @@ EM.run do
 
   EM.defer lambda {
     fgc = FineGrainedClient.new
-    fgc.set("red", "redishtype")
-    fgc.set("blue", "blueish2")
-    r = fgc.read("red")
+    fgc.push("q1", "blueish2")
+    fgc.push("q1", "redishtype")
+    fgc.push("q1", "3")
     puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{r}"
-
+    puts "#{fgc.shift("q1")}"
   }
 
 end

@@ -81,18 +81,19 @@ class FineGrained < EventMachine::Connection
     key = key_match[1].to_s
     params = nil
     case cmd
-    when "SET"
+    when "SET", "PUSH"
       bounds = key_match.offset(0)
       params = key_and_params[bounds[1], key_and_params.length - bounds[1]]
     end
 
+    dirty = false
     case cmd
     when /quit/i
       close_connection
       return false
     when "SET"
       @@store[key] = params
-      self.class.flush
+      dirty = true
       send_data "OK\n"
     when "READ"
       r = @@store[key]
@@ -101,7 +102,39 @@ class FineGrained < EventMachine::Connection
         return
       end
       send_data r + "\n"
+    when 'PUSH', 'POP', 'SHIFT'
+      if @@store[key].nil?
+        @@store[key] = []
+      elsif !@@store[key].is_a?(Array)
+        send_data "Error: Key is not an array.\n"
+        return false
+      end
+
+      case cmd
+      when 'PUSH'
+        @@store[key].push(params)
+        dirty = true
+        send_data "OK\n"
+      when 'POP'
+        if @@store[key].empty?
+          send_data "Error: Nothing in array."
+          return false
+        end
+        r = @@store[key].pop
+        dirty = true
+        send_data "#{r}\n"
+      when 'SHIFT'
+        if @@store[key].empty?
+          send_data "Error: Nothing in array."
+          return false
+        end
+        r = @@store[key].shift
+        dirty = true
+        send_data "#{r}\n"
+      end
     end
+
+    self.class.flush if dirty
 
     true
   end

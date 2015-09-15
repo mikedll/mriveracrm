@@ -31,6 +31,27 @@ class FineGrainedClient
     decode(read_response)
   end
 
+  def push(a, v)
+    @client.sendmsg("PUSH #{a} #{encode(v)}\n")
+    read_response
+  end
+
+  #
+  # Needs to block for a period of seconds.
+  #
+  def pop(a)
+    @client.sendmsg("POP #{a}\n")
+    decode(read_response)
+  end
+
+  #
+  # Needs to block for a period of seconds.
+  #
+  def shift(a)
+    @client.sendmsg("SHIFT #{a}\n")
+    decode(read_response)
+  end
+
   def read_response
     s = @incoming_buffer
 
