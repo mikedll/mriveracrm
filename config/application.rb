@@ -13,6 +13,7 @@ module MikedllCrm
       #{Rails.root}/app/observers
       #{Rails.root}/app/uploaders
       #{Rails.root}/app/workers
+      #{Rails.root}/app/storage
       #{Rails.root}/app/apps_concerns
       #{Rails.root}/app/concerns
       #{Rails.root}/app/morality
