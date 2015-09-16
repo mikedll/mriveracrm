@@ -13,7 +13,7 @@ class WorkerBase
       o.id = obj.id
       o.invoked_method = invoked_method
       o.args = args
-      Resque.enqueue_to(Queues::DEFAULT, o.class, o)
+      FineGrainedClient.enqueue_to(Queues::DEFAULT, o.class, o)
     end
   end
 

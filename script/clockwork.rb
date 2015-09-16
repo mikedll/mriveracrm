@@ -10,6 +10,7 @@ rescue Bundler::GemNotFound => e
 end
 
 # Clockwork environment's includes
+require 'multi_json'
 require 'active_model'
 require 'active_support/core_ext'
 SafeYAML::OPTIONS[:default_mode] = :safe
@@ -22,13 +23,12 @@ $LOAD_PATH << Bundler.root
 require 'lib/app_configuration'
 require 'app/workers/worker_base'
 require 'app/workers/scheduled_event'
-
-# Clockwork environment's initializing setup
-Resque.redis = AppConfiguration.get('redis', ENV['RACK_ENV'])
+require 'app/storage/fine_grained'
+require 'app/storage/fine_grained_client'
 
 
 module Clockwork
-  handler { |job| Resque.enqueue_to(WorkerBase::Queues::DEFAULT, 'ScheduledEvent', job) }
+  handler { |job| FineGrainedClient.enqueue_to(WorkerBase::Queues::DEFAULT, 'ScheduledEvent', job) }
   ScheduledEvent::Events.each do |period_and_task|
     every(period_and_task.first, period_and_task.last)
   end

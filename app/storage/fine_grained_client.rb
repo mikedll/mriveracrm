@@ -2,6 +2,21 @@
 require 'socket'
 
 class FineGrainedClient
+  class << self
+    def cli
+      @@cli ||= new
+    end
+
+    def enqueue_to(q, klass, *args)
+      package = MultiJson.encode({
+        :klass => klass.to_s,
+        :args => args
+      })
+
+      self.cli.push(q, package)
+    end
+  end
+
   def initialize(options = {})
     options.reverse_merge!(
       :hostname => 'localhost',
@@ -59,8 +74,15 @@ class FineGrainedClient
   # Needs to block for a period of seconds.
   #
   def shift(a)
-    @client.sendmsg("SHIFT #{a}\n")
-    decode(read_response)
+    @client.sendmsg("SHIFT #{a.to_s}\n")
+    r = decode(read_response)
+
+    # Should probably improve error-handline.
+    if r.starts_with?("Error:")
+      nil
+    else
+      r
+    end
   end
 
   def read_response
