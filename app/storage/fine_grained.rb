@@ -124,6 +124,31 @@ class FineGrainedFile
   end
 end
 
+class BlockingRead
+  include EM::Deferable
+
+  QUEUE_WAIT_TIMEOUT = 5
+
+  def initialize(connection)
+    @connection = connection
+
+    callback do |r|
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "success defer state."
+      c.send_data "#{r}\n"
+    end
+
+    errback do |discardable|
+      @connection.class.leave_read_queue!(@connection.signature, self)
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "error defer state."
+      c.send_data "Error: Nothing in array.\n"
+    end
+
+    timeout QUEUE_WAIT_TIMEOUT
+  end
+end
+
 class FineGrained < EventMachine::Connection
 
   PORT = 7803
@@ -133,6 +158,11 @@ class FineGrained < EventMachine::Connection
   @@flushing_timer = nil
   @@db = FineGrainedFile.new(DB)
   @@dirty = false
+  @@read_queues = {}
+
+  def self.leave_read_queue!(signature, blocking_read)
+    @@read_queues[key].delete([signature, blocking_read])
+  end
 
   def self.flush
     ensure_store_defined
@@ -174,7 +204,6 @@ class FineGrained < EventMachine::Connection
   def unbind
   end
 
-  QUEUE_WAIT_TIMEOUT = 5
   def process_request(request)
     data = request.chomp
 
@@ -230,8 +259,13 @@ class FineGrained < EventMachine::Connection
 
       case cmd
       when 'PUSH'
-        @@store[key].push(params)
-        @@dirty = true
+        if @@read_queues[key] && !@@read_queues[key].empty?
+          sig, deferred = @@read_queues[key].shift
+          deferred.set_deferred_status(:succeeded, params)
+        else
+          @@store[key].push(params)
+          @@dirty = true
+        end
         send_data "OK\n"
       when 'POP'
         if @@store[key].empty?
@@ -243,22 +277,9 @@ class FineGrained < EventMachine::Connection
         send_data "#{r}\n"
       when 'SHIFT'
         if @@store[key].empty?
-          df = EM::Deferable.new
-          df.callback do
-            puts "*************** #{__FILE__} #{__LINE__} *************"
-            puts "success defer state."
-            r = @@store[key].shift
-            @@dirty = true
-            send_data "#{r}\n"
-          end
-          df.fail do
-            puts "*************** #{__FILE__} #{__LINE__} *************"
-            puts "error defer state."
-            send_data "Error: Nothing in array.\n"
-            return false
-          end
-          df.timeout QUEUE_WAIT_TIMEOUT
-
+          b = BlockingRead.new(self)
+          @@read_queues[key] ||= []
+          @@read_queues[key].push(@signature, b)
           return false
         end
         r = @@store[key].shift
