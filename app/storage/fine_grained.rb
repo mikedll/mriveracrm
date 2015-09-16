@@ -10,6 +10,9 @@ class FineGrainedFile
   }
   MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
 
+  INT_SIZE = 8
+  PACK_INT = "Q"
+
   def initialize(path)
     @path = path
   end
@@ -19,43 +22,43 @@ class FineGrainedFile
   #
   #
   def record_descriptor(t, k, *a)
-    pack_directives = "Q2A#{k.length}" + "Q" * a.length
+    pack_directives = "#{PACK_INT}2A#{k.length}" + PACK_INT * a.length
     ([t, k.length, k] + a).pack(pack_directives)
   end
 
   def read_descriptor
     return nil if @file.eof?
 
-    tu = @file.read 8
-    t = tu.unpack("Q")
-    lu = @file.read 8
-    l = lu.unpack("Q")
+    tu = @file.read INT_SIZE
+    t = tu.unpack(PACK_INT).first
+    lu = @file.read INT_SIZE
+    l = lu.unpack(PACK_INT).first
     k = @file.read l
     if t != WRITE_TYPE_INDEXES[:array]
       [t, k]
     else
-      vu = @file.read 8
-      as = vu.unpack("Q")
+      asu = @file.read INT_SIZE
+      as = asu.unpack(PACK_INT).first
       [t, k, as]
     end
   end
 
   def read_value_s
-    lu = @file.read 8
-    l = lu.unpack("Q")
+    lu = @file.read INT_SIZE
+    l = lu.unpack(PACK_INT).first
     s = @file.read l
   end
 
   def value_s(v)
     record = [v.length, v]
-    record_s = record.pack("QA#{record.first}")
+    record_s = record.pack("#{PACK_INT}A#{record.first}")
   end
 
   def open_db
     if @file.nil?
-      @file = File.open(@path, "w+")
+      @file = File.open(@path, "a+")
     elsif @file.closed?
-      @file.reopen(@path, "w+")
+      @file.reopen(@path, "a+")
     end
   end
 
@@ -80,17 +83,18 @@ class FineGrainedFile
       end
     end
 
+    @file.truncate(@file.tell)
     @file.close
   end
 
   def load_store(store)
-    open_db2
+    open_db
     @file.rewind
 
     magic_descriptor = @file.read 4
-    if magic_descriptor != MAGIC_DESCRIPTOR
-      store = {}
-      puts "Error: Not a valid fine grained file: #{path}"
+    if magic_descriptor != MAGIC_FILE_NUMBER
+      store.clear
+      puts "Error: Not a valid fine grained file: #{@path}"
       return
     end
 
@@ -99,14 +103,16 @@ class FineGrainedFile
       when WRITE_TYPE_INDEXES[:array]
         a = []
         d[2].times { |i| a.push(read_value_s) }
-        store[k] = a
+        store[d[1]] = a
       when WRITE_TYPE_INDEXES[:hash]
         h = MultiJson.decode(read_value_s)
-        store[k] = h
+        store[d[1]] = h
       when WRITE_TYPE_INDEXES[:string]
-        store[k] = read_value_s
+        store[d[1]] = read_value_s
       end
     end
+
+    @file.close
   end
 end
 
@@ -115,29 +121,21 @@ class FineGrained < EventMachine::Connection
   PORT = 7803
   AUTO_FLUSH_FREQUENCY = 3
   DB = "db/fineGrained.db"
-  DB2 = "db/fineGrained.db2"
   @@store = nil
   @@flushing_timer = nil
-  @@db2 = FineGrainedFile.new(DB2)
+  @@db = FineGrainedFile.new(DB)
   @@dirty = false
 
   def self.flush
     ensure_store_defined
-    @@db2.flush(@@store)
+    @@db.flush(@@store)
   end
 
   def self.ensure_store_defined
     if @@store.nil?
       if File.exists?(DB)
-        f = File.open(DB, "r")
-        if f.size > 0
-          @@store = YAML.load(f.read)
-        else
-          @@store = {}
-        end
-        f.close
-      else
         @@store = {}
+        @@db.load_store(@@store)
       end
     end
   end
