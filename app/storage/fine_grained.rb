@@ -125,28 +125,29 @@ class FineGrainedFile
 end
 
 class BlockingRead
-  include EM::Deferable
+  include EM::Deferrable
 
   QUEUE_WAIT_TIMEOUT = 5
 
   def initialize(connection)
     @connection = connection
-
-    callback do |r|
-      puts "*************** #{__FILE__} #{__LINE__} *************"
-      puts "success defer state."
-      c.send_data "#{r}\n"
-    end
-
-    errback do |discardable|
-      @connection.class.leave_read_queue!(@connection.signature, self)
-      puts "*************** #{__FILE__} #{__LINE__} *************"
-      puts "error defer state."
-      c.send_data "Error: Nothing in array.\n"
-    end
-
-    timeout QUEUE_WAIT_TIMEOUT
   end
+
+  def wait!(key)
+    @connection.class.enter_read_queue!(key, @connection.signature, self)
+
+    callback do |k, r|
+      @connection.send_data "#{r}\n"
+    end
+
+    errback do |k, r|
+      @connection.class.leave_read_queue!(k, @connection.signature, self)
+      @connection.send_data "Error: Nothing in array.\n"
+    end
+
+    timeout(QUEUE_WAIT_TIMEOUT, key, nil)
+  end
+
 end
 
 class FineGrained < EventMachine::Connection
@@ -160,7 +161,12 @@ class FineGrained < EventMachine::Connection
   @@dirty = false
   @@read_queues = {}
 
-  def self.leave_read_queue!(signature, blocking_read)
+  def self.enter_read_queue!(key, signature, blocking_read)
+    @@read_queues[key] ||= []
+    @@read_queues[key].push([signature, blocking_read])
+  end
+
+  def self.leave_read_queue!(key, signature, blocking_read)
     @@read_queues[key].delete([signature, blocking_read])
   end
 
@@ -260,8 +266,8 @@ class FineGrained < EventMachine::Connection
       case cmd
       when 'PUSH'
         if @@read_queues[key] && !@@read_queues[key].empty?
-          sig, deferred = @@read_queues[key].shift
-          deferred.set_deferred_status(:succeeded, params)
+          sig, blocking_read = @@read_queues[key].shift
+          blocking_read.set_deferred_status(:succeeded, key, params)
         else
           @@store[key].push(params)
           @@dirty = true
@@ -277,9 +283,7 @@ class FineGrained < EventMachine::Connection
         send_data "#{r}\n"
       when 'SHIFT'
         if @@store[key].empty?
-          b = BlockingRead.new(self)
-          @@read_queues[key] ||= []
-          @@read_queues[key].push(@signature, b)
+          BlockingRead.new(self).wait!(key)
           return false
         end
         r = @@store[key].shift
@@ -293,9 +297,9 @@ class FineGrained < EventMachine::Connection
 
   def receive_data(data)
     @msgs ||= []
-    @msgs.push(data.split(/\r?\n/))
+    @msgs += data.split(/\r?\n/)
     while m = @msgs.shift
-      break if !process_request(l)
+      break if !process_request(m)
     end
   end
 
