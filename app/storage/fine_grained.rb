@@ -52,7 +52,11 @@ class FineGrainedFile
   end
 
   def open_db
-    @file = File.open(@path, "w+") if @file.nil?
+    if @file.nil?
+      @file = File.open(@path, "w+")
+    elsif @file.closed?
+      @file.reopen(@path, "w+")
+    end
   end
 
   def flush(store)
