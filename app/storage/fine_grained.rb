@@ -1,12 +1,20 @@
 
 require 'eventmachine'
 
+#
+#
+# Trouble-shooting:
+#   Attempt to unlock a mutex which is locked by another thread, Connection reset by peer - sendmsg(2) (Errno::ECONNRESET)
+#
+# This crash occured when a MultiJson constant was failing to be found during lookup.
+#
+#
 class FineGrainedFile
 
   WRITE_TYPE_INDEXES = {
     :array => 1,
     :string => 2,
-    :hash => 2
+    :hash => 3
   }
   MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
 
