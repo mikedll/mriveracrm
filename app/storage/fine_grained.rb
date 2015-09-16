@@ -19,11 +19,33 @@ class FineGrainedFile
     ([t, k] + a)pack(pack_directives)
   end
 
+  def read_descriptor
+    return nil if @file.eof?
+
+    tu = @file.read 8
+    t = tu.unpack("Q")
+    lu = @file.read 8
+    l = lu.unpack("Q")
+    k = @file.read l
+    if t != WRITE_TYPE_INDEXES[:array]
+      [t, k]
+    else
+      vu = @file.read 8
+      as = vu.unpack("Q")
+      [t, k, as]
+    end
+  end
+
+  def read_value_s
+    lu = @file.read 8
+    l = lu.unpack("Q")
+    s = @file.read l
+  end
+
   def value_s(v)
     record = [v.length, v]
     record_s = record.pack("QA#{record.first}")
   end
-
 
   def open_db
     @file = File.open(DB2, "w+") if @file.nil?
@@ -38,9 +60,7 @@ class FineGrainedFile
       if v.is_a?(Array)
         @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k.length, k, v.length)
         v.each do |el|
-          record = [el.length, el]
-          record_s = record.pack("QA#{record.first}")
-          @file.write record_s
+          @file.write value_s(el)
         end
       elsif v.is_a?(Hash)
         @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k.length, k)
@@ -55,29 +75,47 @@ class FineGrainedFile
     # @file.close
   end
 
-  def load_store2
+  def load_store
     open_db2
+    @file.rewind
 
-    size = packed.unpack("Q")
-    MultiJson.decode(s)
+    magic_descriptor = @file.read 4
+    if magic_descriptor != MAGIC_DESCRIPTOR
+      @@store = {}
+      puts "Error: Not a valid fine grained file: #{path}"
+      return
+    end
+
+    while d = read_descriptor
+      case d[0]
+      when WRITE_TYPE_INDEXES[:array]
+        a = []
+        d[2].times { |i| a.push(read_value_s) }
+        @@store[k] = a
+      when WRITE_TYPE_INDEXES[:hash]
+        h = MultiJson.decode(read_value_s)
+        @@store[k] = h
+      when WRITE_TYPE_INDEXES[:string]
+        @@store[k] = read_value_s
+      end
+    end
   end
 end
 
 class FineGrained < EventMachine::Connection
 
   PORT = 7803
-  AUTO_FLUSH_FREQUENCY = 10
+  AUTO_FLUSH_FREQUENCY = 3
   DB = "db/fineGrained.db"
   DB2 = "db/fineGrained.db2"
   @@store = nil
   @@flushing_timer = nil
   @@db2 = FineGrainedFile.new(DB2)
+  @@dirty = false
 
   def self.flush
     ensure_store_defined
-    File.open(DB, "w") do |f|
-      f.write @@store.to_yaml
-    end
+    @db2.flush
   end
 
   def self.ensure_store_defined
@@ -117,7 +155,6 @@ class FineGrained < EventMachine::Connection
   end
 
   def unbind
-    self.class.flush
   end
 
   def process_request(request)
@@ -150,14 +187,13 @@ class FineGrained < EventMachine::Connection
       params = key_and_params[bounds[1], key_and_params.length - bounds[1]]
     end
 
-    dirty = false
     case cmd
     when /quit/i
       close_connection
       return false
     when "SET"
       @@store[key] = params
-      dirty = true
+      @@dirty = true
       send_data "OK\n"
     when "READ"
       r = @@store[key]
@@ -177,7 +213,7 @@ class FineGrained < EventMachine::Connection
       case cmd
       when 'PUSH'
         @@store[key].push(params)
-        dirty = true
+        @@dirty = true
         send_data "OK\n"
       when 'POP'
         if @@store[key].empty?
@@ -185,7 +221,7 @@ class FineGrained < EventMachine::Connection
           return false
         end
         r = @@store[key].pop
-        dirty = true
+        @@dirty = true
         send_data "#{r}\n"
       when 'SHIFT'
         if @@store[key].empty?
@@ -193,12 +229,10 @@ class FineGrained < EventMachine::Connection
           return false
         end
         r = @@store[key].shift
-        dirty = true
+        @@dirty = true
         send_data "#{r}\n"
       end
     end
-
-    self.class.flush if dirty
 
     true
   end
