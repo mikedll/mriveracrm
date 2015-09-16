@@ -33,6 +33,24 @@ from the root namespace. This is not decided, however.
 Controller modules are for security restrictions around roles.  We do
 not mirror model namespaces in controllers.
 
+# Backgrounded work
+
+We left redis due to the BSD-license, the meaning of which I don't
+know.
+
+For job queueing, we have the FineGrained database built
+on event machine. The interface for designing classes
+that will receive jobs from this queueing system is like
+resque, and is as follows:
+
+  class MyClass
+    def self.perform
+      # do work
+    end
+  end
+
+
+
 # Typical Views
 
   We have a gui-container class which is typically tied to a Stacked view,
