@@ -23,6 +23,9 @@ class FineGrainedFile
 
   def initialize(path)
     @path = path
+    @journal_bounds = []
+    @dead_region_bounds = []
+    @next_journal_conflict_i = nil
   end
 
   #
@@ -62,6 +65,43 @@ class FineGrainedFile
     record_s = record.pack("#{PACK_INT}A#{record.first}")
   end
 
+  #
+  # Writes to current region if it will not collide
+  # with a journal region.
+  #
+  # Else, skips the journal region. Writes to the next
+  # available region of file.
+  #
+  def write(s)
+    if @next_journal_conflict_i.nil?
+      i = @file.tell
+      @next_journal_conflict_i = @journal_bounds.find_index { |b| b.last <= i || b.first >= i }
+    end
+
+    i = @file.tell
+    while (i < @journal_bounds[@next_journal_conflict_i].last) && (i >= @journal_bounds[@next_journal_conflict_i].first || (i + s.length) >= @journal_bounds[@next_journal_conflict_i].first)
+      @file.seek(@journal_bounds[@next_journal_conflict_i].last)
+      @next_journal_conflict_i = (@next_journal_conflict_i + 1) % @journal_bounds.length
+      i = @file.tell
+    end
+
+    @file.write s
+  end
+
+  JOURNALING_LOWER_TOLERANCE = 0.05
+  JOURNALING_UPPER_TOLERANCE = 0.25
+  #
+  # If journal region is more than 25% of file,
+  # flush journal regions until we get to 5% of file.
+  #
+  # If journal region count is greater than 10, flush
+  # journal regions until we get to 2.
+  #
+  def write_due
+    journal_use = 0
+    @file.size != 0 && (journal_use.to_f / @file.size) >= JOURNALING_UPPER_TOLERANCE
+  end
+
   def open_db
     if @file.nil?
       @file = File.open(@path, "r+")
@@ -70,8 +110,24 @@ class FineGrainedFile
     end
   end
 
+  def open_db2
+    if @file.nil?
+      @file = File.open(@path + "2", "r+")
+    elsif @file.closed?
+      @file.reopen(@path + "2", "r+")
+    end
+  end
+
+  #
+  # go over a journal region
+  # update store
+  # mark journal region as in ram
+  # write store, skipping journal regions, and claiming dead regions if you can
+  # mark journal region as on disk, pull the lower bound of the region toward the upper bound as you go
+  # the journal region is now free. on the next write attempt, you can use it.
+  #
   def flush(store)
-    open_db
+    open_db2
     @file.rewind
 
     @file.write MAGIC_FILE_NUMBER
@@ -91,10 +147,42 @@ class FineGrainedFile
       end
     end
 
-    @file.truncate(@file.tell)
+    @journal_bounds = [@file.tell, @file.tell]
+
+    @file.truncate()
     @file.close
   end
 
+  def flush_old(store)
+    open_db2
+    @file.rewind
+
+    @file.write MAGIC_FILE_NUMBER
+    store.each do |k, v|
+      if v.is_a?(Array)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
+        v.each do |el|
+          @file.write value_s(el)
+        end
+      elsif v.is_a?(Hash)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
+        record_serialized = MultiJson.encode(v)
+        @file.write value_s(record_serialized)
+      else
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
+        @file.write value_s(v)
+      end
+    end
+
+    @journal_bounds.push([@file.tell, @file.tell + 1])
+
+    @file.truncate(@file.size)
+    @file.close
+  end
+
+  #
+  # skip journal and dead regions as you read.
+  #
   def load_store(store)
     open_db
     @file.rewind
