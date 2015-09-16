@@ -80,6 +80,9 @@ class FineGrainedFile
 
     i = @file.tell
     while (i < @journal_bounds[@next_journal_conflict_i].last) && (i >= @journal_bounds[@next_journal_conflict_i].first || (i + s.length) >= @journal_bounds[@next_journal_conflict_i].first)
+
+      # capture dead region if necessary.
+
       @file.seek(@journal_bounds[@next_journal_conflict_i].last)
       @next_journal_conflict_i = (@next_journal_conflict_i + 1) % @journal_bounds.length
       i = @file.tell
@@ -131,6 +134,11 @@ class FineGrainedFile
     @file.rewind
 
     @file.write MAGIC_FILE_NUMBER
+
+    # write journal bounds, at most ten of them
+
+    # write dead bounds, at most journal bounds * 3 of them
+
     store.each do |k, v|
       if v.is_a?(Array)
         @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
@@ -147,9 +155,9 @@ class FineGrainedFile
       end
     end
 
-    @journal_bounds = [@file.tell, @file.tell]
+    @journal_bounds.push([@file.tell, @file.tell + 1])
 
-    @file.truncate()
+    @file.truncate(@file.size)
     @file.close
   end
 
