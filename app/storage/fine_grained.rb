@@ -1,13 +1,77 @@
 
 require 'eventmachine'
 
+class FineGrainedFile
+
+  WRITE_TYPE_INDEXES = {
+    :array => 1,
+    :string => 2,
+    :hash => 2
+  }
+  MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
+
+  def initialize(path)
+    @path = path
+  end
+
+  def record_descriptor(t, k, *a)
+    pack_directives = "Q2#{k.length}"+ "Q" * a.length
+    ([t, k] + a)pack(pack_directives)
+  end
+
+  def value_s(v)
+    record = [v.length, v]
+    record_s = record.pack("QA#{record.first}")
+  end
+
+
+  def open_db
+    @file = File.open(DB2, "w+") if @file.nil?
+  end
+
+  def flush
+    open_db
+    @file.rewind
+
+    @file.write MAGIC_FILE_NUMBER
+    @@store.each do |k, v|
+      if v.is_a?(Array)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k.length, k, v.length)
+        v.each do |el|
+          record = [el.length, el]
+          record_s = record.pack("QA#{record.first}")
+          @file.write record_s
+        end
+      elsif v.is_a?(Hash)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k.length, k)
+        record_serialized = MultiJson.encode(v)
+        @file.write value_s(record_serialized)
+      else
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k.length, k)
+        @file.write value_s(v)
+      end
+    end
+
+    # @file.close
+  end
+
+  def load_store2
+    open_db2
+
+    size = packed.unpack("Q")
+    MultiJson.decode(s)
+  end
+end
+
 class FineGrained < EventMachine::Connection
 
   PORT = 7803
   AUTO_FLUSH_FREQUENCY = 10
   DB = "db/fineGrained.db"
+  DB2 = "db/fineGrained.db2"
   @@store = nil
   @@flushing_timer = nil
+  @@db2 = FineGrainedFile.new(DB2)
 
   def self.flush
     ensure_store_defined
