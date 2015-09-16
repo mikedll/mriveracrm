@@ -3,6 +3,8 @@ source 'http://rubygems.org'
 ruby '2.0.0'
 
 gem 'rails', '~> 3.2.0'
+gem 'activesupport', :group => [:default, :scheduler, :fine_grained_daemon]
+
 
 # vital
 gem "rake", ">= 10.0.0"
@@ -36,18 +38,17 @@ gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :br
 
 gem 'redis-objects'
 
-group :default, :fine_grained do
-  gem 'activesupport'
+gem "safe_yaml", :group => [:default, :fine_grained_daemon, :scheduler]
+gem 'multi_json', :group => [:default, :fine_grained_daemon]
+
+group :default, :fine_grained_daemon do
   gem 'eventmachine'
-  gem "safe_yaml"
 end
 
 group :default, :scheduler do
   gem 'resque', "~> 2.0.0.pre.1", github: "resque/resque"
   gem 'activemodel'
-  gem 'activesupport'
   gem "clockwork"
-  gem "safe_yaml"
 end
 
 group :assets do

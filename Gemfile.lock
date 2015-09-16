@@ -439,6 +439,7 @@ DEPENDENCIES
   haml-rails
   jquery-rails (~> 2.1)
   make_resourceful
+  multi_json
   nokogiri
   omniauth
   omniauth-google-oauth2
