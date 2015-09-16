@@ -158,7 +158,10 @@ class FineGrained < EventMachine::Connection
   def self.start_automatically_flushing
     if @@flushing_timer.nil?
       @@flushing_timer = EventMachine::PeriodicTimer.new(AUTO_FLUSH_FREQUENCY) do
-        flush
+        if @@dirty == true
+          @@dirty = false
+          flush
+        end
       end
     end
   end
