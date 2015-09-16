@@ -64,9 +64,9 @@ class FineGrainedFile
 
   def open_db
     if @file.nil?
-      @file = File.open(@path, "a+")
+      @file = File.open(@path, "r+")
     elsif @file.closed?
-      @file.reopen(@path, "a+")
+      @file.reopen(@path, "r+")
     end
   end
 
