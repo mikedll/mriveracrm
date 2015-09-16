@@ -14,9 +14,13 @@ class FineGrainedFile
     @path = path
   end
 
+  #
+  # type descriptor, key, *additional 64-bit unsigned integers
+  #
+  #
   def record_descriptor(t, k, *a)
-    pack_directives = "Q2#{k.length}"+ "Q" * a.length
-    ([t, k] + a)pack(pack_directives)
+    pack_directives = "Q2A#{k.length}" + "Q" * a.length
+    ([t, k.length, k] + a).pack(pack_directives)
   end
 
   def read_descriptor
@@ -48,40 +52,40 @@ class FineGrainedFile
   end
 
   def open_db
-    @file = File.open(DB2, "w+") if @file.nil?
+    @file = File.open(@path, "w+") if @file.nil?
   end
 
-  def flush
+  def flush(store)
     open_db
     @file.rewind
 
     @file.write MAGIC_FILE_NUMBER
-    @@store.each do |k, v|
+    store.each do |k, v|
       if v.is_a?(Array)
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k.length, k, v.length)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
         v.each do |el|
           @file.write value_s(el)
         end
       elsif v.is_a?(Hash)
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k.length, k)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
         record_serialized = MultiJson.encode(v)
         @file.write value_s(record_serialized)
       else
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k.length, k)
+        @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
         @file.write value_s(v)
       end
     end
 
-    # @file.close
+    @file.close
   end
 
-  def load_store
+  def load_store(store)
     open_db2
     @file.rewind
 
     magic_descriptor = @file.read 4
     if magic_descriptor != MAGIC_DESCRIPTOR
-      @@store = {}
+      store = {}
       puts "Error: Not a valid fine grained file: #{path}"
       return
     end
@@ -91,12 +95,12 @@ class FineGrainedFile
       when WRITE_TYPE_INDEXES[:array]
         a = []
         d[2].times { |i| a.push(read_value_s) }
-        @@store[k] = a
+        store[k] = a
       when WRITE_TYPE_INDEXES[:hash]
         h = MultiJson.decode(read_value_s)
-        @@store[k] = h
+        store[k] = h
       when WRITE_TYPE_INDEXES[:string]
-        @@store[k] = read_value_s
+        store[k] = read_value_s
       end
     end
   end
@@ -115,7 +119,7 @@ class FineGrained < EventMachine::Connection
 
   def self.flush
     ensure_store_defined
-    @db2.flush
+    @@db2.flush(@@store)
   end
 
   def self.ensure_store_defined

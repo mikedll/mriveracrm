@@ -12,6 +12,17 @@ class FineGrainedClient
     @incoming_buffer = ""
   end
 
+  def open
+    if @client.nil?
+      @client = TCPSocket.new(options[:hostname], options[:port])
+    end
+  end
+
+  def close
+    @client.close
+    @client = nil
+  end
+
   def encode(s)
     s.gsub("\n", "\\n")
   end

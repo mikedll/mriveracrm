@@ -32,12 +32,17 @@ EM.run do
 
   EM.defer lambda {
     fgc = FineGrainedClient.new
-    fgc.push("q1", "blueish2")
-    fgc.push("q1", "redishtype")
-    fgc.push("q1", "3")
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "#{fgc.shift("q1")}"
+    fgc.close
   }
+
+  # 40.times do
+  #   EM.defer lambda {
+  #     fgc = FineGrainedClient.new
+  #     fgc.push("q1", "blueish2")
+  #     fgc.push("q1", "redishtype")
+  #     fgc.push("q1", "3")
+  #   }
+  # end
 
 end
 
