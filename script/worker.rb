@@ -1,7 +1,6 @@
 #!/usr/bin/env ruby
 
-require File.expand_path('../config/boot', File.dirname(__FILE__))
-require 'multi_json'
+require ::File.expand_path('../../config/environment',  __FILE__)
 
 c = FineGrainedClient.new
 while 1
@@ -9,6 +8,6 @@ while 1
   if s
     j = MultiJson.decode(s)
     klass = j['klass']
-    klass.constantize.send(:perform, j['args'])
+    klass.constantize.send(:perform, *j['args'])
   end
 end
