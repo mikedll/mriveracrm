@@ -30,19 +30,19 @@ EM.run do
 
   EventMachine.start_server("localhost", FineGrained::PORT, FineGrained)
 
+  # EventMachine::Timer.new(2) do
+  #   fgc = FineGrainedClient.new
+  #   fgc.push("q1", "{}")
+  #   fgc.close
+  # end
+
   EM.defer lambda {
     fgc = FineGrainedClient.new
+    r = fgc.shift("q2")
+    puts "*************** #{__FILE__} #{__LINE__} *************"
+    puts "found: #{r}"
     fgc.close
   }
-
-  # 40.times do
-  #   EM.defer lambda {
-  #     fgc = FineGrainedClient.new
-  #     fgc.push("q1", "blueish2")
-  #     fgc.push("q1", "redishtype")
-  #     fgc.push("q1", "3")
-  #   }
-  # end
 
 end
 

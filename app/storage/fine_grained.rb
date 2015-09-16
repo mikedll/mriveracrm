@@ -174,6 +174,7 @@ class FineGrained < EventMachine::Connection
   def unbind
   end
 
+  QUEUE_WAIT_TIMEOUT = 5
   def process_request(request)
     data = request.chomp
 
@@ -234,7 +235,7 @@ class FineGrained < EventMachine::Connection
         send_data "OK\n"
       when 'POP'
         if @@store[key].empty?
-          send_data "Error: Nothing in array."
+          send_data "Error: Nothing in array.\n"
           return false
         end
         r = @@store[key].pop
@@ -242,7 +243,22 @@ class FineGrained < EventMachine::Connection
         send_data "#{r}\n"
       when 'SHIFT'
         if @@store[key].empty?
-          send_data "Error: Nothing in array."
+          df = EM::Deferable.new
+          df.callback do
+            puts "*************** #{__FILE__} #{__LINE__} *************"
+            puts "success defer state."
+            r = @@store[key].shift
+            @@dirty = true
+            send_data "#{r}\n"
+          end
+          df.fail do
+            puts "*************** #{__FILE__} #{__LINE__} *************"
+            puts "error defer state."
+            send_data "Error: Nothing in array.\n"
+            return false
+          end
+          df.timeout QUEUE_WAIT_TIMEOUT
+
           return false
         end
         r = @@store[key].shift
@@ -255,7 +271,11 @@ class FineGrained < EventMachine::Connection
   end
 
   def receive_data(data)
-    data.split(/\r?\n/).each { |l| break if !process_request(l) }
+    @msgs ||= []
+    @msgs.push(data.split(/\r?\n/))
+    while m = @msgs.shift
+      break if !process_request(l)
+    end
   end
 
 end
