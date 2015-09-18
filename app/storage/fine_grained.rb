@@ -11,6 +11,9 @@ require 'eventmachine'
 #
 class FineGrainedFile
 
+  class MaximumValueExceeded < Exception
+  end
+
   WRITE_TYPE_INDEXES = {
     :array => 1,
     :string => 2,
@@ -20,12 +23,49 @@ class FineGrainedFile
 
   INT_SIZE = 8
   PACK_INT = "Q"
+  MAX_VALUE_SIZE = (2**64 - 1)
+  PAGE_SIZE = 2**8
+  MAXIMUM_PAGES = 1024
+  MAXIMUM_SIZE = (2**30) / (2**8)
 
   def initialize(path)
     @path = path
+
+    @page_count = 0
+    @used_pages = ""
+    @store = {}
+    @store_pages = {}
+    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + @used_pages.bytesize
+
+    load_store_from_disk if File.exists?(path)
+
+    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + @used_pages.bytesize
+
+    # For use in journaling, for later. M. Rivera 9/17/15
     @journal_bounds = []
     @dead_region_bounds = []
     @next_journal_conflict_i = nil
+  end
+
+  #
+  # @pre @file not nil, and is open for writing.
+  #
+  def to_page
+    @file.seek(@page_start_offset + p * PAGE_SIZE)
+  end
+
+  def [](key)
+    @@store[key]
+  end
+
+  #
+  # @todo: funnel all operations on keys through
+  # a system whereby values are written to disk
+  # first and then inserted into the @@store variable.
+  #
+  def []=(key, value)
+    @@store[key] = value
+    write_key(key, value)
   end
 
   #
@@ -61,10 +101,91 @@ class FineGrainedFile
   end
 
   def value_s(v)
+    raise MaximumValueExceeded if v.length > MAX_VALUE_SIZE
     record = [v.length, v]
     record_s = record.pack("#{PACK_INT}A#{record.first}")
   end
 
+  #
+  # @pre new_size >= 0
+  #
+  def allocate_page(new_size)
+    i = 0
+    byte_offset = 0
+    new_page_offset = nil
+    contiguously_available = 0
+    while (contiguously_available * PAGE_SIZE < new_size) && i < (@used_pages.length * 8)
+      bit_in_byte = (i % 8)
+      byte_offset = (i / 8) if bit_in_byte == 0
+      if available ((@used_pages[byte_offset].ord & bit_in_byte) == 0)
+        new_page_offset = i if new_page_offset == nil
+        contiguously_available += 1
+      else
+        new_page_offset = nil
+      end
+    end
+
+    if new_page_offset.nil?
+      # @todo handle reserving more pages for the file. M. Rivera 9/17/15
+      # new_pages = new_size / PAGE_SIZE
+      # @used_pages += "\x00" * new_pages
+      # move keys written where used_pages bit mask
+      # needs to be written with additional space.
+
+      # if dead_region > 0
+      #   @file.seek(last_page_start)
+      #   @file.write ("\x00" * last_page_block_size)
+      # end
+    end
+
+    return new_page_offset
+  end
+
+  def write_key(k, v = nil)
+    v = @@store[k] if v.nil?
+    p_original, size = @store_pages[key]
+    p = p_original
+    new_size = nil
+
+    if v.is_a?(Array)
+      new_size = (24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize } # record_descriptor + value_s sizes
+      p = allocate_page(new_size) if new_size > size
+      to_page(p)
+      @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
+      v.each do |el|
+        @file.write value_s(el)
+      end
+    elsif v.is_a?(Hash)
+      record_serialized = MultiJson.encode(v)
+      new_size = (16 + k.length) + 8 + record_serialized.length # record_descriptor + value_s sizes
+      p = allocate_page(new_size) if new_size > size
+      to_page(p)
+      @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
+      @file.write value_s(record_serialized)
+    else
+      new_size = (16 + k.length) + 8 + v.length # record_descriptor + value_s sizes
+      p = allocate_page(new_size) if new_size > size
+      to_page(p)
+      @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
+      @file.write value_s(v)
+    end
+
+    if p != p_original
+      @store_pages = [p, new_size]
+      deallocate_page(p_original, size)
+    end
+    # get page for this key
+    #
+    # see if page is still large enough. if not, check out
+    # a page at the end of the file, write there,
+    # update its page ref here, then release this page.
+    #
+    #
+    #
+  end
+
+  #
+  # @todo Postponed this until later. M. Rivera 9/17/2015
   #
   # Writes to current region if it will not collide
   # with a journal region.
@@ -72,7 +193,7 @@ class FineGrainedFile
   # Else, skips the journal region. Writes to the next
   # available region of file.
   #
-  def write(s)
+  def write_with_journaling(s)
     if @next_journal_conflict_i.nil?
       i = @file.tell
       @next_journal_conflict_i = @journal_bounds.find_index { |b| b.last <= i || b.first >= i }
@@ -122,6 +243,25 @@ class FineGrainedFile
   end
 
   #
+  # Writes with paging and a page index at the start
+  # of the file.
+  #
+  # Does not compress the right right now.
+  #
+  def flush(store)
+    open_db2
+
+    store.each do |k, v|
+      write_key(store, k)
+    end
+
+    @file.close
+  end
+
+  #
+  #
+  # @todo Postponed until later. M. Rivera 9/17/2015
+  #
   # go over a journal region
   # update store
   # mark journal region as in ram
@@ -129,7 +269,7 @@ class FineGrainedFile
   # mark journal region as on disk, pull the lower bound of the region toward the upper bound as you go
   # the journal region is now free. on the next write attempt, you can use it.
   #
-  def flush(store)
+  def flush_with_journaling(store)
     open_db2
     @file.rewind
 
@@ -191,13 +331,13 @@ class FineGrainedFile
   #
   # skip journal and dead regions as you read.
   #
-  def load_store(store)
+  def load_store_from_disk
     open_db
     @file.rewind
 
     magic_descriptor = @file.read 4
     if magic_descriptor != MAGIC_FILE_NUMBER
-      store.clear
+      @store.clear
       puts "Error: Not a valid fine grained file: #{@path}"
       return
     end
@@ -207,12 +347,12 @@ class FineGrainedFile
       when WRITE_TYPE_INDEXES[:array]
         a = []
         d[2].times { |i| a.push(read_value_s) }
-        store[d[1]] = a
+        @store[d[1]] = a
       when WRITE_TYPE_INDEXES[:hash]
         h = MultiJson.decode(read_value_s)
-        store[d[1]] = h
+        @store[d[1]] = h
       when WRITE_TYPE_INDEXES[:string]
-        store[d[1]] = read_value_s
+        @store[d[1]] = read_value_s
       end
     end
 
@@ -251,9 +391,8 @@ class FineGrained < EventMachine::Connection
   PORT = 7803
   AUTO_FLUSH_FREQUENCY = 3
   DB = "db/fineGrained.db"
-  @@store = nil
+  @@store = FineGrainedFile.new(DB)
   @@flushing_timer = nil
-  @@db = FineGrainedFile.new(DB)
   @@dirty = false
   @@read_queues = {}
 
@@ -264,20 +403,6 @@ class FineGrained < EventMachine::Connection
 
   def self.leave_read_queue!(key, signature, blocking_read)
     @@read_queues[key].delete([signature, blocking_read])
-  end
-
-  def self.flush
-    ensure_store_defined
-    @@db.flush(@@store)
-  end
-
-  def self.ensure_store_defined
-    if @@store.nil?
-      if File.exists?(DB)
-        @@store = {}
-        @@db.load_store(@@store)
-      end
-    end
   end
 
   #
@@ -292,14 +417,13 @@ class FineGrained < EventMachine::Connection
       @@flushing_timer = EventMachine::PeriodicTimer.new(AUTO_FLUSH_FREQUENCY) do
         if @@dirty == true
           @@dirty = false
-          flush
+          @@store.flush
         end
       end
     end
   end
 
   def post_init
-    self.class.ensure_store_defined
     self.class.start_automatically_flushing
   end
 
@@ -340,51 +464,61 @@ class FineGrained < EventMachine::Connection
     when /quit/i
       close_connection
       return false
-    when "SET"
-      @@store[key] = params
-      @@dirty = true
-      send_data "OK\n"
-    when "READ"
-      r = @@store[key]
-      if r.nil?
-        send_data "Error: Key not found.\n"
-        return
-      end
-      send_data r + "\n"
-    when 'PUSH', 'POP', 'SHIFT'
-      if @@store[key].nil?
-        @@store[key] = []
-      elsif !@@store[key].is_a?(Array)
-        send_data "Error: Key is not an array.\n"
-        return false
-      end
-
-      case cmd
-      when 'PUSH'
-        if @@read_queues[key] && !@@read_queues[key].empty?
-          sig, blocking_read = @@read_queues[key].shift
-          blocking_read.set_deferred_status(:succeeded, key, params)
-        else
-          @@store[key].push(params)
+    else
+      begin
+        case cmd
+        when "SET"
+          @@store[key] = params
           @@dirty = true
+          send_data "OK\n"
+        when "READ"
+          r = @@store[key]
+          if r.nil?
+            send_data "Error: Key not found.\n"
+            return
+          end
+          send_data r + "\n"
+        when 'PUSH', 'POP', 'SHIFT'
+          if @@store[key].nil?
+            @@store[key] = []
+          elsif !@@store[key].is_a?(Array)
+            send_data "Error: Key is not an array.\n"
+            return false
+          end
+
+          case cmd
+          when 'PUSH'
+            if @@read_queues[key] && !@@read_queues[key].empty?
+              sig, blocking_read = @@read_queues[key].shift
+              blocking_read.set_deferred_status(:succeeded, key, params)
+            else
+              @@store[key].push(params)
+              @@store.write_key(key)
+              @@dirty = true
+            end
+            send_data "OK\n"
+          when 'POP'
+            if @@store[key].empty?
+              send_data "Error: Nothing in array.\n"
+              return false
+            end
+            r = @@store[key].pop
+            @@store.write_key(key)
+            @@dirty = true
+            send_data "#{r}\n"
+          when 'SHIFT'
+            if @@store[key].empty?
+              BlockingRead.new(self).wait!(key)
+              return false
+            end
+            r = @@store[key].shift
+            @@store.write_key(key)
+            @@dirty = true
+            send_data "#{r}\n"
+          end
         end
-        send_data "OK\n"
-      when 'POP'
-        if @@store[key].empty?
-          send_data "Error: Nothing in array.\n"
-          return false
-        end
-        r = @@store[key].pop
-        @@dirty = true
-        send_data "#{r}\n"
-      when 'SHIFT'
-        if @@store[key].empty?
-          BlockingRead.new(self).wait!(key)
-          return false
-        end
-        r = @@store[key].shift
-        @@dirty = true
-        send_data "#{r}\n"
+      rescue FineGrainedFile::MaximumValueExceeded => e
+        send_data "Error: Maximum size for a given value exceeded. Try setting a smaller value."
       end
     end
 
