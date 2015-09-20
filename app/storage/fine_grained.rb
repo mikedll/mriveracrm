@@ -106,6 +106,29 @@ class FineGrainedFile
   end
 
   #
+  # Returns [record_descriptor, record_value]
+  # or nil if no record is found.
+  #
+  def read_record
+    d = read_descriptor
+    v = nil
+    return nil if d.nil?
+
+    case d[0]
+    when WRITE_TYPE_INDEXES[:array]
+      a = []
+      d[2].times { |i| a.push(read_value_s) }
+      v = a
+    when WRITE_TYPE_INDEXES[:hash]
+      h = MultiJson.decode(read_value_s)
+      v = h
+    when WRITE_TYPE_INDEXES[:string]
+      v = read_value_s
+    end
+    [d, v]
+  end
+
+  #
   # @todo: rescue from parse errors
   #
   def read_value_s
@@ -131,9 +154,8 @@ class FineGrainedFile
     new_page_offset = nil
     contiguously_available = 0
     while (contiguously_available * PAGE_SIZE < new_size) && i < (@used_pages.bytesize * 8)
-      bit_in_byte = (i % 8)
       byte_offset = (i / 8) if bit_in_byte == 0
-      if available ((@used_pages[byte_offset].ord & bit_in_byte) == 0)
+      if available ((@used_pages[byte_offset].ord & (1 << (7 - (i % 8)))) == 0)
         new_page_offset = i if new_page_offset == nil
         contiguously_available += 1
       else
@@ -144,9 +166,23 @@ class FineGrainedFile
     if new_page_offset.nil?
       new_pages = new_size / PAGE_SIZE + (new_size % PAGE_SIZE != 0 ? 1 : 0)
 
+      first_free_page = (@used_pages.bytesize * 8)
+      first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
+
       # make space for used_pages as needed, moving more keys
-      # - transfered_pages = 0
-      while @used_pages is blocked
+      needed_pages = new_pages - (page_start - first_free_page)
+      transfered_pages = 0
+      i = 0
+      while needed_pages > 0
+
+        if @used_pages[i / 8].ord & (1 << (7 - (i % 8)))
+
+          @file.seek @page_start + (i * PAGE_SIZE)
+          desc, v = read_record
+          @file.seek MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize
+          @file.write record_descriptor()
+        end
+
         #
         # - allocate more space and write the key there
         # - update page size on disk
@@ -154,6 +190,7 @@ class FineGrainedFile
         # - mark that that area in used_pages is now free.
         # - increment transfered_pages
         #
+        i += 1
       end
       #
       # - calculate pages_needed_for_byte_congruence, the quantity to add to transfered_pages to make
@@ -403,20 +440,7 @@ class FineGrainedFile
       return
     end
 
-    while d = read_descriptor
-      case d[0]
-      when WRITE_TYPE_INDEXES[:array]
-        a = []
-        d[2].times { |i| a.push(read_value_s) }
-        @store[d[1]] = a
-      when WRITE_TYPE_INDEXES[:hash]
-        h = MultiJson.decode(read_value_s)
-        @store[d[1]] = h
-      when WRITE_TYPE_INDEXES[:string]
-        @store[d[1]] = read_value_s
-      end
-    end
-
+    @store[record.first[1]] = record.last while record = read_record
     @file.close
   end
 end
