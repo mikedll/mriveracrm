@@ -31,7 +31,8 @@ class FineGrainedFile
     @path = path
 
     @page_count = 0
-    @used_pages = ""
+    
+    @used_pages = "".force_encoding("ASCII-8BIT")
     @store = {}
     @store_pages = {}
     @page_start_offset = MAGIC_FILE_NUMBER.bytesize + @used_pages.bytesize
@@ -44,6 +45,11 @@ class FineGrainedFile
     @journal_bounds = []
     @dead_region_bounds = []
     @next_journal_conflict_i = nil
+  end
+
+  def flush_page_count
+    @file.seek(MAGIC_FILE_NUMBER.bytesize + 64)
+    @file.write([@page_count].pack("#{PACK_INT}1"))
   end
 
   #
@@ -169,65 +175,80 @@ class FineGrainedFile
       first_free_page = (@used_pages.bytesize * 8)
       first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
 
-      # make space for used_pages as needed, moving more keys
-      needed_pages = new_pages - (page_start - first_free_page)
-      transfered_pages = 0
-      i = 0
-      while needed_pages > 0
+      # move keys to end of file to make space for used_pages
+      needed_pages = new_pages - (@page_start_offset - first_free_page)
+      raise "Programming Error: Expected needed pages to be non-zero. " if needed_pages == 0
+
+      i = @page_start_offset
+      while i < @page_start_offset + needed_pages
 
         if @used_pages[i / 8].ord & (1 << (7 - (i % 8)))
-          size_p = 1
+          size_p = nil
 
-          @file.seek @page_start + (i * PAGE_SIZE)
+          # allocate more space and write the key there
+          @file.seek(@page_start_offset + (i * PAGE_SIZE))
           desc, v = read_record
-          @file.seek MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize
+          @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE))
           if desc[0] == WRITE_TYPE_INDEXES[:array]
             size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
             @file.write record_descriptor(desc[0], desc[1], desc[2])
             desc[2].each { |el| @file.write value_s(el) }
           else
             v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-            size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+            size_p = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
             @file.write record_descriptor(desc[0], desc[1])
             @file.write value_s(v_serialized)
           end
 
-          @used_pages[i / 8] = (@used_pages[i / 8].ord & (1 << (7 - (i % 8)))).chr
+          # update page size on disk
+          @page_count += size_p
+          flush_page_count
+
+          # update the key's location in store_pages
+          @store_pages[desc[1]] = [@page_count - 1, size_p]
+
+          # mark that that area in used_pages is now free.
+          for j in (0...size_p)
+            @used_pages[(i + j) / 8] = [@used_pages[(i + j) / 8].ord & ~(1 << (7 - ((i + j) % 8)))].pack("c")
+          end
+
           i += size_p
         else
+          @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE))
+          @file.write("\x00" * PAGE_SIZE)
+
           i += 1
         end
-
-        #
-        # - allocate more space and write the key there
-        # - update page size on disk
-        # - update the key's location in store_pages
-        # - mark that that area in used_pages is now free.
-        # - increment transfered_pages
-        #
       end
+
+      # calculate pages_needed_for_byte_congruence, the quantity to add to needed_pages to make
+      # used_pages' represented bits be a multiple of eight.
+      pages_needed_for_byte_congruence = (used_pages.bytesize + needed_pages) % 8 == 0 ? 0 : (8 - ((used_pages.bytesize + needed_pages) % 8))
+
+      # nullify the pages on disk created for byte-congruence, if any exist
+      for i in (0...pages_needed_for_byte_congruence)
+        @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE) + (i * PAGE_SIZE))
+        @file.write("\x00" * PAGE_SIZE)
+        i += 1
+      end
+
       #
-      # - calculate pages_needed_for_byte_congruence, the quantity to add to transfered_pages to make
-      #   used_pages' represented bits be a multiple of eight.
+      # using needed_pages, copy from used_pages into a new string,
+      # append zeros to it with pages_needed_for_byte_congruence so that it is byte-congruent
+      # and defined. call this used_pages_tail. the complement of used_pages_tail in used_pages
+      # is used_pages_head. used_pages_head is out of sync with the disk, and is more
+      # recent in RAM.
       #
-      # - nullify the pages on disk created for byte-congruence, if any exist
+      # increase page_count by the new page increase quantity. write this value to disk.
       #
-      # - using transfered_pages, copy from used_pages into a new string,
-      #   append zeros to it with pages_needed_for_byte_congruence so that it is byte-congruent
-      #   and defined. call this used_pages_tail. the complement of used_pages_tail in used_pages
-      #   is used_pages_head. used_pages_head is out of sync with the disk, and is more
-      #   recent in RAM.
+      # append used_pages_tail to used_pages, and write used_pages_tail to disk.
+      # some bits near the beginning of used_pages on disk
+      # are redundant with the end of the file and end of used_pages on disk. let this be
+      # redundant_used_pages.
       #
-      # - increase page_count by the new page increase quantity quantity. write this value to disk.
+      # update page_start to account for increase in used_pages size. write this value to disk.
       #
-      # - append used_pages_tail to used_pages, and write used_pages_tail to disk.
-      #   some bits near the beginning of used_pages on disk
-      #   are redundant with the end of the file and end of used_pages on disk. let this be
-      #   redundant_used_pages.
-      #
-      # - update page_start to account for increase in used_pages size. write this value to disk.
-      #
-      # - write head of used_pages to disk.
+      # write head of used_pages to disk.
       #
       #
       #
