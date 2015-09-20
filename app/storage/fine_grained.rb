@@ -2,7 +2,6 @@
 require 'eventmachine'
 
 #
-#
 # Trouble-shooting:
 #   Attempt to unlock a mutex which is locked by another thread, Connection reset by peer - sendmsg(2) (Errno::ECONNRESET)
 #
@@ -77,6 +76,18 @@ class FineGrainedFile
     ([t, k.bytesize, k] + a).pack(pack_directives)
   end
 
+  #
+  # @todo: rescue from parse errors
+  # @todo: update bit mask. if you find a duplicate
+  # key, regard the prior position as free and update
+  # the bitmask.
+  # @todo if you reach eof before reading all pages
+  # of keys, update the page_count in ram and on disk
+  # to be shorter than we expected. used_pages
+  # size should equal page_count.
+  # @todo if you have a key collision, it means
+  #  you should free the old key in used_pages.
+  #
   def read_descriptor
     return nil if @file.eof?
 
@@ -94,6 +105,9 @@ class FineGrainedFile
     end
   end
 
+  #
+  # @todo: rescue from parse errors
+  #
   def read_value_s
     lu = @file.read INT_SIZE
     l = lu.unpack(PACK_INT).first
@@ -110,6 +124,8 @@ class FineGrainedFile
   # @pre new_size >= 0
   #
   def allocate_page(new_size)
+
+    # is there existing page space?
     i = 0
     byte_offset = 0
     new_page_offset = nil
@@ -126,16 +142,61 @@ class FineGrainedFile
     end
 
     if new_page_offset.nil?
-      # @todo handle reserving more pages for the file. M. Rivera 9/17/15
-      # new_pages = new_size / PAGE_SIZE
-      # @used_pages += "\x00" * new_pages
+      new_pages = new_size / PAGE_SIZE + (new_size % PAGE_SIZE != 0 ? 1 : 0)
+
+      # make space for used_pages as needed, moving more keys
+      # - transfered_pages = 0
+      while @used_pages is blocked
+        #
+        # - allocate more space and write the key there
+        # - update page size on disk
+        # - update the key's location in store_pages
+        # - mark that that area in used_pages is now free.
+        # - increment transfered_pages
+        #
+      end
+      #
+      # - calculate pages_needed_for_byte_congruence, the quantity to add to transfered_pages to make
+      #   used_pages' represented bits be a multiple of eight.
+      #
+      # - nullify the pages on disk created for byte-congruence, if any exist
+      #
+      # - using transfered_pages, copy from used_pages into a new string,
+      #   append zeros to it with pages_needed_for_byte_congruence so that it is byte-congruent
+      #   and defined. call this used_pages_tail. the complement of used_pages_tail in used_pages
+      #   is used_pages_head. used_pages_head is out of sync with the disk, and is more
+      #   recent in RAM.
+      #
+      # - increase page_count by the new page increase quantity quantity. write this value to disk.
+      #
+      # - append used_pages_tail to used_pages, and write used_pages_tail to disk.
+      #   some bits near the beginning of used_pages on disk
+      #   are redundant with the end of the file and end of used_pages on disk. let this be
+      #   redundant_used_pages.
+      #
+      # - update page_start to account for increase in used_pages size. write this value to disk.
+      #
+      # - write head of used_pages to disk.
+      #
+      #
+      #
+      #
+      # now we begin to allocate space for the request that started this.
+      #
+      # - allocate pages for new_size. mark them as used in used_pages.
+      #   write used_pages to disk.
+      #
+      # - return these pages for use from this method.
+      #
+
+      @used_pages += "\x00" * new_pages
       # move keys written where used_pages bit mask
       # needs to be written with additional space.
 
-      # if dead_region > 0
-      #   @file.seek(last_page_start)
-      #   @file.write ("\x00" * last_page_block_size)
-      # end
+      if dead_region > 0
+        @file.seek(last_page_start)
+        @file.write ("\x00" * last_page_block_size)
+      end
     end
 
     return new_page_offset
