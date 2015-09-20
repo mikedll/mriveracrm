@@ -176,11 +176,26 @@ class FineGrainedFile
       while needed_pages > 0
 
         if @used_pages[i / 8].ord & (1 << (7 - (i % 8)))
+          size_p = 1
 
           @file.seek @page_start + (i * PAGE_SIZE)
           desc, v = read_record
           @file.seek MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize
-          @file.write record_descriptor()
+          if desc[0] == WRITE_TYPE_INDEXES[:array]
+            size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
+            @file.write record_descriptor(desc[0], desc[1], desc[2])
+            desc[2].each { |el| @file.write value_s(el) }
+          else
+            v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
+            size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+            @file.write record_descriptor(desc[0], desc[1])
+            @file.write value_s(v_serialized)
+          end
+
+          @used_pages[i / 8] = (@used_pages[i / 8].ord & (1 << (7 - (i % 8)))).chr
+          i += size_p
+        else
+          i += 1
         end
 
         #
@@ -190,7 +205,6 @@ class FineGrainedFile
         # - mark that that area in used_pages is now free.
         # - increment transfered_pages
         #
-        i += 1
       end
       #
       # - calculate pages_needed_for_byte_congruence, the quantity to add to transfered_pages to make
@@ -245,26 +259,35 @@ class FineGrainedFile
     p = p_original
     new_size = nil
 
-    if v.is_a?(Array)
-      new_size = (24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize } # record_descriptor + value_s sizes
+    ti = if v.is_a?(Array)
+           :array
+         elsif v.is_a?(Hash)
+           :hash
+         else
+           :string
+         end
+    t = WRITE_TYPE_INDEXES[ti]
+
+    if ti == :array
+      new_size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
       p = allocate_page(new_size) if new_size > size
       to_page(p)
-      @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
+      @file.write record_descriptor(t, k, v.length)
       v.each do |el|
         @file.write value_s(el)
       end
-    elsif v.is_a?(Hash)
+    elsif ti == :hash
       record_serialized = MultiJson.encode(v)
-      new_size = (16 + k.bytesize) + 8 + record_serialized.bytesize # record_descriptor + value_s sizes
+      new_size = (((16 + k.bytesize) + 8 + record_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
       p = allocate_page(new_size) if new_size > size
       to_page(p)
-      @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
+      @file.write record_descriptor(t, k)
       @file.write value_s(record_serialized)
     else
-      new_size = (16 + k.bytesize) + 8 + v.bytesize # record_descriptor + value_s sizes
+      new_size = (((16 + k.bytesize) + 8 + v.bytesize) / PAGE_SIZE) # record_descriptor + value_s sizes
       p = allocate_page(new_size) if new_size > size
       to_page(p)
-      @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
+      @file.write record_descriptor(t, k)
       @file.write value_s(v)
     end
 
