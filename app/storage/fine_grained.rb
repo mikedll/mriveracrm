@@ -73,8 +73,8 @@ class FineGrainedFile
   #
   #
   def record_descriptor(t, k, *a)
-    pack_directives = "#{PACK_INT}2A#{k.length}" + PACK_INT * a.length
-    ([t, k.length, k] + a).pack(pack_directives)
+    pack_directives = "#{PACK_INT}2A#{k.length}" + PACK_INT * a.bytesize
+    ([t, k.bytesize, k] + a).pack(pack_directives)
   end
 
   def read_descriptor
@@ -101,8 +101,8 @@ class FineGrainedFile
   end
 
   def value_s(v)
-    raise MaximumValueExceeded if v.length > MAX_VALUE_SIZE
-    record = [v.length, v]
+    raise MaximumValueExceeded if v.bytesize > MAX_VALUE_SIZE
+    record = [v.bytesize, v]
     record_s = record.pack("#{PACK_INT}A#{record.first}")
   end
 
@@ -114,7 +114,7 @@ class FineGrainedFile
     byte_offset = 0
     new_page_offset = nil
     contiguously_available = 0
-    while (contiguously_available * PAGE_SIZE < new_size) && i < (@used_pages.length * 8)
+    while (contiguously_available * PAGE_SIZE < new_size) && i < (@used_pages.bytesize * 8)
       bit_in_byte = (i % 8)
       byte_offset = (i / 8) if bit_in_byte == 0
       if available ((@used_pages[byte_offset].ord & bit_in_byte) == 0)
@@ -157,13 +157,13 @@ class FineGrainedFile
       end
     elsif v.is_a?(Hash)
       record_serialized = MultiJson.encode(v)
-      new_size = (16 + k.length) + 8 + record_serialized.length # record_descriptor + value_s sizes
+      new_size = (16 + k.bytesize) + 8 + record_serialized.bytesize # record_descriptor + value_s sizes
       p = allocate_page(new_size) if new_size > size
       to_page(p)
       @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
       @file.write value_s(record_serialized)
     else
-      new_size = (16 + k.length) + 8 + v.length # record_descriptor + value_s sizes
+      new_size = (16 + k.bytesize) + 8 + v.bytesize # record_descriptor + value_s sizes
       p = allocate_page(new_size) if new_size > size
       to_page(p)
       @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
@@ -200,7 +200,7 @@ class FineGrainedFile
     end
 
     i = @file.tell
-    while (i < @journal_bounds[@next_journal_conflict_i].last) && (i >= @journal_bounds[@next_journal_conflict_i].first || (i + s.length) >= @journal_bounds[@next_journal_conflict_i].first)
+    while (i < @journal_bounds[@next_journal_conflict_i].last) && (i >= @journal_bounds[@next_journal_conflict_i].first || (i + s.bytesize) >= @journal_bounds[@next_journal_conflict_i].first)
 
       # capture dead region if necessary.
 
