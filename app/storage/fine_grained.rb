@@ -26,20 +26,20 @@ class FineGrainedFile
   PAGE_SIZE = 2**8
   MAXIMUM_PAGES = 1024
   MAXIMUM_SIZE = (2**30) / (2**8)
+  PAGE_START_OFFSET_SIZE = 64
+  PAGE_COUNT_SIZE = 64
 
   def initialize(path)
     @path = path
 
-    @page_count = 0
-    
+    @page_start_offset = 0 # file offset in bytes where data starts, after bit_index ends
+    @page_count = 0        # how many pages of data are written to disk, which may be less than bit_index's bytesize
+
     @used_pages = "".force_encoding("ASCII-8BIT")
     @store = {}
     @store_pages = {}
-    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + @used_pages.bytesize
 
     load_store_from_disk if File.exists?(path)
-
-    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + @used_pages.bytesize
 
     # For use in journaling, for later. M. Rivera 9/17/15
     @journal_bounds = []
@@ -47,9 +47,19 @@ class FineGrainedFile
     @next_journal_conflict_i = nil
   end
 
+  def flush_page_start_offset
+    @file.seek(MAGIC_FILE_NUMBER.bytesize)
+    @file.write([@page_start_offset].pack("#{PACK_INT}1"))
+  end
+
   def flush_page_count
-    @file.seek(MAGIC_FILE_NUMBER.bytesize + 64)
+    @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE)
     @file.write([@page_count].pack("#{PACK_INT}1"))
+  end
+
+  def flush_used_pages
+    @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE)
+    @file.write(@used_pages)
   end
 
   #
@@ -58,6 +68,11 @@ class FineGrainedFile
   def to_page
     @file.seek(@page_start_offset + p * PAGE_SIZE)
   end
+
+  def to_next_writable_page
+    @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + @page_start_offset + (@page_count * PAGE_SIZE))
+  end
+
 
   def [](key)
     @@store[key]
@@ -150,6 +165,16 @@ class FineGrainedFile
   end
 
   #
+  # Marks used_pages bit index to indicate
+  # page p to size_p pages are used.
+  #
+  def mark_used(p, size_p)
+    for i in p...(p + size_p)
+      @used_pages[i / 8] = @used_pages[i / 8].ord | (1 << (7 - (i % 8)))
+    end
+  end
+
+  #
   # @pre new_size >= 0
   #
   def allocate_page(new_size)
@@ -170,67 +195,109 @@ class FineGrainedFile
     end
 
     if new_page_offset.nil?
+
+      # We need to allocate more space on disk.
+
+      # Create more space in used_pages.
       new_pages = new_size / PAGE_SIZE + (new_size % PAGE_SIZE != 0 ? 1 : 0)
 
       first_free_page = (@used_pages.bytesize * 8)
       first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
 
-      # move keys to end of file to make space for used_pages
-      needed_pages = new_pages - (@page_start_offset - first_free_page)
+      while (@used_pages.bytesize * 8) < @page_count
+        to_next_writable_page
+        @file.write("\x00" * PAGE_SIZE)
+        @page_count += 1
+        flush_page_count
+      end
+
+      # pages needed beyond blank pages at the tail of used_pages
+      needed_pages = new_pages - ((@used_pages.bytesize * 8) - first_free_page)
       raise "Programming Error: Expected needed pages to be non-zero. " if needed_pages == 0
 
-      i = @page_start_offset
-      while i < @page_start_offset + needed_pages
+      # move data out of the way of bit index.
+      allocated_page_space = 0
+      while false # (needed_pages - allocated_page_space) > 0
 
-        if @used_pages[i / 8].ord & (1 << (7 - (i % 8)))
-          size_p = nil
+        # there appear to be two states from which to allocate
+        # bit_index pages. one, when there are free nodes
+        # at the end of the current bit_index. and two,
+        # when there are not. that is:
+        #
+        # (first_free_page() == used_pages.bytesize * 8)
+        # or not.
+        #
 
-          # allocate more space and write the key there
-          @file.seek(@page_start_offset + (i * PAGE_SIZE))
-          desc, v = read_record
-          @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE))
-          if desc[0] == WRITE_TYPE_INDEXES[:array]
-            size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
-            @file.write record_descriptor(desc[0], desc[1], desc[2])
-            desc[2].each { |el| @file.write value_s(el) }
+
+        #
+        # anyway,
+        # if there is space at the end of this bit_index as-is,
+        # move a key there to make space for a bit_index page allocation.
+        #
+
+
+        if first_free_page < (@used_pages.bytesize * 8)
+          moved = 0
+          if @used_pages[0].ord & (1 << 7)
+            size_p = nil
+
+            # allocate more space and write the key there
+            @file.seek(@page_start_offset)
+            desc, v = read_record
+            to_page(0)
+            if desc[0] == WRITE_TYPE_INDEXES[:array]
+              size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
+              @file.write record_descriptor(desc[0], desc[1], desc[2])
+              desc[2].each { |el| @file.write value_s(el) }
+            else
+              v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
+              size_p = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+              @file.write record_descriptor(desc[0], desc[1])
+              @file.write value_s(v_serialized)
+            end
+
+            # update page size on disk
+            @page_count += size_p
+            flush_page_count
+
+            # update the key's location in store_pages
+            @store_pages[desc[1]] = [@page_count - 1, size_p]
+
+            # mark that that area in used_pages is now free.
+            for i in (0...size_p)
+              @used_pages[i / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
+            end
+
+            moved = size_p
           else
-            v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-            size_p = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
-            @file.write record_descriptor(desc[0], desc[1])
-            @file.write value_s(v_serialized)
+            to_next_writable_page
+            @file.write("\x00" * PAGE_SIZE)
+
+            moved = 1
           end
 
-          # update page size on disk
-          @page_count += size_p
-          flush_page_count
+          @used_pages += "\x00" * PAGE_SIZE
+          flush_used_pages
 
-          # update the key's location in store_pages
-          @store_pages[desc[1]] = [@page_count - 1, size_p]
+          @page_start_offset += PAGE_SIZE
+          flush_page_start_offset
 
-          # mark that that area in used_pages is now free.
-          for j in (0...size_p)
-            @used_pages[(i + j) / 8] = [@used_pages[(i + j) / 8].ord & ~(1 << (7 - ((i + j) % 8)))].pack("c")
-          end
-
-          i += size_p
-        else
-          @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE))
-          @file.write("\x00" * PAGE_SIZE)
-
-          i += 1
+          allocated_page_space += PAGE_SIZE
+        else # first_free_page == (@used_pages.bytesize * 8)
         end
+      else
       end
 
-      # calculate pages_needed_for_byte_congruence, the quantity to add to needed_pages to make
-      # used_pages' represented bits be a multiple of eight.
-      pages_needed_for_byte_congruence = (used_pages.bytesize + needed_pages) % 8 == 0 ? 0 : (8 - ((used_pages.bytesize + needed_pages) % 8))
+      # # calculate pages_needed_for_byte_congruence, the quantity to add to needed_pages to make
+      # # used_pages' represented bits be a multiple of eight.
+      # pages_needed_for_byte_congruence = (used_pages.bytesize + needed_pages) % 8 == 0 ? 0 : (8 - ((used_pages.bytesize + needed_pages) % 8))
 
-      # nullify the pages on disk created for byte-congruence, if any exist
-      for i in (0...pages_needed_for_byte_congruence)
-        @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE) + (i * PAGE_SIZE))
-        @file.write("\x00" * PAGE_SIZE)
-        i += 1
-      end
+      # # nullify the pages on disk created for byte-congruence, if any exist
+      # for i in (0...pages_needed_for_byte_congruence)
+      #   @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE) + (i * PAGE_SIZE))
+      #   @file.write("\x00" * PAGE_SIZE)
+      #   i += 1
+      # end
 
       #
       # using needed_pages, copy from used_pages into a new string,
@@ -250,25 +317,17 @@ class FineGrainedFile
       #
       # write head of used_pages to disk.
       #
+
       #
-      #
-      #
-      # now we begin to allocate space for the request that started this.
-      #
-      # - allocate pages for new_size. mark them as used in used_pages.
-      #   write used_pages to disk.
-      #
-      # - return these pages for use from this method.
+      # return pointer to start of allocated_pages
       #
 
-      @used_pages += "\x00" * new_pages
-      # move keys written where used_pages bit mask
-      # needs to be written with additional space.
+      # I don't remember what this is:
+      # if dead_region > 0
+      #   @file.seek(last_page_start)
+      #   @file.write ("\x00" * last_page_block_size)
+      # end
 
-      if dead_region > 0
-        @file.seek(last_page_start)
-        @file.write ("\x00" * last_page_block_size)
-      end
     end
 
     return new_page_offset
@@ -290,30 +349,33 @@ class FineGrainedFile
     t = WRITE_TYPE_INDEXES[ti]
 
     if ti == :array
-      new_size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
-      p = allocate_page(new_size) if new_size > size
+      new_size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
+      p = allocate_page(new_size_p) if new_size_p > size
       to_page(p)
       @file.write record_descriptor(t, k, v.length)
       v.each do |el|
         @file.write value_s(el)
       end
+      mark_used(p, new_size_p)
     elsif ti == :hash
       record_serialized = MultiJson.encode(v)
-      new_size = (((16 + k.bytesize) + 8 + record_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
-      p = allocate_page(new_size) if new_size > size
+      new_size_p = (((16 + k.bytesize) + 8 + record_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+      p = allocate_page(new_size_p) if new_size_p > size
       to_page(p)
       @file.write record_descriptor(t, k)
       @file.write value_s(record_serialized)
+      mark_used(p, new_size_p)
     else
-      new_size = (((16 + k.bytesize) + 8 + v.bytesize) / PAGE_SIZE) # record_descriptor + value_s sizes
-      p = allocate_page(new_size) if new_size > size
+      new_size_p = (((16 + k.bytesize) + 8 + v.bytesize) / PAGE_SIZE) # record_descriptor + value_s sizes
+      p = allocate_page(new_size_p) if new_size_p > size
       to_page(p)
       @file.write record_descriptor(t, k)
       @file.write value_s(v)
+      mark_used(p, new_size_p)
     end
 
     if p != p_original
-      @store_pages = [p, new_size]
+      @store_pages = [p, new_size_p]
       deallocate_page(p_original, size)
     end
     # get page for this key
@@ -485,6 +547,10 @@ class FineGrainedFile
     end
 
     @store[record.first[1]] = record.last while record = read_record
+
+    # update page_count if there are zeroes at end of file, and
+    # (@used_pages.bytesize * 8) < @page_count. should be an increment.
+
     @file.close
   end
 end
