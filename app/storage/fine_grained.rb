@@ -282,7 +282,7 @@ class FineGrainedFile
                   next_bit_index_page[(tail_size - i - 1) / 8] = [next_bit_index_page[(tail_size - i - 1) / 8].ord | used_bit].pack("c")
                 end
               else
-                # bit-shift by one
+                # bit-shift the rest of used_pages to the left by one.
                 if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
                   @used_pages[(i - 1) / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
                 else
@@ -369,6 +369,11 @@ class FineGrainedFile
            :string
          end
     t = WRITE_TYPE_INDEXES[ti]
+
+    #
+    # todo: recognize when size mismatch is okay due to this key being
+    # the last key in the database on disk.
+    #
 
     if ti == :array
       new_size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
