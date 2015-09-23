@@ -239,19 +239,21 @@ class FineGrainedFile
             # if there is a collision, allocate more space
             # and write the key there.
             if @used_pages[0].ord & (1 << 7) != 0
+              size = 0
               to_page(0)
               desc, v = read_record
               to_page(first_free_page)
               if desc[0] == WRITE_TYPE_INDEXES[:array]
-                size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
+                size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) # record_descriptor + value_s sizes
                 @file.write record_descriptor(desc[0], desc[1], desc[2])
                 desc[2].each { |el| @file.write value_s(el) }
               else
                 v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-                size_p = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+                size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
                 @file.write record_descriptor(desc[0], desc[1])
                 @file.write value_s(v_serialized)
               end
+              size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
 
               # update page size on disk
               @page_count += size_p
