@@ -261,6 +261,9 @@ class FineGrainedFile
 
               # update the key's location in store_pages
               @store_pages[desc[1]] = [first_free_page, size_p]
+
+              to_page(0)
+              @file.write (ZERO_BYTE_ASCII_8BIT * size_p * PAGE_COUNT)
             end
 
             # adjust used_pages to indicate the migration of the key,
