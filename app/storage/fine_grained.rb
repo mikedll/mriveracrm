@@ -33,7 +33,8 @@ class FineGrainedFile
     @path = path
 
     @page_start_offset = 0 # file offset in bytes where data starts, after bit_index ends
-    @page_count = 0        # how many pages of data are written to disk, which may be less than bit_index's bytesize
+
+    @page_count = 0        # how many pages of data are written to disk, which may be less than or greater than used_pages' bytesize.
 
     @used_pages = "".force_encoding("ASCII-8BIT")
     @store = {}
@@ -219,32 +220,24 @@ class FineGrainedFile
       allocated_page_space = 0
       while false # (needed_pages - allocated_page_space) > 0
 
-        # there appear to be two states from which to allocate
-        # bit_index pages. one, when there are free nodes
-        # at the end of the current bit_index. and two,
-        # when there are not. that is:
         #
+        # there appear to be three states from which to allocate
+        # more space in which bit_index can grow:
+        #
+        # (first_free_page() == 0)
+        # (first_free_page() > 0 && first_free_page() < used_pages.bytesize * 8)
         # (first_free_page() == used_pages.bytesize * 8)
-        # or not.
         #
 
-
-        #
-        # anyway,
-        # if there is space at the end of this bit_index as-is,
-        # move a key there to make space for a bit_index page allocation.
-        #
-
-
-        if first_free_page < (@used_pages.bytesize * 8)
-          moved = 0
-          if @used_pages[0].ord & (1 << 7)
+        if first_free_page > 0
+          if first_free_page < (@used_pages.bytesize * 8)
+            moved = 0
             size_p = nil
 
             # allocate more space and write the key there
-            @file.seek(@page_start_offset)
-            desc, v = read_record
             to_page(0)
+            desc, v = read_record
+            to_page(first_free_page)
             if desc[0] == WRITE_TYPE_INDEXES[:array]
               size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
               @file.write record_descriptor(desc[0], desc[1], desc[2])
@@ -264,28 +257,28 @@ class FineGrainedFile
             @store_pages[desc[1]] = [@page_count - 1, size_p]
 
             # mark that that area in used_pages is now free.
-            for i in (0...size_p)
-              @used_pages[i / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
-            end
+            @used_pages[i / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c") for i in (0...size_p)
 
-            moved = size_p
-          else
-            to_next_writable_page
-            @file.write("\x00" * PAGE_SIZE)
+                                                                                              moved = size_p
+                                                                                            else
+                                                                                              to_next_writable_page
+                                                                                              @file.write("\x00" * PAGE_SIZE)
 
-            moved = 1
+                                                                                              moved = 1
+                                                                                            end
+
+            @used_pages += "\x00" * PAGE_SIZE
+            flush_used_pages
+
+            @page_start_offset += PAGE_SIZE
+            flush_page_start_offset
+
+            allocated_page_space += PAGE_SIZE
+          else # first_free_page == (@used_pages.bytesize * 8)
           end
-
-          @used_pages += "\x00" * PAGE_SIZE
-          flush_used_pages
-
-          @page_start_offset += PAGE_SIZE
-          flush_page_start_offset
-
-          allocated_page_space += PAGE_SIZE
-        else # first_free_page == (@used_pages.bytesize * 8)
+        else
+          # Nothing blocking bit_index's growth.
         end
-      else
       end
 
       # # calculate pages_needed_for_byte_congruence, the quantity to add to needed_pages to make
