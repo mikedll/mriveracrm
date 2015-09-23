@@ -206,13 +206,13 @@ class FineGrainedFile
       first_free_page = (@used_pages.bytesize * 8)
       first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
 
-      # do we need to do this?
-      while (@used_pages.bytesize * 8) < @page_count
-        to_next_writable_page
-        @file.write("\x00" * PAGE_SIZE)
-        @page_count += 1
-        flush_page_count
-      end
+      # # do we need to do this?
+      # while (@used_pages.bytesize * 8) < @page_count
+      #   to_next_writable_page
+      #   @file.write("\x00" * PAGE_SIZE)
+      #   @page_count += 1
+      #   flush_page_count
+      # end
 
       # pages needed beyond blank pages at the tail of used_pages
       # needed_pages = new_pages - ((@used_pages.bytesize * 8) - first_free_page)
@@ -220,7 +220,7 @@ class FineGrainedFile
 
       # grow the bit_index
       allocated_page_space = 0
-      while false # (needed_pages - allocated_page_space) > 0
+      while new_pages < allocated_page_space
 
         #
         # there appear to be three states from which to allocate
@@ -265,28 +265,40 @@ class FineGrainedFile
             # and the incoming used_pages appendage.
             next_bit_index_page = ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
             tail = ZERO_BYTE_ASCII_8BIT
-            tail_size = @used_pages.bytesize - first_free_page # contiguous region at end of used_pages that are free
-            for i in (1...@used_pages.bytesize)
-              @used_pages[(i - 1) / 8] = [@used_pages[(i + size_p) / 8].ord & ~(1 << (7 - ((i + size_p) % 8)))].pack("c")
+            tail_size = @used_pages.bytesize - first_free_page # free space at end of used_pages, including 1 to account for the bit shift
+            used_of_next_bit_index_page = size_p - tail_size
+            #
+            # todo: see what happens when first_free_page and size_p are contiguous.
+            #
 
-              used_bit = (1 << (7 - (((i - 1) + size_p) % 8)))
-              if i < tail_size
-                @used_pages[(first_free_page + i - 1) / 8] = [@used_pages[(first_free_page + i) / 8].ord | used_bit].pack("c")
+            for i in (1...@used_pages.bytesize)
+              if i < size_p
+                @used_pages[(i - 1) / 8] = [@used_pages[(i + size_p) / 8].ord & ~(1 << (7 - ((i + size_p) % 8)))].pack("c")
+
+                used_bit = (1 << (7 - ((i - 1) % 8)))
+                if (i - 1) < tail_size
+                  @used_pages[(first_free_page + i - 1) / 8] = [@used_pages[(first_free_page + i - 1) / 8].ord | used_bit].pack("c")
+                else
+                  next_bit_index_page[(tail_size - i - 1) / 8] = [next_bit_index_page[(tail_size - i - 1) / 8].ord | used_bit].pack("c")
+                end
               else
-                next_bit_index_page[(tail_size - i - 1) / 8] = [next_bit_index_page[(tail_size - i) / 8].ord | used_bit].pack("c")
+                # bit-shift by one
+                if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
+                  @used_pages[(i - 1) / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
+                else
+                  @used_pages[(i - 1) / 8] = [@used_pages[i / 8].ord | (1 << (7 - (i % 8)))].pack("c")
+                end
               end
             end
 
             @used_pages += next_bit_index_page
-
-            # we would bit-shift left by one bit here.
-
             flush_used_pages
 
             @page_start_offset += PAGE_SIZE
             flush_page_start_offset
 
-            allocated_page_space += PAGE_SIZE
+            new_page_offset = @page_count if new_page_offset.nil?
+            allocated_page_space += (PAGE_SIZE - used_of_next_bit_index_page)
           else # first_free_page == (@used_pages.bytesize * 8)
           end
         else # first_free_page == 0
