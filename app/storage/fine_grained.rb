@@ -276,22 +276,41 @@ class FineGrainedFile
             # todo: see what happens when first_free_page and size_p are contiguous.
             #
 
+            last_bit_cache = nil
             for i in (1...@used_pages.bytesize)
               if i < size_p
-                @used_pages[(i - 1) / 8] = [@used_pages[(i + size_p) / 8].ord & ~(1 << (7 - ((i + size_p) % 8)))].pack("c")
+                # free head of used_pages for moved key
+                @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord & ~(1 << (7 - ((i - 1) % 8)))].pack("c")
 
-                used_bit = (1 << (7 - ((i - 1) % 8)))
-                if (i - 1) < tail_size
-                  @used_pages[(first_free_page + i - 1) / 8] = [@used_pages[(first_free_page + i - 1) / 8].ord | used_bit].pack("c")
+                # mark taken tail of used_pages and head of next bit-index allocated page
+                j = i - 1
+                used_bit = (1 << (7 - (j % 8)))
+                if j < tail_size
+                  j -= 1  # another one for the fact that we're bit-shifting
+                  if j == -2
+                    # writing this would cause the loss of a bit
+                    last_bit_cache = 1
+                  else
+                    @used_pages[(first_free_page + j) / 8] = [@used_pages[(first_free_page + j) / 8].ord | used_bit].pack("c")
+                  end
                 else
-                  next_bit_index_page[(tail_size - i - 1) / 8] = [next_bit_index_page[(tail_size - i - 1) / 8].ord | used_bit].pack("c")
+                  next_bit_index_page[(j - tail_size ) / 8] = [next_bit_index_page[(j - tail_size) / 8].ord | used_bit].pack("c")
                 end
               else
-                # bit-shift the rest of used_pages to the left by one.
-                if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
-                  @used_pages[(i - 1) / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
+                if (i - 1) == (first_free_page - 1) && last_bit_cache
+                  # restore cached bit
+                  if last_bit_cache == 0
+                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord & ~(1 << (7 - ((i - 1) % 8)))].pack("c")
+                  else
+                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord | (1 << (7 - ((i - 1) % 8)))].pack("c")
+                  end
                 else
-                  @used_pages[(i - 1) / 8] = [@used_pages[i / 8].ord | (1 << (7 - (i % 8)))].pack("c")
+                  # bit-shift the rest of used_pages to the left by one.
+                  if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
+                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord & ~(1 << (7 - ((i - 1) % 8)))].pack("c")
+                  else
+                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord | (1 << (7 - ((i - 1) % 8)))].pack("c")
+                  end
                 end
               end
             end
