@@ -218,7 +218,7 @@ class FineGrainedFile
       # needed_pages = new_pages - ((@used_pages.bytesize * 8) - first_free_page)
       # raise "Programming Error: Expected needed pages to be non-zero. " if needed_pages == 0
 
-      # move data out of the way of bit index.
+      # grow the bit_index
       allocated_page_space = 0
       while false # (needed_pages - allocated_page_space) > 0
 
@@ -233,50 +233,54 @@ class FineGrainedFile
 
         if first_free_page > 0
           if first_free_page < (@used_pages.bytesize * 8)
-            moved = 0
-            size_p = nil
 
-            # allocate more space and write the key there
-            to_page(0)
-            desc, v = read_record
-            to_page(first_free_page)
-            if desc[0] == WRITE_TYPE_INDEXES[:array]
-              size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
-              @file.write record_descriptor(desc[0], desc[1], desc[2])
-              desc[2].each { |el| @file.write value_s(el) }
-            else
-              v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-              size_p = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
-              @file.write record_descriptor(desc[0], desc[1])
-              @file.write value_s(v_serialized)
+            size_p = 0 # size of space moved due to key-collision
+
+            # if there is a collision, allocate more space
+            # and write the key there.
+            if @used_pages[0].ord & (1 << 7) != 0
+              to_page(0)
+              desc, v = read_record
+              to_page(first_free_page)
+              if desc[0] == WRITE_TYPE_INDEXES[:array]
+                size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
+                @file.write record_descriptor(desc[0], desc[1], desc[2])
+                desc[2].each { |el| @file.write value_s(el) }
+              else
+                v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
+                size_p = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+                @file.write record_descriptor(desc[0], desc[1])
+                @file.write value_s(v_serialized)
+              end
+
+              # update page size on disk
+              @page_count += size_p
+              flush_page_count
+
+              # update the key's location in store_pages
+              @store_pages[desc[1]] = [first_free_page, size_p]
             end
-
-
-            # update page size on disk
-            @page_count += size_p
-            flush_page_count
-
-            # update the key's location in store_pages
-            @store_pages[desc[1]] = [first_free_page, size_p]
 
             # adjust used_pages to indicate the migration of the key,
             # and the incoming used_pages appendage.
             next_bit_index_page = ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
             tail = ZERO_BYTE_ASCII_8BIT
             tail_size = @used_pages.bytesize - first_free_page # contiguous region at end of used_pages that are free
-            for i in (0...@used_pages.bytesize)
-              @used_pages[i / 8] = [@used_pages[(i + size_p) / 8].ord & ~(1 << (7 - ((i + size_p) % 8)))].pack("c")
+            for i in (1...@used_pages.bytesize)
+              @used_pages[(i - 1) / 8] = [@used_pages[(i + size_p) / 8].ord & ~(1 << (7 - ((i + size_p) % 8)))].pack("c")
 
-              used_bit = (1 << (7 - ((i + size_p) % 8)))
+              used_bit = (1 << (7 - (((i - 1) + size_p) % 8)))
               if i < tail_size
-                @used_pages[(first_free_page + i) / 8] = (@used_pages[(first_free_page + i) / 8].ord | used_bit).pack("c")
+                @used_pages[(first_free_page + i - 1) / 8] = [@used_pages[(first_free_page + i) / 8].ord | used_bit].pack("c")
               else
-                next_bit_index_page[(tail_size - i) / 8] = (next_bit_index_page[(tail_size - i) / 8].ord | used_bit).pack("c")
+                next_bit_index_page[(tail_size - i - 1) / 8] = [next_bit_index_page[(tail_size - i) / 8].ord | used_bit].pack("c")
               end
             end
-            moved = size_p
 
             @used_pages += next_bit_index_page
+
+            # we would bit-shift left by one bit here.
+
             flush_used_pages
 
             @page_start_offset += PAGE_SIZE
