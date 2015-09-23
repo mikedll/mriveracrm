@@ -19,6 +19,7 @@ class FineGrainedFile
     :hash => 3
   }
   MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
+  ZERO_BYTE_ASCII_8BIT = "\x00".force_encoding("ASCII-8BIT")
 
   INT_SIZE = 8
   PACK_INT = "Q"
@@ -205,6 +206,7 @@ class FineGrainedFile
       first_free_page = (@used_pages.bytesize * 8)
       first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
 
+      # do we need to do this?
       while (@used_pages.bytesize * 8) < @page_count
         to_next_writable_page
         @file.write("\x00" * PAGE_SIZE)
@@ -213,8 +215,8 @@ class FineGrainedFile
       end
 
       # pages needed beyond blank pages at the tail of used_pages
-      needed_pages = new_pages - ((@used_pages.bytesize * 8) - first_free_page)
-      raise "Programming Error: Expected needed pages to be non-zero. " if needed_pages == 0
+      # needed_pages = new_pages - ((@used_pages.bytesize * 8) - first_free_page)
+      # raise "Programming Error: Expected needed pages to be non-zero. " if needed_pages == 0
 
       # move data out of the way of bit index.
       allocated_page_space = 0
@@ -249,25 +251,32 @@ class FineGrainedFile
               @file.write value_s(v_serialized)
             end
 
+
             # update page size on disk
             @page_count += size_p
             flush_page_count
 
             # update the key's location in store_pages
-            @store_pages[desc[1]] = [@page_count - 1, size_p]
+            @store_pages[desc[1]] = [first_free_page, size_p]
 
-            # mark that that area in used_pages is now free.
-            @used_pages[i / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c") for i in (0...size_p)
+            # adjust used_pages to indicate the migration of the key,
+            # and the incoming used_pages appendage.
+            next_bit_index_page = ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
+            tail = ZERO_BYTE_ASCII_8BIT
+            tail_size = @used_pages.bytesize - first_free_page # contiguous region at end of used_pages that are free
+            for i in (0...@used_pages.bytesize)
+              @used_pages[i / 8] = [@used_pages[(i + size_p) / 8].ord & ~(1 << (7 - ((i + size_p) % 8)))].pack("c")
 
-                                                                                              moved = size_p
-                                                                                            else
-                                                                                              to_next_writable_page
-                                                                                              @file.write("\x00" * PAGE_SIZE)
+              used_bit = (1 << (7 - ((i + size_p) % 8)))
+              if i < tail_size
+                @used_pages[(first_free_page + i) / 8] = (@used_pages[(first_free_page + i) / 8].ord | used_bit).pack("c")
+              else
+                next_bit_index_page[(tail_size - i) / 8] = (next_bit_index_page[(tail_size - i) / 8].ord | used_bit).pack("c")
+              end
+            end
+            moved = size_p
 
-                                                                                              moved = 1
-                                                                                            end
-
-            @used_pages += "\x00" * PAGE_SIZE
+            @used_pages += next_bit_index_page
             flush_used_pages
 
             @page_start_offset += PAGE_SIZE
@@ -276,16 +285,20 @@ class FineGrainedFile
             allocated_page_space += PAGE_SIZE
           else # first_free_page == (@used_pages.bytesize * 8)
           end
-        else
+        else # first_free_page == 0
           # Nothing blocking bit_index's growth.
+          #
+          # should we check to see if we're at eof when writing used_pages extension?
         end
       end
 
       # # calculate pages_needed_for_byte_congruence, the quantity to add to needed_pages to make
       # # used_pages' represented bits be a multiple of eight.
+      # # isn't this no longer necessary given that we will allocate used_pages one page at a time, and all pages are byte-congruent?
       # pages_needed_for_byte_congruence = (used_pages.bytesize + needed_pages) % 8 == 0 ? 0 : (8 - ((used_pages.bytesize + needed_pages) % 8))
 
       # # nullify the pages on disk created for byte-congruence, if any exist
+      # # do we need to do this?
       # for i in (0...pages_needed_for_byte_congruence)
       #   @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE) + (i * PAGE_SIZE))
       #   @file.write("\x00" * PAGE_SIZE)
