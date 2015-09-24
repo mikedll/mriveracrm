@@ -49,7 +49,7 @@ describe FineGrained do
         @db["b"].should == "bee"
       end
 
-      it "when hashes, arrays, and strings are written at the same time", :current => true do
+      it "when hashes, arrays, and strings are written at the same time" do
         @db["an_array"] = ['a', 'bbb', 'c', 'dddd', 'e' * 16]
         @db["hash"] = {
           'a' => "hello",
