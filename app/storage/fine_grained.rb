@@ -320,19 +320,6 @@ class FineGrainedFile
         end
       end
 
-      # # calculate pages_needed_for_byte_congruence, the quantity to add to needed_pages to make
-      # # used_pages' represented bits be a multiple of eight.
-      # # isn't this no longer necessary given that we will allocate used_pages one page at a time, and all pages are byte-congruent?
-      # pages_needed_for_byte_congruence = (used_pages.bytesize + needed_pages) % 8 == 0 ? 0 : (8 - ((used_pages.bytesize + needed_pages) % 8))
-
-      # # nullify the pages on disk created for byte-congruence, if any exist
-      # # do we need to do this?
-      # for i in (0...pages_needed_for_byte_congruence)
-      #   @file.seek(MAGIC_FILE_NUMBER.bytesize + 64 + 64 + @used_pages.bytesize + (@page_count * PAGE_SIZE) + (i * PAGE_SIZE))
-      #   @file.write("\x00" * PAGE_SIZE)
-      #   i += 1
-      # end
-
       #
       # using needed_pages, copy from used_pages into a new string,
       # append zeros to it with pages_needed_for_byte_congruence so that it is byte-congruent
