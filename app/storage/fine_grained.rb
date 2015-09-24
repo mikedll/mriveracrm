@@ -18,6 +18,7 @@ class FineGrainedFile
     :string => 2,
     :hash => 3
   }
+
   MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
   ZERO_BYTE_ASCII_8BIT = "\x00".force_encoding("ASCII-8BIT")
 
@@ -53,6 +54,10 @@ class FineGrainedFile
     @file.close
   end
 
+  def filesize
+    @file.size
+  end
+
   #
   # deletes contents of entire file.
   #
@@ -69,7 +74,7 @@ class FineGrainedFile
     flush_page_count
     flush_used_pages
 
-    @file.truncate(@file.size)
+    @file.truncate(@file.tell)
   end
 
   def flush_page_start_offset
