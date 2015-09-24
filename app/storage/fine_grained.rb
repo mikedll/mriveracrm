@@ -51,11 +51,11 @@ class FineGrainedFile
   end
 
   def close
-    @file.close
+    @file.close if !@file.nil? && !@file.closed?
   end
 
   def filesize
-    @file.size
+    @file.nil? ? -1 : @file.size
   end
 
   #
@@ -63,8 +63,8 @@ class FineGrainedFile
   #
   def hard_clean!
     open_db
-    @file.seek 0
     @file.rewind
+
     @file.write MAGIC_FILE_NUMBER
     @used_pages = "".force_encoding("ASCII-8BIT")
     @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + 0 # file offset in bytes where data starts, after bit_index ends
@@ -149,7 +149,7 @@ class FineGrainedFile
     lu = @file.read INT_SIZE
     l = lu.unpack(PACK_INT).first
 
-    return nil if @file.eof?
+    return nil if @file.eof? || l > (PAGE_SIZE * 8)
     k = @file.read l
     if t != WRITE_TYPE_INDEXES[:array]
       [t, k]
@@ -597,8 +597,6 @@ class FineGrainedFile
 
     # update page_count if there are zeroes at end of file, and
     # (@used_pages.bytesize * 8) < @page_count. should be an increment.
-
-    @file.close
   end
 end
 

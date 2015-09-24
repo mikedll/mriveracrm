@@ -12,7 +12,7 @@ describe FineGrained do
     @db.close
   end
 
-  context "basic" do
+  context "basics" do
     it "should be MAGIC_FILE_NUMBER.bytesize + 2 integers without any data stored on disk" do
       @db.filesize.should == FineGrainedFile::MAGIC_FILE_NUMBER.bytesize + (2 * FineGrainedFile::INT_SIZE)
     end
@@ -20,6 +20,16 @@ describe FineGrained do
 
   context "writes" do
     context "should allocate space" do
+
+      it "when a hash is written" do
+        @db["hash"] = { :a => "hello", 2 => "adamant" }
+        @db["hash"].should == { :a => "hello", 2 => "adamant" }
+      end
+
+      it "when an array is written"  do
+        @db["an_array"] = ['a', 'bbb', 'c', 'dddd', 'e' * 16]
+        @db["an_array"].should == ['a', 'bbb', 'c', 'dddd', 'e' * 16]
+      end
 
       it "when a string is written" do
         @db[":a"] = ("a" * 170)
@@ -35,6 +45,24 @@ describe FineGrained do
         i = 2
         (up[i / 8].ord & (1 << (7 - (i % 8)))).should == 0
 
+        @db[":a"].should == "a" * 170
+        @db["b"].should == "bee"
+      end
+
+      it "when hashes, arrays, and strings are written at the same time" do
+        @db["an_array"] = ['a', 'bbb', 'c', 'dddd', 'e' * 16]
+        @db["hash"] = {
+          :a => "hello",
+          :fortunately => "I didn't have to mop the dishes."
+        }
+        @db[":a"] = ("a" * 170)
+        @db["b"] = "bee"
+
+        @db["an_array"].should == ['a', 'bbb', 'c', 'dddd', 'e' * 16]
+        @db["hash"].should == {
+          :a => "hello",
+          :fortunately => "I didn't have to mop the dishes."
+        }
         @db[":a"].should == "a" * 170
         @db["b"].should == "bee"
       end
