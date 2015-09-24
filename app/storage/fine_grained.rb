@@ -320,25 +320,6 @@ class FineGrainedFile
         end
       end
 
-      #
-      # using needed_pages, copy from used_pages into a new string,
-      # append zeros to it with pages_needed_for_byte_congruence so that it is byte-congruent
-      # and defined. call this used_pages_tail. the complement of used_pages_tail in used_pages
-      # is used_pages_head. used_pages_head is out of sync with the disk, and is more
-      # recent in RAM.
-      #
-      # increase page_count by the new page increase quantity. write this value to disk.
-      #
-      # append used_pages_tail to used_pages, and write used_pages_tail to disk.
-      # some bits near the beginning of used_pages on disk
-      # are redundant with the end of the file and end of used_pages on disk. let this be
-      # redundant_used_pages.
-      #
-      # update page_start to account for increase in used_pages size. write this value to disk.
-      #
-      # write head of used_pages to disk.
-      #
-
       # I don't remember what this is:
       # if dead_region > 0
       #   @file.seek(last_page_start)
