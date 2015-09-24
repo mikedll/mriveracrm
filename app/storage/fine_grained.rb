@@ -319,13 +319,6 @@ class FineGrainedFile
           # should we check to see if we're at eof when writing used_pages extension?
         end
       end
-
-      # I don't remember what this is:
-      # if dead_region > 0
-      #   @file.seek(last_page_start)
-      #   @file.write ("\x00" * last_page_block_size)
-      # end
-
     end
 
     return new_page_offset
@@ -468,6 +461,12 @@ class FineGrainedFile
   #
   #
   # @todo Postponed until later. M. Rivera 9/17/2015
+  #
+  # a journal region is a write command that is different from the one-time
+  # storage of the key on disk.
+  #
+  # a dead region is a region in between journal regions that may be used
+  # for key storage.
   #
   # go over a journal region
   # update store
