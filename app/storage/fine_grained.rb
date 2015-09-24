@@ -161,6 +161,16 @@ class FineGrainedFile
     end
   end
 
+  def size_of_record(t, k, v)
+    if t == WRITE_TYPE_INDEXES[:array]
+      # type, key size, array length, array size, array elements
+      (3 * INT_SIZE + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }
+    else
+      # type, key size, value size, value
+      (2 * INT_SIZE + k.bytesize) + INT_SIZE + v.bytesize
+    end
+  end
+
   #
   # Returns [record_descriptor, record_value]
   # or nil if no record is found.
@@ -181,6 +191,11 @@ class FineGrainedFile
     when WRITE_TYPE_INDEXES[:string]
       v = read_value_s
     end
+
+    # @todo read to end of page
+    # remainder = (PAGE_SIZE - (size % PAGE_SIZE))
+    # @file.seek(remainder, IO::SEEK_CUR)
+
     [d, v]
   end
 
@@ -297,11 +312,11 @@ class FineGrainedFile
           desc, v = read_record
           to_page(first_free_page)
           if desc[0] == WRITE_TYPE_INDEXES[:array]
-            size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) # record_descriptor + value_s sizes
+            size = size_of_record(desc[0], k, v)
             write_record(desc[0], desc[1], v)
           else
             v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-            size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+            size = size_of_record(desc[0], k, v_serialized)
             write_record(desc[0], desc[1], v_serialized)
           end
           size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
@@ -411,29 +426,18 @@ class FineGrainedFile
     # the last key in the database on disk.
     #
 
+    record_value_to_write = nil
     if ti == :array
-      size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize })
-      new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + value_s sizes
-      p = allocate_page(new_size_p) if new_size_p > size_p
-      to_page(p)
-      write_record(t, k, v, size)
-      mark_used(p, new_size_p)
-    elsif ti == :hash
-      record_serialized = MultiJson.encode(v)
-      size = ((16 + k.bytesize) + 8 + record_serialized.bytesize)
-      new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + serialized value_s size
-      p = allocate_page(new_size_p) if new_size_p > size_p
-      to_page(p)
-      write_record(t, k, record_serialized, size)
-      mark_used(p, new_size_p)
+      record_value_to_write = v
     else
-      size = ((16 + k.bytesize) + 8 + v.bytesize)
-      new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + value_s sizes
-      p = allocate_page(new_size_p) if new_size_p > size_p
-      to_page(p)
-      write_record(t, k, v, size)
-      mark_used(p, new_size_p)
+      record_value_to_write = ti == :hash ? MultiJson.encode(v) : v
     end
+    size = size_of_record(t, k, record_value_to_write)
+    new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
+    p = allocate_page(new_size_p) if new_size_p > size_p
+    to_page(p)
+    write_record(t, k, record_value_to_write, size)
+    mark_used(p, new_size_p)
 
     if p != p_original
       @store_pages[k] = [p, new_size_p]
@@ -590,9 +594,20 @@ class FineGrainedFile
       return
     end
 
+    pou = @file.read INT_SIZE
+    @page_start_offset = pou.unpack(PACK_INT).first
+
+    pcu = @file.read INT_SIZE
+    @page_count = pcu.unpack(PACK_INT).first
+
     to_page(0)
-    while !@file.eof? && record = read_record
-      @store[record.first[1]] = record.last if record.last
+
+    record = @file.eof? ? nil : read_record
+    while record && record.last
+      @store[record.first[1]] = record.last
+      # @store_pages[record.first[1]] = ?
+
+      record = @file.eof? ? nil : read_record
     end
 
     # update page_count if there are zeroes at end of file, and
