@@ -538,21 +538,7 @@ class FineGrainedFile
 
     # write dead bounds, at most journal bounds * 3 of them
 
-    store.each do |k, v|
-      if v.is_a?(Array)
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
-        v.each do |el|
-          @file.write value_s(el)
-        end
-      elsif v.is_a?(Hash)
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
-        record_serialized = MultiJson.encode(v)
-        @file.write value_s(record_serialized)
-      else
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
-        @file.write value_s(v)
-      end
-    end
+    # write all keys
 
     @journal_bounds.push([@file.tell, @file.tell + 1])
 
