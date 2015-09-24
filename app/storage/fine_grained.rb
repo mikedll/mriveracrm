@@ -196,6 +196,24 @@ class FineGrainedFile
   end
 
   #
+  # @todo make size a required field.
+  #
+  def write_record(t, k, v, size = nil)
+    if t == WRITE_TYPE_INDEXES[:array]
+      @file.write record_descriptor(t, k, v.length)
+      v.each { |el| @file.write value_s(el) }
+    else
+      @file.write record_descriptor(t, k)
+      @file.write value_s(v)
+    end
+
+
+    @file.write ZERO_BYTE_ASCII_8BIT * (PAGE_SIZE - (size % PAGE_SIZE)) if size
+
+    true
+  end
+
+  #
   # Marks used_pages bit index to indicate
   # page p to size_p pages are used.
   #
@@ -275,13 +293,11 @@ class FineGrainedFile
           to_page(first_free_page)
           if desc[0] == WRITE_TYPE_INDEXES[:array]
             size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) # record_descriptor + value_s sizes
-            @file.write record_descriptor(desc[0], desc[1], desc[2])
-            desc[2].each { |el| @file.write value_s(el) }
+            write_record(desc[0], desc[1], v)
           else
             v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
             size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
-            @file.write record_descriptor(desc[0], desc[1])
-            @file.write value_s(v_serialized)
+            write_record(desc[0], desc[1], v_serialized)
           end
           size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
 
@@ -395,10 +411,7 @@ class FineGrainedFile
       new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + value_s sizes
       p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
-      @file.write record_descriptor(t, k, v.length)
-      v.each do |el|
-        @file.write value_s(el)
-      end
+      write_record(t, k, v, size)
       mark_used(p, new_size_p)
     elsif ti == :hash
       record_serialized = MultiJson.encode(v)
@@ -406,16 +419,14 @@ class FineGrainedFile
       new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + serialized value_s size
       p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
-      @file.write record_descriptor(t, k)
-      @file.write value_s(record_serialized)
+      write_record(t, k, record_serialized, size)
       mark_used(p, new_size_p)
     else
       size = ((16 + k.bytesize) + 8 + v.bytesize)
       new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + value_s sizes
       p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
-      @file.write record_descriptor(t, k)
-      @file.write value_s(v)
+      write_record(t, k, v, size)
       mark_used(p, new_size_p)
     end
 
@@ -545,17 +556,12 @@ class FineGrainedFile
     @file.write MAGIC_FILE_NUMBER
     store.each do |k, v|
       if v.is_a?(Array)
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:array], k, v.length)
-        v.each do |el|
-          @file.write value_s(el)
-        end
+        write_record(WRITE_TYPE_INDEXES[:array], k, v)
       elsif v.is_a?(Hash)
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:hash], k)
         record_serialized = MultiJson.encode(v)
-        @file.write value_s(record_serialized)
+        write_record(WRITE_TYPE_INDEXES[:hash], k, record_serialized)
       else
-        @file.write record_descriptor(WRITE_TYPE_INDEXES[:string], k)
-        @file.write value_s(v)
+        write_record(WRITE_TYPE_INDEXES[:string], k, v)
       end
     end
 
