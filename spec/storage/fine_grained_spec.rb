@@ -10,6 +10,10 @@ describe FineGrained do
         @db.hard_clean!
       end
 
+      after :each do
+        @db.close
+      end
+
       it "when a migrated key is against the next available free space in the bit-index", :current => true do
         # when size_p and first_free_page are contiguous
         # size_p = 155

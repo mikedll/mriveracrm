@@ -49,6 +49,10 @@ class FineGrainedFile
     @next_journal_conflict_i = nil
   end
 
+  def close
+    @file.close
+  end
+
   #
   # deletes contents of entire file.
   #
