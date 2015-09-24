@@ -105,7 +105,7 @@ class FineGrainedFile
 
 
   def [](key)
-    @@store[key]
+    @store[key]
   end
 
   #
@@ -114,7 +114,7 @@ class FineGrainedFile
   # first and then inserted into the @@store variable.
   #
   def []=(key, value)
-    @@store[key] = value
+    @store[key] = value
     write_key(key, value)
   end
 
@@ -144,12 +144,17 @@ class FineGrainedFile
 
     tu = @file.read INT_SIZE
     t = tu.unpack(PACK_INT).first
+
+    return nil if @file.eof?
     lu = @file.read INT_SIZE
     l = lu.unpack(PACK_INT).first
+
+    return nil if @file.eof?
     k = @file.read l
     if t != WRITE_TYPE_INDEXES[:array]
       [t, k]
     else
+      return nil if @file.eof?
       asu = @file.read INT_SIZE
       as = asu.unpack(PACK_INT).first
       [t, k, as]
