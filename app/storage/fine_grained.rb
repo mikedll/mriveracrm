@@ -487,14 +487,6 @@ class FineGrainedFile
     end
   end
 
-  def open_db2
-    if @file.nil?
-      @file = File.open(@path + "2", "r+b")
-    elsif @file.closed?
-      @file.reopen(@path + "2", "r+b")
-    end
-  end
-
   #
   # Writes with paging and a page index at the start
   # of the file.
@@ -502,7 +494,7 @@ class FineGrainedFile
   # Does not compress the right right now.
   #
   def flush(store)
-    open_db2
+    open_db
 
     store.each do |k, v|
       write_key(store, k)
@@ -529,7 +521,7 @@ class FineGrainedFile
   # the journal region is now free. on the next write attempt, you can use it.
   #
   def flush_with_journaling(store)
-    open_db2
+    open_db
     @file.rewind
 
     @file.write MAGIC_FILE_NUMBER
@@ -547,7 +539,7 @@ class FineGrainedFile
   end
 
   def flush_old(store)
-    open_db2
+    open_db
     @file.rewind
 
     @file.write MAGIC_FILE_NUMBER
