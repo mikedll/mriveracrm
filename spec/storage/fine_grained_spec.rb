@@ -49,19 +49,24 @@ describe FineGrained do
         @db["b"].should == "bee"
       end
 
-      it "when hashes, arrays, and strings are written at the same time" do
+      it "when hashes, arrays, and strings are written at the same time", :current => true do
         @db["an_array"] = ['a', 'bbb', 'c', 'dddd', 'e' * 16]
         @db["hash"] = {
-          :a => "hello",
-          :fortunately => "I didn't have to mop the dishes."
+          'a' => "hello",
+          'fortunately' => "I didn't have to mop the dishes."
         }
         @db[":a"] = ("a" * 170)
         @db["b"] = "bee"
 
+
+        @db.close
+        @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+
+
         @db["an_array"].should == ['a', 'bbb', 'c', 'dddd', 'e' * 16]
         @db["hash"].should == {
-          :a => "hello",
-          :fortunately => "I didn't have to mop the dishes."
+          'a' => "hello",
+          'fortunately' => "I didn't have to mop the dishes."
         }
         @db[":a"].should == "a" * 170
         @db["b"].should == "bee"

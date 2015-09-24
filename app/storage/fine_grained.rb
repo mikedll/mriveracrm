@@ -128,6 +128,10 @@ class FineGrainedFile
   end
 
   #
+  # returns
+  #   [type descriptor, key] or [type descriptor, key, array size]
+  # for non-arrays and arrays, respectively.
+  #
   # @todo: rescue from parse errors
   # @todo: update bit mask. if you find a duplicate
   # key, regard the prior position as free and update
@@ -180,21 +184,22 @@ class FineGrainedFile
     v = nil
     return nil if d.nil?
 
+    raw_v = nil
     case d[0]
     when WRITE_TYPE_INDEXES[:array]
       a = []
       d[2].times { |i| a.push(read_value_s) }
-      v = a
+      v = raw_v = a
     when WRITE_TYPE_INDEXES[:hash]
-      h = MultiJson.decode(read_value_s)
-      v = h
+      raw_v = read_value_s
+      v = MultiJson.decode(raw_v)
     when WRITE_TYPE_INDEXES[:string]
-      v = read_value_s
+      v = raw_v = read_value_s
     end
 
-    # @todo read to end of page
-    # remainder = (PAGE_SIZE - (size % PAGE_SIZE))
-    # @file.seek(remainder, IO::SEEK_CUR)
+    size = size_of_record(d[0], d[1], raw_v)
+    remainder = (PAGE_SIZE - (size % PAGE_SIZE))
+    @file.seek(remainder, IO::SEEK_CUR)
 
     [d, v]
   end
@@ -601,7 +606,6 @@ class FineGrainedFile
     @page_count = pcu.unpack(PACK_INT).first
 
     to_page(0)
-
     record = @file.eof? ? nil : read_record
     while record && record.last
       @store[record.first[1]] = record.last
