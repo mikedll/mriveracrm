@@ -22,22 +22,22 @@ class FineGrainedFile
   ZERO_BYTE_ASCII_8BIT = "\x00".force_encoding("ASCII-8BIT")
 
   INT_SIZE = 8
-  PACK_INT = "Q"
+  PACK_INT = "Q".force_encoding("UTF-8")
   MAX_VALUE_SIZE = (2**64 - 1)
   PAGE_SIZE = 2**8
   MAXIMUM_PAGES = 1024
   MAXIMUM_SIZE = (2**30) / (2**8)
-  PAGE_START_OFFSET_SIZE = 64
-  PAGE_COUNT_SIZE = 64
+  PAGE_START_OFFSET_SIZE = INT_SIZE
+  PAGE_COUNT_SIZE = INT_SIZE
 
   def initialize(path)
     @path = path
 
-    @page_start_offset = 0 # file offset in bytes where data starts, after bit_index ends
-
     @page_count = 0        # how many pages of data are written to disk, which may be less than or greater than used_pages' bytesize.
 
     @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
+    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + 0 # file offset in bytes where data starts, after bit_index ends
+
     @store = {}
     @store_pages = {}
 
@@ -47,6 +47,25 @@ class FineGrainedFile
     @journal_bounds = []
     @dead_region_bounds = []
     @next_journal_conflict_i = nil
+  end
+
+  #
+  # deletes contents of entire file.
+  #
+  def hard_clean!
+    open_db
+    @file.seek 0
+    @file.rewind
+    @file.write MAGIC_FILE_NUMBER
+    @used_pages = "".force_encoding("ASCII-8BIT")
+    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + 0 # file offset in bytes where data starts, after bit_index ends
+    @page_count = 0
+
+    flush_page_start_offset
+    flush_page_count
+    flush_used_pages
+
+    @file.truncate(@file.size)
   end
 
   def flush_page_start_offset
@@ -67,7 +86,7 @@ class FineGrainedFile
   #
   # @pre @file not nil, and is open for writing.
   #
-  def to_page
+  def to_page(p)
     @file.seek(@page_start_offset + p * PAGE_SIZE)
   end
 
@@ -269,7 +288,14 @@ class FineGrainedFile
             # adjust used_pages to indicate the migration of the key,
             # and the incoming used_pages appendage.
 
+            if size_p >= PAGE_SIZE
+              raise "Error: Programming error. FineGrained cannot handle writes that would displace keys greater than or equal to #{PAGE_SIZE * size_p} bytes in size."
+              # @todo handle size_p > PAGE_SIZE
+              # @used_pages += ZERO_BYTE_ASCII_8BIT * (1 + size_p * PAGE_SIZE)
+            end
+
             @used_pages += ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
+
             # the following two variables do not account for bit-shifting. tail_size
             # would be one larger and used_of_next_bit_index_page would be one smaller
             # if they did.
@@ -277,9 +303,15 @@ class FineGrainedFile
             used_of_next_bit_index_page = size_p - tail_size   # used space from next bit-index page allocation
 
             #
-            # todo: see what happens when first_free_page and size_p are contiguous.
+            # @todo there is a weakness in this algorithm, which is that if the key to be migrated
+            # is large, it will keep on taking a long time to move forward, resulting almost
+            # as many page allocations for bit-indexes as there are pages in the key. however,
+            # in such a situation, a space will be found in the middle of the file, or should be.
+            # on every allocation, the bit-index should be searched from the beginning to identify
+            # growing gaps in the allocated space.
             #
 
+            #
             # @todo consider rewriting this as four while-loops
             #
             # head is the portion of used_pages that held a key that was migrated out of the way
@@ -310,6 +342,11 @@ class FineGrainedFile
             flush_page_start_offset
 
             new_page_offset = @page_count if new_page_offset.nil?
+
+            #
+            # @todo we are losing a page to the allocated used_pages appendage.
+            # take this into consideration when computing the below.
+            #
             allocated_page_space += (PAGE_SIZE - used_of_next_bit_index_page)
           else # first_free_page == (@used_pages.bytesize * 8)
           end
@@ -326,7 +363,7 @@ class FineGrainedFile
 
   def write_key(k, v = nil)
     v = @@store[k] if v.nil?
-    p_original, size = @store_pages[key]
+    p_original, size_p = (@store_pages[k] || [nil, 0])
     p = p_original
     new_size = nil
 
@@ -346,7 +383,7 @@ class FineGrainedFile
 
     if ti == :array
       new_size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
-      p = allocate_page(new_size_p) if new_size_p > size
+      p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
       @file.write record_descriptor(t, k, v.length)
       v.each do |el|
@@ -356,14 +393,14 @@ class FineGrainedFile
     elsif ti == :hash
       record_serialized = MultiJson.encode(v)
       new_size_p = (((16 + k.bytesize) + 8 + record_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
-      p = allocate_page(new_size_p) if new_size_p > size
+      p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
       @file.write record_descriptor(t, k)
       @file.write value_s(record_serialized)
       mark_used(p, new_size_p)
     else
       new_size_p = (((16 + k.bytesize) + 8 + v.bytesize) / PAGE_SIZE) # record_descriptor + value_s sizes
-      p = allocate_page(new_size_p) if new_size_p > size
+      p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
       @file.write record_descriptor(t, k)
       @file.write value_s(v)
@@ -372,7 +409,7 @@ class FineGrainedFile
 
     if p != p_original
       @store_pages = [p, new_size_p]
-      deallocate_page(p_original, size)
+      deallocate_page(p_original, size_p)
     end
     # get page for this key
     #
@@ -428,7 +465,11 @@ class FineGrainedFile
 
   def open_db
     if @file.nil?
-      @file = File.open(@path, "r+")
+      if File.exists? @path
+        @file = File.open(@path, "r+")
+      else
+        @file = File.new(@path, "w+")
+      end
     elsif @file.closed?
       @file.reopen(@path, "r+")
     end
@@ -548,7 +589,10 @@ class FineGrainedFile
       return
     end
 
-    @store[record.first[1]] = record.last while record = read_record
+    to_page(0)
+    while !@file.eof? && record = read_record
+      @store[record.first[1]] = record.last
+    end
 
     # update page_count if there are zeroes at end of file, and
     # (@used_pages.bytesize * 8) < @page_count. should be an increment.
