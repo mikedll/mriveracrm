@@ -123,7 +123,7 @@ class FineGrainedFile
   #
   #
   def record_descriptor(t, k, *a)
-    pack_directives = "#{PACK_INT}2A#{k.length}" + PACK_INT * a.bytesize
+    pack_directives = "#{PACK_INT}2A#{k.length}" + PACK_INT * a.length
     ([t, k.bytesize, k] + a).pack(pack_directives)
   end
 
@@ -183,6 +183,7 @@ class FineGrainedFile
   # @todo: rescue from parse errors
   #
   def read_value_s
+    return nil if @file.eof?
     lu = @file.read INT_SIZE
     l = lu.unpack(PACK_INT).first
     s = @file.read l
@@ -200,38 +201,40 @@ class FineGrainedFile
   #
   def mark_used(p, size_p)
     for i in p...(p + size_p)
-      @used_pages[i / 8] = @used_pages[i / 8].ord | (1 << (7 - (i % 8)))
+      @used_pages[i / 8] = [@used_pages[i / 8].ord | (1 << (7 - (i % 8)))].pack("c")
     end
   end
 
   #
-  # @pre new_size >= 0
+  # @todo do we need to do anything here?
   #
-  def allocate_page(new_size)
+  def deallocate_page(p, size_p)
+  end
+
+  #
+  # @pre new_pages >= 0
+  #
+  def allocate_page(new_pages)
 
     # is there existing page space?
-    i = 0
-    byte_offset = 0
     new_page_offset = nil
     contiguously_available = 0
-    while (contiguously_available * PAGE_SIZE < new_size) && i < (@used_pages.bytesize * 8)
-      byte_offset = (i / 8) if bit_in_byte == 0
-      if available ((@used_pages[byte_offset].ord & (1 << (7 - (i % 8)))) == 0)
+    i = 0
+    while i < @used_pages.bytesize && contiguously_available < new_pages
+      if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
         new_page_offset = i if new_page_offset == nil
         contiguously_available += 1
       else
         new_page_offset = nil
       end
+      i += 1
     end
 
     if new_page_offset.nil?
 
       # We need to allocate more space on disk.
 
-      # Create more space in used_pages.
-      new_pages = new_size / PAGE_SIZE + (new_size % PAGE_SIZE != 0 ? 1 : 0)
-
-      first_free_page = (@used_pages.bytesize * 8)
+      first_free_page = @used_pages.bytesize
       first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
 
       # # do we need to do this?
@@ -248,122 +251,119 @@ class FineGrainedFile
 
       # grow the bit_index
       allocated_page_space = 0
-      while new_pages < allocated_page_space
+      while allocated_page_space < new_pages
 
         #
         # there appear to be three states from which to allocate
         # more space in which bit_index can grow:
         #
         # (first_free_page() == 0)
-        # (first_free_page() > 0 && first_free_page() < used_pages.bytesize * 8)
-        # (first_free_page() == used_pages.bytesize * 8)
+        # (first_free_page() > 0 && first_free_page() < used_pages.bytesize)
+        # (first_free_page() == used_pages.bytesize)
+        #
+        # these are handled below. note that size_p <= first_free_page.
         #
 
-        if first_free_page > 0
-          if first_free_page < (@used_pages.bytesize * 8)
+        size_p = 0 # size of space moved due to key-collision
 
-            size_p = 0 # size of space moved due to key-collision
-
-            # if there is a collision, allocate more space
-            # and write the key there.
-            if @used_pages[0].ord & (1 << 7) != 0
-              size = 0
-              to_page(0)
-              desc, v = read_record
-              to_page(first_free_page)
-              if desc[0] == WRITE_TYPE_INDEXES[:array]
-                size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) # record_descriptor + value_s sizes
-                @file.write record_descriptor(desc[0], desc[1], desc[2])
-                desc[2].each { |el| @file.write value_s(el) }
-              else
-                v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-                size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
-                @file.write record_descriptor(desc[0], desc[1])
-                @file.write value_s(v_serialized)
-              end
-              size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
-
-              # update page size on disk
-              @page_count += size_p
-              flush_page_count
-
-              # update the key's location in store_pages
-              @store_pages[desc[1]] = [first_free_page, size_p]
-
-              to_page(0)
-              @file.write (ZERO_BYTE_ASCII_8BIT * size_p * PAGE_COUNT)
-            end
-
-            # adjust used_pages to indicate the migration of the key,
-            # and the incoming used_pages appendage.
-
-            if size_p >= PAGE_SIZE
-              raise "Error: Programming error. FineGrained cannot handle writes that would displace keys greater than or equal to #{PAGE_SIZE * size_p} bytes in size."
-              # @todo handle size_p > PAGE_SIZE
-              # @used_pages += ZERO_BYTE_ASCII_8BIT * (1 + size_p * PAGE_SIZE)
-            end
-
-            @used_pages += ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
-
-            # the following two variables do not account for bit-shifting. tail_size
-            # would be one larger and used_of_next_bit_index_page would be one smaller
-            # if they did.
-            tail_size = @used_pages.bytesize - first_free_page # free space at end of used_pages
-            used_of_next_bit_index_page = size_p - tail_size   # used space from next bit-index page allocation
-
-            #
-            # @todo there is a weakness in this algorithm, which is that if the key to be migrated
-            # is large, it will keep on taking a long time to move forward, resulting almost
-            # as many page allocations for bit-indexes as there are pages in the key. however,
-            # in such a situation, a space will be found in the middle of the file, or should be.
-            # on every allocation, the bit-index should be searched from the beginning to identify
-            # growing gaps in the allocated space.
-            #
-
-            #
-            # @todo consider rewriting this as four while-loops
-            #
-            # head is the portion of used_pages that held a key that was migrated out of the way
-            # middle is the portion after head but excluding tail
-            # tail is the portion of used_pages at its end that was available for holding the migrated key
-            # head of next bit-index is the space in the next bit-index page allocation that will be marked as used due to the key migration
-            #
-            for i in (1...(@used_pages.bytesize + used_of_next_bit_index_page))
-              j = i - 1
-              j_bit_as_used = (1 << (7 - (j % 8)))  # | this
-              j_bit_as_free = ~(1 << (7 - (j % 8))) # & this
-              if i < size_p
-                # mark head as free due to migrated key
-                @used_pages[j / 8] = [@used_pages[j / 8].ord & j_bit_as_free].pack("c")
-              elsif i < first_free_page
-                # bit shift middle of used_pages
-                cur_i = @used_pages[i / 8].ord
-                cur_j = @used_pages[j / 8].ord
-                @used_pages[j / 8] = (cur_i & (1 << (7 - (i % 8))) == 0 ? [cur_j & j_bit_as_free].pack("c") : [cur_j | j_bit_as_used].pack("c"))
-              else
-                # mark taken tail of used_pages, and head of next bit-index page allocation
-                @used_pages[j / 8] = [@used_pages[j / 8].ord | j_bit_as_used].pack("c")
-              end
-            end
-            flush_used_pages
-
-            @page_start_offset += PAGE_SIZE
-            flush_page_start_offset
-
-            new_page_offset = @page_count if new_page_offset.nil?
-
-            #
-            # @todo we are losing a page to the allocated used_pages appendage.
-            # take this into consideration when computing the below.
-            #
-            allocated_page_space += (PAGE_SIZE - used_of_next_bit_index_page)
-          else # first_free_page == (@used_pages.bytesize * 8)
+        # if there is a collision, allocate more space
+        # and write the key there.
+        if @used_pages.bytesize > 0 && @used_pages[0].ord & (1 << 7) != 0
+          size = 0
+          to_page(0)
+          desc, v = read_record
+          to_page(first_free_page)
+          if desc[0] == WRITE_TYPE_INDEXES[:array]
+            size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) # record_descriptor + value_s sizes
+            @file.write record_descriptor(desc[0], desc[1], desc[2])
+            desc[2].each { |el| @file.write value_s(el) }
+          else
+            v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
+            size = (((16 + k.bytesize) + 8 + v_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+            @file.write record_descriptor(desc[0], desc[1])
+            @file.write value_s(v_serialized)
           end
-        else # first_free_page == 0
-          # Nothing blocking bit_index's growth.
-          #
-          # should we check to see if we're at eof when writing used_pages extension?
+          size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
+
+          # update page size on disk
+          @page_count += size_p
+          flush_page_count
+
+          # update the key's location in store_pages
+          @store_pages[desc[1]] = [first_free_page, size_p]
+
+          to_page(0)
+          @file.write (ZERO_BYTE_ASCII_8BIT * size_p * PAGE_SIZE)
         end
+
+        # adjust used_pages to indicate the migration of the key,
+        # and the incoming used_pages appendage.
+
+        if size_p >= PAGE_SIZE
+          raise "Error: Programming error. FineGrained cannot handle writes that would displace keys greater than or equal to #{PAGE_SIZE * size_p} bytes in size."
+          # @todo handle size_p > PAGE_SIZE
+          # @used_pages += ZERO_BYTE_ASCII_8BIT * (1 + size_p * PAGE_SIZE)
+        end
+
+        used_page_appendage = ZERO_BYTE_ASCII_8BIT * (PAGE_SIZE / ZERO_BYTE_ASCII_8BIT.bytesize)
+        @used_pages += used_page_appendage
+
+        # the following two variables do not account for bit-shifting. tail_size
+        # would be one larger and used_of_next_bit_index_page would be one smaller
+        # if they did.
+        tail_size = @used_pages.bytesize - first_free_page # free space at end of used_pages
+        used_of_next_bit_index_page = size_p - tail_size   # used space from next bit-index page allocation
+
+        #
+        # @todo there is a weakness in this algorithm, which is that if the key to be migrated
+        # is large, it will keep on taking a long time to move forward, resulting almost
+        # as many page allocations for bit-indexes as there are pages in the key. however,
+        # in such a situation, a space will be found in the middle of the file, or should be.
+        # on every allocation, the bit-index should be searched from the beginning to identify
+        # growing gaps in the allocated space.
+        #
+
+        #
+        # @todo consider rewriting this as four while-loops
+        #
+        # head is the portion of used_pages that held a key that was migrated out of the way
+        # middle is the portion after head but excluding tail
+        # tail is the portion of used_pages at its end that was available for holding the migrated key
+        # head of next bit-index is the space in the next bit-index page allocation that will be marked as used due to the key migration
+        #
+        for i in (1...(@used_pages.bytesize + used_of_next_bit_index_page))
+          j = i - 1
+          j_bit_as_used = (1 << (7 - (j % 8)))  # | this
+          j_bit_as_free = ~(1 << (7 - (j % 8))) # & this
+          if i < size_p
+            # mark head as free due to migrated key
+            @used_pages[j / 8] = [@used_pages[j / 8].ord & j_bit_as_free].pack("c")
+          elsif i < first_free_page
+            # bit shift middle of used_pages
+            cur_i = @used_pages[i / 8].ord
+            cur_j = @used_pages[j / 8].ord
+            @used_pages[j / 8] = (cur_i & (1 << (7 - (i % 8))) == 0 ? [cur_j & j_bit_as_free].pack("c") : [cur_j | j_bit_as_used].pack("c"))
+          else
+            # mark taken tail of used_pages, and head of next bit-index page allocation
+            @used_pages[j / 8] = [@used_pages[j / 8].ord | j_bit_as_used].pack("c")
+          end
+        end
+
+        #
+        # @todo should we check to see if we're at eof when writing used_pages extension?
+        #
+        flush_used_pages
+
+        @page_start_offset += used_page_appendage.bytesize
+        flush_page_start_offset
+
+        new_page_offset = @page_count if new_page_offset.nil?
+
+        #
+        # @todo we are losing a page to the allocated used_pages appendage.
+        # take this into consideration when computing the below.
+        #
+        allocated_page_space += (used_page_appendage.bytesize - used_of_next_bit_index_page)
       end
     end
 
@@ -391,7 +391,8 @@ class FineGrainedFile
     #
 
     if ti == :array
-      new_size_p = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }) / PAGE_SIZE # record_descriptor + value_s sizes
+      size = ((24 + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize })
+      new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + value_s sizes
       p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
       @file.write record_descriptor(t, k, v.length)
@@ -401,14 +402,16 @@ class FineGrainedFile
       mark_used(p, new_size_p)
     elsif ti == :hash
       record_serialized = MultiJson.encode(v)
-      new_size_p = (((16 + k.bytesize) + 8 + record_serialized.bytesize) / PAGE_SIZE) # record_descriptor + serialized value_s size
+      size = ((16 + k.bytesize) + 8 + record_serialized.bytesize)
+      new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + serialized value_s size
       p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
       @file.write record_descriptor(t, k)
       @file.write value_s(record_serialized)
       mark_used(p, new_size_p)
     else
-      new_size_p = (((16 + k.bytesize) + 8 + v.bytesize) / PAGE_SIZE) # record_descriptor + value_s sizes
+      size = ((16 + k.bytesize) + 8 + v.bytesize)
+      new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1) # record_descriptor + value_s sizes
       p = allocate_page(new_size_p) if new_size_p > size_p
       to_page(p)
       @file.write record_descriptor(t, k)
@@ -417,7 +420,7 @@ class FineGrainedFile
     end
 
     if p != p_original
-      @store_pages = [p, new_size_p]
+      @store_pages[k] = [p, new_size_p]
       deallocate_page(p_original, size_p)
     end
     # get page for this key
@@ -475,20 +478,20 @@ class FineGrainedFile
   def open_db
     if @file.nil?
       if File.exists? @path
-        @file = File.open(@path, "r+")
+        @file = File.open(@path, "r+b")
       else
-        @file = File.new(@path, "w+")
+        @file = File.new(@path, "w+b")
       end
     elsif @file.closed?
-      @file.reopen(@path, "r+")
+      @file.reopen(@path, "r+b")
     end
   end
 
   def open_db2
     if @file.nil?
-      @file = File.open(@path + "2", "r+")
+      @file = File.open(@path + "2", "r+b")
     elsif @file.closed?
-      @file.reopen(@path + "2", "r+")
+      @file.reopen(@path + "2", "r+b")
     end
   end
 
@@ -600,7 +603,7 @@ class FineGrainedFile
 
     to_page(0)
     while !@file.eof? && record = read_record
-      @store[record.first[1]] = record.last
+      @store[record.first[1]] = record.last if record.last
     end
 
     # update page_count if there are zeroes at end of file, and
