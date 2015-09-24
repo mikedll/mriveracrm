@@ -339,10 +339,6 @@ class FineGrainedFile
       # write head of used_pages to disk.
       #
 
-      #
-      # return pointer to start of allocated_pages
-      #
-
       # I don't remember what this is:
       # if dead_region > 0
       #   @file.seek(last_page_start)
