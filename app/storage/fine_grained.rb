@@ -37,7 +37,7 @@ class FineGrainedFile
 
     @page_count = 0        # how many pages of data are written to disk, which may be less than or greater than used_pages' bytesize.
 
-    @used_pages = "".force_encoding("ASCII-8BIT")
+    @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
     @store = {}
     @store_pages = {}
 
@@ -268,54 +268,42 @@ class FineGrainedFile
 
             # adjust used_pages to indicate the migration of the key,
             # and the incoming used_pages appendage.
-            next_bit_index_page = ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
-            tail = ZERO_BYTE_ASCII_8BIT
-            tail_size = @used_pages.bytesize - first_free_page # free space at end of used_pages, including 1 to account for the bit shift
-            used_of_next_bit_index_page = size_p - tail_size
+
+            @used_pages += ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
+            # the following two variables do not account for bit-shifting. tail_size
+            # would be one larger and used_of_next_bit_index_page would be one smaller
+            # if they did.
+            tail_size = @used_pages.bytesize - first_free_page # free space at end of used_pages
+            used_of_next_bit_index_page = size_p - tail_size   # used space from next bit-index page allocation
+
             #
             # todo: see what happens when first_free_page and size_p are contiguous.
             #
 
-            last_bit_cache = nil
-            for i in (1...@used_pages.bytesize)
+            # @todo consider rewriting this as four while-loops
+            #
+            # head is the portion of used_pages that held a key that was migrated out of the way
+            # middle is the portion after head but excluding tail
+            # tail is the portion of used_pages at its end that was available for holding the migrated key
+            # head of next bit-index is the space in the next bit-index page allocation that will be marked as used due to the key migration
+            #
+            for i in (1...(@used_pages.bytesize + used_of_next_bit_index_page))
+              j = i - 1
+              j_bit_as_used = (1 << (7 - (j % 8)))  # | this
+              j_bit_as_free = ~(1 << (7 - (j % 8))) # & this
               if i < size_p
-                # free head of used_pages for moved key
-                @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord & ~(1 << (7 - ((i - 1) % 8)))].pack("c")
-
-                # mark taken tail of used_pages and head of next bit-index allocated page
-                j = i - 1
-                used_bit = (1 << (7 - (j % 8)))
-                if j < tail_size
-                  j -= 1  # another one for the fact that we're bit-shifting
-                  if j == -2
-                    # writing this would cause the loss of a bit
-                    last_bit_cache = 1
-                  else
-                    @used_pages[(first_free_page + j) / 8] = [@used_pages[(first_free_page + j) / 8].ord | used_bit].pack("c")
-                  end
-                else
-                  next_bit_index_page[(j - tail_size ) / 8] = [next_bit_index_page[(j - tail_size) / 8].ord | used_bit].pack("c")
-                end
+                # mark head as free due to migrated key
+                @used_pages[j / 8] = [@used_pages[j / 8].ord & j_bit_as_free].pack("c")
+              elsif i < first_free_page
+                # bit shift middle of used_pages
+                cur_i = @used_pages[i / 8].ord
+                cur_j = @used_pages[j / 8].ord
+                @used_pages[j / 8] = (cur_i & (1 << (7 - (i % 8))) == 0 ? [cur_j & j_bit_as_free].pack("c") : [cur_j | j_bit_as_used].pack("c"))
               else
-                if (i - 1) == (first_free_page - 1) && last_bit_cache
-                  # restore cached bit
-                  if last_bit_cache == 0
-                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord & ~(1 << (7 - ((i - 1) % 8)))].pack("c")
-                  else
-                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord | (1 << (7 - ((i - 1) % 8)))].pack("c")
-                  end
-                else
-                  # bit-shift the rest of used_pages to the left by one.
-                  if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
-                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord & ~(1 << (7 - ((i - 1) % 8)))].pack("c")
-                  else
-                    @used_pages[(i - 1) / 8] = [@used_pages[(i - 1) / 8].ord | (1 << (7 - ((i - 1) % 8)))].pack("c")
-                  end
-                end
+                # mark taken tail of used_pages, and head of next bit-index page allocation
+                @used_pages[j / 8] = [@used_pages[j / 8].ord | j_bit_as_used].pack("c")
               end
             end
-
-            @used_pages += next_bit_index_page
             flush_used_pages
 
             @page_start_offset += PAGE_SIZE
