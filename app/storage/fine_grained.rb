@@ -13,6 +13,9 @@ class FineGrainedFile
   class MaximumValueExceeded < Exception
   end
 
+  class ParseError < Exception
+  end
+
   WRITE_TYPE_INDEXES = {
     :array => 1,
     :string => 2,
@@ -127,44 +130,6 @@ class FineGrainedFile
     ([t, k.bytesize, k] + a).pack(pack_directives)
   end
 
-  #
-  # returns
-  #   [type descriptor, key] or [type descriptor, key, array size]
-  # for non-arrays and arrays, respectively.
-  #
-  # @todo: rescue from parse errors
-  # @todo: update bit mask. if you find a duplicate
-  # key, regard the prior position as free and update
-  # the bitmask.
-  # @todo if you reach eof before reading all pages
-  # of keys, update the page_count in ram and on disk
-  # to be shorter than we expected. used_pages
-  # size should equal page_count.
-  # @todo if you have a key collision, it means
-  #  you should free the old key in used_pages.
-  #
-  def read_descriptor
-    return nil if @file.eof?
-
-    tu = @file.read INT_SIZE
-    t = tu.unpack(PACK_INT).first
-
-    return nil if @file.eof?
-    lu = @file.read INT_SIZE
-    l = lu.unpack(PACK_INT).first
-
-    return nil if @file.eof? || l > (PAGE_SIZE * 8)
-    k = @file.read l
-    if t != WRITE_TYPE_INDEXES[:array]
-      [t, k]
-    else
-      return nil if @file.eof?
-      asu = @file.read INT_SIZE
-      as = asu.unpack(PACK_INT).first
-      [t, k, as]
-    end
-  end
-
   def size_of_record(t, k, v)
     if t == WRITE_TYPE_INDEXES[:array]
       # type, key size, array length, array size, array elements
@@ -176,42 +141,95 @@ class FineGrainedFile
   end
 
   #
+  # returns [string, bytes read]
+  #
+  # returns nil if eof is reached before reading an entire value.
+  #
+  # @todo: rescue from parse errors
+  #
+  def read_value_s
+    b_read = 0
+    lu = @file.read INT_SIZE
+    return nil if lu.nil? || lu.bytesize < INT_SIZE
+    b_read += lu.bytesize
+
+    l = lu.unpack(PACK_INT).first
+    s = @file.read l
+    return nil if s.nil? || s.bytesize < l
+    b_read += s.bytesize
+
+    [s, b_read]
+  end
+
+  #
   # Returns [record_descriptor, record_value]
   # or nil if no record is found.
   #
+  # record_descriptor is [type descriptor, key] or [type descriptor, key, array size]
+  # for non-arrays and arrays, respectively.
+  #
+  # @todo: check how you are rescuing from parse errors.
+  #
   def read_record
-    d = read_descriptor
-    v = nil
+    n_read = 0
+    tu = @file.read INT_SIZE
+    return nil if tu.nil? || tu.bytesize < INT_SIZE
+    n_read += tu.bytesize
+    t = tu.unpack(PACK_INT).first
+
+    return nil if @file.eof?
+    lu = @file.read INT_SIZE
+    return nil if lu.nil? || lu.bytesize < INT_SIZE
+    n_read += lu.bytesize
+    l = lu.unpack(PACK_INT).first
+
+    if l > MAX_VALUE_SIZE
+      raise ParseError.new "Read size that exceeds the maximum size for a value."
+    end
+
+    k = @file.read l
+    return nil if k.nil? || k.bytesize < l
+    n_read += k.bytesize
+    d = if t != WRITE_TYPE_INDEXES[:array]
+          [t, k]
+        else
+          asu = @file.read INT_SIZE
+          return nil if asu.nil? || asu.bytesize < INT_SIZE
+          n_read += asu.bytesize
+          as = asu.unpack(PACK_INT).first
+          [t, k, as]
+        end
     return nil if d.nil?
+
+    v = nil
 
     raw_v = nil
     case d[0]
     when WRITE_TYPE_INDEXES[:array]
       a = []
-      d[2].times { |i| a.push(read_value_s) }
+      d[2].times do |i|
+        raw_v, b_read = read_value_s
+        break if raw_v.nil?
+        n_read += b_read
+        a.push(raw_v)
+      end
       v = raw_v = a
     when WRITE_TYPE_INDEXES[:hash]
-      raw_v = read_value_s
+      raw_v, b_read = read_value_s
+      return nil if raw_v.nil?
+      n_read += b_read
       v = MultiJson.decode(raw_v)
     when WRITE_TYPE_INDEXES[:string]
-      v = raw_v = read_value_s
+      raw_v, b_read = read_value_s
+      return nil if raw_v.nil?
+      n_read += b_read
+      v = raw_v
     end
 
-    size = size_of_record(d[0], d[1], raw_v)
-    remainder = (PAGE_SIZE - (size % PAGE_SIZE))
-    @file.seek(remainder, IO::SEEK_CUR)
+    remainder = (PAGE_SIZE - (n_read % PAGE_SIZE))
+    @file.seek(remainder, IO::SEEK_CUR) if remainder > 0
 
     [d, v]
-  end
-
-  #
-  # @todo: rescue from parse errors
-  #
-  def read_value_s
-    return nil if @file.eof?
-    lu = @file.read INT_SIZE
-    l = lu.unpack(PACK_INT).first
-    s = @file.read l
   end
 
   def value_s(v)
@@ -588,6 +606,12 @@ class FineGrainedFile
   #
   # skip journal and dead regions as you read.
   #
+  # @todo: if you find a duplication of a key, delete
+  # the earlier-occuring one and mark it as free in the bit-index.
+  #
+  # @todo if you reach eof before reading pages equal to page_count,
+  # decrease page_count and flush it.
+  #
   def load_store_from_disk
     open_db
     @file.rewind
@@ -605,6 +629,11 @@ class FineGrainedFile
     pcu = @file.read INT_SIZE
     @page_count = pcu.unpack(PACK_INT).first
 
+    #
+    # @todo use page count to iterate over
+    # null areas. consider using the bit-index
+    # to accelerate your iteration.
+    #
     to_page(0)
     record = @file.eof? ? nil : read_record
     while record && record.last
