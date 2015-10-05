@@ -411,11 +411,6 @@ class FineGrainedFile
         #
         # @todo consider rewriting this as four while-loops
         #
-        # head is the portion of used_pages that held a key that was migrated out of the way
-        # middle is the portion after head but excluding tail
-        # tail is the portion of used_pages at its end that was available for holding the migrated key
-        # head of next bit-index is the space in the next bit-index page allocation that will be marked as used due to the key migration
-        #
         for i in (1...(@used_pages.bytesize + used_of_next_bit_index_page))
           j = i - 1
           j_bit_as_used = byte_with_used_bit(j)  # | this
