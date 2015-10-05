@@ -430,7 +430,7 @@ class FineGrainedFile
   end
 
   def write_key(k, v = nil)
-    v = @@store[k] if v.nil?
+    v = @store[k] if v.nil?
     p_original, size_p = (@store_pages[k] || [nil, 0])
     p = p_original
     new_size = nil
