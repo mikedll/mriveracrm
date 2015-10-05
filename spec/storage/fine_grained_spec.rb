@@ -18,7 +18,7 @@ describe FineGrained do
     end
   end
 
-  context "deletes", :current => true do
+  context "deletes" do
     it "should zero out space on disk where a deleted key used to be written" do
       @db["hash"] = {
         'a' => "hello",
@@ -37,7 +37,7 @@ describe FineGrained do
   end
 
   context "writes" do
-    context "should allocate space" do
+    context "should allocate space and remember the write" do
       it "when a hash is written" do
         @db["hash"] = { :a => "hello", 2 => "adamant" }
         @db["hash"].should == { :a => "hello", 2 => "adamant" }
@@ -66,7 +66,7 @@ describe FineGrained do
         @db["b"].should == "bee"
       end
 
-      it "when hashes, arrays, and strings are written at the same time" do
+      it "when hashes, arrays, and strings are written at the same time and the database is reloaded from disk" do
         @db["an_array"] = ['a', 'bbb', 'c', 'dddd', 'e' * 16]
         @db["hash"] = {
           'a' => "hello",

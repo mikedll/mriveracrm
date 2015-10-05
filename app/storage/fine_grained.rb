@@ -40,7 +40,7 @@ class FineGrainedFile
     @page_count = 0        # how many pages of data are written to disk, which may be less than or greater than used_pages' bytesize.
 
     @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
-    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + 0 # file offset in bytes where data starts, after bit_index ends
+    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE # file offset in bytes where data starts, after bit_index ends
 
     @store = {}
     @store_pages = {}
@@ -70,7 +70,7 @@ class FineGrainedFile
 
     @file.write MAGIC_FILE_NUMBER
     @used_pages = "".force_encoding("ASCII-8BIT")
-    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + 0 # file offset in bytes where data starts, after bit_index ends
+    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE # file offset in bytes where data starts, after bit_index ends
     @page_count = 0
 
     flush_page_start_offset
@@ -481,15 +481,15 @@ class FineGrainedFile
     size = size_of_record(t, k, record_value_to_write)
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
     p = allocate_page(new_size_p) if new_size_p > size_p
-    to_page(p)
     if p == @page_count
       @page_count += new_size_p
       flush_page_count
     end
+    to_page(p)
     write_record(t, k, record_value_to_write, size)
     toggle_used(p, new_size_p)
 
-    if p != p_original
+    if p != p_original || new_size_p != size_p
       @store_pages[k] = [p, new_size_p]
       deallocate_page(p_original, size_p)
     end
@@ -504,8 +504,8 @@ class FineGrainedFile
   end
 
   def erase_key(key)
-    page, size_p = @store_pages[key]
-    to_page(page)
+    p, size_p = @store_pages[key]
+    to_page(p)
     @file.write (ZERO_BYTE_ASCII_8BIT * PAGE_SIZE) * size_p
     toggle_used(p, size_p, :used => false)
   end
@@ -663,24 +663,32 @@ class FineGrainedFile
     pcu = @file.read INT_SIZE
     @page_count = pcu.unpack(PACK_INT).first
 
+    used_pages_size = @page_start_offset - (MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE)
+    if (used_pages_size < 0) || (used_pages_size % PAGE_SIZE != 0)
+      puts "Error: Not a valid fine grained file: #{@path}"
+      @page_count = 0
+      @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE
+      return
+    end
+    @used_pages = @file.read(used_pages_size)
+
     #
-    # @todo use page count to iterate over
-    # null areas. consider using the bit-index
+    # @todo consider using the bit-index
     # to accelerate your iteration.
     #
+
     i = 0
     to_page(i)
-    pages_read = 0
     record = @file.eof? ? nil : read_record
-    while !@file.eof? && (record || pages_read < @page_count)
+    while (record || (i < @page_count && !@file.eof?))
       if record.nil?
         i += 1
       else
         @store[record[0][1]] = record[1]
         @store_pages[record[0][1]] = [i, record[2]]
-        pages_read += record[2]
         i += record[2]
       end
+
       record = @file.eof? ? nil : read_record
     end
 
