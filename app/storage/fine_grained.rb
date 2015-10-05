@@ -78,7 +78,32 @@ class FineGrainedFile
     flush_used_pages
 
     @file.truncate(@file.tell)
+
+    @store = {}
+    @store_pages = {}
   end
+
+  def [](key)
+    @store[key]
+  end
+
+  #
+  # @todo: funnel all operations on keys through
+  # a system whereby values are written to disk
+  # first and then inserted into the @@store variable.
+  #
+  def []=(key, value)
+    @store[key] = value
+    write_key(key, value)
+  end
+
+  def delete(key)
+    erase_key(key)
+    @store_pages.delete(key)
+    @store.delete(key)
+  end
+
+  protected
 
   def flush_page_start_offset
     @file.seek(MAGIC_FILE_NUMBER.bytesize)
@@ -104,21 +129,6 @@ class FineGrainedFile
 
   def to_next_writable_page
     @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + @page_start_offset + (@page_count * PAGE_SIZE))
-  end
-
-
-  def [](key)
-    @store[key]
-  end
-
-  #
-  # @todo: funnel all operations on keys through
-  # a system whereby values are written to disk
-  # first and then inserted into the @@store variable.
-  #
-  def []=(key, value)
-    @store[key] = value
-    write_key(key, value)
   end
 
   #
@@ -162,7 +172,7 @@ class FineGrainedFile
   end
 
   #
-  # Returns [record_descriptor, record_value]
+  # Returns [record_descriptor, record_value, pages_read]
   # or nil if no record is found.
   #
   # record_descriptor is [type descriptor, key] or [type descriptor, key, array size]
@@ -174,6 +184,11 @@ class FineGrainedFile
     n_read = 0
     tu = @file.read INT_SIZE
     return nil if tu.nil? || tu.bytesize < INT_SIZE
+    if (tu == (ZERO_BYTE_ASCII_8BIT * INT_SIZE))
+      # empty record. skip this page.
+      @file.seek(PAGE_SIZE - INT_SIZE, IO::SEEK_CUR)
+      return nil
+    end
     n_read += tu.bytesize
     t = tu.unpack(PACK_INT).first
 
@@ -226,10 +241,14 @@ class FineGrainedFile
       v = raw_v
     end
 
-    remainder = (PAGE_SIZE - (n_read % PAGE_SIZE))
-    @file.seek(remainder, IO::SEEK_CUR) if remainder > 0
+    pages_read = n_read / PAGE_SIZE
+    remainder = (n_read % PAGE_SIZE)
+    if remainder > 0
+      @file.seek((PAGE_SIZE - remainder), IO::SEEK_CUR)
+      pages_read += 1
+    end
 
-    [d, v]
+    [d, v, pages_read]
   end
 
   def value_s(v)
@@ -250,7 +269,6 @@ class FineGrainedFile
       @file.write value_s(v)
     end
 
-
     @file.write ZERO_BYTE_ASCII_8BIT * (PAGE_SIZE - (size % PAGE_SIZE)) if size
 
     true
@@ -260,9 +278,14 @@ class FineGrainedFile
   # Marks used_pages bit index to indicate
   # page p to size_p pages are used.
   #
-  def mark_used(p, size_p)
+  def toggle_used(p, size_p, options = {})
+    options.merge!(:used => true)
     for i in p...(p + size_p)
-      @used_pages[i / 8] = [@used_pages[i / 8].ord | (1 << (7 - (i % 8)))].pack("c")
+      if options[:used]
+        @used_pages[i / 8] = [@used_pages[i / 8].ord | (1 << (7 - (i % 8)))].pack("c")
+      else
+        @used_pages[i / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
+      end
     end
   end
 
@@ -459,8 +482,12 @@ class FineGrainedFile
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
     p = allocate_page(new_size_p) if new_size_p > size_p
     to_page(p)
+    if p == @page_count
+      @page_count += new_size_p
+      flush_page_count
+    end
     write_record(t, k, record_value_to_write, size)
-    mark_used(p, new_size_p)
+    toggle_used(p, new_size_p)
 
     if p != p_original
       @store_pages[k] = [p, new_size_p]
@@ -474,6 +501,13 @@ class FineGrainedFile
     #
     #
     #
+  end
+
+  def erase_key(key)
+    page, size_p = @store_pages[key]
+    to_page(page)
+    @file.write (ZERO_BYTE_ASCII_8BIT * PAGE_SIZE) * size_p
+    toggle_used(p, size_p, :used => false)
   end
 
   #
@@ -634,12 +668,19 @@ class FineGrainedFile
     # null areas. consider using the bit-index
     # to accelerate your iteration.
     #
-    to_page(0)
+    i = 0
+    to_page(i)
+    pages_read = 0
     record = @file.eof? ? nil : read_record
-    while record && record.last
-      @store[record.first[1]] = record.last
-      # @store_pages[record.first[1]] = ?
-
+    while !@file.eof? && (record || pages_read < @page_count)
+      if record.nil?
+        i += 1
+      else
+        @store[record[0][1]] = record[1]
+        @store_pages[record[0][1]] = [i, record[2]]
+        pages_read += record[2]
+        i += record[2]
+      end
       record = @file.eof? ? nil : read_record
     end
 
@@ -718,6 +759,10 @@ class FineGrained < EventMachine::Connection
   def unbind
   end
 
+  module Responses
+    OK = "OK\n"
+  end
+
   def process_request(request)
     data = request.chomp
 
@@ -755,10 +800,14 @@ class FineGrained < EventMachine::Connection
     else
       begin
         case cmd
+        when "DEL"
+          @@store.delete(key)
+          @@dirty = true
+          send_data Responses::OK
         when "SET"
           @@store[key] = params
           @@dirty = true
-          send_data "OK\n"
+          send_data Responses::OK
         when "READ"
           r = @@store[key]
           if r.nil?
@@ -784,7 +833,7 @@ class FineGrained < EventMachine::Connection
               @@store.write_key(key)
               @@dirty = true
             end
-            send_data "OK\n"
+            send_data Responses::OK
           when 'POP'
             if @@store[key].empty?
               send_data "Error: Nothing in array.\n"

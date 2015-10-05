@@ -18,9 +18,26 @@ describe FineGrained do
     end
   end
 
+  context "deletes", :current => true do
+    it "should zero out space on disk where a deleted key used to be written" do
+      @db["hash"] = {
+        'a' => "hello",
+        'fortunately' => "I didn't have to mop the dishes."
+      }
+      @db["b"] = "bee"
+
+      @db.delete("hash")
+
+      @db.close
+      @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+
+      @db["hash"].should be_nil
+      @db["b"].should == "bee"
+    end
+  end
+
   context "writes" do
     context "should allocate space" do
-
       it "when a hash is written" do
         @db["hash"] = { :a => "hello", 2 => "adamant" }
         @db["hash"].should == { :a => "hello", 2 => "adamant" }
