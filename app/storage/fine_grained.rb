@@ -105,6 +105,9 @@ class FineGrainedFile
 
   protected
 
+  def byte_with_used_bit(i); 1 << (7 - (i % 8)); end
+  def byte_with_free_bit(i); ~(1 << (7 - (i % 8))); end
+
   def flush_page_start_offset
     @file.seek(MAGIC_FILE_NUMBER.bytesize)
     @file.write([@page_start_offset].pack("#{PACK_INT}1"))
@@ -282,9 +285,9 @@ class FineGrainedFile
     options.merge!(:used => true)
     for i in p...(p + size_p)
       if options[:used]
-        @used_pages[i / 8] = [@used_pages[i / 8].ord | (1 << (7 - (i % 8)))].pack("c")
+        @used_pages[i / 8] = [@used_pages[i / 8].ord | byte_with_used_bit(i)].pack("c")
       else
-        @used_pages[i / 8] = [@used_pages[i / 8].ord & ~(1 << (7 - (i % 8)))].pack("c")
+        @used_pages[i / 8] = [@used_pages[i / 8].ord & byte_with_free_bit(i)].pack("c")
       end
     end
   end
@@ -305,7 +308,7 @@ class FineGrainedFile
     contiguously_available = 0
     i = 0
     while i < @used_pages.bytesize && contiguously_available < new_pages
-      if @used_pages[i / 8].ord & (1 << (7 - (i % 8))) == 0
+      if @used_pages[i / 8].ord & byte_with_used_bit(i) == 0
         new_page_offset = i if new_page_offset == nil
         contiguously_available += 1
       else
@@ -319,7 +322,7 @@ class FineGrainedFile
       # We need to allocate more space on disk.
 
       first_free_page = @used_pages.bytesize
-      first_free_page -= 1 while first_free_page > 0 && (1 << (7 - ((first_free_page - 1) % 8))) & @used_pages[(first_free_page - 1) / 8].ord == 0
+      first_free_page -= 1 while first_free_page > 0 && @used_pages[(first_free_page - 1) / 8].ord & byte_with_used_bit(first_free_page) == 0
 
       # # do we need to do this?
       # while (@used_pages.bytesize * 8) < @page_count
@@ -355,14 +358,14 @@ class FineGrainedFile
         if @used_pages.bytesize > 0 && @used_pages[0].ord & (1 << 7) != 0
           size = 0
           to_page(0)
-          desc, v = read_record
+          desc, v, pages_read = read_record
           to_page(first_free_page)
           if desc[0] == WRITE_TYPE_INDEXES[:array]
-            size = size_of_record(desc[0], k, v)
+            size = size_of_record(desc[0], desc[1], v)
             write_record(desc[0], desc[1], v)
           else
             v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-            size = size_of_record(desc[0], k, v_serialized)
+            size = size_of_record(desc[0], desc[1], v_serialized)
             write_record(desc[0], desc[1], v_serialized)
           end
           size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
@@ -415,8 +418,8 @@ class FineGrainedFile
         #
         for i in (1...(@used_pages.bytesize + used_of_next_bit_index_page))
           j = i - 1
-          j_bit_as_used = (1 << (7 - (j % 8)))  # | this
-          j_bit_as_free = ~(1 << (7 - (j % 8))) # & this
+          j_bit_as_used = byte_with_used_bit(j)  # | this
+          j_bit_as_free = byte_with_free_bit(j)  # & this
           if i < size_p
             # mark head as free due to migrated key
             @used_pages[j / 8] = [@used_pages[j / 8].ord & j_bit_as_free].pack("c")
@@ -424,7 +427,7 @@ class FineGrainedFile
             # bit shift middle of used_pages
             cur_i = @used_pages[i / 8].ord
             cur_j = @used_pages[j / 8].ord
-            @used_pages[j / 8] = (cur_i & (1 << (7 - (i % 8))) == 0 ? [cur_j & j_bit_as_free].pack("c") : [cur_j | j_bit_as_used].pack("c"))
+            @used_pages[j / 8] = (cur_i & byte_with_used_bit(i) == 0 ? [cur_j & j_bit_as_free].pack("c") : [cur_j | j_bit_as_used].pack("c"))
           else
             # mark taken tail of used_pages, and head of next bit-index page allocation
             @used_pages[j / 8] = [@used_pages[j / 8].ord | j_bit_as_used].pack("c")
@@ -508,6 +511,36 @@ class FineGrainedFile
     to_page(p)
     @file.write (ZERO_BYTE_ASCII_8BIT * PAGE_SIZE) * size_p
     toggle_used(p, size_p, :used => false)
+    shrink_disk
+  end
+
+  def shrink_disk
+    used_pages_size_p = @used_pages.bytesize / PAGE_SIZE
+
+    for i in (0...(used_pages_size_p - 1))
+      p = (used_pages_size_p - 1 - i)
+      final_block_is_free = true
+      for j in (-1...PAGE_SIZE)
+        final_block_is_free = final_block_is_free && (@used_pages[(p * PAGE_SIZE) + j / 8].ord & byte_with_used_bit((p * PAGE_SIZE) + j) == 0)
+      end
+
+      if final_block_is_free
+        # bit-shift to the right
+        for j in (0...@used_pages.bytesize - 1)
+          k = @used_pages.bytesize - 1 - j
+          @used_pages[k / 8] = [(@used_pages[(k - 1) / 8].ord & byte_with_used_bit(k - 1) == 0) ? @used_pages[k / 8].ord & byte_with_free_bit(k) : @used_pages[k / 8].ord | byte_with_used_bit(k)].pack("c")
+        end
+
+        # first bit points to old bit-index block, and it is free
+        @used_pages[0] = [@used_pages[0].ord & byte_with_free_bit(0)].pack("c")
+        flush_used_pages
+
+        @page_count -= PAGE_SIZE
+        flush_page_count
+
+        @file.truncate(@page_start_offset + (@page_count * PAGE_SIZE))
+      end
+    end
   end
 
   #
@@ -615,28 +648,6 @@ class FineGrainedFile
     @file.close
   end
 
-  def flush_old(store)
-    open_db
-    @file.rewind
-
-    @file.write MAGIC_FILE_NUMBER
-    store.each do |k, v|
-      if v.is_a?(Array)
-        write_record(WRITE_TYPE_INDEXES[:array], k, v)
-      elsif v.is_a?(Hash)
-        record_serialized = MultiJson.encode(v)
-        write_record(WRITE_TYPE_INDEXES[:hash], k, record_serialized)
-      else
-        write_record(WRITE_TYPE_INDEXES[:string], k, v)
-      end
-    end
-
-    @journal_bounds.push([@file.tell, @file.tell + 1])
-
-    @file.truncate(@file.size)
-    @file.close
-  end
-
   #
   # skip journal and dead regions as you read.
   #
@@ -671,11 +682,6 @@ class FineGrainedFile
       return
     end
     @used_pages = @file.read(used_pages_size)
-
-    #
-    # @todo consider using the bit-index
-    # to accelerate your iteration.
-    #
 
     i = 0
     to_page(i)
