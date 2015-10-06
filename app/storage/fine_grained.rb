@@ -514,29 +514,35 @@ class FineGrainedFile
   def shrink_disk
     used_pages_size_p = @used_pages.bytesize / PAGE_SIZE
 
-    for i in (0...(used_pages_size_p - 1))
-      p = (used_pages_size_p - 1 - i)
-      final_block_is_free = true
-      for j in (-1...PAGE_SIZE)
-        final_block_is_free = final_block_is_free && (@used_pages[(p * PAGE_SIZE) + j / 8].ord & byte_with_used_bit((p * PAGE_SIZE) + j) == 0)
+    i = 0
+    final_block_is_free = true
+    while final_block_is_free && i < used_pages_size_p
+      ip = (used_pages_size_p - 1 - i)
+      j = (ip * PAGE_SIZE * 8) - 1
+      while final_block_is_free && j < ((ip + 1) * PAGE_SIZE * 8)
+        final_block_is_free = final_block_is_free && (@used_pages[j / 8].ord & byte_with_used_bit(j) == 0)
+        j += 1
       end
 
       if final_block_is_free
         # bit-shift to the right
-        for j in (0...@used_pages.bytesize - 1)
-          k = @used_pages.bytesize - 1 - j
-          @used_pages[k / 8] = [(@used_pages[(k - 1) / 8].ord & byte_with_used_bit(k - 1) == 0) ? @used_pages[k / 8].ord & byte_with_free_bit(k) : @used_pages[k / 8].ord | byte_with_used_bit(k)].pack("c")
+        for k in (0...(@used_pages.bytesize * 8) - 1)
+          kp = (@used_pages.bytesize * 8) - 1 - k
+          @used_pages[kp / 8] = [(@used_pages[(kp - 1) / 8].ord & byte_with_used_bit(kp - 1) == 0) ? @used_pages[kp / 8].ord & byte_with_free_bit(kp) : @used_pages[kp / 8].ord | byte_with_used_bit(kp)].pack("c")
         end
 
         # first bit points to old bit-index block, and it is free
         @used_pages[0] = [@used_pages[0].ord & byte_with_free_bit(0)].pack("c")
+        @used_pages = @used_pages[0,@used_pages.length - PAGE_SIZE]
         flush_used_pages
 
-        @page_count -= PAGE_SIZE
+        @page_count -= (PAGE_SIZE * 8 - 1)
         flush_page_count
 
         @file.truncate(@page_start_offset + (@page_count * PAGE_SIZE))
       end
+
+      i += 1
     end
   end
 
