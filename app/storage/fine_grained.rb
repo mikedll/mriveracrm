@@ -282,7 +282,7 @@ class FineGrainedFile
   # page p to size_p pages are used.
   #
   def toggle_used(p, size_p, options = {})
-    options.merge!(:used => true)
+    options.reverse_merge!(:used => true)
     for i in p...(p + size_p)
       if options[:used]
         @used_pages[i / 8] = [@used_pages[i / 8].ord | byte_with_used_bit(i)].pack("c")
