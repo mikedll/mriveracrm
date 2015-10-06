@@ -461,7 +461,7 @@ class FineGrainedFile
 
   def write_key(k, v = nil)
     v = @store[k] if v.nil?
-    p_original, size_p = (@store_pages[k] || [nil, 0])
+    p_original, size_p = (@store_pages[k] || [nil, nil])
     p = p_original
     new_size = nil
 
@@ -482,7 +482,7 @@ class FineGrainedFile
     record_value_to_write = (ti == :hash) ? MultiJson.encode(v) : v
     size = size_of_record(t, k, record_value_to_write)
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
-    p = allocate_page(new_size_p) if new_size_p > size_p # @todo allow storage of empty string
+    p = allocate_page(new_size_p) if size_p.nil? || new_size_p > size_p
     @page_count += new_size_p - (@page_count - p)
     flush_page_count
     to_page(p)
