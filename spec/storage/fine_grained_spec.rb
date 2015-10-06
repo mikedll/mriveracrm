@@ -35,7 +35,7 @@ describe FineGrained do
       @db["b"].should == "bee"
     end
 
-    it "should shrink disk when enough free space is at the end of the file", :current => true do
+    it "should shrink disk when enough free space is at the end of the file" do
       (FineGrainedFile::PAGE_SIZE * 3).times do |i|
         @db["a#{i}"] = "a" * FineGrainedFile::PAGE_SIZE
       end
@@ -47,11 +47,23 @@ describe FineGrained do
         j = (FineGrainedFile::PAGE_SIZE * 3) - i
         @db.delete("a#{i}")
       end
-
     end
   end
 
   context "writes" do
+    it "should allocate space beyond the initial used_pages block" do
+      1025.times do |i|
+        s = "a#{i}value"
+        @db["a#{i}"] = s + ("a" * (FineGrainedFile::PAGE_SIZE - s.bytesize))
+      end
+
+      @db.close
+      @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+
+      @db["a0"].should == "a0value" + ("a" * (FineGrainedFile::PAGE_SIZE - "a0value".bytesize))
+      @db["a1024"].should == "a1024value" + ("a" * (FineGrainedFile::PAGE_SIZE - "a1024value".bytesize))
+    end
+
     context "should allocate space and remember the write" do
       it "when a hash is written" do
         @db["hash"] = { :a => "hello", 2 => "adamant" }

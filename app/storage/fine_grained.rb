@@ -28,7 +28,7 @@ class FineGrainedFile
   INT_SIZE = 8
   PACK_INT = "Q".force_encoding("UTF-8")
   MAX_VALUE_SIZE = (2**64 - 1)
-  PAGE_SIZE = 2**8
+  PAGE_SIZE = 2**8 # bytes
   MAXIMUM_PAGES = 1024
   MAXIMUM_SIZE = (2**30) / (2**8)
   PAGE_START_OFFSET_SIZE = INT_SIZE
@@ -290,6 +290,7 @@ class FineGrainedFile
         @used_pages[i / 8] = [@used_pages[i / 8].ord & byte_with_free_bit(i)].pack("c")
       end
     end
+    flush_used_pages
   end
 
   #
@@ -307,7 +308,7 @@ class FineGrainedFile
     new_page_offset = nil
     contiguously_available = 0
     i = 0
-    while i < @used_pages.bytesize && contiguously_available < new_pages
+    while i < (@used_pages.bytesize * 8) && contiguously_available < new_pages
       if @used_pages[i / 8].ord & byte_with_used_bit(i) == 0
         new_page_offset = i if new_page_offset == nil
         contiguously_available += 1
@@ -321,7 +322,7 @@ class FineGrainedFile
 
       # We need to allocate more space on disk.
 
-      first_free_page = @used_pages.bytesize
+      first_free_page = (@used_pages.bytesize * 8)
       first_free_page -= 1 while first_free_page > 0 && @used_pages[(first_free_page - 1) / 8].ord & byte_with_used_bit(first_free_page) == 0
 
       # # do we need to do this?
@@ -356,21 +357,17 @@ class FineGrainedFile
         # if there is a collision, allocate more space
         # and write the key there.
         if @used_pages.bytesize > 0 && @used_pages[0].ord & (1 << 7) != 0
+
           size = 0
           to_page(0)
           desc, v, pages_read = read_record
           to_page(first_free_page)
-          if desc[0] == WRITE_TYPE_INDEXES[:array]
-            size = size_of_record(desc[0], desc[1], v)
-            write_record(desc[0], desc[1], v)
-          else
-            v_serialized = desc[0] == WRITE_TYPE_INDEXES[:hash] ? MultiJson.encode(v) : v
-            size = size_of_record(desc[0], desc[1], v_serialized)
-            write_record(desc[0], desc[1], v_serialized)
-          end
+          record_to_write = (desc[0] == WRITE_TYPE_INDEXES[:hash]) ? MultiJson.encode(v) : v
+          size = size_of_record(desc[0], desc[1], record_to_write)
+          write_record(desc[0], desc[1], record_to_write, size)
           size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
 
-          # update page size on disk
+          # update page size on disk to account for migrated key
           @page_count += size_p
           flush_page_count
 
@@ -390,13 +387,18 @@ class FineGrainedFile
           # @used_pages += ZERO_BYTE_ASCII_8BIT * (1 + size_p * PAGE_SIZE)
         end
 
-        used_page_appendage = ZERO_BYTE_ASCII_8BIT * (PAGE_SIZE / ZERO_BYTE_ASCII_8BIT.bytesize)
+        used_page_appendage = ZERO_BYTE_ASCII_8BIT * PAGE_SIZE
         @used_pages += used_page_appendage
+
+
+        #
+        # bit-shift used_pages to the left
+        #
 
         # the following two variables do not account for bit-shifting. tail_size
         # would be one larger and used_of_next_bit_index_page would be one smaller
         # if they did.
-        tail_size = @used_pages.bytesize - first_free_page # free space at end of used_pages
+        tail_size = (@used_pages.bytesize * 8) - first_free_page # free space at end of used_pages
         used_of_next_bit_index_page = size_p - tail_size   # used space from next bit-index page allocation
 
         #
@@ -411,7 +413,7 @@ class FineGrainedFile
         #
         # @todo consider rewriting this as four while-loops
         #
-        for i in (1...(@used_pages.bytesize + used_of_next_bit_index_page))
+        for i in (1...((@used_pages.bytesize * 8) + used_of_next_bit_index_page))
           j = i - 1
           j_bit_as_used = byte_with_used_bit(j)  # | this
           j_bit_as_free = byte_with_free_bit(j)  # & this
@@ -437,6 +439,13 @@ class FineGrainedFile
         @page_start_offset += used_page_appendage.bytesize
         flush_page_start_offset
 
+        # acknowledge that we lost a page to the used_pages index
+        if @page_count > 0
+          @page_count -= 1
+          flush_page_count
+        end
+
+        # @todo do we have to update new_page offset if it moves even further down?
         new_page_offset = @page_count if new_page_offset.nil?
 
         #
@@ -470,19 +479,12 @@ class FineGrainedFile
     # the last key in the database on disk.
     #
 
-    record_value_to_write = nil
-    if ti == :array
-      record_value_to_write = v
-    else
-      record_value_to_write = ti == :hash ? MultiJson.encode(v) : v
-    end
+    record_value_to_write = (ti == :hash) ? MultiJson.encode(v) : v
     size = size_of_record(t, k, record_value_to_write)
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
     p = allocate_page(new_size_p) if new_size_p > size_p
-    if p == @page_count
-      @page_count += new_size_p
-      flush_page_count
-    end
+    @page_count += new_size_p - (@page_count - p)
+    flush_page_count
     to_page(p)
     write_record(t, k, record_value_to_write, size)
     toggle_used(p, new_size_p)
