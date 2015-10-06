@@ -293,10 +293,10 @@ class FineGrainedFile
     flush_used_pages
   end
 
-  #
-  # @todo do we need to do anything here?
-  #
   def deallocate_page(p, size_p)
+    to_page(p)
+    @file.write (ZERO_BYTE_ASCII_8BIT * PAGE_SIZE) * size_p
+    toggle_used(p, size_p, :used => false)
   end
 
   #
@@ -482,7 +482,7 @@ class FineGrainedFile
     record_value_to_write = (ti == :hash) ? MultiJson.encode(v) : v
     size = size_of_record(t, k, record_value_to_write)
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
-    p = allocate_page(new_size_p) if new_size_p > size_p
+    p = allocate_page(new_size_p) if new_size_p > size_p # @todo allow storage of empty string
     @page_count += new_size_p - (@page_count - p)
     flush_page_count
     to_page(p)
@@ -491,23 +491,14 @@ class FineGrainedFile
 
     if p != p_original || new_size_p != size_p
       @store_pages[k] = [p, new_size_p]
-      deallocate_page(p_original, size_p)
+      deallocate_page(p_original, size_p) if p_original
     end
-    # get page for this key
-    #
-    # see if page is still large enough. if not, check out
-    # a page at the end of the file, write there,
-    # update its page ref here, then release this page.
-    #
-    #
-    #
   end
 
   def erase_key(key)
     p, size_p = @store_pages[key]
-    to_page(p)
-    @file.write (ZERO_BYTE_ASCII_8BIT * PAGE_SIZE) * size_p
-    toggle_used(p, size_p, :used => false)
+    deallocate_page(p, size_p)
+    @store_pages.delete(key)
     shrink_disk
   end
 
