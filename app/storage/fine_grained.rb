@@ -462,9 +462,9 @@ class FineGrainedFile
     return new_page_offset
   end
 
-  def write_key(k, v = nil)
-    v = @store[k] if v.nil?
-    p_original, size_p = (@store_pages[k] || [nil, nil])
+  def write_key(key, v = nil)
+    v = @store[key] if v.nil?
+    p_original, size_p = (@store_pages[key] || [nil, nil])
     p = p_original
     new_size = nil
 
@@ -483,17 +483,17 @@ class FineGrainedFile
     #
 
     record_value_to_write = (ti == :hash) ? MultiJson.encode(v) : v
-    size = size_of_record(t, k, record_value_to_write)
+    size = size_of_record(t, key, record_value_to_write)
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
     p = allocate_page(new_size_p) if size_p.nil? || new_size_p > size_p
     @page_count += new_size_p - (@page_count - p)
     flush_page_count
     to_page(p)
-    write_record(t, k, record_value_to_write, size)
+    write_record(t, key, record_value_to_write, size)
     toggle_used(p, new_size_p)
 
     if p != p_original
-      @store_pages[k] = [p, new_size_p]
+      @store_pages[key] = [p, new_size_p]
       deallocate_page(p_original, size_p) if p_original
     end
   end
