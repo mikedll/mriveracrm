@@ -314,9 +314,12 @@ class FineGrainedFile
         contiguously_available += 1
       else
         new_page_offset = nil
+        contiguously_available = 0
       end
       i += 1
     end
+
+    new_page_offset = nil if contiguously_available < new_pages
 
     if new_page_offset.nil?
 
