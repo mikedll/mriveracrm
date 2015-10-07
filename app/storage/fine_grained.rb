@@ -489,7 +489,7 @@ class FineGrainedFile
     write_record(t, k, record_value_to_write, size)
     toggle_used(p, new_size_p)
 
-    if p != p_original || new_size_p != size_p
+    if p != p_original
       @store_pages[k] = [p, new_size_p]
       deallocate_page(p_original, size_p) if p_original
     end
