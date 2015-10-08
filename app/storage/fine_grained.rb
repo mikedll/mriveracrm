@@ -326,7 +326,7 @@ class FineGrainedFile
       # We need to allocate more space on disk.
 
       first_free_page = (@used_pages.bytesize * 8)
-      first_free_page -= 1 while first_free_page > 0 && @used_pages[(first_free_page - 1) / 8].ord & byte_with_used_bit(first_free_page) == 0
+      first_free_page -= 1 while first_free_page > 0 && @used_pages[(first_free_page - 1) / 8].ord & byte_with_used_bit(first_free_page - 1) == 0
 
       # # do we need to do this?
       # while (@used_pages.bytesize * 8) < @page_count
@@ -369,6 +369,11 @@ class FineGrainedFile
           size = size_of_record(desc[0], desc[1], record_to_write)
           write_record(desc[0], desc[1], record_to_write, size)
           size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
+
+          if false # desc[1] == ""
+            puts "*************** #{__FILE__} #{__LINE__} *************"
+            puts "wrote key #{desc[1]} to page #{first_free_page} with page start offset of #{@page_start_offset} and size_p #{size_p}. page count is #{@page_count}"
+          end
 
           # update page size on disk to account for migrated key
           @page_count += size_p
@@ -488,6 +493,11 @@ class FineGrainedFile
     p = allocate_page(new_size_p) if size_p.nil? || new_size_p > size_p
     @page_count += new_size_p - (@page_count - p)
     flush_page_count
+
+    if false # key == ""
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "writing key #{key} to page #{p} with page start offset of #{@page_start_offset}"
+    end
     to_page(p)
     write_record(t, key, record_value_to_write, size)
     toggle_used(p, new_size_p)
