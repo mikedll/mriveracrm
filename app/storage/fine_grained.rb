@@ -511,7 +511,6 @@ class FineGrainedFile
   def erase_key(key)
     p, size_p = @store_pages[key]
     deallocate_page(p, size_p)
-    @store_pages.delete(key)
     shrink_disk
   end
 
