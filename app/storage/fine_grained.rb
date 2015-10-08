@@ -40,7 +40,7 @@ class FineGrainedFile
   def initialize(path)
     @path = path
 
-    @page_count = 0        # how many pages of data are written to disk, which may be less than or greater than used_pages' bytesize.
+    @page_count = 0        # how many pages are written to disk, including nullified pages. unless there has been a crash, this should be less than or equal to used_pages.bytesize * 8.
 
     @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
     @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE # file offset in bytes where data starts, after bit_index ends
