@@ -16,6 +16,9 @@ class FineGrainedFile
   class ParseError < Exception
   end
 
+  class KeyNotFoundError < Exception
+  end
+
   WRITE_TYPE_INDEXES = {
     :array => 1,
     :string => 2,
@@ -98,6 +101,8 @@ class FineGrainedFile
   end
 
   def delete(key)
+    raise KeyNotFoundError.new("Key not found: #{key}") if @store[key].nil?
+
     erase_key(key)
     @store_pages.delete(key)
     @store.delete(key)
@@ -821,9 +826,13 @@ class FineGrained < EventMachine::Connection
       begin
         case cmd
         when "DEL"
-          @@store.delete(key)
-          @@dirty = true
-          send_data Responses::OK
+          begin
+            @@store.delete(key)
+            @@dirty = true
+            send_data Responses::OK
+          rescue KeyNotFoundError => e
+            send_data "Error: Key not found.\n"
+          end
         when "SET"
           @@store[key] = params
           @@dirty = true
