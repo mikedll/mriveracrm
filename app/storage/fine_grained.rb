@@ -206,11 +206,24 @@ class FineGrainedFile
     n_read += lu.bytesize
     l = lu.unpack(PACK_INT).first
 
+    if false # l == 7016996765293437281
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "at: #{@file.tell}"
+    end
+
     if l > MAX_VALUE_SIZE
       raise ParseError.new "Read size that exceeds the maximum size for a value."
     end
 
-    k = @file.read l
+    k = nil
+    begin
+      k = @file.read l
+    rescue NoMemoryError => e
+      # puts "*************** #{__FILE__} #{__LINE__} *************"
+      # puts "#{e.message} at #{l}"
+      raise
+    end
+
     return nil if k.nil? || k.bytesize < l
     n_read += k.bytesize
     d = if t != WRITE_TYPE_INDEXES[:array]
