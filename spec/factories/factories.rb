@@ -27,8 +27,8 @@ FactoryGirl.define do
     google_oauth2_client_id "google_oauth2_client_idxxx"
     google_oauth2_client_secret "google_oauth2_client_secretxxx"
 
-    stripe_secret_key "sk_test_SoDXR6QkygrYnlnFhDWKNbB2"
-    stripe_publishable_key "pk_test_rPvMBvyuzsgRIXZFCW2xMmxz"
+    stripe_secret_key AppConfiguration.get('stripe.secret_key')
+    stripe_publishable_key AppConfiguration.get('stripe.publishable_key')
 
     after(:create) do |business, eval|
       if Business.current.nil? || RequestSettings.host.nil?
