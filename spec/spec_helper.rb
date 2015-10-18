@@ -13,6 +13,7 @@ Spork.prefork do
   require 'factory_girl'
 
   Resque.inline = true
+  FineGrainedClient.flag_immediate_execution!
 
   RSpec.configure do |config|
     # If you're not using ActiveRecord, or you'd prefer not to run each of your

@@ -2,12 +2,23 @@
 require 'socket'
 
 class FineGrainedClient
+  @@immediate_execution = false
+
   class << self
     def cli
       @@cli ||= new
     end
 
+    def flag_immediate_execution!
+      @@immediate_execution = true
+    end
+
     def enqueue_to(q, klass, *args)
+      if @@immediate_execution
+        klass.send(:perform, *args)
+        return
+      end
+
       package = MultiJson.encode({
         :klass => klass.to_s,
         :args => args
