@@ -125,7 +125,7 @@ describe FineGrained do
         @db["b"].should == "bee"
       end
 
-      it "when a migrated key is against the next available free space in the bit-index" do
+      it "when a migrated key is against the next available free space in the bit-index", :ignore => true do
 
         # @todo this is a difficult test to write, due to generated
         # 155 pages of data.
@@ -148,19 +148,19 @@ describe FineGrained do
         # end
       end
 
-      it "when tail size is 0 and size_p is non-zero" do
+      it "when tail size is 0 and size_p is non-zero", :ignore => true do
       end
 
-      it "when tail size is 0 and size_p == PAGE_SIZE" do
+      it "when tail size is 0 and size_p == PAGE_SIZE", :ignore => true do
       end
 
-      it "when tail size is 0 and size_p > PAGE_SIZE" do
+      it "when tail size is 0 and size_p > PAGE_SIZE", :ignore => true do
       end
 
     end
   end
 
-  context "stress", :current => true do
+  context "stress" do
     it "should work with 5k random writes and deletes" do
       @db.filesize.should == 20
 
