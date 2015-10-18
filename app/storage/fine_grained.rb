@@ -829,10 +829,8 @@ end
 class FineGrained < EventMachine::Connection
 
   PORT = 7803
-  AUTO_FLUSH_FREQUENCY = 3
   DB = "db/fineGrained.db"
   @@store = nil
-  @@flushing_timer = nil
   @@read_queues = {}
 
   def self.enter_read_queue!(key, signature, blocking_read)
@@ -848,12 +846,11 @@ class FineGrained < EventMachine::Connection
   # This could be in a constructor but the eventmachine constructor
   # documentation is weird. I don't understand it. M. Rivera 10/18/2015
   #
-  def ensure_opened
+  def self.ensure_opened
     @@store = FineGrainedFile.new(DB) if @@store.nil?
   end
 
   def post_init
-    self.class.start_automatically_flushing
   end
 
   def unbind
