@@ -42,15 +42,12 @@ class FineGrainedFile
   def initialize(path)
     @path = path
 
-    @page_count = 0        # how many pages are written to disk, including nullified pages. unless there has been a crash, this should be less than or equal to used_pages.bytesize * 8.
-
-    @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
-    @page_start_offset = 0 # file offset in bytes where data starts, after bit_index ends; unless there has been a crash, it is equal to used_pages.bytesize
-
-    @store = {}
-    @store_pages = {}
-
-    load_store_from_disk if File.exists?(path)
+    if File.exists?(path)
+      load_store_from_disk
+    else
+      open_db
+      write_fresh_database
+    end
 
     # For use in journaling, for later. M. Rivera 9/17/15
     @journal_bounds = []
@@ -66,26 +63,28 @@ class FineGrainedFile
     @file.nil? ? -1 : @file.size
   end
 
+  def write_fresh_database
+    @store = {}
+    @store_pages = {}
+
+    @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
+    @page_count = 0        # how many pages are written to disk, including nullified pages. unless there has been a crash, this should be less than or equal to used_pages.bytesize * 8.
+    @page_start_offset = 0 # file offset in bytes where data starts, after bit_index ends; unless there has been a crash, it is equal to used_pages.bytesize
+
+    @file.rewind
+    @file.write MAGIC_FILE_NUMBER
+    flush_page_start_offset
+    flush_page_count
+    flush_used_pages
+  end
+
   #
   # deletes contents of entire file.
   #
   def hard_clean!
     open_db
-    @file.rewind
-
-    @file.write MAGIC_FILE_NUMBER
-    @used_pages = "".force_encoding("ASCII-8BIT")
-    @page_start_offset = 0
-    @page_count = 0
-
-    flush_page_start_offset
-    flush_page_count
-    flush_used_pages
-
-    @file.truncate(@file.tell)
-
-    @store = {}
-    @store_pages = {}
+    @file.truncate(PREAMBLE_SIZE)
+    write_fresh_database
   end
 
   def [](key)
@@ -753,6 +752,9 @@ class FineGrainedFile
   # decrease page_count and flush it.
   #
   def load_store_from_disk
+    @store = {}
+    @store_pages = {}
+
     open_db
     @file.rewind
 
