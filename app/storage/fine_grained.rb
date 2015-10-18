@@ -572,10 +572,10 @@ class FineGrainedFile
   def erase_key(key)
     p, size_p = @store_pages[key]
     deallocate_page(p, size_p)
-    shrink_disk
+    compact_disk_usage
   end
 
-  def shrink_disk
+  def compact_disk_usage
     used_pages_size_p = @used_pages.bytesize / PAGE_SIZE
 
     pc = @page_count
@@ -594,7 +594,7 @@ class FineGrainedFile
       if at_least_one_liberation && !final_block_is_free
         if false
           puts "*************** #{__FILE__} #{__LINE__} *************"
-          puts "Shrink disk freed #{used_pages_deallocated} page(s) of used pages, then halted on page #{ip} for bit index j == #{j}."
+          puts "#compact_disk_usage freed #{used_pages_deallocated} page(s) of used pages, then halted on page #{ip} for bit index j == #{j}."
           puts "the byte for this bit index at file position #{PREAMBLE_SIZE + (j / 8)} (0x#{(PREAMBLE_SIZE + (j / 8)).to_s(16)}), having value #{@used_pages[j / 8].ord}, disabled final_block_is_free. the bit that disabled shrinking was the #{j % 8}th bit."
           puts "page j is at position #{(PREAMBLE_SIZE + @page_start_offset + PAGE_SIZE * j).to_s(16)} of the file."
         end
