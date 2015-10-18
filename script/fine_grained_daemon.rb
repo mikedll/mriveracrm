@@ -28,6 +28,7 @@ EM.run do
   Signal.trap("INT")  { EventMachine.stop }
   Signal.trap("TERM") { EventMachine.stop }
 
+  FineGrained.ensure_opened
   EventMachine.start_server("localhost", FineGrained::PORT, FineGrained)
 
   EventMachine::Timer.new(2) do
