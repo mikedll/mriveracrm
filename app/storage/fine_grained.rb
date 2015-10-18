@@ -630,6 +630,9 @@ class FineGrainedFile
       i += 1
     end
 
+    @store_pages.each do |k, v|
+      v[0] += used_pages_deallocated
+    end
   end
 
   #
