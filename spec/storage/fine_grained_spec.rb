@@ -45,7 +45,7 @@ describe FineGrained do
       @db.close
       @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
 
-      @db.filesize.should == 5901608
+      @db.filesize.should == 5901588
 
       (FineGrainedFile::PAGE_SIZE * (iterations - 1)).times do |i|
         if i <= expected_used_pages_enlargements
@@ -179,7 +179,8 @@ describe FineGrained do
       @db.close
       @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
 
-      @db.filesize.should == 3841832
+      @db.filesize.should == 3841812
+
       5000.times do |i|
         t = i % 3
         v = case t
@@ -192,8 +193,8 @@ describe FineGrained do
         @db[k].should == v
         @db.delete(k)
       end
-      @db.filesize.should == 20
 
+      @db.filesize.should == 20
     end
   end
 end
