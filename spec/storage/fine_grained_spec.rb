@@ -55,7 +55,7 @@ describe FineGrained do
         @db.delete("a#{ip}")
       end
 
-      @db.filesize.should == 526888
+      @db.filesize.should == 524564
     end
   end
 
