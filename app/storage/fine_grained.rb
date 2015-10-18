@@ -833,7 +833,6 @@ class FineGrained < EventMachine::Connection
   DB = "db/fineGrained.db"
   @@store = nil
   @@flushing_timer = nil
-  @@dirty = false
   @@read_queues = {}
 
   def self.enter_read_queue!(key, signature, blocking_read)
@@ -843,24 +842,6 @@ class FineGrained < EventMachine::Connection
 
   def self.leave_read_queue!(key, signature, blocking_read)
     @@read_queues[key].delete([signature, blocking_read])
-  end
-
-  #
-  # It's not clear why we have this
-  # if we're going to flush on every write,
-  # as shown in receive_data. This could
-  # be used to stagger journaling vs writing
-  # of the compressed form of our data.
-  #
-  def self.start_automatically_flushing
-    if @@flushing_timer.nil?
-      @@flushing_timer = EventMachine::PeriodicTimer.new(AUTO_FLUSH_FREQUENCY) do
-        if @@dirty == true
-          @@dirty = false
-          @@store.flush
-        end
-      end
-    end
   end
 
   #
@@ -922,14 +903,12 @@ class FineGrained < EventMachine::Connection
         when "DEL"
           begin
             @@store.delete(key)
-            @@dirty = true
             send_data Responses::OK
           rescue KeyNotFoundError => e
             send_data "Error: Key not found.\n"
           end
         when "SET"
           @@store[key] = params
-          @@dirty = true
           send_data Responses::OK
         when "READ"
           r = @@store[key]
@@ -954,7 +933,6 @@ class FineGrained < EventMachine::Connection
             else
               @@store[key].push(params)
               @@store.write_key(key)
-              @@dirty = true
             end
             send_data Responses::OK
           when 'POP'
@@ -964,7 +942,6 @@ class FineGrained < EventMachine::Connection
             end
             r = @@store[key].pop
             @@store.write_key(key)
-            @@dirty = true
             send_data "#{r}\n"
           when 'SHIFT'
             if @@store[key].empty?
@@ -973,7 +950,6 @@ class FineGrained < EventMachine::Connection
             end
             r = @@store[key].shift
             @@store.write_key(key)
-            @@dirty = true
             send_data "#{r}\n"
           end
         end
