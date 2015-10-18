@@ -105,10 +105,51 @@ class FineGrainedFile
   def delete(key)
     raise KeyNotFoundError.new("Key not found: #{key}") if @store[key].nil?
 
+    # if @interesting_event
+    #   if !@first_early_exit_from_delete
+    #     puts "*************** #{__FILE__} #{__LINE__} *************"
+    #     puts "returning early from delete due to interesting event. key was #{key} which is at page #{@store_pages[key]}."
+    #   end
+    #   @first_early_exit_from_delete = true
+    #   return
+    # end
+
     erase_key(key)
     @store_pages.delete(key)
     @store.delete(key)
   end
+
+  def key_info(key)
+    "#{key} is at page #{@store_pages[key]} which, in used_pages, is at #{page_position_in_used_pages(@store_pages[key][0])}"
+  end
+
+  #
+  # returns hexadecimal representation of disk within
+  # the given min and max position.
+  #
+  def disk_at(minpos, maxpos)
+    @file.seek(minpos)
+    s = ""
+    for i in 0..(maxpos - minpos)
+      b = @file.read 1
+      bs = b[0].ord.to_s(16)
+      s += (bs.length == 1 ? "0" + bs : bs)
+    end
+    s
+  end
+
+  #
+  # method for debugging.
+  #
+  def page_position_in_used_pages(p)
+    pos = PREAMBLE_SIZE + (p / 8)
+    "#{pos} (0x#{pos.to_s(16)}) in bit #{p % 8} of byte #{p / 8} which is equal to #{used_pages_page(p / 8)}"
+  end
+
+  def used_pages_page(i)
+    "0x#{@used_pages[i].ord.to_s(16)}"
+  end
+
 
   protected
 
@@ -537,7 +578,10 @@ class FineGrainedFile
   def shrink_disk
     used_pages_size_p = @used_pages.bytesize / PAGE_SIZE
 
+    pc = @page_count
+    used_pages_deallocated = 0
     i = 0
+    at_least_one_liberation = false
     final_block_is_free = true
     while final_block_is_free && i < used_pages_size_p
       ip = (used_pages_size_p - 1 - i)
@@ -545,6 +589,15 @@ class FineGrainedFile
       while final_block_is_free && j < ((ip + 1) * PAGE_SIZE * 8)
         final_block_is_free = final_block_is_free && (@used_pages[j / 8].ord & byte_with_used_bit(j) == 0)
         j += 1
+      end
+
+      if at_least_one_liberation && !final_block_is_free
+        if false
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "Shrink disk freed #{used_pages_deallocated} page(s) of used pages, then halted on page #{ip} for bit index j == #{j}."
+          puts "the byte for this bit index at file position #{PREAMBLE_SIZE + (j / 8)} (0x#{(PREAMBLE_SIZE + (j / 8)).to_s(16)}), having value #{@used_pages[j / 8].ord}, disabled final_block_is_free. the bit that disabled shrinking was the #{j % 8}th bit."
+          puts "page j is at position #{(PREAMBLE_SIZE + @page_start_offset + PAGE_SIZE * j).to_s(16)} of the file."
+        end
       end
 
       if final_block_is_free
@@ -556,17 +609,27 @@ class FineGrainedFile
 
         # first bit points to old bit-index block, and it is free
         @used_pages[0] = [@used_pages[0].ord & byte_with_free_bit(0)].pack("c")
-        @used_pages = @used_pages[0,@used_pages.length - PAGE_SIZE]
+        @used_pages = @used_pages[0, @used_pages.length - PAGE_SIZE]
         flush_used_pages
 
-        @page_count -= (PAGE_SIZE * 8 - 1)
+        used_pages_deallocated += 1
+
+        @page_count -= (PAGE_SIZE * 8 - 1) # we lost a PAGE_SIZE worth of pages, but gained one from the used_pages deallocation
         flush_page_count
 
-        @file.truncate(@page_start_offset + (@page_count * PAGE_SIZE))
+        z = @page_start_offset + (@page_count * PAGE_SIZE)
+        if false
+          puts "*************** #{__FILE__} #{__LINE__} *************"
+          puts "trying to truncate to #{z} for page count of #{@page_count} which used to be #{pc} where used_pages_size_p in this method was #{used_pages_size_p} and is now #{redone}"
+        end
+
+        @file.truncate(z)
+        at_least_one_liberation = true
       end
 
       i += 1
     end
+
   end
 
   #
