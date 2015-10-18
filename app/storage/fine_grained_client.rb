@@ -39,11 +39,11 @@ class FineGrainedClient
   end
 
   def encode(s)
-    s.gsub("\n", "\\n")
+    s.gsub("\\", "\\\\").gsub("\n", "\\n")
   end
 
   def decode(s)
-    s.gsub("\\n", "\n")
+    s.gsub("\\n", "\n").gsub("\\\\", "\\")
   end
 
   def set(k, v)
