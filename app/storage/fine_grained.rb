@@ -612,19 +612,21 @@ class FineGrainedFile
         @used_pages = @used_pages[0, @used_pages.length - PAGE_SIZE]
         flush_used_pages
 
-        used_pages_deallocated += 1
-
-        @page_count -= (PAGE_SIZE * 8 - 1) # we lost a PAGE_SIZE worth of pages, but gained one from the used_pages deallocation
+        @page_count = @used_pages.bytesize * 8
         flush_page_count
 
-        z = @page_start_offset + (@page_count * PAGE_SIZE)
+        @page_start_offset = @used_pages.bytesize
+        flush_page_start_offset
+
+        used_pages_deallocated += 1
+        z = PREAMBLE_SIZE + @page_start_offset + (@page_count * PAGE_SIZE)
         if false
           redone = @used_pages.bytesize / PAGE_SIZE
           puts "*************** #{__FILE__} #{__LINE__} *************"
           puts "trying to truncate to #{z} for page count of #{@page_count} which used to be #{pc} where used_pages_size_p in this method was #{used_pages_size_p} and is now #{redone}. file size is #{@file.size}"
         end
-
         @file.truncate(z)
+
         at_least_one_liberation = true
       end
 

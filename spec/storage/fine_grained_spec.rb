@@ -162,6 +162,8 @@ describe FineGrained do
 
   context "stress", :current => true do
     it "should work with 5k random writes and deletes" do
+      @db.filesize.should == 20
+
       5000.times do |i|
         t = i % 3
         v = case t
@@ -177,9 +179,7 @@ describe FineGrained do
       @db.close
       @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
 
-      puts "*************** #{__FILE__} #{__LINE__} *************"
       @db.filesize.should == 3841832
-
       5000.times do |i|
         t = i % 3
         v = case t
@@ -192,9 +192,7 @@ describe FineGrained do
         @db[k].should == v
         @db.delete(k)
       end
-
-      puts "*************** #{__FILE__} #{__LINE__} *************"
-      puts "#{@db.filesize}"
+      @db.filesize.should == 20
 
     end
   end
