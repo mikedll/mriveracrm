@@ -37,6 +37,8 @@ class FineGrainedFile
   PAGE_START_OFFSET_SIZE = INT_SIZE
   PAGE_COUNT_SIZE = INT_SIZE
 
+  PREAMBLE_SIZE = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE
+
   def initialize(path)
     @path = path
 
@@ -73,7 +75,7 @@ class FineGrainedFile
 
     @file.write MAGIC_FILE_NUMBER
     @used_pages = "".force_encoding("ASCII-8BIT")
-    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE # file offset in bytes where data starts, after bit_index ends
+    @page_start_offset = PREAMBLE_SIZE # file offset in bytes where data starts, after bit_index ends
     @page_count = 0
 
     flush_page_start_offset
@@ -124,7 +126,7 @@ class FineGrainedFile
   end
 
   def flush_used_pages
-    @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE)
+    @file.seek(PREAMBLE_SIZE)
     @file.write(@used_pages)
   end
 
@@ -132,11 +134,11 @@ class FineGrainedFile
   # @pre @file not nil, and is open for writing.
   #
   def to_page(p)
-    @file.seek(@page_start_offset + p * PAGE_SIZE)
+    @file.seek(PREAMBLE_SIZE + @page_start_offset + p * PAGE_SIZE)
   end
 
   def to_next_writable_page
-    @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE + @page_start_offset + (@page_count * PAGE_SIZE))
+    @file.seek(PREAMBLE_SIZE + @page_start_offset + (@page_count * PAGE_SIZE))
   end
 
   #
