@@ -45,7 +45,7 @@ class FineGrainedFile
     @page_count = 0        # how many pages are written to disk, including nullified pages. unless there has been a crash, this should be less than or equal to used_pages.bytesize * 8.
 
     @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
-    @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE # file offset in bytes where data starts, after bit_index ends
+    @page_start_offset = 0 # file offset in bytes where data starts, after bit_index ends; unless there has been a crash, it is equal to used_pages.bytesize
 
     @store = {}
     @store_pages = {}
@@ -75,7 +75,7 @@ class FineGrainedFile
 
     @file.write MAGIC_FILE_NUMBER
     @used_pages = "".force_encoding("ASCII-8BIT")
-    @page_start_offset = PREAMBLE_SIZE # file offset in bytes where data starts, after bit_index ends
+    @page_start_offset = 0
     @page_count = 0
 
     flush_page_start_offset
@@ -769,14 +769,16 @@ class FineGrainedFile
     pcu = @file.read INT_SIZE
     @page_count = pcu.unpack(PACK_INT).first
 
-    used_pages_size = @page_start_offset - (MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE)
+    used_pages_size = @page_start_offset
+
     if (used_pages_size < 0) || (used_pages_size % PAGE_SIZE != 0)
       puts "Error: Not a valid fine grained file: #{@path}"
       @page_count = 0
-      @page_start_offset = MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE + PAGE_COUNT_SIZE
+      @page_start_offset = 0
       return
     end
-    @used_pages = @file.read(used_pages_size)
+
+    @used_pages = @file.read(used_pages_size) if used_pages_size > 0
 
     i = 0
     to_page(i)
