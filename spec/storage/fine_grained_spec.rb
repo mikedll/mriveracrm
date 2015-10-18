@@ -36,17 +36,26 @@ describe FineGrained do
     end
 
     it "should shrink disk when enough free space is at the end of the file" do
-      (FineGrainedFile::PAGE_SIZE * 3).times do |i|
-        @db["a#{i}"] = "a" * FineGrainedFile::PAGE_SIZE
+      iterations = 15
+      expected_used_pages_enlargements = 12
+      (FineGrainedFile::PAGE_SIZE * iterations).times do |i|
+        @db["a#{i}"] = "a" * FineGrainedFile::PAGE_SIZE * 5
       end
 
       @db.close
       @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
 
-      (FineGrainedFile::PAGE_SIZE * 2).times do |i|
-        j = (FineGrainedFile::PAGE_SIZE * 3) - i
-        @db.delete("a#{i}")
+      @db.filesize.should == 5901608
+
+      (FineGrainedFile::PAGE_SIZE * (iterations - 1)).times do |i|
+        if i <= expected_used_pages_enlargements
+          @db.delete("a#{i}")
+        end
+        ip = (FineGrainedFile::PAGE_SIZE * iterations) - 1 - i
+        @db.delete("a#{ip}")
       end
+
+      @db.filesize.should == 526888
     end
   end
 
