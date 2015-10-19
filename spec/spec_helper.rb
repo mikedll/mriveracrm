@@ -13,7 +13,6 @@ Spork.prefork do
   require 'factory_girl'
 
   Resque.inline = true
-  FineGrainedClient.flag_immediate_execution!
 
   RSpec.configure do |config|
     # If you're not using ActiveRecord, or you'd prefer not to run each of your
@@ -61,6 +60,8 @@ Spork.prefork do
 
       # Allow net connect if at least one live group is not excluded
       WebMock.disable! if live_test_being_run
+
+      FineGrainedClient.flag_immediate_execution!
 
       FactoryGirl.create(:marketing_front_end)
     end
