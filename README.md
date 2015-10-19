@@ -9,6 +9,11 @@ Michael Rivera, also known as Mike De La Loza, Owner
 
 See `doc/server_setup.md`.
 
+Run specs with Guard:
+
+    > ./script/fine_grained_daemon.rb # you may have to start the FineGrained daemon.
+    > guard
+    
 Start everyting:
 
     > foreman start
