@@ -116,12 +116,7 @@ FactoryGirl.define do
     last_name "Watson"
 
     factory :stubbed_client do
-      before(:create) { |profile, evaluator|
-        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
-
-        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
-        Stripe::Charge.stub(:create) { ApiStubs.stripe_charge }
-      }
+      # obsolete as of generic_stripe_stub! in ApiStubs in spec_helper
     end
   end
 

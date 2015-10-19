@@ -92,10 +92,11 @@ describe Invoice do
   end
 
   context "typical pay cycle" do
-    it "should allow basic payable transactions under normal operations", :live_stripe => true do
-      i = FactoryGirl.create(:unstubbed_client_invoice)
+    it "should create a succcessful transaction after an invoice is pending and then charged" do
+      i = FactoryGirl.create(:invoice)
       i.mark_pending!
       i.client.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
+      i.reload
       i.charge!.should be_true
     end
   end
@@ -145,6 +146,18 @@ describe Invoice do
 
     it "should fail if pdf isnt done being edited (passed pending)" do
       @invoice.regenerate_pdf.should be_false
+    end
+  end
+
+  context "live", :live_stripe => true do
+    context "typical pay cycle" do
+      it "should allow basic payable transactions under normal operations" do
+        i = FactoryGirl.create(:unstubbed_client_invoice)
+        i.mark_pending!
+        i.client.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
+        i.reload
+        i.charge!.should be_true
+      end
     end
   end
 

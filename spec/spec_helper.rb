@@ -34,6 +34,11 @@ Spork.prefork do
       # Invert these lines to focus on remote tests if you want, or
       # disable it if you want to run the entire suite. It depends on
       # what you're doing.
+      #
+      # If you want to run a single live test, it may be better
+      # to remove the label from it in the spec and replace that label
+      # with the :current label while you exercise it. If you do this,
+      # set live_test_being_run to true.
       config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end
