@@ -48,13 +48,11 @@ on event machine. The interface for designing classes
 that will receive jobs from this queueing system is like
 resque, and is as follows:
 
-  class MyClass
-    def self.perform
-      # do work
+    class MyClass
+      def self.perform
+        # do work
+      end
     end
-  end
-
-
 
 # Typical Views
 
