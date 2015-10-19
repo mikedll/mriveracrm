@@ -149,6 +149,13 @@ class FineGrainedFile
     "0x#{@used_pages[i].ord.to_s(16)}"
   end
 
+  #
+  # Public means of clients to request that this key be flushed.
+  # Created for flushing arrays, which are not mutated with the []= method.
+  #
+  def invoke_write_key(key)
+    write_key(key)
+  end
 
   protected
 
@@ -931,7 +938,7 @@ class FineGrained < EventMachine::Connection
               blocking_read.set_deferred_status(:succeeded, key, params)
             else
               @@store[key].push(params)
-              @@store.write_key(key)
+              @@store.invoke_write_key(key)
             end
             send_data Responses::OK
           when 'POP'
@@ -940,7 +947,7 @@ class FineGrained < EventMachine::Connection
               return false
             end
             r = @@store[key].pop
-            @@store.write_key(key)
+            @@store.invoke_write_key(key)
             send_data "#{r}\n"
           when 'SHIFT'
             if @@store[key].empty?
@@ -948,7 +955,7 @@ class FineGrained < EventMachine::Connection
               return false
             end
             r = @@store[key].shift
-            @@store.write_key(key)
+            @@store.invoke_write_key(key)
             send_data "#{r}\n"
           end
         end
