@@ -5,15 +5,16 @@ class WorkerBase
     DEFAULT = :default
   end
 
-  attr_accessor :id, :invoked_method, :args
+  attr_accessor :id, :invoked_method, :invoked_method_arguments
 
   class << self
-    def obj_enqueue(obj, invoked_method, *args)
-      o = new
-      o.id = obj.id
-      o.invoked_method = invoked_method
-      o.args = args
-      FineGrainedClient.enqueue_to(Queues::DEFAULT, o.class, o)
+    def obj_enqueue(obj, invoked_method, *invoked_method_arguments)
+      h = {
+        :id => obj.id,
+        :invoked_method => invoked_method,
+        :invoked_method_arguments => invoked_method_arguments
+      }
+      FineGrainedClient.enqueue_to(Queues::DEFAULT, self, h)
     end
   end
 
@@ -28,7 +29,7 @@ class WorkerBase
   end
 
   def work
-    obj_found.send(invoked_method, *args) if !id.blank? && obj_found
+    obj_found.send(invoked_method, *invoked_method_arguments) if !id.blank? && obj_found
   end
 
   # http://stackoverflow.com/questions/2481775/accessing-a-classs-containing-namespace-from-within-a-module

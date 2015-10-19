@@ -14,10 +14,7 @@ class FineGrainedClient
     end
 
     def enqueue_to(q, klass, *args)
-      if @@immediate_execution
-        klass.send(:perform, *args)
-        return
-      end
+      return klass.send(:perform, *args) if @@immediate_execution
 
       package = MultiJson.encode({
         :klass => klass.to_s,
