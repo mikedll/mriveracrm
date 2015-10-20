@@ -54,6 +54,11 @@ class FineGrainedClient
     s.gsub("\\n", "\n").gsub("\\\\", "\\")
   end
 
+  def del(k)
+    @client.sendmsg "DEL #{k}\n"
+    read_response
+  end
+
   def set(k, v)
     @client.sendmsg "SET #{k} #{encode(v)}\n"
     read_response
@@ -93,14 +98,47 @@ class FineGrainedClient
     end
   end
 
-  def read_response
-    s = @incoming_buffer
+  #
+  # Read n elements from a list.
+  #
+  def lread(key, n = -1)
+    i = 0
+    l = []
+    @client.sendmsg("LREAD #{key} #{n}")
+    v = decode(read_response)
+    while v != "OK"
+      if v.starts_with?("Error:")
+        return nil
+      elsif v.starts_with?("Warning:")
+        return l
+      end
 
-    res = @incoming_buffer.length != 0 ? @incoming_buffer : @client.recvmsg(BUFFER_SIZE)
-    res_split = res[0].split("\n", 2)
+      l.push(v)
+      v = decode(read_response)
+    end
+
+    l
+  end
+
+  def buffered_read
+    if @incoming_buffer.length > 0
+      r = @incoming_buffer
+      @incoming_buffer = ""
+    else
+      result = @client.recvmsg(BUFFER_SIZE)
+      r = result[0]
+    end
+    r
+  end
+
+  def read_response
+    s = ""
+
+    res = buffered_read
+    res_split = res.split("\n", 2)
     s += res_split[0]
     while res_split.length == 1
-      res = @client.recvmsg(BUFFER_SIZE)
+      res = buffered_read
       res_split = res[0].split("\n", 2)
       s += res_split[0]
     end

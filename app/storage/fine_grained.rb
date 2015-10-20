@@ -894,7 +894,7 @@ class FineGrained < EventMachine::Connection
     key = key_match[1].to_s
     params = nil
     case cmd
-    when "SET", "PUSH"
+    when "SET", "PUSH", "LREAD"
       bounds = key_match.offset(0)
       params = key_and_params[bounds[1], key_and_params.length - bounds[1]]
     end
@@ -923,7 +923,7 @@ class FineGrained < EventMachine::Connection
             return
           end
           send_data r + "\n"
-        when 'PUSH', 'POP', 'SHIFT'
+        when 'PUSH', 'POP', 'SHIFT', 'LREAD'
           if @@store[key].nil?
             @@store[key] = []
           elsif !@@store[key].is_a?(Array)
@@ -957,6 +957,23 @@ class FineGrained < EventMachine::Connection
             r = @@store[key].shift
             @@store.invoke_write_key(key)
             send_data "#{r}\n"
+          when 'LREAD'
+            a = @@store[key]
+            i = 0
+            n = params.to_i
+            n = a.length if n == -1
+            while i < n
+              if i >= a.length
+                send_data "Warning: Nothing left in array.\n"
+                return
+              end
+
+              r = a[i]
+              send_data "#{r}\n"
+              i += 1
+            end
+
+            send_data Responses::OK
           end
         end
       rescue FineGrainedFile::MaximumValueExceeded => e
