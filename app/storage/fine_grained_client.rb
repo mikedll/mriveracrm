@@ -128,18 +128,22 @@ class FineGrainedClient
       result = @client.recvmsg(BUFFER_SIZE)
       r = result[0]
     end
-    r
+
+    if false
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "read #{r}"
+    end
+
+    r.split("\n", 2)
   end
 
   def read_response
     s = ""
 
-    res = buffered_read
-    res_split = res.split("\n", 2)
+    res_split = buffered_read
     s += res_split[0]
     while res_split.length == 1
-      res = buffered_read
-      res_split = res[0].split("\n", 2)
+      res_split = buffered_read
       s += res_split[0]
     end
 
