@@ -9,7 +9,7 @@ ActiveAdmin.register_page "Background Jobs" do
   menu :priority => 2
 
   page_action :clear_jobs do
-    # FineGrainedClient.cli.lclear(WorkerBase::Queues::DEFAULT)
+    FineGrainedClient.cli.lclear(WorkerBase::Queues::DEFAULT)
     redirect_to abdiel_background_jobs_path, :notice => "Cleared."
   end
 
@@ -37,7 +37,7 @@ ActiveAdmin.register_page "Background Jobs" do
     end
 
     para do
-      link_to("Clear Background Jobs", abdiel_background_jobs_clear_jobs_path)
+      link_to("Clear Background Jobs", abdiel_background_jobs_clear_jobs_path, :confirm => "Delete all of these background jobs?")
     end
   end
 end
