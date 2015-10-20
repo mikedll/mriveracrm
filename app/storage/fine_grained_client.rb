@@ -141,7 +141,7 @@ class FineGrainedClient
     s = ""
 
     res_split = buffered_read
-    s += res_split[0]
+    s += res_split[0] if res_split.length > 0
     while res_split.length == 1
       res_split = buffered_read
       s += res_split[0]
