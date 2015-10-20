@@ -14,5 +14,16 @@ describe FineGrainedClient do
       @fgc.push("an_array", 'bbb')
       @fgc.lread("an_array").should == ["a", 'bbb']
     end
+
+    it "should permit clearing an array" do
+      @fgc.lclear("a")
+      @fgc.lread("a").should == []
+
+      30.times { |i| @fgc.push("a", i.to_s) }
+
+      @fgc.lread("a").length.should == 30
+      @fgc.lclear("a")
+      @fgc.lread("a").length.should == 0
+    end
   end
 end

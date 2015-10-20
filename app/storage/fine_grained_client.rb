@@ -98,6 +98,11 @@ class FineGrainedClient
     end
   end
 
+  def lclear(key)
+    @client.sendmsg("LCLEAR #{key}")
+    decode(read_response)
+  end
+
   #
   # Read n elements from a list.
   #

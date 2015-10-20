@@ -923,7 +923,7 @@ class FineGrained < EventMachine::Connection
             return
           end
           send_data r + "\n"
-        when 'PUSH', 'POP', 'SHIFT', 'LREAD'
+        when 'PUSH', 'POP', 'SHIFT', 'LREAD', 'LCLEAR'
           if @@store[key].nil?
             @@store[key] = []
           elsif !@@store[key].is_a?(Array)
@@ -974,7 +974,13 @@ class FineGrained < EventMachine::Connection
             end
 
             send_data Responses::OK
+          when "LCLEAR"
+            @@store[key] = []
+            @@store.invoke_write_key(key)
+            send_data Responses::OK
           end
+        else
+          send_data "Error: Unrecognized command.\n"
         end
       rescue FineGrainedFile::MaximumValueExceeded => e
         send_data "Error: Maximum size for a given value exceeded. Try setting a smaller value."
