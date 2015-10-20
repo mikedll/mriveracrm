@@ -25,7 +25,7 @@ gem "fog"
 gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
-gem 'activeadmin'
+gem 'activeadmin' # mit
 gem 'aws-ses', '~> 0.4.4', require: 'aws/ses'
 gem 'cancan'
 gem 'excon', '>= 0.27.5'
