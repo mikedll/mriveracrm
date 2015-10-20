@@ -8,7 +8,7 @@ describe FineGrainedClient do
   end
 
   context "arrays" do
-    it "should allow reading arrays", :current => true do
+    it "should allow reading arrays" do
       @fgc.del("an_array")
       @fgc.push("an_array", 'a')
       @fgc.push("an_array", 'bbb')
