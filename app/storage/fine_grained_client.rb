@@ -104,7 +104,18 @@ class FineGrainedClient
   end
 
   #
+  # Retrieves the size of an array.
+  #
+  def llength(key)
+    @client.sendmsg("LLENGTH #{key}")
+    read_response.to_i
+  end
+
+  #
   # Read n elements from a list.
+  #
+  # @todo simplify this command to work without
+  # sending OK.
   #
   def lread(key, n = -1)
     i = 0

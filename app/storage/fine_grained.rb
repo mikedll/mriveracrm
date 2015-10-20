@@ -910,7 +910,7 @@ class FineGrained < EventMachine::Connection
           begin
             @@store.delete(key)
             send_data Responses::OK
-          rescue KeyNotFoundError => e
+          rescue FineGrainedFile::KeyNotFoundError => e
             send_data "Error: Key not found.\n"
           end
         when "SET"
@@ -923,7 +923,7 @@ class FineGrained < EventMachine::Connection
             return
           end
           send_data r + "\n"
-        when 'PUSH', 'POP', 'SHIFT', 'LREAD', 'LCLEAR'
+        when 'PUSH', 'POP', 'SHIFT', 'LREAD', 'LCLEAR', 'LLENGTH'
           if @@store[key].nil?
             @@store[key] = []
           elsif !@@store[key].is_a?(Array)
@@ -978,6 +978,9 @@ class FineGrained < EventMachine::Connection
             @@store[key] = []
             @@store.invoke_write_key(key)
             send_data Responses::OK
+          when "LLENGTH"
+            a = @@store[key]
+            send_data "#{@@store[key].length}\n"
           end
         else
           send_data "Error: Unrecognized command.\n"
