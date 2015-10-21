@@ -8,6 +8,18 @@ describe FineGrainedClient do
   end
 
   context "live", :live_fine_grained => true do
+
+    context "counters" do
+      it "should be incrementable and decrementable" do
+        @fgc.del("account:5:ready")
+        @fgc.incr("account:5:ready").should == 1
+        @fgc.cread("account:5:ready").should == 1
+        @fgc.incr("account:5:ready").should == 2
+        @fgc.decr("account:5:ready").should == 1
+        @fgc.decr("account:5:ready").should == 0
+      end
+    end
+
     context "lists" do
       it "should allow retrieving an list's size" do
         @fgc.del("an_list")

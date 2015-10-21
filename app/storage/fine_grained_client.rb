@@ -136,6 +136,38 @@ class FineGrainedClient
     l
   end
 
+  #
+  # Increment counter.
+  #
+  def incr(key)
+    @client.sendmsg("INCR #{key}")
+    read_response.to_i
+  end
+
+  #
+  # Decrement counter.
+  #
+  def decr(key)
+    @client.sendmsg("DECR #{key}")
+    read_response.to_i
+  end
+
+  #
+  # Read counter.
+  #
+  def cread(key)
+    @client.sendmsg("CREAD #{key}")
+    read_response.to_i
+  end
+
+  #
+  # Reset counter.
+  #
+  def reset(key)
+    @client.sendmsg("RESET #{key}")
+    read_response.to_i
+  end
+
   def buffered_read
     if @incoming_buffer.length > 0
       r = @incoming_buffer

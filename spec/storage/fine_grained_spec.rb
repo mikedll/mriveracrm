@@ -12,6 +12,11 @@ describe FineGrained do
     @db.close
   end
 
+  def reload_db
+    @db.close
+    @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+  end
+
   context "basics" do
     it "should be MAGIC_FILE_NUMBER.bytesize + 2 integers without any data stored on disk" do
       @db.filesize.should == FineGrainedFile::MAGIC_FILE_NUMBER.bytesize + (2 * FineGrainedFile::INT_SIZE)
@@ -28,8 +33,7 @@ describe FineGrained do
 
       @db.delete("hash")
 
-      @db.close
-      @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+      reload_db
 
       @db["hash"].should be_nil
       @db["b"].should == "bee"
@@ -42,8 +46,7 @@ describe FineGrained do
         @db["a#{i}"] = "a" * FineGrainedFile::PAGE_SIZE * 5
       end
 
-      @db.close
-      @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+      reload_db
 
       @db.filesize.should == 5901588
 
@@ -66,8 +69,7 @@ describe FineGrained do
         @db["a#{i}"] = s + ("a" * (FineGrainedFile::PAGE_SIZE - s.bytesize))
       end
 
-      @db.close
-      @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+      reload_db
 
       @db["a0"].should == "a0value" + ("a" * (FineGrainedFile::PAGE_SIZE - "a0value".bytesize))
       @db["a1024"].should == "a1024value" + ("a" * (FineGrainedFile::PAGE_SIZE - "a1024value".bytesize))
@@ -112,8 +114,7 @@ describe FineGrained do
         @db["b"] = "bee"
 
 
-        @db.close
-        @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+        reload_db
 
 
         @db["an_array"].should == ['a', 'bbb', 'c', 'dddd', 'e' * 16]
@@ -160,6 +161,14 @@ describe FineGrained do
     end
   end
 
+  context "counters" do
+    it "should be storable as integers" do
+      @db["c1"] = 0
+      reload_db
+      @db["c1"].should == 0
+    end
+  end
+
   context "stress" do
     it "should work with 5k random writes and deletes" do
       @db.filesize.should == 20
@@ -176,8 +185,7 @@ describe FineGrained do
         @db[k] = v
       end
 
-      @db.close
-      @db = FineGrainedFile.new(Rails.root.join("tmp/fgtest.db"))
+      reload_db
 
       @db.filesize.should == 3841812
 

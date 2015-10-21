@@ -22,14 +22,16 @@ class FineGrainedFile
   WRITE_TYPE_INDEXES = {
     :array => 1,
     :string => 2,
-    :hash => 3
+    :hash => 3,
+    :counter => 4
   }
 
   MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
   ZERO_BYTE_ASCII_8BIT = "\x00".force_encoding("ASCII-8BIT")
 
   INT_SIZE = 8
-  PACK_INT = "Q".force_encoding("UTF-8")
+  PACK_UINT = "Q".force_encoding("UTF-8")
+  PACK_INT = "q".force_encoding("UTF-8")
   MAX_VALUE_SIZE = (2**64 - 1)
   PAGE_SIZE = 2**8 # bytes
   MAXIMUM_PAGES = 1024
@@ -164,12 +166,12 @@ class FineGrainedFile
 
   def flush_page_start_offset
     @file.seek(MAGIC_FILE_NUMBER.bytesize)
-    @file.write([@page_start_offset].pack("#{PACK_INT}1"))
+    @file.write([@page_start_offset].pack("#{PACK_UINT}1"))
   end
 
   def flush_page_count
     @file.seek(MAGIC_FILE_NUMBER.bytesize + PAGE_START_OFFSET_SIZE)
-    @file.write([@page_count].pack("#{PACK_INT}1"))
+    @file.write([@page_count].pack("#{PACK_UINT}1"))
   end
 
   def flush_used_pages
@@ -193,18 +195,36 @@ class FineGrainedFile
   #
   #
   def record_descriptor(t, k, *a)
-    pack_directives = "#{PACK_INT}2A#{k.length}" + PACK_INT * a.length
+    pack_directives = "#{PACK_UINT}2A#{k.length}" + PACK_UINT * a.length
     ([t, k.bytesize, k] + a).pack(pack_directives)
   end
 
   def size_of_record(t, k, v)
     if t == WRITE_TYPE_INDEXES[:array]
-      # type, key size, array length, array size, array elements
-      (3 * INT_SIZE + k.bytesize) + v.inject(0) { |acc, el| acc += 8 + el.bytesize }
+      # type, key size, array length, array elements' size size, array elements' size
+      3 * INT_SIZE + k.bytesize + v.inject(0) { |acc, el| acc += 8 + el.bytesize }
+    elsif t == WRITE_TYPE_INDEXES[:counter]
+      # type, key size, integer size
+      2 * INT_SIZE + k.bytesize + INT_SIZE
     else
-      # type, key size, value size, value
-      (2 * INT_SIZE + k.bytesize) + INT_SIZE + v.bytesize
+      # type, key size, value size size, value size
+      2 * INT_SIZE + k.bytesize + INT_SIZE + v.bytesize
     end
+  end
+
+  #
+  # returns [Fixnum, bytes read]
+  #
+  # returns nil if eof is reached before integer was read
+  #
+  def read_value_i
+    b_read = 0
+    ie = @file.read INT_SIZE
+    return nil if ie.nil? || ie.bytesize < INT_SIZE
+    b_read += ie.bytesize
+
+    i = ie.unpack(PACK_INT).first
+    [i, b_read]
   end
 
   #
@@ -220,7 +240,7 @@ class FineGrainedFile
     return nil if lu.nil? || lu.bytesize < INT_SIZE
     b_read += lu.bytesize
 
-    l = lu.unpack(PACK_INT).first
+    l = lu.unpack(PACK_UINT).first
     s = @file.read l
     return nil if s.nil? || s.bytesize < l
     b_read += s.bytesize
@@ -247,13 +267,13 @@ class FineGrainedFile
       return nil
     end
     n_read += tu.bytesize
-    t = tu.unpack(PACK_INT).first
+    t = tu.unpack(PACK_UINT).first
 
     return nil if @file.eof?
     lu = @file.read INT_SIZE
     return nil if lu.nil? || lu.bytesize < INT_SIZE
     n_read += lu.bytesize
-    l = lu.unpack(PACK_INT).first
+    l = lu.unpack(PACK_UINT).first
 
     if false # l == 7016996765293437281
       puts "*************** #{__FILE__} #{__LINE__} *************"
@@ -281,7 +301,7 @@ class FineGrainedFile
           asu = @file.read INT_SIZE
           return nil if asu.nil? || asu.bytesize < INT_SIZE
           n_read += asu.bytesize
-          as = asu.unpack(PACK_INT).first
+          as = asu.unpack(PACK_UINT).first
           [t, k, as]
         end
     return nil if d.nil?
@@ -294,21 +314,24 @@ class FineGrainedFile
       a = []
       d[2].times do |i|
         raw_v, b_read = read_value_s
-        break if raw_v.nil?
         n_read += b_read
+        break if raw_v.nil?
         a.push(raw_v)
       end
-      v = raw_v = a
+      v = a
     when WRITE_TYPE_INDEXES[:hash]
       raw_v, b_read = read_value_s
       return nil if raw_v.nil?
       n_read += b_read
       v = MultiJson.decode(raw_v)
     when WRITE_TYPE_INDEXES[:string]
-      raw_v, b_read = read_value_s
-      return nil if raw_v.nil?
+      v, b_read = read_value_s
+      return nil if v.nil?
       n_read += b_read
-      v = raw_v
+    when WRITE_TYPE_INDEXES[:counter]
+      v, b_read = read_value_i
+      return nil if v.nil?
+      n_read += b_read
     end
 
     pages_read = n_read / PAGE_SIZE
@@ -324,7 +347,12 @@ class FineGrainedFile
   def value_s(v)
     raise MaximumValueExceeded if v.bytesize > MAX_VALUE_SIZE
     record = [v.bytesize, v]
-    record_s = record.pack("#{PACK_INT}A#{record.first}")
+    record_s = record.pack("#{PACK_UINT}A#{record.first}")
+  end
+
+  def value_i(v)
+    record = [v]
+    record_s = record.pack("#{PACK_INT}")
   end
 
   #
@@ -334,6 +362,9 @@ class FineGrainedFile
     if t == WRITE_TYPE_INDEXES[:array]
       @file.write record_descriptor(t, k, v.length)
       v.each { |el| @file.write value_s(el) }
+    elsif t == WRITE_TYPE_INDEXES[:counter]
+      @file.write record_descriptor(t, k)
+      @file.write value_i(v)
     else
       @file.write record_descriptor(t, k)
       @file.write value_s(v)
@@ -544,6 +575,8 @@ class FineGrainedFile
            :array
          elsif v.is_a?(Hash)
            :hash
+         elsif v.is_a?(Fixnum)
+           :counter
          else
            :string
          end
@@ -773,10 +806,10 @@ class FineGrainedFile
     end
 
     pou = @file.read INT_SIZE
-    @page_start_offset = pou.unpack(PACK_INT).first
+    @page_start_offset = pou.unpack(PACK_UINT).first
 
     pcu = @file.read INT_SIZE
-    @page_count = pcu.unpack(PACK_INT).first
+    @page_count = pcu.unpack(PACK_UINT).first
 
     used_pages_size = @page_start_offset
 
@@ -885,7 +918,7 @@ class FineGrained < EventMachine::Connection
     key_and_params = data[bounds[1], data.length - bounds[1]]
 
     key = nil
-    key_match = /\A(\w+)\s*/.match(key_and_params)
+    key_match = /\A(\S+)\s*/.match(key_and_params)
     if key_match.nil? || key_match.length < 2
       send_data "Error: Key not found.\n"
       return
@@ -936,6 +969,30 @@ class FineGrained < EventMachine::Connection
             return
           end
           send_data r + "\n"
+        when 'INCR', 'DECR', 'CREAD', 'RESET'
+          inited = false
+          if @@store[key].nil?
+            @@store[key] = 0
+            inited = true
+          elsif !@@store[key].is_a?(Fixnum)
+            send_data "Error: #{key} is not a counter."
+            return false
+          end
+
+          case cmd
+          when "INCR"
+            @@store[key] += 1
+            @@store.invoke_write_key(key)
+          when "DECR"
+            @@store[key] -= 1
+            @@store.invoke_write_key(key)
+          when "RESET"
+            @@store[key] = 0 if !inited
+            @@store.invoke_write_key(key)
+          end
+
+          r = @@store[key]
+          send_data "#{r}\n"
         when 'PUSH', 'POP', 'SHIFT', 'LREAD', 'LCLEAR', 'LLENGTH'
           if @@store[key].nil?
             @@store[key] = []
