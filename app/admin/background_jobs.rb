@@ -19,7 +19,7 @@ ActiveAdmin.register_page "Background Jobs" do
     background_jobs = FineGrainedClient.cli.lread(WorkerBase::Queues::DEFAULT, (page - 1) * 20, 20)
 
     h3 do
-      "Showing #{background_jobs.length} of #{pluralize(length, 'background job')}."
+      "Showing #{20 * (page - 1) + 1} - #{20 * (page - 1) + background_jobs.length} of #{pluralize(length, 'background job')}."
     end
 
     table do
@@ -48,7 +48,7 @@ ActiveAdmin.register_page "Background Jobs" do
             s.safe_concat(link_to("< Previous", abdiel_background_jobs_path(:page => page - 1)))
           end
           if (page.to_i * 20) < length
-            s.safe_concat(link_to("Next >", abdiel_background_jobs_path(:path => page + 1)))
+            s.safe_concat(link_to("Next >", abdiel_background_jobs_path(:page => page + 1)))
           end
           s
         end
