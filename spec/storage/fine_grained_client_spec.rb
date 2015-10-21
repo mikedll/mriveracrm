@@ -39,6 +39,44 @@ describe FineGrainedClient do
         @fgc.lread("a").length.should == 0
       end
     end
+
+    context "shift" do
+      it "should queue for five seconds before failing" do
+
+        t1 = Thread.new do
+          sleep 3 # make t2 and t3 wait for 3 and 2 seconds, respectively
+          fgc = FineGrainedClient.new
+          fgc.push("q2", "a job")
+          fgc.push("q2", "another job")
+        end
+
+        t2 = Thread.new do
+          fgc = FineGrainedClient.new
+          r = fgc.shift("q2")
+          r.should == "a job"
+        end
+
+        t3 = Thread.new do
+          sleep 1 # go after t2
+          fgc = FineGrainedClient.new
+          r = fgc.shift("q2")
+          r.should == "another job"
+        end
+
+        t4 = Thread.new do
+          sleep 3 # go after t2 and t3
+          fgc = FineGrainedClient.new
+          r = fgc.shift("q2")
+          r.should be_nil
+        end
+
+        t1.join
+        t2.join
+        t3.join
+        t4.join
+
+      end
+    end
   end
 
 end

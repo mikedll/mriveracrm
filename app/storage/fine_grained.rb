@@ -892,11 +892,19 @@ class FineGrained < EventMachine::Connection
     end
 
     key = key_match[1].to_s
-    params = nil
+    params = []
     case cmd
     when "SET", "PUSH", "LREAD"
       bounds = key_match.offset(0)
-      params = key_and_params[bounds[1], key_and_params.length - bounds[1]].split(/\s+/)
+      params_string = key_and_params[bounds[1], key_and_params.length - bounds[1]]
+
+      case cmd
+      when "LREAD"
+        params = params_string.split(/\s+/, 2)
+      else
+        params = [params_string]
+      end
+
     end
 
     if false
