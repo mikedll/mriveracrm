@@ -9,6 +9,20 @@ describe FineGrainedClient do
 
   context "live", :live_fine_grained => true do
 
+    context "sets" do
+      it "should store elements without permitting duplication" do
+        @fgc.del("account:5:requests")
+        @fgc.sadd("account:5:requests", "stripe_request")
+        @fgc.sadd("account:5:requests", "stripe_request")
+        @fgc.sadd("account:5:requests", "stripe_request2")
+        @fgc.slength("account:5:requests").should == 2
+        @fgc.smember("account:5:requests", "stripe_request").should be_true
+        @fgc.sread("account:5:requests").should =~ ["stripe_request", "stripe_request2"]
+        @fgc.srem("account:5:requests", "stripe_request")
+        @fgc.srem("account:5:requests", "stripe_request2")
+        @fgc.sread("account:5:requests").should == []
+      end
+    end
     context "counters" do
       it "should be incrementable and decrementable" do
         @fgc.del("account:5:ready")

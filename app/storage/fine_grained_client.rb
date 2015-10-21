@@ -111,18 +111,11 @@ class FineGrainedClient
     read_response.to_i
   end
 
-  #
-  # Read n elements from a list.
-  #
-  # @todo simplify this command to work without
-  # sending OK.
-  #
-  def lread(key, start = 0, n = -1)
+  def read_sequence
     i = 0
     l = []
-    @client.sendmsg("LREAD #{key} #{start} #{n}")
     v = decode(read_response)
-    while v != "OK"
+    while v != "" && v != "OK"
       if v.starts_with?("Error:")
         return nil
       elsif v.starts_with?("Warning:")
@@ -134,6 +127,17 @@ class FineGrainedClient
     end
 
     l
+  end
+
+  #
+  # Read n elements from a list.
+  #
+  # @todo simplify this command to work without
+  # sending OK.
+  #
+  def lread(key, start = 0, n = -1)
+    @client.sendmsg("LREAD #{key} #{start} #{n}")
+    read_sequence
   end
 
   #
@@ -161,6 +165,48 @@ class FineGrainedClient
   end
 
   #
+  # Add to set.
+  #
+  def sadd(key, el)
+    @client.sendmsg("SADD #{key} #{el}")
+    read_response
+  end
+
+  #
+  # Remove from set.
+  #
+  def srem(key, el)
+    @client.sendmsg("SREM #{key} #{el}")
+    read_response
+  end
+
+  #
+  # Ask is an element a member of a set.
+  #
+  def smember(key, el)
+    @client.sendmsg("SMEMBER #{key} #{el}")
+    read_response == "true"
+  end
+
+  #
+  # Read elements from a set. Order of retrieval is not significant,
+  # so you may want to page through results for this to be
+  # meaningful.
+  #
+  def sread(key, offset = 0, n = -1)
+    @client.sendmsg("SREAD #{key} #{offset} #{n}")
+    read_sequence
+  end
+
+  #
+  # Retrieves the number of elements in a set.
+  #
+  def slength(key)
+    @client.sendmsg("SLENGTH #{key}")
+    read_response.to_i
+  end
+
+  #
   # Reset counter.
   #
   def reset(key)
@@ -179,23 +225,32 @@ class FineGrainedClient
 
     if false
       puts "*************** #{__FILE__} #{__LINE__} *************"
-      puts "read #{r}"
+      puts "read #{r.class} '#{r}'"
     end
 
     r.split("\n", 2)
   end
 
+  #
+  # @todo handle broken pipe, of which res_split.length == 0 is a
+  # symptom.
+  #
   def read_response
     s = ""
 
     res_split = buffered_read
-    s += res_split[0] if res_split.length > 0
     while res_split.length == 1
-      res_split = buffered_read
       s += res_split[0]
+      res_split = buffered_read
     end
 
-    @incoming_buffer = res_split[1]
+    if res_split.length == 0
+      @incoming_buffer = ""
+    else
+      s += res_split[0]
+      @incoming_buffer = res_split[1]
+    end
+
     s
   end
 

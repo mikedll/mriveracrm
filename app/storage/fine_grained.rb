@@ -23,7 +23,8 @@ class FineGrainedFile
     :array => 1,
     :string => 2,
     :hash => 3,
-    :counter => 4
+    :counter => 4,
+    :set => 5
   }
 
   MAGIC_FILE_NUMBER = "\x1F8pZ".force_encoding("UTF-8")
@@ -68,6 +69,7 @@ class FineGrainedFile
   def write_fresh_database
     @store = {}
     @store_pages = {}
+    @store_types = {}
 
     @used_pages = "".force_encoding("ASCII-8BIT") # bit-index of markings of used and free pages.
     @page_count = 0        # how many pages are written to disk, including nullified pages. unless there has been a crash, this should be less than or equal to used_pages.bytesize * 8.
@@ -89,8 +91,27 @@ class FineGrainedFile
     write_fresh_database
   end
 
+  def init_key(key, type_index)
+    if [:hash, :set].include?(type_index)
+      @store[key] = {}
+    elsif [:counter].include?(type_index)
+      @store[key] = 0
+    elsif [:array].include?(type_index)
+      @store[key] = []
+    elsif [:string].include?(type_index)
+      @store[key] = ""
+    else
+      raise ArgumentError.new("Unrecognized type index.")
+    end
+    @store_types[key] = WRITE_TYPE_INDEXES[type_index]
+  end
+
   def [](key)
     @store[key]
+  end
+
+  def is_a?(key, type_index)
+    @store_types[key] == FineGrainedFile::WRITE_TYPE_INDEXES[type_index]
   end
 
   #
@@ -100,6 +121,17 @@ class FineGrainedFile
   #
   def []=(key, value)
     @store[key] = value
+
+    # One can't initialize a set with this method.
+    @store_types[key] = if value.is_a?(Array)
+                          WRITE_TYPE_INDEXES[:array]
+                        elsif value.is_a?(Hash)
+                          WRITE_TYPE_INDEXES[:hash]
+                        elsif value.is_a?(Fixnum)
+                          WRITE_TYPE_INDEXES[:counter]
+                        elsif value.is_a?(String)
+                          WRITE_TYPE_INDEXES[:string]
+                        end
     write_key(key, value)
   end
 
@@ -116,6 +148,7 @@ class FineGrainedFile
     # end
 
     erase_key(key)
+    @store_types.delete(key)
     @store_pages.delete(key)
     @store.delete(key)
   end
@@ -319,7 +352,7 @@ class FineGrainedFile
         a.push(raw_v)
       end
       v = a
-    when WRITE_TYPE_INDEXES[:hash]
+    when WRITE_TYPE_INDEXES[:hash], WRITE_TYPE_INDEXES[:set]
       raw_v, b_read = read_value_s
       return nil if raw_v.nil?
       n_read += b_read
@@ -463,7 +496,7 @@ class FineGrainedFile
           to_page(0)
           desc, v, pages_read = read_record
           to_page(first_free_page)
-          record_to_write = (desc[0] == WRITE_TYPE_INDEXES[:hash]) ? MultiJson.encode(v) : v
+          record_to_write = ([WRITE_TYPE_INDEXES[:hash], WRITE_TYPE_INDEXES[:set]].include?(desc[0])) ? MultiJson.encode(v) : v
           size = size_of_record(desc[0], desc[1], record_to_write)
           write_record(desc[0], desc[1], record_to_write, size)
           size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
@@ -565,29 +598,22 @@ class FineGrainedFile
     return new_page_offset
   end
 
+  #
+  # @store_types is defined for the key.
+  #
   def write_key(key, v = nil)
     v = @store[key] if v.nil?
     p_original, size_p = (@store_pages[key] || [nil, nil])
     p = p_original
     new_size = nil
-
-    ti = if v.is_a?(Array)
-           :array
-         elsif v.is_a?(Hash)
-           :hash
-         elsif v.is_a?(Fixnum)
-           :counter
-         else
-           :string
-         end
-    t = WRITE_TYPE_INDEXES[ti]
+    t = @store_types[key]
 
     #
     # todo: recognize when size mismatch is okay due to this key being
     # the last key in the database on disk.
     #
 
-    record_value_to_write = (ti == :hash) ? MultiJson.encode(v) : v
+    record_value_to_write = ([WRITE_TYPE_INDEXES[:hash], WRITE_TYPE_INDEXES[:set]].include?(t)) ? MultiJson.encode(v) : v
     size = size_of_record(t, key, record_value_to_write)
     new_size_p = (size / PAGE_SIZE) + (size % PAGE_SIZE == 0 ? 0 : 1)
     p = allocate_page(new_size_p) if size_p.nil? || new_size_p > size_p
@@ -794,6 +820,7 @@ class FineGrainedFile
   def load_store_from_disk
     @store = {}
     @store_pages = {}
+    @store_types = {}
 
     open_db
     @file.rewind
@@ -831,6 +858,7 @@ class FineGrainedFile
       else
         @store[record[0][1]] = record[1]
         @store_pages[record[0][1]] = [i, record[2]]
+        @store_types[record[0][1]] = record[0][0]
         i += record[2]
       end
 
@@ -898,6 +926,20 @@ class FineGrained < EventMachine::Connection
   def unbind
   end
 
+  def send_array(a, offset, n)
+    i = 0
+    while i < n
+      if (offset + i) >= a.length
+        send_data "Warning: Nothing left in array.\n"
+        return
+      end
+
+      r = a[offset + i]
+      send_data "#{r}\n"
+      i += 1
+    end
+  end
+
   module Responses
     OK = "OK\n"
   end
@@ -927,12 +969,12 @@ class FineGrained < EventMachine::Connection
     key = key_match[1].to_s
     params = []
     case cmd
-    when "SET", "PUSH", "LREAD"
+    when "SET", "PUSH", "LREAD", "SADD", "SREM", "SMEMBER", "SREAD"
       bounds = key_match.offset(0)
       params_string = key_and_params[bounds[1], key_and_params.length - bounds[1]]
 
       case cmd
-      when "LREAD"
+      when "LREAD", "SREAD"
         params = params_string.split(/\s+/, 2)
       else
         params = [params_string]
@@ -969,12 +1011,45 @@ class FineGrained < EventMachine::Connection
             return
           end
           send_data r + "\n"
-        when 'INCR', 'DECR', 'CREAD', 'RESET'
+
+        when 'SREAD', 'SREM', 'SADD', 'SMEMBER', 'SLENGTH'
+          if @@store[key].nil?
+            @@store.init_key(key, :set)
+          elsif !@@store.is_a?(key, :set)
+            send_data "Error: Key is not a set.\n"
+          end
+
+          case cmd
+          when 'SREAD'
+            offset = params.first.try(:to_i) || 0
+            n = (params.length > 1) ? (params[1].try(:to_i) || -1) : -1
+            n = @@store[key].length if n == -1
+            send_array(@@store[key].keys, offset, n)
+            send_data Responses::OK
+          when 'SREM'
+            @@store[key].delete(params.first)
+            @@store.invoke_write_key(key)
+            send_data Responses::OK
+          when 'SADD'
+            @@store[key][params.first] = true
+            @@store.invoke_write_key(key)
+            send_data Responses::OK
+          when 'SMEMBER'
+            if @@store[key][params.first] == true
+              send_data "true\n"
+            else
+              send_data "false\n"
+            end
+          when 'SLENGTH'
+            send_data "#{@@store[key].length}\n"
+          end
+
+        when 'INCR', 'DECR', 'CREAD', 'RESET' # counters
           inited = false
           if @@store[key].nil?
-            @@store[key] = 0
+            @@store.init_key(key, :counter)
             inited = true
-          elsif !@@store[key].is_a?(Fixnum)
+          elsif !@@store.is_a?(key, :counter)
             send_data "Error: #{key} is not a counter."
             return false
           end
@@ -993,10 +1068,10 @@ class FineGrained < EventMachine::Connection
 
           r = @@store[key]
           send_data "#{r}\n"
-        when 'PUSH', 'POP', 'SHIFT', 'LREAD', 'LCLEAR', 'LLENGTH'
+        when 'PUSH', 'POP', 'SHIFT', 'LREAD', 'LCLEAR', 'LLENGTH' # arrays
           if @@store[key].nil?
-            @@store[key] = []
-          elsif !@@store[key].is_a?(Array)
+            @@store.init_key(key, :array)
+          elsif !@@store.is_a?(key, :array)
             send_data "Error: Key is not an array.\n"
             return false
           end
@@ -1028,22 +1103,10 @@ class FineGrained < EventMachine::Connection
             @@store.invoke_write_key(key)
             send_data "#{r}\n"
           when 'LREAD'
-            a = @@store[key]
-            i = 0
             offset = params.first.try(:to_i) || 0
             n = (params.length > 1) ? (params[1].try(:to_i) || -1) : -1
-            n = a.length if n == -1
-            while i < n
-              if (offset + i) >= a.length
-                send_data "Warning: Nothing left in array.\n"
-                return
-              end
-
-              r = a[offset + i]
-              send_data "#{r}\n"
-              i += 1
-            end
-
+            n = @@store[key].length if n == -1
+            send_array(@@store[key], offset, n)
             send_data Responses::OK
           when "LCLEAR"
             @@store[key] = []
