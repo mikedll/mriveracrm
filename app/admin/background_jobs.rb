@@ -14,7 +14,13 @@ ActiveAdmin.register_page "Background Jobs" do
   end
 
   content :title => "Background Jobs" do
-    background_jobs = FineGrainedClient.cli.lread(WorkerBase::Queues::DEFAULT, 20)
+    length = FineGrainedClient.cli.llength(WorkerBase::Queues::DEFAULT)
+    page = params[:page].try(:to_i) || 1
+    background_jobs = FineGrainedClient.cli.lread(WorkerBase::Queues::DEFAULT, (page - 1) * 20, 20)
+
+    h3 do
+      "Showing #{background_jobs.length} of #{pluralize(length, 'background job')}."
+    end
 
     table do
       thead do
@@ -32,6 +38,19 @@ ActiveAdmin.register_page "Background Jobs" do
           td do
             j['args']
           end
+        end
+      end
+
+      tr do
+        td :colspan => 2 do
+          s = ActiveSupport::SafeBuffer.new
+          if page && page.to_i > 1
+            s.safe_concat(link_to("< Previous", abdiel_background_jobs_path(:page => page - 1)))
+          end
+          if (page.to_i * 20) < length
+            s.safe_concat(link_to("Next >", abdiel_background_jobs_path(:path => page + 1)))
+          end
+          s
         end
       end
     end

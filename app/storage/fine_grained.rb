@@ -896,7 +896,12 @@ class FineGrained < EventMachine::Connection
     case cmd
     when "SET", "PUSH", "LREAD"
       bounds = key_match.offset(0)
-      params = key_and_params[bounds[1], key_and_params.length - bounds[1]]
+      params = key_and_params[bounds[1], key_and_params.length - bounds[1]].split(/\s+/)
+    end
+
+    if false
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "FineGrained cmd #{cmd} with key #{key} and params #{params}"
     end
 
     case cmd
@@ -914,7 +919,7 @@ class FineGrained < EventMachine::Connection
             send_data "Error: Key not found.\n"
           end
         when "SET"
-          @@store[key] = params
+          @@store[key] = params.first
           send_data Responses::OK
         when "READ"
           r = @@store[key]
@@ -935,9 +940,9 @@ class FineGrained < EventMachine::Connection
           when 'PUSH'
             if @@read_queues[key] && !@@read_queues[key].empty?
               sig, blocking_read = @@read_queues[key].shift
-              blocking_read.set_deferred_status(:succeeded, key, params)
+              blocking_read.set_deferred_status(:succeeded, key, params.first)
             else
-              @@store[key].push(params)
+              @@store[key].push(params.first)
               @@store.invoke_write_key(key)
             end
             send_data Responses::OK
@@ -960,15 +965,16 @@ class FineGrained < EventMachine::Connection
           when 'LREAD'
             a = @@store[key]
             i = 0
-            n = params.to_i
+            offset = params.first.try(:to_i) || 0
+            n = (params.length > 1) ? (params[1].try(:to_i) || -1) : -1
             n = a.length if n == -1
             while i < n
-              if i >= a.length
+              if (offset + i) >= a.length
                 send_data "Warning: Nothing left in array.\n"
                 return
               end
 
-              r = a[i]
+              r = a[offset + i]
               send_data "#{r}\n"
               i += 1
             end

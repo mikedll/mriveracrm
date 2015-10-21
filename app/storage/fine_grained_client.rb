@@ -117,10 +117,10 @@ class FineGrainedClient
   # @todo simplify this command to work without
   # sending OK.
   #
-  def lread(key, n = -1)
+  def lread(key, start = 0, n = -1)
     i = 0
     l = []
-    @client.sendmsg("LREAD #{key} #{n}")
+    @client.sendmsg("LREAD #{key} #{start} #{n}")
     v = decode(read_response)
     while v != "OK"
       if v.starts_with?("Error:")
