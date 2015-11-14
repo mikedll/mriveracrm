@@ -214,6 +214,15 @@ class FineGrainedClient
     read_response.to_i
   end
 
+  #
+  # Retrieve all keys.
+  #
+  def keys
+    @client.sendmsg("KEYS")
+    read_sequence
+  end
+
+
   def buffered_read
     if @incoming_buffer.length > 0
       r = @incoming_buffer

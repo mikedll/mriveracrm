@@ -192,6 +192,10 @@ class FineGrainedFile
     write_key(key)
   end
 
+  def keys
+    @store.keys
+  end
+
   protected
 
   def byte_with_used_bit(i); 1 << (7 - (i % 8)); end
@@ -926,6 +930,10 @@ class FineGrained < EventMachine::Connection
   def unbind
   end
 
+  module Responses
+    OK = "OK\n"
+  end
+
   def send_array(a, offset, n)
     i = 0
     while i < n
@@ -938,48 +946,48 @@ class FineGrained < EventMachine::Connection
       send_data "#{r}\n"
       i += 1
     end
-  end
-
-  module Responses
-    OK = "OK\n"
+    send_data Responses::OK
   end
 
   def process_request(request)
     data = request.chomp
 
-    matches = /\A(\w+)\s+/.match(data)
+    matches = /\A(\w+)\s*/.match(data)
 
-    if matches.nil? || matches.length < 2
+    if matches.nil? || matches.length < 1
       send_data "ERROR: Command not recognized.\n"
       return
     end
 
     cmd = matches[1].to_s
-
-    bounds = matches.offset(0)
-    key_and_params = data[bounds[1], data.length - bounds[1]]
-
     key = nil
-    key_match = /\A(\S+)\s*/.match(key_and_params)
-    if key_match.nil? || key_match.length < 2
-      send_data "Error: Key not found.\n"
-      return
-    end
-
-    key = key_match[1].to_s
     params = []
     case cmd
-    when "SET", "PUSH", "LREAD", "SADD", "SREM", "SMEMBER", "SREAD"
-      bounds = key_match.offset(0)
-      params_string = key_and_params[bounds[1], key_and_params.length - bounds[1]]
+    when "KEYS"
+    else
+      bounds = matches.offset(0)
+      key_and_params = data[bounds[1], data.length - bounds[1]]
 
-      case cmd
-      when "LREAD", "SREAD"
-        params = params_string.split(/\s+/, 2)
-      else
-        params = [params_string]
+      key_match = /\A(\S+)\s*/.match(key_and_params)
+      if key_match.nil? || key_match.length < 2
+        send_data "Error: Key not found.\n"
+        return
       end
 
+      key = key_match[1].to_s
+
+      case cmd
+      when "SET", "PUSH", "LREAD", "SADD", "SREM", "SMEMBER", "SREAD"
+        bounds = key_match.offset(0)
+        params_string = key_and_params[bounds[1], key_and_params.length - bounds[1]]
+
+        case cmd
+        when "LREAD", "SREAD"
+          params = params_string.split(/\s+/, 2)
+        else
+          params = [params_string]
+        end
+      end
     end
 
     if false
@@ -1012,6 +1020,10 @@ class FineGrained < EventMachine::Connection
           end
           send_data r + "\n"
 
+        when "KEYS"
+          a = @@store.keys
+          send_array(a, 0, a.length)
+
         when 'SREAD', 'SREM', 'SADD', 'SMEMBER', 'SLENGTH'
           if @@store[key].nil?
             @@store.init_key(key, :set)
@@ -1025,7 +1037,6 @@ class FineGrained < EventMachine::Connection
             n = (params.length > 1) ? (params[1].try(:to_i) || -1) : -1
             n = @@store[key].length if n == -1
             send_array(@@store[key].keys, offset, n)
-            send_data Responses::OK
           when 'SREM'
             @@store[key].delete(params.first)
             @@store.invoke_write_key(key)
@@ -1107,7 +1118,6 @@ class FineGrained < EventMachine::Connection
             n = (params.length > 1) ? (params[1].try(:to_i) || -1) : -1
             n = @@store[key].length if n == -1
             send_array(@@store[key], offset, n)
-            send_data Responses::OK
           when "LCLEAR"
             @@store[key] = []
             @@store.invoke_write_key(key)

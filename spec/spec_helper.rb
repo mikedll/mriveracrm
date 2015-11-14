@@ -103,12 +103,8 @@ Spork.prefork do
         end
         DatabaseCleaner.clean_with(:truncation)
 
-        Resque.backend.store.redis.keys("*").each do |k|
-          Resque.backend.store.redis.del(k)
-        end
-
-        Redis.current.keys("*").each do |k|
-          Redis.current.del(k)
+        FineGrainedClient.cli.keys.each do |k|
+          FineGrainedClient.cli.del(k)
         end
       end
     end
