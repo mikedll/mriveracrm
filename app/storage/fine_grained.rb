@@ -1024,7 +1024,7 @@ class FineGrained < EventMachine::Connection
           a = @@store.keys
           send_array(a, 0, a.length)
 
-        when 'SREAD', 'SREM', 'SADD', 'SMEMBER', 'SLENGTH'
+        when 'SREAD', 'SREM', 'SADD', 'SMEMBER', 'SLENGTH', 'SRESET'
           if @@store[key].nil?
             @@store.init_key(key, :set)
           elsif !@@store.is_a?(key, :set)
@@ -1053,6 +1053,10 @@ class FineGrained < EventMachine::Connection
             end
           when 'SLENGTH'
             send_data "#{@@store[key].length}\n"
+          when 'SRESET'
+            @@store[key].clear
+            @@store.invoke_write_key(key)
+            send_data Responses::OK
           end
 
         when 'INCR', 'DECR', 'CREAD', 'RESET' # counters

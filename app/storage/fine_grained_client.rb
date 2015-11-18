@@ -207,6 +207,14 @@ class FineGrainedClient
   end
 
   #
+  # Reset set.
+  #
+  def sreset(key)
+    @client.sendmsg("SRESET #{key}")
+    read_response
+  end
+
+  #
   # Reset counter.
   #
   def reset(key)
