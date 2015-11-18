@@ -2,6 +2,9 @@
 require 'active_support/concern'
 
 #
+# This can be moved to cknife, outside of this crm,
+# eventually. mrivera 11/17/15.
+#
 # Client must define:
 #
 #   before_poll

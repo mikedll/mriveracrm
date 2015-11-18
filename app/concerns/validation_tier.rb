@@ -2,6 +2,11 @@
 require 'active_support/concern'
 
 #
+# Haven't found a use for this yet. Had planned on using
+# it on a monitor. It's probably available for use later.
+# Its implementation is good. mrivera 11/17/15
+#
+#
 # Validation level starts at 1.
 #
 module ValidationTier
