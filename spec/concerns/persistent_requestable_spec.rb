@@ -5,14 +5,30 @@ describe PersistentRequestable do
 
   class Jungle
     extend ActiveModel::Callbacks
+    extend ActiveModel::Naming
 
     define_model_callbacks :destroy
 
     include PersistentRequestable
 
     attr_accessor :id
+    attr_reader :errors
+
     def initialize(id)
       self.id = id
+      @errors = ActiveModel::Errors.new(self)
+    end
+
+    def read_attribute_for_validation(attr)
+      send(attr)
+    end
+
+    def Jungle.human_attribute_name(attr, options = {})
+      attr
+    end
+
+    def Jungle.lookup_ancestors
+      [self]
     end
 
     def new_record?; false; end
