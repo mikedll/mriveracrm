@@ -16,6 +16,7 @@ describe PersistentRequestable do
     end
 
     def new_record?; false; end
+    def changed?; false; end
 
     def grow!
       return false if !start_persistent_request('grow!')
@@ -30,16 +31,20 @@ describe PersistentRequestable do
     end
   end
 
-  it "should clean redis on destroy" do
+  it "should clean redis on destroy", :current => true do
+    FineGrainedClient.cli.keys.each do |k|
+      FineGrainedClient.cli.del(k)
+    end
+
     j = Jungle.new(1)
-    Redis.current.keys("*").should =~ []
+    FineGrainedClient.cli.keys.should =~ []
     j.grow!
-    Redis.current.keys("*").should =~ [j.persistent_requests_count.key]
+    FineGrainedClient.cli.keys =~ [j.persistent_requests_count.key]
     j.destroy
-    Redis.current.keys("*").should == []
+    FineGrainedClient.cli.keys.should == []
   end
 
-  it "should lock record to one request at a time with redis" do
+  it "should lock record to one request at a time with redis", :current => true do
     j = Jungle.new(2)
 
     j.start_persistent_request('grow!').should be_true

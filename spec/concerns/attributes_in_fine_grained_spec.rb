@@ -50,5 +50,12 @@ describe AttributesInFineGrained do
       @obj.resource_uses.include?("dusting").should be_false
       @obj.resource_uses.include?("sweeping").should be_false
     end
+
+    it "should permit deletion of keys" do
+      @obj.resources.incr
+      @obj.resources.should == 1
+      @obj.resources.del
+      @fgc.cread("interesting_object:1:resources").should == 0
+    end
   end
 end

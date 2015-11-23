@@ -3,11 +3,7 @@ MikedllCrm::Application.routes.draw do
 
   ActiveAdmin.routes(self)
 
-  constraints Ability::RoutesAdminConstraint.new do
-    mount ResqueWeb::Engine => "#{ActiveAdmin.application.default_namespace}/resque_web"
-  end
-
-  # # raw marketing / custom domain
+  # raw marketing / custom domain
   resource :business, :path => "", :only => [:show]
 
   resource :home, :path => "", :controller => :home, :only => [] do

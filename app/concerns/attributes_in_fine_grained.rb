@@ -14,11 +14,14 @@ module AttributesInFineGrained
       self.record = options[:record]
     end
 
-    protected
+    def del
+      fgc.del(key)
+    end
 
-    def _key
+    def key
       @unique_name ||= "#{record.class.to_s.underscore}:#{record.id.to_i}:#{name}"
     end
+
   end
 
   #
@@ -26,11 +29,11 @@ module AttributesInFineGrained
   #
   class ValueAttribute < Attribute
     def set(s)
-      (fgc.set(_key, s) == "OK") ? s : nil
+      (fgc.set(key, s) == "OK") ? s : nil
     end
 
     def to_s
-      fgc.read(_key)
+      fgc.read(key)
     end
 
     def ==(other)
@@ -52,15 +55,15 @@ module AttributesInFineGrained
 
   class CounterAttribute < Attribute
     def incr
-      fgc.incr(_key)
+      fgc.incr(key)
     end
 
     def decr
-      fgc.decr(_key)
+      fgc.decr(key)
     end
 
     def to_i
-      fgc.cread(_key)
+      fgc.cread(key)
     end
 
     def ==(other)
@@ -82,20 +85,24 @@ module AttributesInFineGrained
 
   class SetAttribute < Attribute
     def add(s)
-      fgc.sadd(_key, s)
+      fgc.sadd(key, s)
+    end
+
+    def <<(s)
+      add(s)
     end
 
     def remove(s)
-      fgc.srem(_key, s)
+      fgc.srem(key, s)
     end
 
     def include?(s)
-      vals = fgc.sread(_key)
+      vals = fgc.sread(key)
       vals.include?(s)
     end
 
     def reset
-      fgc.sreset(_key)
+      fgc.sreset(key)
     end
   end
 

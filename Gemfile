@@ -33,11 +33,6 @@ gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this i
 gem "nokogiri"
 gem "rest-client"
 
-gem "resque-web", :require => "resque_web", :github => "mikedll/resque-web", :branch => "resque-2"
-# gem "resque-web", :require => "resque_web", :path => '../resque-web' # For dev mode
-
-gem 'redis-objects'
-
 gem "safe_yaml", :group => [:default, :fine_grained_daemon, :scheduler]
 gem 'multi_json', :group => [:default, :fine_grained_daemon]
 
@@ -46,7 +41,6 @@ group :default, :fine_grained_daemon do
 end
 
 group :default, :scheduler do
-  gem 'resque', "~> 2.0.0.pre.1", github: "resque/resque"
   gem 'activemodel'
   gem "clockwork"
 end
