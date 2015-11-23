@@ -24,53 +24,10 @@ This may go in `~/.gemrc`:
 Pick a package directory like the packages directory described
 above for doing package building.
 
-# Redis
+# FineGrained
 
-Download [Redis 3.0](http://download.redis.io/releases/redis-3.0.0.tar.gz) to your package directory.
-
-    > tar -xzf redis-3.0.0.tar.gz 
-    > cd redis-3.0.0/
-    > make 
-    > make test 
-    > sudo make install
-    > redis-server -v 
-    Redis server v=3.0.0 sha=00000000:0 malloc=jemalloc-3.6.0 bits=64 build=b3c1bfa1b88f43f9
-
-## Setup a config
-
-    > cd [app dir]
-    > cp config/redis.conf.sample config/redis.conf
-
-## Start the server, if local
-
-    redis-server ./config/redis.conf
-
-## Cure system for redis. Some comments on our adjusted configuration:
-
-Max clients is down to 4096 to coincide with a Linux setting.
-
-Disable 'Transparent Huge Pages':
-
-    echo 'never' > /sys/kernel/mm/transparent_hugepage/enabled
-
-Allow overcommit memory:
-
-    > sudo vi /etc/sysctl.conf
-
-    vm.overcommit_memory = 1
-
-Max backlog:
-
-    tcp-backlog 128
-
-Which is a Linux default on Ubuntu 12. See the redis config
-if you want to raise it.
-
-In development:
-
-    redis-server config/redis.conf
-
-Then Resque will have something to connect to.
+FineGrained is as of this writing built into this
+product and maintains its disk file in `db/`.
 
 # App setup
 
