@@ -9,6 +9,11 @@ module IntrospectionRenderable
       instance_variable_name_without_model_namespace_awareness
     end
 
+    def current_model_name_with_model_namespace_awareness
+      return namespaced_model_klass_name.camelize if model_variable_name
+      current_model_name_without_model_namespace_awareness
+    end
+
     helper_method(:rendered_current_objects, :rendered_current_object)
 
     protected
@@ -17,17 +22,17 @@ module IntrospectionRenderable
       activate_default_apps
       apps_configuration[:primary_model] = klass if apps_configuration[:primary_model].nil?
 
-      model_namespaced_klass_name = klass.to_s
-      klass_name = model_namespaced_klass_name.demodulize
-      model_namespaced_klass_name_underscored = model_namespaced_klass_name.underscore.tr('/', '_')
+      self.namespaced_model_klass_name = klass.to_s
+      klass_name = namespaced_model_klass_name.demodulize
+      namespaced_model_klass_name_underscored = namespaced_model_klass_name.underscore.tr('/', '_')
       controller_klass = self.class.to_s
       controller_klass_name = controller_klass.demodulize
       controller_name = controller_klass_name.gsub("Controller", '')
       controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass.demodulize}$"), '')
 
-      if klass_name != model_namespaced_klass_name
-        self.model_variable_name = model_namespaced_klass_name_underscored
-        self.model_variable_name = model_namespaced_klass_name_underscored.pluralize if (controller_name.singularize != controller_name)
+      if klass_name != namespaced_model_klass_name
+        self.model_variable_name = namespaced_model_klass_name_underscored
+        self.model_variable_name = namespaced_model_klass_name_underscored.pluralize if (controller_name.singularize != controller_name)
       end
 
 
@@ -35,7 +40,7 @@ module IntrospectionRenderable
       apps_configuration[:subject_klass_name] = (singular? ? klass_name : klass_name.pluralize).underscore
       apps_configuration.merge!({
           :app_top => singular? ? false : true,
-          :app_class => (singular? ? model_namespaced_klass_name_underscored : model_namespaced_klass_name_underscored.pluralize).dasherize,
+          :app_class => (singular? ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize,
           :title => (singular? ? klass_name : klass_name.pluralize).titleize
         })
 
@@ -105,7 +110,7 @@ module IntrospectionRenderable
     def configure_apps(opts, &block)
       cattr_accessor :apps_primary_model, :apps_selected_view
 
-      attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name
+      attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name, :namespaced_model_klass_name
 
       before_filter :_check_for_primary_model
 
@@ -157,6 +162,7 @@ module IntrospectionRenderable
       end
 
       alias_method_chain :instance_variable_name, :model_namespace_awareness
+      alias_method_chain :current_model_name, :model_namespace_awareness
     end
   end
 end

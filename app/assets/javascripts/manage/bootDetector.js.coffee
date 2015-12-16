@@ -38,7 +38,7 @@ $(() ->
     else if selector == '.billing-settings-gui'
       return __billing_settings
     else if selector == '.it-monitored-computers-gui'
-      return __it_monitored_computer
+      return __it_monitored_computers
     else
       # something went wrong here.
       return []
