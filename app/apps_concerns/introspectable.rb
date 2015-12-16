@@ -138,7 +138,9 @@ module Introspectable
     def group(name = nil, &block)
       self.current_group = [name, []]
       instance_eval(&block)
-      (current_view.nil? ? attributes : current_view.last).push(current_group)
+
+      # We don't use name for now, until we make the group dsl keyword more interesting.
+      (current_view.nil? ? attributes : current_view.last).push(current_group.last)
       self.current_group = nil
     end
 
