@@ -49,6 +49,11 @@ MikedllCrm::Application.routes.draw do
     end
   end
 
+  resources :monitored_computers, :only => [] do
+    collection do
+      put :heartbeat
+    end
+  end
 
   namespace 'manage' do
 
@@ -56,11 +61,7 @@ MikedllCrm::Application.routes.draw do
     resource :business, :only => [:show, :update, :destroy]
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
-    resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy] do
-      member do
-        put :rank
-      end
-    end
+    resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
 
     resources :products do
       resources :product_images, :path => "images" do
@@ -154,6 +155,11 @@ MikedllCrm::Application.routes.draw do
       end
     end
 
+    resources :monitored_computers, :only => [] do
+      collection do
+        put :heartbeat
+      end
+    end
 
     namespace 'manage' do
 
@@ -161,11 +167,7 @@ MikedllCrm::Application.routes.draw do
       resource :business, :only => [:show, :update, :destroy]
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
-      resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy] do
-        member do
-          put :rank
-        end
-      end
+      resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
 
       resources :products do
         resources :product_images, :path => "images" do

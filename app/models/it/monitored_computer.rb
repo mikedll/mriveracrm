@@ -6,7 +6,6 @@ class IT::MonitoredComputer < ActiveRecord::Base
   end
 
   include Introspectable
-  include BackgroundedPolling
   include ValidationTier
   include ActionView::Helpers::TranslationHelper
 
@@ -49,18 +48,6 @@ class IT::MonitoredComputer < ActiveRecord::Base
       mail = AlertMailer.computer_down(mc.business, mc)
       mc.business.notification_deliver!(Alerts::COMPUTER_DOWN, mail)
     end
-  end
-
-  def target_endpoint
-    "http://#{hostname}:#{port}"
-  end
-
-  def before_poll
-    self.last_result = nil
-  end
-
-  def handle_poll_result(response, request, result)
-    self.last_result = response.net_http_res.code.to_i
   end
 
   protected

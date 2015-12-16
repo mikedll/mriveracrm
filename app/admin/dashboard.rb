@@ -25,7 +25,6 @@ ActiveAdmin.register_page "Dashboard" do
 
       column do
         para link_to("Your Business, #{current_user.business.handle}", business_home_url(current_user.business))
-        para link_to("Resque", resque_web.root_path)
       end
     end
   end
