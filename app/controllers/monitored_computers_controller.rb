@@ -7,7 +7,19 @@ class MonitoredComputersController < ApplicationController
   before_filter :_require_business_support
 
   def heartbeat
-    head :ok
+    ip = request.ip
+    stats = { :free => params[:free].to_i, :total => params[:total].to_i }
+
+    mc = current_business.it_monitored_computers.find_by_hostname ip
+    mc = current_business.it_monitored_computers.build(:hostname => ip, :name => ip) if mc.nil?
+    mc.last_heartbeat_received_at = Time.now
+    mc.last_result = stats.to_json
+    mc.down = false
+    if mc.save
+      head :ok
+    else
+      head :unprocessible_entity
+    end
   end
 
   def _require_business_support
