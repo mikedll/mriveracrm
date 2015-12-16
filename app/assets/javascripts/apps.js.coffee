@@ -545,12 +545,6 @@ class window.ListItemView extends ModelBaseView
   tagName: 'li'
   className: 'list-item'
 
-  id: () ->
-    if !@model.isNew()
-      "list-item-#{@model.get('id')}"
-    else
-      ""
-
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
@@ -608,16 +602,16 @@ class window.ListItemView extends ModelBaseView
 
   removeDom: () ->
     @detachFromModel()
-    if @showview?
-      @showview.remove()
+    if @modelView?
+      @modelView.remove()
     @$el.remove() # remove DOM element
 
   show: (e) ->
     e.stopPropagation()
-    if !@showview?
-      @showview = @spawnView()
-      @showview.render()
-    @parent.show(@showview)
+    if !@modelView?
+      @modelView = @spawnView()
+      @modelView.render()
+    @parent.show(@modelView)
     false
 
   render: () ->
@@ -638,7 +632,6 @@ class window.ListItemView extends ModelBaseView
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
-    @$el.prop('id', @id()) if @$el.prop('id') == ""
     @render()
 
   onError: (model, resp, options) ->
@@ -662,12 +655,6 @@ class window.ListItemView extends ModelBaseView
 #
 class window.CrmModelView extends ModelBaseView
   className: 'model-view'
-
-  id: () ->
-    if !@model.isNew()
-      "#{@modelName}-view-#{@model.get('id')}"
-    else
-      ""
 
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
@@ -1063,7 +1050,6 @@ class window.CrmModelView extends ModelBaseView
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
-    @$el.prop('id', @id()) if @$el.prop('id') == ""
     @clearErrors()
     @repaintEditable()
     @repaintNonEditable()
@@ -1137,7 +1123,7 @@ class window.SingleModelAppView extends WithChildrenView
 
   render: () ->
     WithChildrenView.prototype.render.apply(@, arguments)
-    @modelShowContainer = @$('.models-show-container').first()
+    @modelShowContainer = @$('.model-show-container').first()
     @showModelView()
     @
 
@@ -1347,28 +1333,21 @@ class window.CollectionAppView extends WithChildrenView
     @move(@modelsListCache.find(".list-item a.active").parent().prev())
 
   focusTopModelView: () ->
-    @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
+    @$('.model-show-container .model-view').first().find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
   show: (view) ->
     @$('.errors').hide()
     @modelsListCache.find(".list-item a").removeClass('active')
     @modelListItemLink(view.model).addClass('active')
 
+    if !$.contains( @$('.model-show-container').get(0), view.el)
     # lower curtain
-    @$('.models-show-container').hide()
-
-    # rearrange stage (hide other model views, show this model view)
-    @$('.models-show-container .model-view').hide()
-    @$('.models-show-container').append(view.el) if !$.contains( @$('.models-show-container').get(0), view.el)
-    view.$el.show()
+      @$('.model-show-container').empty()
+      @$('.model-show-container').append(view.el)
 
     # raise curtain and focus
-    @$('.models-show-container').show()
     @focusTopModelView()
     @parent.rebindGlobalHotKeys()
-
-  $modelView: (id) ->
-    @$("##{@modelName}-view-" + id)
 
   onSync: (model, resp, options) ->
     @clearHighlightedModelErrors()
