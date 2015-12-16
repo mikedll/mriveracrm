@@ -648,6 +648,9 @@ class window.ListItemView extends ModelBaseView
   activate: () ->
     @$('a').addClass('active')
 
+  deactivate: () ->
+    @$('a').removeClass('active')
+
 
 #
 # Define className, modelName, and probably events and render
@@ -1250,6 +1253,7 @@ class window.CollectionAppView extends WithChildrenView
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
     @currentModelListItem = null
+    @focusSupressed = false
 
   detachFromCollection: () ->
     @stopListening(@collection)
@@ -1298,27 +1302,18 @@ class window.CollectionAppView extends WithChildrenView
     @addAll()
 
   addAll: () ->
+    @focusSupressed = true
     @collection.each(@addOne, @)
+    @focusSupressed = false
+    @$listItems.find(".list-item").first().find('a').trigger('click')
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
     @$listItems.append(listItemView.render().el)
-
-    # just adde first model, so we need to focus it.
-    if @$listItems.children().length == 1
-      @$listItems.find(".list-item a").first().trigger('click')
+    listItemView.$('a').trigger('click') if !@focusSupressed
 
   create: () ->
-    @collection.create({},
-      wait: false,
-      success: (model, response, options) => @afterSave(model, response, options)
-    )
-
-  modelListItemLink: (model) ->
-    @$listItems.find("#list-item-#{model.get('id')} a")
-
-  afterSave: (model, response, options) ->
-    @modelListItemLink(model).trigger('click')
+    @collection.create({}, wait: false)
 
   remove: () ->
     @detachFromCollection
@@ -1343,7 +1338,7 @@ class window.CollectionAppView extends WithChildrenView
     @$('.errors').hide()
 
     if not @currentModelListItem? || @currentModelListItem != listItem
-      @currentModelListItem.removeClass('active') if @currentModelListItem?
+      @currentModelListItem.deactivate() if @currentModelListItem?
       @currentModelListItem = listItem
       @currentModelListItem.activate()
       @$('.model-show-container').empty()
