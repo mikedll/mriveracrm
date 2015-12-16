@@ -611,7 +611,7 @@ class window.ListItemView extends ModelBaseView
     if !@modelView?
       @modelView = @spawnView()
       @modelView.render()
-    @parent.show(@modelView)
+    @parent.show(@, @modelView)
     false
 
   render: () ->
@@ -644,6 +644,9 @@ class window.ListItemView extends ModelBaseView
 
   spawnView: () ->
     new @spawnViewType({model:@model, className: "#{@modelName}-view model-view", parent: @})
+
+  activate: () ->
+    @$('a').addClass('active')
 
 
 #
@@ -1246,6 +1249,7 @@ class window.CollectionAppView extends WithChildrenView
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
+    @currentModelListItem = null
 
   detachFromCollection: () ->
     @stopListening(@collection)
@@ -1298,11 +1302,11 @@ class window.CollectionAppView extends WithChildrenView
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
-    @modelsListCache.append(listItemView.render().el)
+    @$listItems.append(listItemView.render().el)
 
     # just adde first model, so we need to focus it.
-    if @modelsListCache.children().length == 1
-      @modelsListCache.find(".list-item a").first().trigger('click')
+    if @$listItems.children().length == 1
+      @$listItems.find(".list-item a").first().trigger('click')
 
   create: () ->
     @collection.create({},
@@ -1311,7 +1315,7 @@ class window.CollectionAppView extends WithChildrenView
     )
 
   modelListItemLink: (model) ->
-    @modelsListCache.find("#list-item-#{model.get('id')} a")
+    @$listItems.find("#list-item-#{model.get('id')} a")
 
   afterSave: (model, response, options) ->
     @modelListItemLink(model).trigger('click')
@@ -1327,21 +1331,21 @@ class window.CollectionAppView extends WithChildrenView
     listItem.find('a').trigger('click') if listItem.length > 0
 
   next: () ->
-    @move(@modelsListCache.find(".list-item a.active").parent().next())
+    @move(@$listItems.find(".list-item a.active").parent().next())
 
   previous: () ->
-    @move(@modelsListCache.find(".list-item a.active").parent().prev())
+    @move(@$listItems.find(".list-item a.active").parent().prev())
 
   focusTopModelView: () ->
     @$('.model-show-container .model-view').first().find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
-  show: (view) ->
+  show: (listItem, view) ->
     @$('.errors').hide()
-    @modelsListCache.find(".list-item a").removeClass('active')
-    @modelListItemLink(view.model).addClass('active')
 
-    if !$.contains( @$('.model-show-container').get(0), view.el)
-    # lower curtain
+    if not @currentModelListItem? || @currentModelListItem != listItem
+      @currentModelListItem.removeClass('active') if @currentModelListItem?
+      @currentModelListItem = listItem
+      @currentModelListItem.activate()
       @$('.model-show-container').empty()
       @$('.model-show-container').append(view.el)
 
@@ -1359,7 +1363,7 @@ class window.CollectionAppView extends WithChildrenView
     @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
 
   cacheInitialDom: () ->
-    @modelsListCache = @$('.models-list').first()
+    @$listItems = @$('.models-list').first()
 
   render: () ->
     @buildDom()
