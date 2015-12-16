@@ -101,7 +101,7 @@ module IntrospectionRenderable
     private
 
     def json_config
-      apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
+      @json_config ||= apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
     end
 
   end

@@ -1,10 +1,5 @@
 
 class window.ItMonitoredComputer extends BaseModel
-  defaults:
-    'runnable?': false
-
-  isPersistentRequestingAvailable: () ->
-    @deepGet('available_for_request?')
 
 class window.ItMonitoredComputerView extends CrmModelView
   modelName: 'it_monitored_computer'

@@ -2,21 +2,12 @@ class Manage::MonitoredComputersController < Manage::BaseController
 
   configure_apps :model => ::IT::MonitoredComputer do
     actions :index, :show, :create, :update, :destroy
-    member_actions :rank
     belongs_to :business
   end
 
   skip_before_filter :require_active_plan
 
   before_filter :_parent_name
-
-  def json_config
-    { :methods => [:available_for_request?] }
-  end
-
-  def rank
-    with_update_and_transition { current_object.rank! }
-  end
 
   def object_parameters
     params.slice(* IT::MonitoredComputer.accessible_attributes.map { |k| k.underscore.to_sym } )
