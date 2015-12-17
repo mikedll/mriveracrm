@@ -35,22 +35,6 @@ module AttributesInFineGrained
     def to_s
       fgc.read(key)
     end
-
-    def ==(other)
-      to_s == other
-    end
-
-    def <(other)
-      to_s < other
-    end
-
-    def >(other)
-      to_s > other
-    end
-
-    def !=(other)
-      to_s != other
-    end
   end
 
   class CounterAttribute < Attribute
@@ -118,6 +102,11 @@ module AttributesInFineGrained
       end
     end
 
+    #
+    # This has issues, it appears, with IntrospectableRenderable's use of to_json.
+    # It freezes the invoices retrieval for an employee. Calling to_s to side-step
+    # this issue for now. M. Rivera 12/16/15.
+    #
     def value(name)
       define_method(name.to_sym) do
         self._attributes_in_fine_grained ||= {}
@@ -125,13 +114,13 @@ module AttributesInFineGrained
           self._attributes_in_fine_grained[name.to_sym] = ValueAttribute.new(:record => self, :name => name)
           self._attributes_in_fine_grained[name.to_sym].set("")
         end
-        self._attributes_in_fine_grained[name.to_sym]
+        self._attributes_in_fine_grained[name.to_sym].to_s
       end
 
       define_method("#{name}=".to_sym) do |s|
         self._attributes_in_fine_grained ||= {}
         self._attributes_in_fine_grained[name.to_sym] ||= ValueAttribute.new(:record => self, :name => name)
-        self._attributes_in_fine_grained[name.to_sym].set(s)
+        self._attributes_in_fine_grained[name.to_sym].set(s).to_s
       end
     end
 
