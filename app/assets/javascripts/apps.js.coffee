@@ -647,8 +647,10 @@ class window.ListItemView extends ModelBaseView
 
   activate: () ->
     @$('a').addClass('active')
+    @modelView.delegateEvents()
 
   deactivate: () ->
+    @modelView.undelegateEvents()
     @$('a').removeClass('active')
 
 
