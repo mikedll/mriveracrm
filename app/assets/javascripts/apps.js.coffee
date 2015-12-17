@@ -955,7 +955,7 @@ class window.CrmModelView extends ModelBaseView
       enablerValue = @model.deepGet(el$.data('attribute_enabler'))
       enabledWhenValue = el$.data('enabled_when')
       if enablerValue?
-        if (_.isString(enabledWhenValue) && _.any( enabledWhenValue.split(/,/), (val) -> val == enablerValue)) || (typeof(enabledWhenValue) != "undefined" && enablerValue == enabledWhenValue) || enablerValue == true
+        if (_.isString(enabledWhenValue) && _.any( enabledWhenValue.split(/,/), (val) -> val == enablerValue)) || (typeof(enabledWhenValue) != "undefined" && enablerValue == enabledWhenValue) || (typeof(enabledWhenValue) == "undefined" && enablerValue != false)
           el$.removeClass('disabled')
         else
           el$.addClass('disabled')
