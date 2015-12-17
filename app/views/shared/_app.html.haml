@@ -19,6 +19,8 @@
       .model-show-container
   - else
     .span2
+      .search-filter
+        %input{:type => "text", :placeholder => "quickfilter", :class => "quickfilter"}
       %ul.models-list{:class => "#{app_class}-list" }
 
     .span10

@@ -1245,12 +1245,27 @@ class window.CollectionAppView extends WithChildrenView
       'click button.back': 'back'
       'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
+      'keyup input.quickfilter': 'quickfilterAdjust'
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
     @currentModelListItem = null
+
+  quickfilterAdjust: (e) ->
+    s = $(e.target).val().toLowerCase()
+    rtext = ""
+    _.each(s, (c) ->
+      rtext += c + ".*"
+    )
+    tester = new RegExp(rtext)
+    @$listItems.find(".list-item").each((i, el) ->
+      if tester.test($(el).text().toLowerCase())
+        $(el).show()
+      else
+        $(el).hide()
+    )
 
   detachFromCollection: () ->
     @stopListening(@collection)
@@ -1327,10 +1342,10 @@ class window.CollectionAppView extends WithChildrenView
     listItem.find('a').trigger('click') if listItem.length > 0
 
   next: () ->
-    @move(@$listItems.find(".list-item a.active").parent().next())
+    @move(@$listItems.find(".list-item a.active").parent().nextAll('.list-item').filter(':visible').first())
 
   previous: () ->
-    @move(@$listItems.find(".list-item a.active").parent().prev())
+    @move(@$listItems.find(".list-item a.active").parent().prevAll('.list-item').filter(':visible').first())
 
   focusTopModelView: () ->
     @$('.model-show-container .model-view').first().find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
