@@ -506,8 +506,14 @@ class window.WithChildrenView extends BaseView
       'margin-left': -(w / 2) + "px"
       'margin-top': -(h / 2) + "px"
     )
+
+    interiorHeight = Math.round(h * 0.8) + 'px'
     @$('.models-list').css(
-      'height': Math.round(h * 0.8) + 'px'
+      'height': interiorHeight
+    )
+
+    @$('.model-show-container').css(
+      'height': interiorHeight
     )
 
   disableWithShield: () ->
