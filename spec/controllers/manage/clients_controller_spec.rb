@@ -45,6 +45,18 @@ describe Manage::ClientsController do
       response.status.should == 404
     end
 
+    it "should not accidently display a client from another business", :current => true do
+      b2 = FactoryGirl.create(:business)
+      c1 = FactoryGirl.create(:client, :business => @user.business)
+      c2 = FactoryGirl.create(:client, :business => b2)
+      request.host = @user.employee.business.host
+      get :index, :format => 'json'
+      response.body
+      result = JSON.parse(response.body)
+      result.length.should == 1
+      result[0]['id'].should == c1.id
+    end
+
     context "business's plan and feature support" do
 
       render_views
