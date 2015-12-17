@@ -952,9 +952,10 @@ class window.CrmModelView extends ModelBaseView
 
     _.each( @$('.put_action, .destroy'), (el) =>
       el$ = $(el)
-      enablerValue = @model.get(el$.data('attribute_enabler'))
+      enablerValue = @model.deepGet(el$.data('attribute_enabler'))
+      enabledWhenValue = el$.data('enabled_when')
       if enablerValue?
-        if enablerValue != false && (enablerValue == true || _.any( el$.data('enabled_when').split(/,/), (val) -> val == enablerValue))
+        if (_.isString(enabledWhenValue) && _.any( enabledWhenValue.split(/,/), (val) -> val == enablerValue)) || (typeof(enabledWhenValue) != "undefined" && enablerValue == enabledWhenValue) || enablerValue == true
           el$.removeClass('disabled')
         else
           el$.addClass('disabled')
@@ -1193,11 +1194,8 @@ class window.SearchAndListView extends BaseView
 
   addOne: (model) ->
     itemView = new @searchResultItemViewType({'model':model, 'parent': @})
-    @modelsListCache.append(itemView.render().el)
-
-    # just adde first model, so we need to focus it.
-    if @modelsListCache.children().length == 1
-      @modelsListCache.find(".list-item a").first().trigger('click')
+    @$listItems.append(itemView.render().el)
+    itemView.$('a').trigger('click') if !@$listItems.children().length == 1
 
   remove: () ->
     @detachFromCollection()
@@ -1215,7 +1213,7 @@ class window.SearchAndListView extends BaseView
     @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
 
   cacheInitialDom: () ->
-    @modelsListCache = @$('.models-list').first()
+    @$listItems = @$('.models-list').first()
 
   render: () ->
     @buildDom()
@@ -1253,7 +1251,6 @@ class window.CollectionAppView extends WithChildrenView
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
     @currentModelListItem = null
-    @focusSupressed = false
 
   detachFromCollection: () ->
     @stopListening(@collection)
@@ -1286,6 +1283,7 @@ class window.CollectionAppView extends WithChildrenView
           data[el$.data('filter')] = true
     )
     @collection.fetch(data: data)
+    @$listItems.find(".list-item").first().find('a').trigger('click')
 
   sortsChanged: (e) ->
     if @collection.any( (model) -> model.isDirty() )
@@ -1302,18 +1300,21 @@ class window.CollectionAppView extends WithChildrenView
     @addAll()
 
   addAll: () ->
-    @focusSupressed = true
     @collection.each(@addOne, @)
-    @focusSupressed = false
-    @$listItems.find(".list-item").first().find('a').trigger('click')
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
     @$listItems.append(listItemView.render().el)
-    listItemView.$('a').trigger('click') if !@focusSupressed
+    listItemView.$('a').trigger('click') if @$('.model-show-container').children().length == 0
 
   create: () ->
-    @collection.create({}, wait: false)
+    @collection.create({},
+      wait: false
+      success: (model, response, options) => @afterCreate(model, response, options)
+    )
+
+  afterCreate: (model, response, options) ->
+    @$listItems.find('.list-item').last().find('a').trigger('click')
 
   remove: () ->
     @detachFromCollection
