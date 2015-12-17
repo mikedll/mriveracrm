@@ -1,5 +1,7 @@
 class Manage::InvoicesController < Manage::BaseController
 
+  skip_before_filter :_install_parent_name
+
   configure_apps :model => Invoice do
     actions :index, :show, :update, :create, :destroy
     member_actions :mark_pending, :regenerate_pdf, :cancel, :charge, :mark_paid

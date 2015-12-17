@@ -1,7 +1,5 @@
 class Manage::ProductsController < Manage::BaseController
 
-  before_filter :_parent_name
-
   make_resourceful do
     actions :all
     belongs_to :business
@@ -46,10 +44,6 @@ class Manage::ProductsController < Manage::BaseController
 
   def parent_object
     @parent_object ||= Business.current
-  end
-
-  def _parent_name
-    @parent_name = "business" # hack; parent_object isnt enough.
   end
 
   protected

@@ -1,5 +1,7 @@
 class Manage::NotesController < Manage::BaseController
 
+  skip_before_filter :_install_parent_name
+
   make_resourceful do
     actions :all
     belongs_to :client

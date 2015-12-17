@@ -1,5 +1,7 @@
 class Manage::TransactionsController < Manage::BaseController
 
+  skip_before_filter :_install_parent_name
+
   # Makes outside transactions by default
 
   make_resourceful do

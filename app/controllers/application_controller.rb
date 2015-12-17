@@ -212,7 +212,7 @@ class ApplicationController < ActionController::Base
 
         if business_handle
           @current_business = Business.find_by_handle business_handle
-           if @current_business.nil?
+          if @current_business.nil?
              head :not_found
              return
            end

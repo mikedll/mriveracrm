@@ -1,14 +1,14 @@
 class Manage::BusinessesController < Manage::BaseController
 
-
   skip_before_filter :require_active_plan
+  skip_before_filter :_install_parent_name
 
   before_filter :_can_manage_current_object
 
   make_resourceful do
     actions :show, :update, :destroy
 
-    response_for(:show) do |format|
+    response_for(:show, :update) do |format|
       format.html
       format.json { render :json => current_object }
     end

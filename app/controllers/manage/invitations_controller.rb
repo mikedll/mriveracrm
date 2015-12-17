@@ -1,5 +1,7 @@
 class Manage::InvitationsController < Manage::BaseController
 
+  skip_before_filter :_install_parent_name
+
   make_resourceful do
     actions :index, :show, :update, :create, :destroy
     belongs_to :client

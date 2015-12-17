@@ -686,8 +686,8 @@ class window.CrmModelView extends ModelBaseView
     @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
     @textRenderer = new TextRenderer()
 
-    @inputsCache = []
-    @readonlyInputsCache = []
+    @inputsCache = $([])
+    @readonlyInputsCache = $([])
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
