@@ -507,7 +507,8 @@ class window.WithChildrenView extends BaseView
       'margin-top': -(h / 2) + "px"
     )
 
-    interiorHeight = Math.round(h * 0.8) + 'px'
+    multiplier = if @$('.app-top .btn-group').length > 0 then 0.8 else 0.95
+    interiorHeight = Math.round(h * multiplier) + 'px'
     @$('.models-list').css(
       'height': interiorHeight
     )
