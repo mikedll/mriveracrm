@@ -1,5 +1,8 @@
 class Business < ActiveRecord::Base
 
+  include Introspectable
+  include ActionView::Helpers::TranslationHelper
+
   #
   # The current business in use in the global request.
   #
@@ -23,6 +26,7 @@ class Business < ActiveRecord::Base
 
   belongs_to :default_mfe, :class_name => "MarketingFrontEnd"
 
+  before_validation :_defaults_on_create, :if => :new_record?
   before_validation :_find_default_mfe, :if => :new_record?
   before_validation :_format_fields
 
@@ -40,6 +44,20 @@ class Business < ActiveRecord::Base
   after_create :_have_usage_subscription
 
   scope :with_features, lambda { joins(:usage_subscription => :features).includes(:usage_subscription => :features) }
+
+  introspect do
+    can :destroy, :confirmation => t('business.confirm_delete')
+
+    attr :name
+    attr :stripe_secret_key
+    attr :stripe_publishable_key
+    attr :google_oauth2_client_id, :hint => t('business.oauth2_fields')
+    attr :google_oauth2_client_secret
+
+    attr :splash_html, :as => :text, :label => "Homepage Splash Text"
+
+    action :regenerate_monitored_computers_key, :enabler => nil
+  end
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
@@ -139,8 +157,11 @@ class Business < ActiveRecord::Base
     mail.deliver!
   end
 
-  private
+  def generate_it_monitored_computers_key
+    self.it_monitored_computers_key = SecureRandom.hex(16)
+  end
 
+  private
 
   def _format_fields
     self.handle.strip!
@@ -148,6 +169,10 @@ class Business < ActiveRecord::Base
 
     self.host.strip!
     self.host.downcase!
+  end
+
+  def _defaults_on_create
+    generate_it_monitored_computers_key if it_monitored_computers_key.blank?
   end
 
   def _find_default_mfe

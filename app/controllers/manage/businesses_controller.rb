@@ -5,7 +5,8 @@ class Manage::BusinessesController < Manage::BaseController
 
   before_filter :_can_manage_current_object
 
-  make_resourceful do
+  configure_apps :model => Business do
+    title "Your Business"
     actions :show, :update, :destroy
 
     response_for(:show, :update, :destroy) do |format|

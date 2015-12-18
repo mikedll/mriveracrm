@@ -41,7 +41,7 @@ module IntrospectionRenderable
       apps_configuration.merge!({
           :app_top => singular? ? false : true,
           :app_class => (singular? ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize,
-          :title => (singular? ? klass_name : klass_name.pluralize).titleize
+          :title => apps_title_override || ((singular? ? klass_name : klass_name.pluralize).titleize)
         })
 
       apps_configuration[:model_templates].push(klass)
@@ -107,8 +107,27 @@ module IntrospectionRenderable
   end
 
   module ClassMethods
+
+    #
+    # Add to make_resourceful builder api. This arguably could be
+    # better-done by extending make_resourceful.
+    #
+    class MakeResourcefulDecorator
+      def initialize(wrapped)
+        @wrapped = wrapped
+      end
+
+      def title(s)
+        self.controller.apps_title_override = s
+      end
+
+      def method_missing(method, *args, &block)
+        @wrapped.send(method, *args, &block)
+      end
+    end
+
     def configure_apps(opts, &block)
-      cattr_accessor :apps_primary_model, :apps_selected_view
+      cattr_accessor :apps_primary_model, :apps_selected_view, :apps_title_override
 
       attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name, :namespaced_model_klass_name
 
@@ -158,7 +177,8 @@ module IntrospectionRenderable
         response_for(:update_fails, :create_fails) do |format|
           format.json { render :status => :unprocessable_entity, :json => { :object => rendered_current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
         end
-        self.instance_eval(&block) if block
+
+        MakeResourcefulDecorator.new(self).instance_eval(&block) if block
       end
 
       alias_method_chain :instance_variable_name, :model_namespace_awareness

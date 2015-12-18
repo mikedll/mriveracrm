@@ -28,6 +28,8 @@ module Introspectable
   end
 
   class Configuration
+    include ActionView::Helpers::TranslationHelper
+
     attr_accessor :model_name, :destroyable, :destroyable_enabler, :synthesized, :actions, :attributes, :nested_associations, :current_group, :views, :current_view
 
     def initialize(klass_name)
