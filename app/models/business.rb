@@ -49,11 +49,16 @@ class Business < ActiveRecord::Base
     can :destroy, :confirmation => t('business.confirm_delete')
 
     attr :name
-    attr :stripe_secret_key
-    attr :stripe_publishable_key
-    attr :google_oauth2_client_id, :hint => t('business.oauth2_fields')
-    attr :google_oauth2_client_secret
+    group do
+      attr :stripe_secret_key
+      attr :stripe_publishable_key
+    end
+    group do
+      attr :google_oauth2_client_id, :hint => t('business.oauth2_fields')
+      attr :google_oauth2_client_secret
+    end
 
+    attr :it_monitored_computers_key, :read_only
     attr :splash_html, :as => :text, :label => "Homepage Splash Text"
 
     action :regenerate_monitored_computers_key
