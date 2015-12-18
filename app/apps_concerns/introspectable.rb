@@ -132,7 +132,7 @@ module Introspectable
     #
     # It's a hash with one key-value pair, where the value is a hash.
     #
-    def action(a, traits)
+    def action(a, traits = {})
       traits.reverse_merge!({ :type => :put_action })
       (current_view ? current_view.last[:actions] : actions).push({ a => traits })
     end

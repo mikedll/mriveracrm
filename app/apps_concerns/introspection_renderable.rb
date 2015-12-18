@@ -39,9 +39,9 @@ module IntrospectionRenderable
       apps_configuration[:controller_klass_container] = controller_klass_container.underscore
       apps_configuration[:subject_klass_name] = (singular? ? klass_name : klass_name.pluralize).underscore
       apps_configuration.merge!({
-          :app_top => singular? ? false : true,
-          :app_class => (singular? ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize,
-          :title => apps_title_override || ((singular? ? klass_name : klass_name.pluralize).titleize)
+          :app_top => (!plural_action? || singular?) ? false : true,
+          :app_class => ((!plural_action? || singular?) ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize,
+          :title => apps_title_override || (((!plural_action? || singular?) ? klass_name : klass_name.pluralize).titleize)
         })
 
       apps_configuration[:model_templates].push(klass)
@@ -110,7 +110,9 @@ module IntrospectionRenderable
 
     #
     # Add to make_resourceful builder api. This arguably could be
-    # better-done by extending make_resourceful.
+    # better-done by extending make_resourceful. But, apps
+    # will probably eventually replace make_resourceful
+    # on its own.
     #
     class MakeResourcefulDecorator
       def initialize(wrapped)

@@ -8,11 +8,6 @@ class Manage::BusinessesController < Manage::BaseController
   configure_apps :model => Business do
     title "Your Business"
     actions :show, :update, :destroy
-
-    response_for(:show, :update, :destroy) do |format|
-      format.html
-      format.json { render :json => current_object }
-    end
   end
 
   def current_object
