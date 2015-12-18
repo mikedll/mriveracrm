@@ -3,6 +3,7 @@ class MonitoredComputersController < ApplicationController
   skip_before_filter :verify_authenticity_token
 
   skip_before_filter :authenticate_user!
+  before_filter :_require_valid_api_key
   before_filter :require_active_plan_public
   before_filter :_require_business_support
 
@@ -19,6 +20,14 @@ class MonitoredComputersController < ApplicationController
       head :ok
     else
       head :unprocessible_entity
+    end
+  end
+
+  protected
+
+  def _require_valid_api_key
+    authenticate_or_request_with_http_basic do |u, p|
+      u == current_business.it_monitored_computers_key && p == current_business.it_monitored_computers_key
     end
   end
 
