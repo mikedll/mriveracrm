@@ -58,7 +58,11 @@ MikedllCrm::Application.routes.draw do
   namespace 'manage' do
 
     resource :billing_settings, :only => [:show, :update]
-    resource :business, :only => [:show, :update, :destroy]
+    resource :business, :only => [:show, :update, :destroy] do
+      member do
+        put  :regenerate_monitored_computers_key
+      end
+    end
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
     resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
@@ -164,7 +168,11 @@ MikedllCrm::Application.routes.draw do
     namespace 'manage' do
 
       resource :billing_settings, :only => [:show, :update]
-      resource :business, :only => [:show, :update, :destroy]
+      resource :business, :only => [:show, :update, :destroy] do
+        member do
+          put :regenerate_monitored_computers_key
+        end
+      end
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
       resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]

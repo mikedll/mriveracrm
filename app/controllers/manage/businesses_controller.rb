@@ -8,6 +8,7 @@ class Manage::BusinessesController < Manage::BaseController
   configure_apps :model => Business do
     title "Your Business"
     actions :show, :update, :destroy
+    member_actions :regenerate_monitored_computers_key
   end
 
   def current_object
@@ -17,6 +18,15 @@ class Manage::BusinessesController < Manage::BaseController
   def current_objects
     raise "Should not be attempting to load all businesses."
     @current_objects = []
+  end
+
+  def regenerate_monitored_computers_key
+    current_object.generate_it_monitored_computers_key
+    if current_object.save
+      response_for :update
+    else
+      response_for :update_fails
+    end
   end
 
   def update
