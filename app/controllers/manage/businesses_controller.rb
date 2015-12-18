@@ -21,12 +21,7 @@ class Manage::BusinessesController < Manage::BaseController
   end
 
   def regenerate_monitored_computers_key
-    current_object.generate_it_monitored_computers_key
-    if current_object.save
-      response_for :update
-    else
-      response_for :update_fails
-    end
+    with_update_and_transition { current_object.generate_it_monitored_computers_key }
   end
 
   def update
