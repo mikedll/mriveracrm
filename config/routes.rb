@@ -51,7 +51,7 @@ MikedllCrm::Application.routes.draw do
 
   resources :monitored_computers, :only => [] do
     collection do
-      put :heartbeat
+      post :heartbeat
     end
   end
 
@@ -161,7 +161,7 @@ MikedllCrm::Application.routes.draw do
 
     resources :monitored_computers, :only => [] do
       collection do
-        put :heartbeat
+        post :heartbeat
       end
     end
 
