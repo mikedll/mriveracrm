@@ -106,7 +106,6 @@ class AppsFormBuilder < SimpleForm::FormBuilder
     content_tag('div', content_tag('div', output, :class => 'controls'), :class => 'control-group')
   end
 
-
   def derived_input(attr, decorations = {})
     input(attr.keys.first.to_sym, :apps_traits => Array.wrap(attr.values.first), :apps_decors => decorations)
   end
@@ -114,6 +113,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   def input(attribute_name, options={}, &block) #:nodoc:
     apps_traits = options.delete(:apps_traits)
     apps_attr_decors = options.delete(:apps_decors)
+
     if apps_traits
       apps_derived_options = apps_traits.inject({:input_html => { :class => (options[:input_html].try(:[], :class) || '') }}) do |acc, trait|
 
@@ -136,7 +136,25 @@ class AppsFormBuilder < SimpleForm::FormBuilder
       end
 
       # "Futhermore"
-      apps_derived_options.merge!(apps_attr_decors) if apps_attr_decors
+      if apps_attr_decors
+        apps_attr_decors.each do |k, v|
+          case k
+          when :as
+            apps_derived_options[k] = v
+            case v
+            when :text
+              apps_derived_options[:input_html] ||= {}
+              apps_derived_options[:input_html][:rows] = 8 if apps_derived_options[:input_html][:rows].nil?
+            else
+            end
+          when :input_html
+            apps_derived_options[:input_html] ||= {}
+            apps_derived_options[:input_html].merge!(v)
+          else
+            apps_derived_options[k] = v
+          end
+        end
+      end
 
       options.deep_merge!(apps_derived_options)
     end
