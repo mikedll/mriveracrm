@@ -61,7 +61,8 @@ class Business < ActiveRecord::Base
     end
 
     attr :it_monitored_computers_key, :read_only
-    attr :splash_html, :as => :text, :label => "Homepage Splash Text"
+    attr :splash_html, :as => :text
+    fmore :label => "Homepage Splash Text"
 
     action :regenerate_monitored_computers_key, :confirm => I18n.t('business.confirm_regenerate_it_monitored_computers_api_key')
   end
