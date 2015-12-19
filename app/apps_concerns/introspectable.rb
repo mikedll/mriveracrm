@@ -30,12 +30,12 @@ module Introspectable
   class Configuration
     include ActionView::Helpers::TranslationHelper
 
-    attr_accessor :model_name, :destroyable, :destroyable_enabler, :synthesized, :actions, :attributes, :nested_associations, :current_group, :views, :current_view
+    attr_accessor :model_name, :destroyable, :destroyable_traits, :synthesized, :actions, :attributes, :nested_associations, :current_group, :views, :current_view
 
     def initialize(klass_name)
       self.model_name = klass_name
       self.destroyable = true
-      self.destroyable_enabler = nil
+      self.destroyable_traits = {}
       self.attributes = []
       self.synthesized = []
       self.actions = []
@@ -97,11 +97,11 @@ module Introspectable
       stack.push(current_group ? t : [t])
     end
 
-    def can(ability, options = {})
+    def can(ability, traits = {})
       case ability
       when :destroy
         self.destroyable = true
-        self.destroyable_enabler = options[:enabler] if options[:enabler]
+        action(:delete, traits.merge(:type => :delete))
       else
       end
     end

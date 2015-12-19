@@ -38,6 +38,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
 
   def derived_buttons(options = {})
     output = ActiveSupport::SafeBuffer.new
+    tail_output = nil
     output.safe_concat(content_tag('div', :class => 'btn-group') do
                          content_tag('button', 'Save', :class => 'save btn btn-primary', :type => 'button')
                        end)
@@ -52,11 +53,17 @@ class AppsFormBuilder < SimpleForm::FormBuilder
         label = name.titleize
         btn_css_classes = ['btn', name.to_s]
         data_opts = { :data => { :action => name} }
+        is_tail_output = false
         action_descriptor.values.first.each do |k, v|
           case k
           when :type
             if v == :basic
-              data_opts = { :data => {}}
+              data_opts[:data].delete(:action) if data_opts[:data][:action].nil?
+            elsif v == :delete
+              data_opts[:data][:confirm] = t('delete_confirm') if data_opts[:data][:confirm].nil?
+              btn_css_classes.push('destroy')
+              btn_css_classes.push('btn-danger')
+              is_tail_output = true
             else
               btn_css_classes.push('put_action')
             end
@@ -70,26 +77,21 @@ class AppsFormBuilder < SimpleForm::FormBuilder
           end
         end
 
-        output.safe_concat(content_tag('div', :class => 'btn-group') do
-                             button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
-                           end)
+        if is_tail_output
+          # Content pulled-right.
+          tail_output ||= ActiveSupport::SafeBuffer.new
+          tail_output.safe_concat(content_tag('div', :class => 'btn-group pull-right') do
+                               button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
+                             end)
+        else
+          output.safe_concat(content_tag('div', :class => 'btn-group') do
+                               button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
+                             end)
+        end
       end
     end
 
-    #
-    # Remove nil check on options[:view] after abilities are view-aware in Introspectable.
-    #
-    if object.nil? || (options[:view].nil? && object.class.introspectable_configuration.destroyable == true)
-      data_opts = { :data => { :confirm => t('delete_confirm') } }
-      if object && object.class.introspectable_configuration.destroyable_enabler
-        data_opts['data-attribute_enabler'] = object.class.introspectable_configuration.destroyable_enabler
-      end
-
-      output.safe_concat(content_tag('div', :class => 'btn-group pull-right') do
-                           content_tag('button', 'Delete', {:class => 'destroy btn btn-danger', :type => 'button'}.merge(data_opts))
-                         end)
-    end
-
+    output.safe_concat(tail_output) if !tail_output.blank?
     content_tag('div', content_tag('div', output, :class => 'controls'), :class => 'control-group')
   end
 
