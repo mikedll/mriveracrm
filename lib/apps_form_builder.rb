@@ -10,10 +10,11 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   def derived_inputs(options = {})
     return nil if object.nil?
 
+    config = object.class.introspectable_configuration
     output = ActiveSupport::SafeBuffer.new
-    object.class.introspectable_configuration.attribute_stack_for_view(options[:view]).each do |row|
+    config.attribute_stack_for_view(options[:view]).each do |row|
       if row.length == 1
-        output.safe_concat(derived_input(row.first))
+        output.safe_concat(derived_input(row.first, config.attr_decoration(row.first.keys.first.to_sym, options[:view])))
       else
         div_class = nil
         if row.length > 4
@@ -27,7 +28,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
 
         inputs_html = ActiveSupport::SafeBuffer.new
         row.each do |attr|
-          inputs_html.safe_concat(content_tag('div', derived_input(attr), :class => div_class))
+          inputs_html.safe_concat(content_tag('div', derived_input(attr, config.attr_decoration(attr.keys.first.to_sym, options[:view])), :class => div_class))
         end
         output.safe_concat(div_class.nil? ? inputs_html : content_tag('div', inputs_html, :class => 'row-fluid'))
       end
@@ -47,10 +48,17 @@ class AppsFormBuilder < SimpleForm::FormBuilder
                          content_tag('button', 'Revert', :class => 'revert btn btn-warning', :type => 'button', :data => { :confirm => t('revert_confirm') })
                        end)
 
+
+    #
+    # We as of yet don't derive a default button set for objectless invocations of
+    # this FormBuilder, although supplying a default here in the future may
+    # not be hard. It's not clear that we need such a default right now. M. Rivera 12/19/15
+    #
     if object
       object.class.introspectable_configuration.actions_for_view(options[:view]).each do |action_descriptor|
         name = action_descriptor.keys.first.to_s
         label = name.titleize
+        btn_group_css_classes = ["btn-group"]
         btn_css_classes = ['btn', name.to_s]
         data_opts = { :data => { :action => name} }
         is_tail_output = false
@@ -77,17 +85,20 @@ class AppsFormBuilder < SimpleForm::FormBuilder
           end
         end
 
+        selected_output = output
         if is_tail_output
-          # Content pulled-right.
           tail_output ||= ActiveSupport::SafeBuffer.new
-          tail_output.safe_concat(content_tag('div', :class => 'btn-group pull-right') do
-                               button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
-                             end)
+          btn_group_css_classes.push('pull-right')
+          tail_output.safe_concat(content_tag('div', :class => btn_group_css_classes.join(' ')) do
+                                        button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
+                                      end)
         else
-          output.safe_concat(content_tag('div', :class => 'btn-group') do
-                               button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
-                             end)
+          selected_output.safe_concat(content_tag('div', :class => btn_group_css_classes.join(' ')) do
+                                        button_tag(label, {:type => 'button', :class => btn_css_classes.join(' ')}.merge(data_opts))
+                                      end)
+
         end
+
       end
     end
 
@@ -96,16 +107,13 @@ class AppsFormBuilder < SimpleForm::FormBuilder
   end
 
 
-  def derived_input(attr)
-    if attr.is_a?(Hash)
-      input(attr.keys.first.to_sym, :apps_traits => Array.wrap(attr.values.first))
-    else
-      input(attr)
-    end
+  def derived_input(attr, decorations = {})
+    input(attr.keys.first.to_sym, :apps_traits => Array.wrap(attr.values.first), :apps_decors => decorations)
   end
 
   def input(attribute_name, options={}, &block) #:nodoc:
     apps_traits = options.delete(:apps_traits)
+    apps_attr_decors = options.delete(:apps_decors)
     if apps_traits
       apps_derived_options = apps_traits.inject({:input_html => { :class => (options[:input_html].try(:[], :class) || '') }}) do |acc, trait|
 
@@ -126,6 +134,9 @@ class AppsFormBuilder < SimpleForm::FormBuilder
         acc[:input_html][:class] += "#{acc[:input_html][:class].blank? ? '' : ' '}#{css_class}" if css_class
         acc
       end
+
+      # "Futhermore"
+      apps_derived_options.merge!(apps_attr_decors) if apps_attr_decors
 
       options.deep_merge!(apps_derived_options)
     end

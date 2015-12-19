@@ -58,7 +58,7 @@ en:
     google_public_api_key: "This is not used yet."
     oauth2_fields: "This and the client secret allow visitors (clients, employees, etc) to login to your business website without creating a username and password. They can use Google's OAuth login feature."
     google_analytics_id: "No need to modify HTML. Simply give us your Google Anlytics key and we'll insert it into every one of your pages for you."
-    confirm_regerated_it_monitored_computers_api_key: "Are you sure you want to regenerate the Monitored Computers API key?"
+    confirm_regenerate_it_monitored_computers_api_key: "Are you sure you want to regenerate the Monitored Computers API key?"
     errors:
       handle_format: can only contain letters and numbers
       inactive_plan_internal: "Your business's subscription is not active. See the Billing page to rectify this."

@@ -46,7 +46,7 @@ class Business < ActiveRecord::Base
   scope :with_features, lambda { joins(:usage_subscription => :features).includes(:usage_subscription => :features) }
 
   introspect do
-    can :destroy, :confirm => t('business.confirm_delete')
+    can :destroy, :confirm => I18n.t('business.confirm_delete')
 
     attr :name
     group do
@@ -54,14 +54,16 @@ class Business < ActiveRecord::Base
       attr :stripe_publishable_key
     end
     group do
-      attr :google_oauth2_client_id, :hint => t('business.oauth2_fields')
+      attr :google_oauth2_client_id
+      fmore :hint => I18n.t('business.oauth2_fields')
+
       attr :google_oauth2_client_secret
     end
 
     attr :it_monitored_computers_key, :read_only
     attr :splash_html, :as => :text, :label => "Homepage Splash Text"
 
-    action :regenerate_monitored_computers_key, :confirm => t('business.confirm_regerated_it_monitored_computers_api_key')
+    action :regenerate_monitored_computers_key, :confirm => I18n.t('business.confirm_regenerate_it_monitored_computers_api_key')
   end
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
