@@ -1,4 +1,4 @@
-class SEORankersHaveActive < ActiveRecord::Migration
+class SeoRankersHaveActive < ActiveRecord::Migration
   def up
     add_column :seo_rankers, :active, :boolean, :null => false, :default => false
   end
