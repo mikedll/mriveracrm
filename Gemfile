@@ -32,6 +32,7 @@ gem 'excon', '>= 0.27.5'
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
 gem "nokogiri"
 gem "rest-client"
+gem "foreman"
 
 gem "safe_yaml", :group => [:default, :fine_grained_daemon, :scheduler]
 gem 'multi_json', :group => [:default, :fine_grained_daemon]
@@ -59,7 +60,6 @@ group :development do
   gem "capistrano"
   gem "rvm-capistrano", :require => false
   gem "rvm"
-  gem "foreman"
   gem "cknife"
 end
 
