@@ -27,7 +27,7 @@ class IT::MonitoredComputer < ActiveRecord::Base
   # last_heartbeat_received_at is null OR
 
   introspect do
-    can :destroy, :enabler => nil
+    can :destroy
 
     attr :name
     attr :hostname

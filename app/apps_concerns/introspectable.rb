@@ -5,7 +5,7 @@ require 'active_support/concern'
 # Allows things like the following in an ActiveRecord model:
 #
 # introspect do
-#   can :destroy, :enabler => nil
+#   can :destroy
 
 #   attr :name
 #   attr :hostname
