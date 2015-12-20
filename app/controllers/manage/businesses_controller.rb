@@ -20,7 +20,7 @@ class Manage::BusinessesController < Manage::BaseController
     @current_objects = []
   end
 
-  def regenerate_monitored_computers_key
+  def regenerate_monitored_computers_api_key
     with_update_and_transition { current_object.generate_it_monitored_computers_key }
   end
 
