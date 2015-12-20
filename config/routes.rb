@@ -60,7 +60,7 @@ MikedllCrm::Application.routes.draw do
     resource :billing_settings, :only => [:show, :update]
     resource :business, :only => [:show, :update, :destroy] do
       member do
-        put  :regenerate_monitored_computers_key
+        put  :regenerate_monitored_computers_api_key
       end
     end
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
@@ -170,7 +170,7 @@ MikedllCrm::Application.routes.draw do
       resource :billing_settings, :only => [:show, :update]
       resource :business, :only => [:show, :update, :destroy] do
         member do
-          put :regenerate_monitored_computers_key
+          put :regenerate_monitored_computers_api_key
         end
       end
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
