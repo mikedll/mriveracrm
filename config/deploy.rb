@@ -16,12 +16,6 @@ set :rvm_ruby_string, '2.0.0-p247@mikedllcrm'
 set :rvm_type, :user
 
 namespace :deploy do
-  # task :start do ; end
-  # task :stop do ; end
-  # task :restart, :roles => :app, :except => { :no_release => true } do
-  #   run "#{try_sudo} touch #{File.join(current_path,'tmp','restart.txt')}"
-  # end
-
   task :configs do
     run "ln -nfs #{shared_path}/config/database.yml #{release_path}/config/database.yml"
     run "ln -nfs #{shared_path}/config/credentials.yml #{release_path}/config/credentials.yml"
@@ -34,9 +28,33 @@ namespace :deploy do
     put File.read("config/credentials.yml.sample"), "#{shared_path}/config/credentials.yml"
   end
 
-  # task :prepare_foreman, :roles => [:app] do
-  #   run "cd #{release_path}; bundle exec foreman export upstart /etc/init -f config/foreman/Procfile.production -e config/foreman/production.env -u #{fetch(:user)}"
-  # end
+  def app_rvmsudo
+    "export rvmsudo_secure_path=1; cd #{current_path};"
+  end
+
+  def dump_rvm_env
+    "echo \"PATH=$PATH\" > tmp/path.env; echo \"GEM_HOME=$GEM_HOME\" >> tmp/path.env; echo \"GEM_PATH=$GEM_PATH\" >> tmp/path.env;"
+  end
+
+  task :prepare_foreman, :roles => [:app] do
+    run "#{app_rvmsudo} #{dump_rvm_env} rvmsudo bundle exec foreman export upstart /etc/init -f config/foreman/Procfile.production -e config/foreman/production.env,tmp/path.env -u #{fetch(:user)} -a #{fetch(:application)} -l #{current_path}/log"
+  end
+
+  task :start, :roles => :app do
+    run "sudo start #{fetch(:application)}"
+  end
+
+  task :stop, :roles => :app do
+    run "sudo stop #{fetch(:application)}"
+  end
+
+  task :restart, :roles => :app, :except => { :no_release => true } do
+    run "sudo restart #{fetch(:application)}"
+  end
+end
+
+task :rvminfo do
+  run "rvm info"
 end
 
 task :production do
@@ -48,4 +66,4 @@ task :production do
 end
 
 after 'deploy:update_code', 'deploy:configs'
-after 'deploy:restart', 'unicorn:restart'  # app preloaded
+
