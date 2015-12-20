@@ -1,4 +1,4 @@
-class RenameSeoRankersToODeskListers < ActiveRecord::Migration
+class RenameSeoRankersToOdeskListers < ActiveRecord::Migration
   def up
     rename_table :seo_rankers, :odesk_listers
   end
