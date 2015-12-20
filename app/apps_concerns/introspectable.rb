@@ -95,7 +95,7 @@ module Introspectable
     end
 
     def view(name, opts = {}, &block)
-      self.current_view = [name, { :attr_decorations => [], :attrs => [], :actions => [], :synthesized => [] }]
+      self.current_view = [name, { :attr_decorations => {}, :attrs => [], :actions => [], :synthesized => [] }]
       instance_eval(&block)
       self.last_attr = nil
       views.push(current_view)

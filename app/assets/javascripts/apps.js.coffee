@@ -953,7 +953,7 @@ class window.CrmModelView extends ModelBaseView
           else if el$.hasClass('hasDatepicker')
             v = @toHumanReadableDateFormat(v)
           else if el$.hasClass('currency')
-            v = "$#{@textRenderer.toFixed(v, 2)}"
+            v = @textRenderer.toFixed(v, 2)
           el$.val(v)
     )
 
