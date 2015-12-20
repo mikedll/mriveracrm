@@ -1,4 +1,4 @@
-class RemoveHostToMatchFromODeskListers < ActiveRecord::Migration
+class RemoveHostToMatchFromOdeskListers < ActiveRecord::Migration
   def up
     remove_column :odesk_listers, :host_to_match
   end
