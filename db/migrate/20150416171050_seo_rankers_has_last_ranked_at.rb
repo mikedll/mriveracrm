@@ -1,4 +1,4 @@
-class SEORankersHasLastRankedAt < ActiveRecord::Migration
+class SeoRankersHasLastRankedAt < ActiveRecord::Migration
   def up
     add_column :seo_rankers, :last_ranked_at, :datetime
   end

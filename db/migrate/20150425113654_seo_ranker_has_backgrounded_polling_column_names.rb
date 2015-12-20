@@ -1,4 +1,4 @@
-class SEORankerHasBackgroundedPollingColumnNames < ActiveRecord::Migration
+class SeoRankerHasBackgroundedPollingColumnNames < ActiveRecord::Migration
   def up
     rename_column :seo_rankers, :last_ranked_at, :last_polled_at
   end
