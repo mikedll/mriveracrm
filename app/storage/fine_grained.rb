@@ -851,7 +851,7 @@ class FineGrainedFile
       return
     end
 
-    @used_pages = @file.read(used_pages_size) if used_pages_size > 0
+    @used_pages = used_pages_size > 0 ? @file.read(used_pages_size) : ""
 
     i = 0
     to_page(i)
