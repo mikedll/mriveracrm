@@ -1,4 +1,4 @@
-class BusinessesHaveGoogleApiKey < ActiveRecord::Migration
+class BusinessesHaveGoogleAPIKey < ActiveRecord::Migration
   def up
     add_column :businesses, :google_public_api_key, :string, :default => "", :null => false
   end
