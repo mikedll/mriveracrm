@@ -27,8 +27,8 @@ FactoryGirl.define do
     google_oauth2_client_id "google_oauth2_client_idxxx"
     google_oauth2_client_secret "google_oauth2_client_secretxxx"
 
-    stripe_secret_key "sk_test_SoDXR6QkygrYnlnFhDWKNbB2"
-    stripe_publishable_key "pk_test_rPvMBvyuzsgRIXZFCW2xMmxz"
+    stripe_secret_key AppConfiguration.get('stripe.secret_key')
+    stripe_publishable_key AppConfiguration.get('stripe.publishable_key')
 
     after(:create) do |business, eval|
       if Business.current.nil? || RequestSettings.host.nil?
@@ -116,12 +116,7 @@ FactoryGirl.define do
     last_name "Watson"
 
     factory :stubbed_client do
-      before(:create) { |profile, evaluator|
-        PaymentGateway.stub(:authorizenet) { RSpec::Mocks::Mock.new("gateway", :create_customer_profile => ApiStubs.authorize_net_create_customer_profile) }
-
-        Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer }
-        Stripe::Charge.stub(:create) { ApiStubs.stripe_charge }
-      }
+      # obsolete as of generic_stripe_stub! in ApiStubs in spec_helper
     end
   end
 
@@ -162,16 +157,13 @@ FactoryGirl.define do
     # have to do this before even the create call.
     # before :build's effect is ambiguous.
     payment_gateway_profilable do
-      UsageSubscription.any_instance.stub(:require_payment_gateway_profile)
-      UsageSubscription.any_instance.stub(:ensure_correct_plan!)
-      UsageSubscription.any_instance.stub(:notify_signup!)
-      FactoryGirl.create(:usage_subscription)
+      FactoryGirl.create(:stubbed_profilable_usage_subscription)
     end
 
     after :create do |profile|
-      UsageSubscription.any_instance.unstub(:notify_signup!)
-      UsageSubscription.any_instance.unstub(:ensure_correct_plan!)
-      UsageSubscription.any_instance.unstub(:require_payment_gateway_profile)
+      profile.payment_gateway_profilable.unstub(:require_payment_gateway_profile)
+      profile.payment_gateway_profilable.unstub(:ensure_correct_plan!)
+      profile.payment_gateway_profilable.unstub(:notify_signup!)
       profile.payment_gateway_profilable.send(:ensure_correct_plan!)
     end
   end
@@ -182,6 +174,15 @@ FactoryGirl.define do
     date { Time.now }
     total { 2500.00 }
     status { "open" }
+
+    after :build do |r|
+      r.stub(:_enqueue_pdf_generation)
+    end
+
+    after :create do |r|
+      r.persistent_requests_count.reset
+      r.persistent_requests.clear
+    end
 
     factory :unstubbed_client_invoice do
       client { FactoryGirl.create(:client) }
@@ -197,8 +198,6 @@ FactoryGirl.define do
         end
       end
     end
-
-
   end
 
   factory :transaction do
@@ -278,6 +277,16 @@ FactoryGirl.define do
     business
     generation { 0 }
 
+    # It is the responsibility of the caller to unstub
+    # the below stubs.
+    factory :stubbed_profilable_usage_subscription do
+      payment_gateway_profile nil
+      after :build do |r|
+        r.stub(:require_payment_gateway_profile)
+        r.stub(:ensure_correct_plan!)
+        r.stub(:notify_signup!)
+      end
+    end
     factory :usage_subscription
   end
 
@@ -314,4 +323,18 @@ FactoryGirl.define do
     marketing_front_end
   end
 
+  factory :it_monitored_computer, :class => IT::MonitoredComputer do
+    business
+    name { generate(:random_name) }
+    active true
+    down false
+    hostname { "crmdev.michaelriveraco.com" }
+    factory :dead_it_monitored_computer do
+      last_heartbeat_received_at { Time.now - (IT::MonitoredComputer::HEARTBEAT_PERIOD + 5.seconds) }
+    end
+  end
+
+  factory :notification do
+    business
+  end
 end

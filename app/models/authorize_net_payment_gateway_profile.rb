@@ -1,5 +1,7 @@
 class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
+  attr_accessor :last_error
+
   module AuthorizeResponses
     OK = 'Ok'
     ERROR = 'Error'
@@ -21,9 +23,12 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
     nil
   end
 
-  def pay_invoice!(invoice)
+  def pay_invoice!(amount, description)
+
+    raise "This no longer agrees with the interface's description. Rewrite it."
+
     if self.vendor_id.nil? || self.card_profile_id.nil?
-      self.last_error = I18n.t('payment_gateway_profile.cant_pay')
+      self.last_error = I18n.t('payment_gateway_profile.not_ready_for_payments')
       return false
     end
 
@@ -91,12 +96,12 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
   #
   # 
   #
-  def update_payment_info(opts)
-    card = card_from_opts(opts)
+  def update_payment_info(options)
+    card = card_from_options(options)
 
     return false if !card_valid?(card)
 
-    call_opts = {
+    call_options = {
       :customer_profile_id => self.vendor_id,
       :payment_profile => {
         :payment => {
@@ -107,13 +112,13 @@ class AuthorizeNetPaymentGatewayProfile < PaymentGatewayProfile
 
     call_prefix = 'create'
     if !self.card_profile_id.nil?
-      call_opts[:payment_profile].merge!(:customer_payment_profile_id => self.card_profile_id) 
+      call_options[:payment_profile].merge!(:customer_payment_profile_id => self.card_profile_id) 
       call_prefix = 'update'
     end
 
     response = nil
     begin
-      response = PaymentGateway.authorizenet.send("#{call_prefix}_customer_payment_profile".to_sym, call_opts)
+      response = PaymentGateway.authorizenet.send("#{call_prefix}_customer_payment_profile".to_sym, call_options)
     rescue => e
       self.errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
       return false      

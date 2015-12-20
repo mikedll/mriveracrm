@@ -1,10 +1,13 @@
 class PaymentGatewayProfile < ActiveRecord::Base
+
+  include PersistentRequestable
+
   belongs_to :payment_gateway_profilable, polymorphic: true
   has_many :transactions
 
   after_create :_create_remote
 
-  attr_accessor :last_error, :card_number, :expiration_month, :expiration_year, :cv_code
+  attr_accessor :card_number, :expiration_month, :expiration_year, :cv_code
 
   TRIAL_DURATION = 30.days
 
@@ -25,12 +28,12 @@ class PaymentGatewayProfile < ActiveRecord::Base
     raise "Implement in subclass."
   end
 
-  def card_from_opts(opts)
+  def card_from_options(options)
     ActiveMerchant::Billing::CreditCard.new({
-                                              :month => opts[:expiration_month].to_i,
-                                              :year => "20#{opts[:expiration_year]}".to_i,
-                                              :number => opts[:card_number],
-                                              :verification_value => opts[:cv_code]
+                                              :month => options[:expiration_month].to_i,
+                                              :year => "20#{options[:expiration_year]}".to_i,
+                                              :number => options[:card_number],
+                                              :verification_value => options[:cv_code]
                                             }.merge(payment_gateway_profilable.payment_profile_profilable_card_args))
   end
 
@@ -52,7 +55,7 @@ class PaymentGatewayProfile < ActiveRecord::Base
     card_last_4.blank? ? "No card on file" : "#{card_brand.camelize} ending in #{card_last_4}"
   end
 
-  def pay_invoice!(invoice)
+  def pay_invoice!(amount, description)
     raise "Implement in subclass."
   end
 

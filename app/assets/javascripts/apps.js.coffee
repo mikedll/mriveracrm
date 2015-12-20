@@ -28,6 +28,7 @@ window.AppsConfig =
   datetimePickerTimeFormat: 'h:mmTT'
   fadeDuration: 1000
   balloonDuration: 2000
+  refreshFrequency: 3000
 
 class window.TextRenderer
   toFixed: (value, precision) ->
@@ -105,7 +106,7 @@ class window.BaseModel extends Backbone.Model
 
     @_lastRequestError = null
     @_attributesSinceSync = {}
-
+    @_refreshTimeout = null
     @ignoredAttributes = {}
 
     @listenTo(@, 'invalid', @onInvalid)
@@ -113,8 +114,29 @@ class window.BaseModel extends Backbone.Model
     @listenTo(@, 'request', @onRequest)
     @listenTo(@, 'sync', @onSync)
     @listenTo(@, 'error', @onError)
+    @listenTo(@, 'destroy', @onDestroy)
+
+    # This should be replacable with onChange
+    # but onChange is not working for pollIfNeeded
+    # for some reason.
+    @listenTo(@, 'bootstrapped', @onBootstrapped)
 
     @dumpOnChange = false
+
+  #
+  # Override in subclass that is persistent requestable.
+  #
+  isPersistentRequestingAvailable: () ->
+    true
+
+  isPersistentRequesting: () ->
+    !@isPersistentRequestingAvailable() && !@isNew()
+
+  url: () ->
+    if typeof(@urlFragment) != "undefined"
+      gUrlManager.url(@urlFragment)
+    else
+      Backbone.Model.prototype.url.apply(@, arguments)
 
   isDirty: () ->
     return @_isDirty
@@ -123,7 +145,7 @@ class window.BaseModel extends Backbone.Model
     return @_isInvalid
 
   isRequesting: () ->
-    return @_isRequesting
+    @_isRequesting || @isPersistentRequesting()
 
   onInvalid: () ->
     @_isInvalid = true
@@ -156,7 +178,7 @@ class window.BaseModel extends Backbone.Model
       @_isInvalid = false
 
     if @dumpOnChange
-      console.log(@attributes)
+      AppsLogger.log(@attributes)
 
   # hook for subclasses to adjust the set attrs
   adjustSetAttrs: (attrs) ->
@@ -276,6 +298,13 @@ class window.BaseModel extends Backbone.Model
     @set(attrs)
     @trigger('sync', @, null, {})
 
+  pollIfNeeded: () ->
+    if !@_refreshTimeout? && @isPersistentRequesting()
+      @_refreshTimeout = setTimeout( () =>
+        @_refreshTimeout = null
+        @fetch()
+      , AppsConfig.refreshFrequency)
+
   onSync: () ->
     # purge any destroyed attrs, before deleting history.
     retainedHasRelations = {}
@@ -301,10 +330,19 @@ class window.BaseModel extends Backbone.Model
     @_isInvalid = false
     @_isDirty = false
 
+    @pollIfNeeded()
+
   onError: (model, xhr, options) ->
     @_isRequesting = false
     @_isInvalid = true
     @_lastRequestError = jQuery.parseJSON( xhr.responseText )
+
+  onDestroy: () ->
+    clearTimeout(@_refreshTimeout) if @_refreshTimeout?
+    @_isRequesting = false
+
+  onBootstrapped: () ->
+    @pollIfNeeded()
 
 class window.BaseView extends Backbone.View
   initialize: (options) ->
@@ -355,6 +393,12 @@ class window.BaseView extends Backbone.View
       return false
     return true
 
+  notifyRequestStarted: (e) ->
+    @parent.notifyRequestStarted() if @parent?
+
+  notifyRequestCompleted: (e) ->
+    @parent.notifyRequestCompleted() if @parent?
+
 class window.ModelBaseView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
@@ -363,6 +407,10 @@ class window.ModelBaseView extends BaseView
     @listenTo(@model, 'request', @onRequest)
     @listenTo(@model, 'sync', @onSync)
     @listenTo(@model, 'error', @onError)
+    @listenTo(@model, 'destroy', @onDestroy)
+
+  detachFromModel: () ->
+    @stopListening(@model)
 
   dirtyRegistration: () ->
     return if !@useDirty
@@ -371,28 +419,53 @@ class window.ModelBaseView extends BaseView
     else
       @parent.unregisterDirty(@model)
 
+  decorateDirty: () ->
+
+  decorateError: () ->
+
+  decorateRequesting: () ->
+
+  copyModelToForm: () ->
+    throw "Override in base class of ModelBaseView."
+
+  repaintEditable: () ->
+    @copyModelToForm()
+
+  repaintNonEditable: () ->
+    @decorateDirty()
+    @decorateError()
+    @decorateRequesting()
+    @resolveButtonAvailability()
+
   onModelChanged: (e) ->
     @dirtyRegistration()
+    @resolveButtonAvailability()
 
   onRequest: (model, xhr, options) ->
     if @model.isRequesting()
-      @$('.save').addClass('disabled')
-      @$('.revert').addClass('disabled')
+      @notifyRequestStarted()
+    @resolveButtonAvailability()
+
+  onDestroy: (model, resp, options) ->
+    if !@model.isRequesting() && !@model.isNew() # isNew() => a request just finished to delete this on the server
+      @notifyRequestCompleted()
 
   onSync: (model, resp, options) ->
-    @resolveButtonAvailability() if !@model.isRequesting()
+    if !@model.isRequesting()
+      @notifyRequestCompleted()
+    @resolveButtonAvailability()
     @dirtyRegistration()
 
   onError: (model, resp, options) ->
-    @resolveButtonAvailability() if !@model.isRequesting()
+    if !@model.isRequesting()
+      @notifyRequestCompleted()
+    @resolveButtonAvailability()
 
   resolveButtonAvailability: () ->
-    if @model.isDirty()
-      @$('.save').removeClass('disabled')
-      @$('.revert').removeClass('disabled')
+    if @model.isRequesting() || !@model.isDirty()
+      @$('.save, .revert').addClass('disabled')
     else
-      @$('.save').addClass('disabled')
-      @$('.revert').addClass('disabled')
+      @$('.save, .revert').removeClass('disabled')
 
 
 class window.BaseCollection extends Backbone.Collection
@@ -406,6 +479,16 @@ class window.BaseCollection extends Backbone.Collection
     @comparator = (model) ->
       model.get('id')
 
+    @listenTo(@, 'reset', @onReset)
+
+  url: () ->
+    if typeof(@urlFragment) != "undefined"
+      gUrlManager.url(@urlFragment)
+    else
+      Backbone.Collection.prototype.url.apply(@, arguments)
+
+  onReset: () ->
+    @each((model) -> model.trigger('bootstrapped'))
 
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
@@ -423,8 +506,15 @@ class window.WithChildrenView extends BaseView
       'margin-left': -(w / 2) + "px"
       'margin-top': -(h / 2) + "px"
     )
+
+    multiplier = if @$('.app-top .btn-group').length > 0 then 0.8 else 0.95
+    interiorHeight = Math.round(h * multiplier) + 'px'
     @$('.models-list').css(
-      'height': Math.round(h * 0.8) + 'px'
+      'height': interiorHeight
+    )
+
+    @$('.model-show-container').css(
+      'height': interiorHeight
     )
 
   disableWithShield: () ->
@@ -462,12 +552,6 @@ class window.ListItemView extends ModelBaseView
   tagName: 'li'
   className: 'list-item'
 
-  id: () ->
-    if !@model.isNew()
-      "list-item-#{@model.get('id')}"
-    else
-      ""
-
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
@@ -475,8 +559,7 @@ class window.ListItemView extends ModelBaseView
     )
 
     @parent = options.parent
-    # 'sync', 'change', 'request', and 'error' are in ModelBaseView
-    @listenTo(@model, 'destroy', @onDestroy)
+    # 'sync', 'change', 'request', 'destroy', and 'error' are in ModelBaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
     @listenTo(@model, 'resorted', @onResorted)
@@ -485,6 +568,7 @@ class window.ListItemView extends ModelBaseView
     @removeDom()
 
   onDestroy: () ->
+    ModelBaseView.prototype.onDestroy.apply(@, arguments)
     @removeDom()
 
   onResorted: () ->
@@ -497,11 +581,13 @@ class window.ListItemView extends ModelBaseView
     s = @title()
     @$('a .titleText').text(if s? && s.trim() != "" then s else "-")
 
+  repaintNonEditable: () ->
+    ModelBaseView.prototype.repaintNonEditable.apply(@, arguments)
+    @setTitle()
+
   onModelChanged: (e) ->
     ModelBaseView.prototype.onModelChanged.apply(@, arguments)
-    @decorateDirty()
-    @decorateError()
-    @setTitle()
+    @repaintNonEditable()
 
   decorateDirty: () ->
     if @model.isDirty()
@@ -522,21 +608,22 @@ class window.ListItemView extends ModelBaseView
       @$el.removeClass('error')
 
   removeDom: () ->
-    if @showview?
-      @showview.remove()
+    @detachFromModel()
+    if @modelView?
+      @modelView.remove()
     @$el.remove() # remove DOM element
 
   show: (e) ->
     e.stopPropagation()
-    if !@showview?
-      @showview = @spawnView()
-      @showview.render()
-    @parent.show(@showview)
+    if !@modelView?
+      @modelView = @spawnView()
+      @modelView.render()
+    @parent.show(@, @modelView)
     false
 
   render: () ->
     @$el.html($('.list-item-view-title-template a').clone()) if @$('a').length == 0
-    @setTitle()
+    @repaintNonEditable()
     @
 
   clearHighlightedModelErrors: () ->
@@ -544,20 +631,15 @@ class window.ListItemView extends ModelBaseView
     @parent.clearHighlightedModelErrors() if @parent?
 
   onRequest: () ->
-    @decorateError()
-    @decorateRequesting()
+    ModelBaseView.prototype.onRequest.apply(@, arguments)
+    @repaintNonEditable()
 
   onInvalid: () ->
-    @decorateError()
-    @decorateRequesting()
+    @repaintNonEditable()
 
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
-    @$el.prop('id', @id()) if @$el.prop('id') == ""
     @render()
-    @decorateDirty()
-    @decorateError()
-    @decorateRequesting()
 
   onError: (model, resp, options) ->
     ModelBaseView.prototype.onError.apply(@, arguments)
@@ -570,6 +652,14 @@ class window.ListItemView extends ModelBaseView
   spawnView: () ->
     new @spawnViewType({model:@model, className: "#{@modelName}-view model-view", parent: @})
 
+  activate: () ->
+    @$('a').addClass('active')
+    @modelView.delegateEvents()
+
+  deactivate: () ->
+    @modelView.undelegateEvents()
+    @$('a').removeClass('active')
+
 
 #
 # Define className, modelName, and probably events and render
@@ -580,12 +670,6 @@ class window.ListItemView extends ModelBaseView
 #
 class window.CrmModelView extends ModelBaseView
   className: 'model-view'
-
-  id: () ->
-    if !@model.isNew()
-      "#{@modelName}-view-#{@model.get('id')}"
-    else
-      ""
 
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
@@ -599,11 +683,11 @@ class window.CrmModelView extends ModelBaseView
       'confirm:complete .btn.destroy': 'destroy'
       'confirm:complete .btn.put_action': 'putActionConfirmed'
       'click .btn.put_action:not([data-confirm])': 'putAction'
+      'click .refresh': 'refresh'
     )
 
     @parent = options.parent
-    # 'sync', 'change', 'error', and 'request' are in ModelBaseView
-    @listenTo(@model, 'destroy', @onDestroy)
+    # 'sync', 'change', 'error', 'destroy', and 'request' are in ModelBaseView
     @listenTo(@model, 'remove', @onRemove)
     @listenTo(@model, 'invalid', @onInvalid)
 
@@ -611,14 +695,24 @@ class window.CrmModelView extends ModelBaseView
     @subAttributeMatcher = new RegExp("\\[(\\w+)\\]")
     @textRenderer = new TextRenderer()
 
-    @inputsCache = []
-    @readonlyInputsCache = []
+    @inputsCache = $([])
+    @readonlyInputsCache = $([])
 
   childViewPulled: (view) ->
     @options.parent.childViewPulled(view)
 
   rebindGlobalHotKeys: () ->
     @parent.rebindGlobalHotKeys()
+
+  inputFor$: (attributeName, readOnly) ->
+    readOnly = readOnly || true
+    toSearch = if readOnly then @readonlyInputsCache else @inputsCache.add(@readonlyInputsCache)
+    input =_.find(toSearch, (el) => @nameFromInput($(el)) == attributeName)
+    if typeof(input) == "undefined"
+      AppsLogger.log("CrmModelView.inputFor failed to find input for attribute named #{attributeName}")
+      return input
+    else
+      return $(input)
 
   putAction: (e) ->
     return false if @buttonsCache.filter(e.target).length == 0
@@ -628,13 +722,18 @@ class window.CrmModelView extends ModelBaseView
     return false if @buttonsCache.filter(e.target).length == 0
     @putAction(e) if answer
 
+  refresh: () ->
+    @model.fetch()
+
   onDestroy: () ->
+    ModelBaseView.prototype.onDestroy.apply(@, arguments)
     @removeDom()
 
   onRemove: () ->
     @removeDom()
 
   removeDom: () ->
+    @detachFromModel()
     @parent = null # remove pointer to parent.
     @$el.remove() if @$el? # isn't this event redundant? review with onDestroy event. http://backbonejs.org/#View-remove
 
@@ -684,17 +783,17 @@ class window.CrmModelView extends ModelBaseView
     @readonlyInputsCache.each((i, domEl) =>
       el$ = $(domEl)
       attributeName = @nameFromInput(el$, true)
+      # todo: this is dirty code. You're using changed which is only coincidentally
+      # defined above when @model.isDirty() is true.
       if attributeName? and @model.isDirty() and _.has(changed, attributeName)
         el$.closest('.control-group').addClass('warning')
       else
         el$.closest('.control-group').removeClass('warning')
     )
 
-    @resolveButtonAvailability()
-
   onModelChanged: (e) ->
     # since this is the primary editing area of this model,
-    # we really don't update it just because the model changes.
+    # we don't update it when the model changes.
     # in the event another editing area updates this,
     # more code needs to be written here.
     #
@@ -708,7 +807,7 @@ class window.CrmModelView extends ModelBaseView
     @copyReadOnlyFieldsToForm()
     @decorateDirty()
     if @model.validationError?
-      @renderErrors(@model.validationError)
+      @decorateError()
     else
       @clearErrors(@model.changedAttributes())
 
@@ -828,7 +927,7 @@ class window.CrmModelView extends ModelBaseView
           v = @toHumanReadableDateTimeFormat(v, 'dateJsReadonlyDateTime')
         else if el$.hasClass('date')
           v = @toHumanReadableDateFormat(v)
-        else if el$.hasClass('money')
+        else if el$.hasClass('currency')
           v = "$#{@textRenderer.toFixed(v, 2)}"
         el$.text(v)
     )
@@ -853,8 +952,8 @@ class window.CrmModelView extends ModelBaseView
             v = @toHumanReadableDateTimeFormat(v)
           else if el$.hasClass('hasDatepicker')
             v = @toHumanReadableDateFormat(v)
-          else if el$.hasClass('money')
-            v = "$#{@textRenderer.toFixed(v, 2)}"
+          else if el$.hasClass('currency')
+            v = @textRenderer.toFixed(v, 2)
           el$.val(v)
     )
 
@@ -862,9 +961,10 @@ class window.CrmModelView extends ModelBaseView
 
     _.each( @$('.put_action, .destroy'), (el) =>
       el$ = $(el)
-      enablerValue = @model.get(el$.data('attribute_enabler'))
+      enablerValue = @model.deepGet(el$.data('attribute_enabler'))
+      enabledWhenValue = el$.data('enabled_when')
       if enablerValue?
-        if _.any( el$.data('enabled_when').toString().split(/,/), (val) -> val == enablerValue.toString())
+        if (_.isString(enabledWhenValue) && _.any( enabledWhenValue.split(/,/), (val) -> val == enablerValue)) || (typeof(enabledWhenValue) != "undefined" && enablerValue == enabledWhenValue) || (typeof(enabledWhenValue) == "undefined" && enablerValue != false)
           el$.removeClass('disabled')
         else
           el$.addClass('disabled')
@@ -896,9 +996,19 @@ class window.CrmModelView extends ModelBaseView
       @clearHighlightedModelErrors()
 
   save: () ->
-    return if !@model.isDirty()
-    @clearErrors()
-    @model.save()
+    # todo: This should be compressed if useDirty
+    # can be use to determine that fromForm should be called,
+    # and that isDirty must make use of it.
+    if @useDirty
+      return if !@model.isDirty()
+      @clearErrors()
+      @model.save()
+    else
+      @clearErrors()
+      @model.save(@fromForm)
+
+  decorateError: (errors) ->
+    renderErrors(@model.validationError) if @model.validationError?
 
   renderErrors: (errors) ->
     _.each(errors, (value, key, list) =>
@@ -911,7 +1021,7 @@ class window.CrmModelView extends ModelBaseView
       )
 
   onInvalid: () ->
-    @renderErrors(@model.validationError) if @model.validationError?
+    @repaintNonEditable()
 
   clearErrors: (changedAttributesw) ->
 
@@ -951,14 +1061,15 @@ class window.CrmModelView extends ModelBaseView
   onRequest: (model, xhr, options) ->
     ModelBaseView.prototype.onRequest.apply(@, arguments)
 
+  resetInputDevice: () ->
+    @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
+
   onSync: (model, resp, options) ->
     ModelBaseView.prototype.onSync.apply(@, arguments)
-    @$el.prop('id', @id()) if @$el.prop('id') == ""
     @clearErrors()
-    @copyModelToForm()
-    @decorateDirty()
-    @renderErrors(@model.validationError) if @model.validationError?
-    @inputsCache.filter(':visible').not('.datetimepicker, .datepicker').first().focus() if @$el.is(':visible')
+    @repaintEditable()
+    @repaintNonEditable()
+    @resetInputDevice()
     @parent.rebindGlobalHotKeys()
 
   buildDom: () ->
@@ -976,9 +1087,9 @@ class window.CrmModelView extends ModelBaseView
       dateFormat: AppsConfig.datePickerDateFormat,
       timeFormat: AppsConfig.datetimePickerTimeFormat
     )
-    @copyModelToForm()
-    @decorateDirty()
-    @renderErrors(@model.validationError) if @model.validationError?
+    @repaintEditable()
+    @repaintNonEditable()
+    @resetInputDevice()
     @
 
 class window.SingleModelAppView extends WithChildrenView
@@ -1028,7 +1139,7 @@ class window.SingleModelAppView extends WithChildrenView
 
   render: () ->
     WithChildrenView.prototype.render.apply(@, arguments)
-    @modelShowContainer = @$('.models-show-container').first()
+    @modelShowContainer = @$('.model-show-container').first()
     @showModelView()
     @
 
@@ -1048,6 +1159,9 @@ class window.SearchAndListView extends BaseView
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
+
+  detachFromCollection: () ->
+    @stopListening(@collection)
 
   filtersChanged: (e) ->
     if @collection.any( (model) -> model.isDirty() )
@@ -1089,13 +1203,11 @@ class window.SearchAndListView extends BaseView
 
   addOne: (model) ->
     itemView = new @searchResultItemViewType({'model':model, 'parent': @})
-    @modelsListCache.append(itemView.render().el)
-
-    # just adde first model, so we need to focus it.
-    if @modelsListCache.children().length == 1
-      @modelsListCache.find(".list-item a").first().trigger('click')
+    @$listItems.append(itemView.render().el)
+    itemView.$('a').trigger('click') if !@$listItems.children().length == 1
 
   remove: () ->
+    @detachFromCollection()
     @$el.remove()
 
   next: () ->
@@ -1110,7 +1222,7 @@ class window.SearchAndListView extends BaseView
     @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
 
   cacheInitialDom: () ->
-    @modelsListCache = @$('.models-list').first()
+    @$listItems = @$('.models-list').first()
 
   render: () ->
     @buildDom()
@@ -1142,11 +1254,30 @@ class window.CollectionAppView extends WithChildrenView
       'click button.back': 'back'
       'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
+      'keyup input.quickfilter': 'quickfilterAdjust'
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
     @listenTo(@collection, 'sync', @onSync)
     @listenTo(@collection, 'error', @onError)
+    @currentModelListItem = null
+
+  quickfilterAdjust: (e) ->
+    s = $(e.target).val().toLowerCase()
+    rtext = ""
+    _.each(s, (c) ->
+      rtext += c + ".*"
+    )
+    tester = new RegExp(rtext)
+    @$listItems.find(".list-item").each((i, el) ->
+      if tester.test($(el).text().toLowerCase())
+        $(el).show()
+      else
+        $(el).hide()
+    )
+
+  detachFromCollection: () ->
+    @stopListening(@collection)
 
   resizeView: () ->
     h = Math.max(200, Math.round( $(window).height() * 0.8 ))
@@ -1176,6 +1307,7 @@ class window.CollectionAppView extends WithChildrenView
           data[el$.data('filter')] = true
     )
     @collection.fetch(data: data)
+    @$listItems.find(".list-item").first().find('a').trigger('click')
 
   sortsChanged: (e) ->
     if @collection.any( (model) -> model.isDirty() )
@@ -1196,25 +1328,20 @@ class window.CollectionAppView extends WithChildrenView
 
   addOne: (model) ->
     listItemView = new @spawnListItemType({'model':model, 'parent': @})
-    @modelsListCache.append(listItemView.render().el)
-
-    # just adde first model, so we need to focus it.
-    if @modelsListCache.children().length == 1
-      @modelsListCache.find(".list-item a").first().trigger('click')
+    @$listItems.append(listItemView.render().el)
+    listItemView.$('a').trigger('click') if @$('.model-show-container').children().length == 0
 
   create: () ->
     @collection.create({},
-      wait: false,
-      success: (model, response, options) => @afterSave(model, response, options)
+      wait: false
+      success: (model, response, options) => @afterCreate(model, response, options)
     )
 
-  modelListItemLink: (model) ->
-    @modelsListCache.find("#list-item-#{model.get('id')} a")
-
-  afterSave: (model, response, options) ->
-    @modelListItemLink(model).trigger('click')
+  afterCreate: (model, response, options) ->
+    @$listItems.find('.list-item').last().find('a').trigger('click')
 
   remove: () ->
+    @detachFromCollection
     @$el.remove()
 
   back: () ->
@@ -1224,34 +1351,27 @@ class window.CollectionAppView extends WithChildrenView
     listItem.find('a').trigger('click') if listItem.length > 0
 
   next: () ->
-    @move(@modelsListCache.find(".list-item a.active").parent().next())
+    @move(@$listItems.find(".list-item a.active").parent().nextAll('.list-item').filter(':visible').first())
 
   previous: () ->
-    @move(@modelsListCache.find(".list-item a.active").parent().prev())
+    @move(@$listItems.find(".list-item a.active").parent().prevAll('.list-item').filter(':visible').first())
 
   focusTopModelView: () ->
-    @$('.models-show-container .model-view:visible').find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
+    @$('.model-show-container .model-view').first().find(':input:visible').not('.datetimepicker, .datepicker').first().focus()
 
-  show: (view) ->
+  show: (listItem, view) ->
     @$('.errors').hide()
-    @modelsListCache.find(".list-item a").removeClass('active')
-    @modelListItemLink(view.model).addClass('active')
 
-    # lower curtain
-    @$('.models-show-container').hide()
-
-    # rearrange stage (hide other model views, show this model view)
-    @$('.models-show-container .model-view').hide()
-    @$('.models-show-container').append(view.el) if !$.contains( @$('.models-show-container').get(0), view.el)
-    view.$el.show()
+    if not @currentModelListItem? || @currentModelListItem != listItem
+      @currentModelListItem.deactivate() if @currentModelListItem?
+      @currentModelListItem = listItem
+      @currentModelListItem.activate()
+      @$('.model-show-container').empty()
+      @$('.model-show-container').append(view.el)
 
     # raise curtain and focus
-    @$('.models-show-container').show()
     @focusTopModelView()
     @parent.rebindGlobalHotKeys()
-
-  $modelView: (id) ->
-    @$("##{@modelName}-view-" + id)
 
   onSync: (model, resp, options) ->
     @clearHighlightedModelErrors()
@@ -1263,7 +1383,7 @@ class window.CollectionAppView extends WithChildrenView
     @$el.html($(".templates .#{@modelNamePlural}_view_example").children().clone()) if @$el.children().length == 0
 
   cacheInitialDom: () ->
-    @modelsListCache = @$('.models-list').first()
+    @$listItems = @$('.models-list').first()
 
   render: () ->
     @buildDom()
@@ -1293,8 +1413,6 @@ class window.StackedChildrenView extends WithChildrenView
     @children = []
     @dirtyModels = []
     @eventHotKeys = new EventHotKeys()
-    $(document).ajaxStart(() => @toBusy())
-    $(document).ajaxStop(() => @toNotBusy())
 
     @transforms =
       out:
@@ -1344,9 +1462,15 @@ class window.StackedChildrenView extends WithChildrenView
     return if @children.length == 0
     @children[ @children.length - 1].$('.spinner-container').show()
 
+  notifyRequestStarted: () ->
+    @toBusy()
+
   toNotBusy: () ->
     return if @children.length == 0
     @children[ @children.length - 1].$('.spinner-container').hide()
+
+  notifyRequestCompleted: () ->
+    @toNotBusy()
 
   childViewPushed: (view) ->
     if @children.length > 0

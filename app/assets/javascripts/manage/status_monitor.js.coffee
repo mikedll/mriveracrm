@@ -17,19 +17,3 @@ class window.StatusMonitorView extends CrmModelView
 
   refresh: () ->
     @model.fetch()
-
-  onRequest: () ->
-    CrmModelView.prototype.onRequest.apply(@, arguments)
-    $('.spinner-container').show()
-
-  onComplete: () ->
-    $('.spinner-container').hide()
-
-  onSync: () ->
-    @onComplete()
-    CrmModelView.prototype.onSync.apply(this, arguments)
-
-  onError: () ->
-    CrmModelView.prototype.onError.apply(@, arguments)
-    @onComplete()
-

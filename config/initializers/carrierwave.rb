@@ -6,8 +6,8 @@ CarrierWave.configure do |config|
   config.root = Rails.root.join('public')
   config.fog_credentials = {
     :provider               => 'AWS',       # required
-    :aws_access_key_id      => MikedllCrm::Configuration.get('AMAZON_ACCESS_KEY_ID'),
-    :aws_secret_access_key  => MikedllCrm::Configuration.get('AMAZON_SECRET_ACCESS_KEY')
+    :aws_access_key_id      => AppConfiguration.get('AMAZON_ACCESS_KEY_ID'),
+    :aws_secret_access_key  => AppConfiguration.get('AMAZON_SECRET_ACCESS_KEY')
   }
   config.fog_directory  = s3store['bucket']
   # config.fog_public     = false                                   # optional, defaults to true

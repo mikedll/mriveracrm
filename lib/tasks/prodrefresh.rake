@@ -84,7 +84,7 @@ namespace :prodrefresh do
       Business.connection.execute "UPDATE businesses SET google_oauth2_client_id = '647124770183.apps.googleusercontent.com', google_oauth2_client_secret = 'q00FkSldcDe15IMHQrzvcuJj' WHERE host = 'dev1.mikedll.com'"
     end
 
-    safe_email = MikedllCrm::Configuration.get('safe_admin_email')
+    safe_email = AppConfiguration.get('safe_admin_email')
     b = Business.find_by_host 'dev1.mikedll.com'
     b.an_owner.email = safe_email
     b.an_owner.save!

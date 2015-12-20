@@ -49,13 +49,23 @@ MikedllCrm::Application.routes.draw do
     end
   end
 
+  resources :monitored_computers, :only => [] do
+    collection do
+      post :heartbeat
+    end
+  end
 
   namespace 'manage' do
 
     resource :billing_settings, :only => [:show, :update]
-    resource :business, :only => [:show, :update, :destroy]
+    resource :business, :only => [:show, :update, :destroy] do
+      member do
+        put  :regenerate_monitored_computers_key
+      end
+    end
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
+    resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
 
     resources :products do
       resources :product_images, :path => "images" do
@@ -94,7 +104,7 @@ MikedllCrm::Application.routes.draw do
   namespace "client" do
     resource :payment_gateway_profile, :only => [:create, :update, :show]
 
-    resources :invoices do
+    resources :invoices, :only => [:index, :show] do
       member do
         put :charge
       end
@@ -149,13 +159,23 @@ MikedllCrm::Application.routes.draw do
       end
     end
 
+    resources :monitored_computers, :only => [] do
+      collection do
+        post :heartbeat
+      end
+    end
 
     namespace 'manage' do
 
       resource :billing_settings, :only => [:show, :update]
-      resource :business, :only => [:show, :update, :destroy]
+      resource :business, :only => [:show, :update, :destroy] do
+        member do
+          put :regenerate_monitored_computers_key
+        end
+      end
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
 
+      resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
 
       resources :products do
         resources :product_images, :path => "images" do
@@ -194,7 +214,7 @@ MikedllCrm::Application.routes.draw do
     namespace "client" do
       resource :payment_gateway_profile, :only => [:create, :update, :show]
 
-      resources :invoices do
+      resources :invoices, :only => [:index, :show]  do
         member do
           put :charge
         end

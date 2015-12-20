@@ -6,6 +6,9 @@ class window.Invoice extends BaseModel
   title: () ->
     @get('title')
 
+  isPersistentRequestingAvailable: () ->
+    @deepGet('available_for_request?')
+
 class window.Invoices extends BaseCollection
   model: Invoice
   initialize: () ->

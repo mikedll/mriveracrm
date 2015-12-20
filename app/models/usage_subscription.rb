@@ -115,7 +115,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def payment_gateway_profilable_remote_app_key
-    key = MikedllCrm::Configuration.get('stripe.secret_key')
+    key = AppConfiguration.get('stripe.secret_key')
     if key.blank?
       raise "Stripe Secrete Key should never be blank. App is misconfigured."
     end

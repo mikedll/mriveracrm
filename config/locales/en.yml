@@ -12,6 +12,8 @@ en:
   delete_confirm: "Delete this?"
   revert_confirm: "Are you sure you want to revert all your changes?"
 
+  internal_server_error: "An internal server error occured. Please contact a representative of the business if this continues."
+
   unauthorized:
     default: "You are not authorized to access that part of this business's online service."
     manage:
@@ -27,6 +29,10 @@ en:
     products: "Products"
     contact: "Contact"
 
+  computer_monitor:
+    errors:
+      unexpected_http_result:  "Unexpected HTTP Result: %{code}"
+
   user:
     errors:
       no_invitation: "No open invitation could be found for your email, %{email}."
@@ -37,6 +43,10 @@ en:
     archive_confirm: "Archive this client? It will not be listed in normal client listings."
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."
 
+  persistent_requestable:
+    not_pristine: 'This %{model} cannot have pending changes when starting this request.'
+    already_requesting: 'This %{model} is already busy with a request. Please wait for the existing request to finish.'
+
   product_image:
     unable_to_force_unique_primary: "unable to remove conflicting primary marking on other image for this product"
 
@@ -45,6 +55,10 @@ en:
     signup_handle: 'Business Handle'
     created: Your business has been created. You are designated as its owner.
     mfe_host_conflict: is not available.
+    google_public_api_key: "This is not used yet."
+    oauth2_fields: "This and the client secret allow visitors (clients, employees, etc) to login to your business website without creating a username and password. They can use Google's OAuth login feature."
+    google_analytics_id: "No need to modify HTML. Simply give us your Google Anlytics key and we'll insert it into every one of your pages for you."
+    confirm_regenerate_it_monitored_computers_api_key: "Are you sure you want to regenerate the Monitored Computers API key?"
     errors:
       handle_format: can only contain letters and numbers
       inactive_plan_internal: "Your business's subscription is not active. See the Billing page to rectify this."
@@ -63,6 +77,9 @@ en:
       only_one: 'if handle for new business is blank, then must have either a client or an employee, and not both'
       no_client_or_employee_for_handle: "cannot have employee or client if there is a handle for a new business"
 
+  monitored_computer:
+    computer_down: "Computer Down: %{hostname}"
+
   transaction:
     errors:
       cannot_destroy_this_type: 'This type of transaction cannot be destroyed'
@@ -76,6 +93,9 @@ en:
     uneditable: "This invoice is no longer open and not available for editing"
     cannot_delete: 'cannot be deleted in its current state'
     cannot_generate_pdf: 'cannot be generated in this state'
+    actions:
+      charge:
+        confirm: "Charge this now?"
 
   usage_subscriptions:
     no_payment_gateway_profile: "An internal error has occured. There is no payment profile available for your business. Please contact support if this error persists."
@@ -83,7 +103,7 @@ en:
     welcome: Welcome to %{title}
 
   payment_gateway_profile:
-    cant_pay: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
+    not_ready_for_payments: "Payment information is not properly setup. Have you setup and saved valid credit card information?"
     update_error: "Payment information failed to update. Check your inputs. If this persists, please contact your business representative."
     plan_update_error: "Subscription plan failed to update. Check your inputs. If this persists. please contact your business representative."
     custom_plan_update_error: "Subscription plan failed to update: %{message}"

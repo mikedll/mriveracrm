@@ -24,16 +24,30 @@ Spork.prefork do
 
     # config.filter_run_including :current => true
     config.filter_run_excluding :broken => true
+    config.filter_run_excluding :ignore => true
 
+    GENERIC_WEB_TESTS = [:generic_web_test]
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
     LIVE_WEB_TESTS.each do |filter|
-      # Invert the next two lines, depending on what you're doing,
-      # unless you actually intend to run the entire test suite.
+      # Invert these lines to focus on remote tests if you want, or
+      # disable it if you want to run the entire suite. It depends on
+      # what you're doing.
+      #
+      # If you want to run a single live test, it may be better
+      # to remove the label from it in the spec and replace that label
+      # with the :current label while you exercise it. If you do this,
+      # set live_test_being_run to true.
       config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end
 
-    live_test_being_run = !LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
+    # As above
+    GENERIC_WEB_TESTS.each do |filter|
+      config.filter_run_excluding filter => true
+      # config.filter_run_including filter => true
+    end
+
+    live_test_being_run = !(LIVE_WEB_TESTS + GENERIC_WEB_TESTS).all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
 
     # config.backtrace_clean_patterns = [
     #   # /\/lib\d*\/ruby\//,
@@ -49,6 +63,8 @@ Spork.prefork do
 
       # Allow net connect if at least one live group is not excluded
       WebMock.disable! if live_test_being_run
+
+      FineGrainedClient.flag_immediate_execution!
 
       FactoryGirl.create(:marketing_front_end)
     end
@@ -84,6 +100,10 @@ Spork.prefork do
           ApiStubs.release_stripe_stub!
         end
         DatabaseCleaner.clean_with(:truncation)
+
+        FineGrainedClient.cli.keys.each do |k|
+          FineGrainedClient.cli.del(k)
+        end
       end
     end
   end

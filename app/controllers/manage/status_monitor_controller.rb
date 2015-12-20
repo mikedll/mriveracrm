@@ -1,6 +1,7 @@
 class Manage::StatusMonitorController < Manage::BaseController
 
   skip_before_filter :require_active_plan
+  skip_before_filter :_install_parent_name
   before_filter :_can_monitor_business
 
   def show

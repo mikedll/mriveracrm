@@ -27,7 +27,7 @@
       - features.each_with_index do |f, i|
         - features_in_row.push(f)
         - if i % 3 == 2 || i == features.count - 1
-          -# todo remove .models-show-container from the row-fluid it is under outside this view. M. Rivera, Sept 11th 2015
+          -# todo remove .model-show-container from the row-fluid it is under outside this view. M. Rivera, Sept 11th 2015
           .row-fluid
             - features_in_row.each do |feature|
               .span3
@@ -45,7 +45,7 @@
           %label
             Monthly Price:
         .controls
-          .read-only-field{:data => {:name => 'billing_settings[price]'}, :class => "money" }
+          .read-only-field{:data => {:name => 'billing_settings[price]'}, :class => "currency" }
 
       .control-group.trial-remote-status-display
         .control-label

@@ -1,7 +1,7 @@
 class SubscriptionMailer < ActionMailer::Base
 
   add_template_helper(ApplicationHelper)
-  default from: "MRivera CRM Admin <#{MikedllCrm::Configuration.get('DEFAULT_EMAIL_SENDER')}>"
+  default from: "MRivera CRM Admin <#{AppConfiguration.get('DEFAULT_EMAIL_SENDER')}>"
 
   def status_inactive(us)
     @us = us

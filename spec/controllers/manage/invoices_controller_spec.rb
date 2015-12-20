@@ -29,7 +29,7 @@ describe Manage::InvoicesController do
 
     it "should allow invoices to be created by employee" do
       @client.invoices.count.should == 0
-      post :create, {:format => 'js', :client_id => @client.id, "total" => 10, "description" => "Latest invoice"}
+      post :create, {:format => 'json', :client_id => @client.id, "total" => 10, "description" => "Latest invoice"}
       @client.invoices.count.should == 1
       response.should be_success
       response.status.should == 201
@@ -43,7 +43,7 @@ describe Manage::InvoicesController do
       sign_in @user
       request.host = @user.client.business.host
 
-      get :index, {:format => 'js', :client_id => @client.id}
+      get :index, {:format => 'json', :client_id => @client.id}
 
       response.should redirect_to new_user_session_path
       response.should_not be_success

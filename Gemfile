@@ -3,6 +3,8 @@ source 'http://rubygems.org'
 ruby '2.0.0'
 
 gem 'rails', '~> 3.2.0'
+gem 'activesupport', :group => [:default, :scheduler, :fine_grained_daemon]
+
 
 # vital
 gem "rake", ">= 10.0.0"
@@ -23,12 +25,25 @@ gem "fog"
 gem 'rmagick'
 gem 'jquery-rails', '~> 2.1'
 gem 'stripe'
-gem 'rest-client'
-gem 'activeadmin'
+gem 'activeadmin' # mit
 gem 'aws-ses', '~> 0.4.4', require: 'aws/ses'
 gem 'cancan'
 gem 'excon', '>= 0.27.5'
 gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this is out here.
+gem "nokogiri"
+gem "rest-client"
+
+gem "safe_yaml", :group => [:default, :fine_grained_daemon, :scheduler]
+gem 'multi_json', :group => [:default, :fine_grained_daemon]
+
+group :default, :fine_grained_daemon do
+  gem 'eventmachine'
+end
+
+group :default, :scheduler do
+  gem 'activemodel'
+  gem "clockwork"
+end
 
 group :assets do
   gem 'yui-compressor'
@@ -44,6 +59,8 @@ group :development do
   gem "capistrano"
   gem "rvm-capistrano", :require => false
   gem "rvm"
+  gem "foreman"
+  gem "cknife"
 end
 
 group :test, :development do

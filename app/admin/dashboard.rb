@@ -24,7 +24,7 @@ ActiveAdmin.register_page "Dashboard" do
       end
 
       column do
-        link_to "Your Business, #{current_user.business.handle}", business_home_url(current_user.business)
+        para link_to("Your Business, #{current_user.business.handle}", business_home_url(current_user.business))
       end
     end
   end

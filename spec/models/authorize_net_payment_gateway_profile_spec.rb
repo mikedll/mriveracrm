@@ -80,12 +80,12 @@ describe AuthorizeNetPaymentGatewayProfile do
 
       it "should fail unless payment info confgured" do
         @profile.pay_invoice!(@invoice).should be_false
-        @profile.last_error.should == I18n.t('payment_gateway_profile.cant_pay')
+        @profile.last_error.should == I18n.t('payment_gateway_profile.not_ready_for_payments')
       end
 
       it "should fail on open invoice" do
         @profile.pay_invoice!(FactoryGirl.create(:invoice)).should be_false
-        @profile.last_error.should == I18n.t('payment_gateway_profile.cant_pay')
+        @profile.last_error.should == I18n.t('payment_gateway_profile.not_ready_for_payments')
       end
 
       it "should be able to pay normal invoice" do

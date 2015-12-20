@@ -4,6 +4,7 @@
 class ApplicationController < ActionController::Base
 
   include ActionView::Helpers::TranslationHelper
+  include IntrospectionRenderable
 
   protect_from_forgery
 
@@ -38,13 +39,13 @@ class ApplicationController < ActionController::Base
             flash[:notice] = t('errors.not_found_redirect_home')
             redirect_to after_sign_in_path_for(current_user)
           end
-          format.js { head :not_found }
+          format.json { head :not_found }
         end
       else
         # not logged in and no business. nothing here.
         respond_to do |format|
           format.html { redirect_to root_path }
-          format.js { head :not_found }
+          format.json { head :not_found }
         end
       end
     else
@@ -148,7 +149,6 @@ class ApplicationController < ActionController::Base
     end
   end
 
-
   def force_www
     return if Rails.env.development? # Doesn't work with certain CRM addresses. Might not even keep this feature.
 
@@ -212,7 +212,7 @@ class ApplicationController < ActionController::Base
 
         if business_handle
           @current_business = Business.find_by_handle business_handle
-           if @current_business.nil?
+          if @current_business.nil?
              head :not_found
              return
            end
@@ -245,6 +245,5 @@ class ApplicationController < ActionController::Base
       redirect_to root_path
     end
   end
-
 
 end
