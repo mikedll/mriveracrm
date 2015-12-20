@@ -48,8 +48,8 @@ namespace :deploy do
     run "sudo stop #{fetch(:application)}"
   end
 
-  task :restart, :roles => :app, :except => { :no_release => true } do
-    run "sudo restart #{fetch(:application)}"
+  task :upstart_restart, :roles => :app, :except => { :no_release => true } do
+    run "sudo stop #{fetch(:application)}; sudo start #{fetch(:application)}"
   end
 end
 
@@ -66,4 +66,4 @@ task :production do
 end
 
 after 'deploy:update_code', 'deploy:configs'
-
+after 'deploy:restart', 'deploy:upstart_restart'
