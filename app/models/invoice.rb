@@ -144,7 +144,7 @@ class Invoice < ActiveRecord::Base
       synth :available_for_request?
       synth :last_error
 
-      action :charge, :enabler => :can_pay?
+      action :charge, :enabler => :can_pay?, :confirm => t('invoice.actions.charge.confirm')
     end
   end
 
