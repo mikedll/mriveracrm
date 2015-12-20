@@ -101,13 +101,13 @@ Cut a release.
 
     g f release start v1.x
 
-Fix any bugs. Do assets compilation and deploy, if assets have changed.
+Fix any bugs. Do assets compilation and deploy, if assets have changed. Ensure
+amazon keys are defined in the environment, then run the assets deploy command.
     
     RAILS_ENV=production rake assets:deploy  # this does an assets:precompile, too.
 
 Commit manifest.
 
-    # whatever your git commit maneuver is
     g add public/assets/manifest.yml
     g ci -m "Updated manifest."
     
