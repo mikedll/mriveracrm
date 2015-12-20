@@ -1,0 +1,4 @@
+web: bundle exec unicorn -c config/unicorn.rb
+worker: bundle exec ./script/worker.rb
+scheduler: bundle exec clockwork ./script/clockwork.rb
+fine_grained: bundle exec ./script/fine_grained_daemon.rb
