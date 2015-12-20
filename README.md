@@ -163,3 +163,12 @@ to be killed at the command line.
 
 Sometimes this happens in a controller when referring
 to a model. Use :: module global qualifier.
+
+## missing translations in model class-level code
+
+Not all translation files, namely those outside of our application,
+are loaded in time for model definition. The initializer
+`config/i18n_preload_paths.rb` addresses this issue for the main
+application translation files in config/locales. Gem locales may need
+to be looked up and loaded early in a similar fashion.
+
