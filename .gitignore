@@ -9,7 +9,6 @@ db/*.sqlite3
 config/credentials.yml
 config/database.yml
 
-
 public/javascripts/generated/
 public/stylesheets/active_admin.css
 
@@ -22,3 +21,7 @@ public/test/uploads/*
 
 .sass-cache
 
+cknife.yml
+
+db/fineGrained.db
+db/fineGrained.db2

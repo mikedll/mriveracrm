@@ -1,0 +1,9 @@
+%p
+  This computer is down:
+  %strong
+    = "#{@monitored_computer.hostname}."
+  It was last heard from at
+  = "#{l(@monitored_computer.last_heartbeat_received_at, :format => :full)}."
+
+%p
+  = "#{@business.default_mfe.title} Automatic Alert Service"

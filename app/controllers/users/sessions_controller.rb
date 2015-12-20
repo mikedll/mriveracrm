@@ -80,7 +80,7 @@ class Users::SessionsController < Devise::SessionsController
     key_obj = @current_mfe ? @current_mfe : @current_business
     OmniAuth::Strategies::GoogleOauth2.new(NoopApp.new, key_obj.send(:google_oauth2_client_id), key_obj.send(:google_oauth2_client_secret), {
                                              :path_prefix => omniauth_authorize_path(:provider => provider).chomp("/#{provider}"),
-                                             :scope => MikedllCrm::Configuration.get('google_oauth2_scope'),
+                                             :scope => AppConfiguration.get('google_oauth2_scope'),
                                              :approval_prompt => "auto"
     })
   end

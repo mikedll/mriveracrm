@@ -95,7 +95,7 @@ SimpleForm.setup do |config|
   # config.label_text = lambda { |label, required| "#{required} #{label}" }
 
   # You can define the class to use on all labels. Default is nil.
-  config.label_class = 'control-label'
+  # config.label_class = nil
 
   # You can define the class to use on all forms. Default is simple_form.
   # config.form_class = :simple_form
@@ -120,7 +120,10 @@ SimpleForm.setup do |config|
 
   # Custom wrappers for input types. This should be a hash containing an input
   # type as key and the wrapper that will be used for all inputs with specified type.
-  # config.wrapper_mappings = { :string => :prepend }
+  config.wrapper_mappings = {
+    :boolean => :inline_label,
+    :read_only => :read_only
+  }
 
   # Default priority for time_zone inputs.
   # config.time_zone_priority = nil

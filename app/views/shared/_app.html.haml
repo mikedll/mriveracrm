@@ -13,15 +13,22 @@
   = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => defined?(disable_create) && disable_create } if app_top
 
 .row-fluid
-  .span2
-    %ul.models-list{:class => "#{app_class}-list" }
+  - if defined?(multiplicity) && multiplicity == 'single'
+    .span12
+      .errors.alert.alert-error.hide
+      .model-show-container
+  - else
+    .span3
+      .search-filter
+        %input{:type => "text", :placeholder => "quickfilter", :class => "quickfilter"}
+      %ul.models-list{:class => "#{app_class}-list" }
 
-  .span10
-    .errors.alert.alert-error.hide
-    .models-show-container
+    .span9
+      .errors.alert.alert-error.hide
+      .model-show-container
 
   .clear
 
-  .spinner-container.hide 
+  .spinner-container.hide
     .spinner
       = image_tag 'loading.gif'

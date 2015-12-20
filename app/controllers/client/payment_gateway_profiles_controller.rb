@@ -1,9 +1,10 @@
 class Client::PaymentGatewayProfilesController < Client::BaseController
 
+  skip_before_filter :_install_parent_name
   before_filter :create_remote_if_doesnt_exist, :only => [:create, :update]
 
   make_resourceful do
-    actions :update, :show
+    actions :create, :update, :show
 
     response_for(:show, :update) do |format|
       format.js { render :json => current_object.public }

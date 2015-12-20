@@ -18,7 +18,7 @@ class StripeWebhooksController < ApplicationController
     if params[:type] == StripePaymentGatewayProfile::Events::SUBSCRIPTION_UPDATED
 
       # hackity mchacks a lot. use a singleton? hmm.
-      event = StripePaymentGatewayProfile.new.webhook_event_with_stripe_key(MikedllCrm::Configuration.get('stripe.secret_key'), params[:id])
+      event = StripePaymentGatewayProfile.new.webhook_event_with_stripe_key(AppConfiguration.get('stripe.secret_key'), params[:id])
 
       if event
 

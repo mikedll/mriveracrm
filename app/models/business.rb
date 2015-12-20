@@ -1,5 +1,8 @@
 class Business < ActiveRecord::Base
 
+  include Introspectable
+  include ActionView::Helpers::TranslationHelper
+
   #
   # The current business in use in the global request.
   #
@@ -16,10 +19,14 @@ class Business < ActiveRecord::Base
   has_many :invitations, :dependent => :destroy
   has_many :images, :dependent => :destroy
   has_many :lifecycle_notifications, :dependent => :destroy
+  has_many :notifications, :dependent => :destroy, :inverse_of => :business
+
   has_one :usage_subscription, :dependent => :destroy
+  has_many :it_monitored_computers, :inverse_of => :business, :dependent => :destroy, :class_name => 'IT::MonitoredComputer'
 
   belongs_to :default_mfe, :class_name => "MarketingFrontEnd"
 
+  before_validation :_defaults_on_create, :if => :new_record?
   before_validation :_find_default_mfe, :if => :new_record?
   before_validation :_format_fields
 
@@ -37,6 +44,30 @@ class Business < ActiveRecord::Base
   after_create :_have_usage_subscription
 
   scope :with_features, lambda { joins(:usage_subscription => :features).includes(:usage_subscription => :features) }
+
+  introspect do
+    can :destroy, :confirm => t('business.confirm_delete')
+
+    attr :name
+    group do
+      attr :stripe_secret_key
+      attr :stripe_publishable_key
+    end
+    group do
+      attr :google_oauth2_client_id
+      fmore :hint => t('business.oauth2_fields')
+
+      attr :google_oauth2_client_secret
+    end
+
+    attr :it_monitored_computers_key, :read_only
+    fmore :label => "Monitored computers API key"
+
+    attr :splash_html
+    fmore :label => "Homepage splash text", :as => :text
+
+    action :regenerate_monitored_computers_api_key, :confirm => t('business.confirm_regenerate_it_monitored_computers_api_key')
+  end
 
   # attr_accessible :name, :stripe_secret_key, :stripe_publishable_key, :google_oauth2_client_id, :google_oauth2_client_secret, :authorizenet_payment_gateway_id, :api_login_id, :transaction_key, :test
 
@@ -121,14 +152,26 @@ class Business < ActiveRecord::Base
   end
 
   def lifecycle_deliver!(identifier, mail)
-    ln = lifecycle_notifications.build(:identifier => 'welcome', :body => mail.body.to_s)
+    ln = lifecycle_notifications.build(:identifier => identifier, :body => mail.body.to_s)
     ln.save!
     mail.deliver!
   end
 
+  def notification_deliver!(identifier, mail)
+    n = notifications.build(:identifier => identifier,
+                            :to => mail.to.join(', '),
+                            :from => mail.from.join(', '),
+                            :subject => mail.subject,
+                            :body => mail.body.to_s)
+    n.save!
+    mail.deliver!
+  end
+
+  def generate_it_monitored_computers_key
+    self.it_monitored_computers_key = SecureRandom.hex(16)
+  end
 
   private
-
 
   def _format_fields
     self.handle.strip!
@@ -136,6 +179,10 @@ class Business < ActiveRecord::Base
 
     self.host.strip!
     self.host.downcase!
+  end
+
+  def _defaults_on_create
+    generate_it_monitored_computers_key if it_monitored_computers_key.blank?
   end
 
   def _find_default_mfe

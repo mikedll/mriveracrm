@@ -24,13 +24,26 @@ class ApiStubs
 
     Stripe::Plan.stub(:retrieve) { |plan_id| ApiStubs.stripe_retrieve_or_create_plan(plan_id) }
     Stripe::Customer.stub(:create) { ApiStubs.stripe_create_customer(FactoryGirl.generate(:customer_vendor_id)) }
-    Stripe::Customer.stub(:retrieve) { |cid| ApiStubs.stripe_retrieve_customer(cid) }
+    Stripe::Customer.stub(:retrieve) do |cid|
+      c = ApiStubs.stripe_retrieve_customer(cid)
+      c.stub(:save) do
+        with_card = ApiStubs.stripe_retrieve_customer_with_card(cid)
+        if c.active_card.nil?
+          c.active_card = with_card.active_card
+        end
+
+        with_card
+      end
+      c
+    end
+    Stripe::Charge.stub(:create) { |params| ApiStubs.stripe_charge(params[:amount]) }
   end
 
   def self.release_stripe_stub!
     Stripe::Plan.unstub(:retrieve)
     Stripe::Customer.unstub(:create)
     Stripe::Customer.unstub(:retrieve)
+    Stripe::Charge.unstub(:create)
   end
 
   def self.authorize_net_create_customer_payment_profile(payment_profile_id = '12024206')
@@ -106,6 +119,19 @@ class ApiStubs
     c
   end
 
+  def self.stripe_retrieve_customer_with_card(customer_profile_id = DEFAULT_VENDOR_ID)
+    c = stripe_retrieve_customer
+
+    card_id = "card_7BtWFfF7g1zlZA"
+    active_card_values = YAML.load load('stripe_customer_active_card').result( binding )
+    active_card = Stripe::Card.construct_from(active_card_values['values'], active_card_values['api_key'])
+
+    c.default_card = card_id
+    c.default_source = card_id
+    c.active_card = active_card
+    customer_db[customer_profile_id] = c
+  end
+
   def self.stripe_charge(amount = 7280)
     customer_profile_id = DEFAULT_VENDOR_ID
 
@@ -116,7 +142,7 @@ class ApiStubs
     charge.card = Stripe::Card.construct_from(vs['values'], vs['api_key'])
 
     vs = YAML.load load('stripe_fee_details').result(binding)
-    charge.fee_details = Stripe::Object.construct_from(vs['values'], vs['api_key'])
+    charge.fee_details = [Stripe::StripeObject.construct_from(vs['values'], vs['api_key'])]
 
     charge
   end

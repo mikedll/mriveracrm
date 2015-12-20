@@ -14,6 +14,9 @@
         - if bcan? Feature::Names::CLIENTS
           %li
             = link_to 'Clients', manage_clients_path, :tabIndex => '-1'
+        - if true # bcan? Feature::Names::ODESK_LISTER
+          %li
+            = link_to 'Monitored Computers', manage_monitored_computers_path, :tabIndex => '-1'
         - if can? :manage, current_business
           %li.dropdown
             %a.dropdown-toggle{:data => { :toggle => "dropdown" }, :href => "#", :tabIndex => "-1"}

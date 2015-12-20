@@ -1,8 +1,14 @@
+
+require 'simple_form/components/bootstrap_control_label'
+
+SimpleForm::Inputs::Base.send(:include, SimpleForm::Components::BootstrapControlLabel)
+
 # Use this setup block to configure all options available in SimpleForm.
 SimpleForm.setup do |config|
   config.wrappers :bootstrap, :tag => 'div', :class => 'control-group', :error_class => 'error' do |b|
     b.use :html5
     b.use :placeholder
+    b.use :bootstrap_control_label
     b.use :label
     b.wrapper :tag => 'div', :class => 'controls' do |ba|
       ba.use :input
@@ -14,6 +20,7 @@ SimpleForm.setup do |config|
   config.wrappers :prepend, :tag => 'div', :class => "control-group", :error_class => 'error' do |b|
     b.use :html5
     b.use :placeholder
+    b.use :bootstrap_control_label
     b.use :label
     b.wrapper :tag => 'div', :class => 'controls' do |input|
       input.wrapper :tag => 'div', :class => 'input-prepend' do |prepend|
@@ -27,6 +34,7 @@ SimpleForm.setup do |config|
   config.wrappers :append, :tag => 'div', :class => "control-group", :error_class => 'error' do |b|
     b.use :html5
     b.use :placeholder
+    b.use :bootstrap_control_label
     b.use :label
     b.wrapper :tag => 'div', :class => 'controls' do |input|
       input.wrapper :tag => 'div', :class => 'input-append' do |append|

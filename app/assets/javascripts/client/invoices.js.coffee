@@ -1,7 +1,9 @@
 
 class window.Invoice extends BaseModel
+  isPersistentRequestingAvailable: () ->
+    @deepGet('available_for_request?')
 
-class window.Invoices extends Backbone.Collection
+class window.Invoices extends BaseCollection
   model: Invoice
   comparator: (invoice) ->
     invoice.get('id')
@@ -24,7 +26,7 @@ class window.InvoiceListItemView extends ListItemView
     @decoratePending()
 
   decoratePending: () ->
-    if @model.get('status') == 'pending'
+    if @model.get('can_pay?')
       @$el.addClass('labelled')
     else
       @$el.removeClass('labelled')
@@ -58,8 +60,11 @@ class window.PartitionedChildrenView extends WithChildrenView
 
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
-    @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices)), parent: @)
-    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile, url: '/client/payment_gateway_profile'), parent: @)
+    @invoicesAppView = new InvoicesAppView(collection: (new Invoices(__invoices, silent: false)), parent: @)
+    @paymentGatewayProfileView = new PaymentGatewayProfileView(model: new PaymentGatewayProfile(__payment_gateway_profile,
+      assumeBootstrapped: true,
+      url: '/client/payment_gateway_profile'
+    ), parent: @)
 
   resizeView: () ->
     # override so that we dont shift the content of this box way wrong to the left/top

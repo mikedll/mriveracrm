@@ -1,6 +1,13 @@
 class Ability
   include CanCan::Ability
 
+  class RoutesAdminConstraint
+    def matches?(request)
+      current_user = request.env['warden'].user
+      current_user.present? && current_user.is_admin?
+    end
+  end
+
   def initialize(user)
     user ||= User.new
 

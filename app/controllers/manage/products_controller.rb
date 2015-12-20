@@ -1,7 +1,5 @@
 class Manage::ProductsController < Manage::BaseController
 
-  before_filter :_parent_name
-
   make_resourceful do
     actions :all
     belongs_to :business
@@ -31,14 +29,6 @@ class Manage::ProductsController < Manage::BaseController
     {:include => { :product_images => { :include => :image } }}
   end
 
-  def rendered_current_objects
-    current_objects.to_json(json_config)
-  end
-
-  def rendered_current_object
-    current_object.to_json(json_config)
-  end
-
   def current_objects
     top_scope = current_model
     @current_objects ||= top_scope.order("updated_at DESC")
@@ -54,10 +44,6 @@ class Manage::ProductsController < Manage::BaseController
 
   def parent_object
     @parent_object ||= Business.current
-  end
-
-  def _parent_name
-    @parent_name = "business" # hack; parent_object isnt enough.
   end
 
   protected

@@ -5,8 +5,12 @@ class Invoice < ActiveRecord::Base
   has_many :outside_transactions
   has_many :stripe_transactions
 
+  include Introspectable
+  include PersistentRequestable
   include ActionView::Helpers::TranslationHelper
   include ActionView::Helpers::NumberHelper
+
+  PDF_GENERATION = 'PDFGeneration'
 
   mount_uploader :pdf_file, PdfUploader
 
@@ -88,7 +92,6 @@ class Invoice < ActiveRecord::Base
 
   attr_accessible :description, :total, :date, :title
 
-
   before_validation { @virtual_path = 'invoice' }
   before_validation :_defaults_and_formatting
   before_validation :_verify_can_edit?
@@ -97,7 +100,7 @@ class Invoice < ActiveRecord::Base
   validates :description, :length => { :minimum => 3 }
   validate :_can_mark_paid
 
-  before_save :generate_and_assign_pdf
+  after_save :_enqueue_pdf_generation
 
   before_destroy :_verify_destroyable
 
@@ -107,6 +110,47 @@ class Invoice < ActiveRecord::Base
 
   default_scope { order('created_at asc') }
 
+  introspect do
+    can :destroy, :enabler => :destroyable
+
+    nested_association :transactions
+
+    attr :title
+    attr :date, [:datetime, :datepicker]
+    attr :total, :currency
+    attr :description
+    attr :status, :read_only
+    attr :pdf_file, [:download, :included]
+    attr :last_error, [:read_only, :string]
+
+    synth :available_for_request?
+    synth :last_error
+
+    action :mark_pending, :enabler => :can_edit?
+    action :regenerate_pdf, :disabler => :can_edit?
+    action :mark_paid, :enabler => :can_pay?
+    action :cancel, :enabler => :can_pay?
+    action :charge, :enabler => :can_pay?
+
+    view :client do
+      attr :title, :read_only
+      attr :date, [:read_only, :datetime]
+      attr :total, [:read_only, :currency]
+      attr :description, :read_only
+      attr :status, :read_only
+      # attr :pdf_file, [:download, :included]
+      attr :last_error, [:read_only, :string]
+
+      synth :available_for_request?
+      synth :last_error
+
+      action :charge, :enabler => :can_pay?, :confirm => t('invoice.actions.charge.confirm')
+    end
+  end
+
+  class Worker < WorkerBase
+  end
+
   def pretty_date
     I18n.l(date, :format => :dateonly)
   end
@@ -115,75 +159,48 @@ class Invoice < ActiveRecord::Base
     number_to_currency(total)
   end
 
-
+  CHARGE_REQUEST = 'charge'
   def charge!
     if !can_pay?
       errors.add(:base, t('.cannot_pay'))
       return false
     end
 
-    if self.client.payment_gateway_profile.nil?
-      errors.add(:base, I18n.t('payment_gateway_profile.cant_pay'))
+    if client.payment_gateway_profile.nil? || !client.payment_gateway_profile.ready_for_payments?
+      errors.add(:base, I18n.t('payment_gateway_profile.not_ready_for_payments'))
       return false
     end
 
-    self.client.payment_gateway_profile.pay_invoice!(self).tap do |result|
-      errors.add(:base, self.client.payment_gateway_profile.last_error) if !result
-    end
+    return false if !start_persistent_request(CHARGE_REQUEST)
+    Worker.obj_enqueue(self, :charge_background)
   end
 
-  def public
-    {
-      :id => id,
-      :title => title,
-      :description => description,
-      :total => total,
-      :can_pay => can_pay?,
-      :can_edit => can_edit?,
-      :date => date,
-      :status => status
-    }    
-  end
+  def charge_background
+    _with_stop_persistence(CHARGE_REQUEST) do
+      transaction = StripeTransaction.new
+      transaction.payment_gateway_profile = client.payment_gateway_profile
+      transaction.invoice = self
+      transaction.amount = total
+      transaction.begin!
 
-  def generate_pdf
-    if can_edit?
-      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
-      return nil
+      result = client.payment_gateway_profile.pay_invoice!(total, title)
+      transaction.vendor_id = result[:vendor_id] if result[:vendor_id]
+
+      if !result[:succeeded]
+        self.last_error = result[:error]
+        fail_payment!
+        transaction.has_failed!
+      else
+        transaction.succeed!
+        mark_paid!
+      end
+
+      result[:succeeded]
     end
-
-    pdf_root = Rails.root.join("tmp/pdfs")
-    html_filename = pdf_root.join("invoice#{self.id}.html")
-    pdf_filename = "#{File.dirname(html_filename)}/#{File.basename(html_filename, ".*")}.pdf"
-
-    invoice = self
-    File.open(html_filename, "w") do |f| 
-      f.write ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding) 
-    end
-
-    Dir.chdir(pdf_root) do
-      cmd = "xhtml2pdf #{html_filename}"
-      result = %x[#{cmd}]
-    end
-
-    FileUtils.rm_rf(html_filename)
-    File.new(pdf_filename, "r")
   end
 
   def regenerate_pdf
-    if !can_edit?
-      file = generate_pdf # have to do this to allow us to remove the File object
-      self.pdf_file = file
-      FileUtils.rm_rf(file)
-    end
-    save
-  end
-
-  def generate_and_assign_pdf
-    if !pdf_file? && !can_edit?
-      file = generate_pdf # have to do this to allow us to remove the File object
-      self.pdf_file = file
-      FileUtils.rm_rf(file)
-    end
+    _capture_as_pdf
   end
 
   private
@@ -206,15 +223,53 @@ class Invoice < ActiveRecord::Base
 
   def _verify_destroyable
     if !can_delete?
-      errors.add(:base, I18n.t('invoice.cannot_delete')) 
+      errors.add(:base, I18n.t('invoice.cannot_delete'))
       return false
-    end    
+    end
   end
 
   def _can_mark_paid
     if status_changed? && status == 'paid' && self.transactions.successful.empty?
-      self.errors.add(:transactions, 'must include at least one successful transaction') 
+      self.errors.add(:transactions, 'must include at least one successful transaction')
     end
+  end
+
+  def _capture_as_pdf
+    if can_edit?
+      errors.add(:pdf_file, I18n.t('invoice.cannot_generate_pdf'))
+      return false
+    end
+
+    return false if !start_persistent_request(PDF_GENERATION)
+
+    Worker.obj_enqueue(self, :capture_as_pdf_background)
+    true
+  end
+
+  def capture_as_pdf_background
+    pdf_root = Rails.root.join("tmp/pdfs")
+    html_filename = pdf_root.join("invoice#{self.id}.html")
+    pdf_filename = "#{File.dirname(html_filename)}/#{File.basename(html_filename, ".*")}.pdf"
+
+    invoice = self
+    File.open(html_filename, "w") do |f|
+      f.write ERB.new(File.read(Rails.root.join('app/views/invoices/invoice_pdf.html.erb'))).result(binding)
+    end
+
+    Dir.chdir(pdf_root) do
+      cmd = "xhtml2pdf #{html_filename}"
+      result = %x[#{cmd}]
+    end
+
+    FileUtils.rm_rf(html_filename)
+    self.pdf_file = File.new(pdf_filename, "r")
+    save!
+    FileUtils.rm_rf(pdf_filename)
+    stop_persistent_request(PDF_GENERATION)
+  end
+
+  def _enqueue_pdf_generation
+    _capture_as_pdf if !pdf_file? && !can_edit?
   end
 
 end

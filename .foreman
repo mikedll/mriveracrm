@@ -1,0 +1,3 @@
+environment: config/foreman/development.env
+procfile: config/foreman/Procfile
+root: .

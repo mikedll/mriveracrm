@@ -1,33 +1,27 @@
 class Manage::BusinessesController < Manage::BaseController
 
   skip_before_filter :require_active_plan
+  skip_before_filter :_install_parent_name
+
   before_filter :_can_manage_current_object
 
-  make_resourceful do
+  configure_apps :model => Business do
+    title "Your Business"
     actions :show, :update, :destroy
-
-    response_for :destroy do |format|
-      format.html
-      format.json { render :json => current_object }
-    end
-
-    response_for(:show, :update) do |format|
-      format.html
-      format.json { render :json => current_object }
-    end
-
-    response_for(:update_fails) do |format|
-      format.json { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
-    end
+    member_actions :regenerate_monitored_computers_key
   end
 
   def current_object
-    @current_object ||= @current_business
+    @current_object ||= current_business
   end
 
   def current_objects
     raise "Should not be attempting to load all businesses."
     @current_objects = []
+  end
+
+  def regenerate_monitored_computers_key
+    with_update_and_transition { current_object.generate_it_monitored_computers_key }
   end
 
   def update
@@ -38,6 +32,10 @@ class Manage::BusinessesController < Manage::BaseController
       current_object.stripe_publishable_key = params[:stripe_publishable_key] if params[:stripe_publishable_key]
       current_object.google_oauth2_client_id = params[:google_oauth2_client_id] if params[:google_oauth2_client_id]
       current_object.google_oauth2_client_secret = params[:google_oauth2_client_secret] if params[:google_oauth2_client_secret]
+
+      current_object.google_analytics_id = params[:google_analytics_id] if params[:google_analytics_id]
+
+      current_object.google_public_api_key = params[:google_public_api_key] if params[:google_public_api_key]
 
       current_object.splash_html = params[:splash_html] if params[:splash_html]
       # current_object. = params[:] if params[:]

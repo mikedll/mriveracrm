@@ -1,6 +1,7 @@
 class Manage::BillingSettingsController < Manage::BaseController
 
   skip_before_filter :require_active_plan
+  skip_before_filter :_install_parent_name
   before_filter :_can_manage_current_object
 
   make_resourceful do

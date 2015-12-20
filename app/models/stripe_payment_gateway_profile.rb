@@ -10,15 +10,19 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     SUBSCRIPTION_UPDATED = 'customer.subscription.updated'
   end
 
+  class Worker < WorkerBase
+  end
+
   def public
     {
       :id => id,
       :card_prompt => card_prompt,
-      :updated_at => updated_at
+      :updated_at => updated_at,
+      :available_for_request? => available_for_request?
     }
   end
 
-  def can_pay?
+  def ready_for_payments?
     !self.vendor_id.nil? && !self.card_last_4.blank?
   end
 
@@ -59,96 +63,84 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     event
   end
 
-  def pay_invoice!(invoice)
-    if !can_pay?
-      self.last_error = I18n.t('payment_gateway_profile.cant_pay')
-      return false
-    end
-
-    if !invoice.can_pay?
-      self.last_error = I18n.t('invoice.cannot_pay')
-      return false
-    end
+  def pay_invoice!(amount, description)
+    result = { :error => '', :succeeded => false, :vendor_id => nil }
 
     _with_stripe_key do
-      transaction = StripeTransaction.new
-      transaction.payment_gateway_profile = self
-      transaction.invoice = invoice
-      transaction.amount = invoice.total
-      transaction.begin!
-
       charge = nil
       begin
         charge = Stripe::Charge.create({
                                          :customer => vendor_id,
-                                         :amount => (invoice.total * 100).to_i,
+                                         :amount => (amount * 100).to_i,
                                          :currency => "usd",
-                                         :description => invoice.title
+                                         :description => description
                                        })
       rescue Stripe::CardError => e
-        self.last_error = e.message
-        invoice.fail_payment!
-        transaction.has_failed!
-        return false
+        result[:error] = e.message
+        return result
       end
 
-      transaction.vendor_id = charge.id
+      result[:vendor_id] = charge.id
       if !charge[:captured]
         # unknown as to whether this can ever be reached
-        self.last_error = charge[:failure_message]
-        invoice.fail_payment!
-        transaction.has_failed!
-        return false
+        result[:error] = charge[:failure_message]
+        return result
       end
 
-      transaction.succeed!
-      invoice.mark_paid!
-      true
+      result[:succeeded] = true
+      result
     end
   end
 
-  def update_payment_info(opts)
-    if vendor_id.blank?
-      _create_remote
-    end
-
-    card_param = nil
-    if opts[:token].blank?
-      card = card_from_opts(opts)
+  UPDATE_PAYMENT_INFO_REQUEST = 'update_payment_info'
+  def update_payment_info(options)
+    card_params = nil
+    if options[:token].blank?
+      card = card_from_options(options)
       return false if !card_valid?(card)
-      card_param = {
+      card_params = {
         :number => card.number,
         :exp_month => card.month,
         :exp_year => card.year,
         :cvc => card.verification_value
       }
     else
-      card_param = opts[:token]
+      card_params = options[:token]
     end
 
-    _with_stripe_key do
-      customer = Stripe::Customer.retrieve(self.vendor_id)
-      customer.card = card_param
+    Worker.obj_enqueue(self, :update_payment_info_background, card_params) if start_persistent_request(UPDATE_PAYMENT_INFO_REQUEST)
+  end
 
-      begin
-        customer.save
-      rescue Stripe::CardError => e
-        errors.add(:base, e.message)
-        return false
-      rescue Stripe::InvalidRequestError => e
-        DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => payment_gateway_profilable_id)
-        errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-        return false
-      rescue => e
-        DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => payment_gateway_profilable_id)
-        errors.add(:base, I18n.t('payment_gateway_profile.update_error'))
-        return false
+  def update_payment_info_background(card_params)
+    _with_stop_persistence(UPDATE_PAYMENT_INFO_REQUEST) do
+      _create_remote if vendor_id.blank?
+
+      _with_stripe_key do
+        customer = Stripe::Customer.retrieve(self.vendor_id)
+
+        customer.card = card_params
+
+        begin
+          customer.save
+        rescue Stripe::CardError => e
+          self.last_error = e.message
+          return false
+        rescue Stripe::InvalidRequestError => e
+          DetectedError.create!(:message => "Stripe profile update failure: #{e.message}.", :client_id => payment_gateway_profilable_id)
+          self.last_error = I18n.t('payment_gateway_profile.update_error')
+          return false
+        rescue => e
+          DetectedError.create!(:message => "Very strange stripe profile exception thrown: #{e.message}.", :client_id => payment_gateway_profilable_id)
+          self.last_error = I18n.t('payment_gateway_profile.update_error')
+          return false
+        end
+
+        _cache_customer(customer)
+        save!
       end
-
-      _cache_customer(customer)
-      save!
     end
   end
+
 
   RECOGNIZED_ERRORS = [
     "Failed to create",
