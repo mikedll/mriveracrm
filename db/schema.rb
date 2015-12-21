@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20151217234520) do
+ActiveRecord::Schema.define(:version => 20151220163358) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
@@ -169,6 +169,12 @@ ActiveRecord::Schema.define(:version => 20151217234520) do
     t.string   "hostname",                   :default => "",    :null => false
     t.string   "last_result",                :default => "",    :null => false
     t.boolean  "down",                       :default => false, :null => false
+  end
+
+  create_table "letters", :force => true do |t|
+    t.integer "business_id", :null => false
+    t.string  "title"
+    t.text    "body"
   end
 
   create_table "lifecycle_notifications", :force => true do |t|

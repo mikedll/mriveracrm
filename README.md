@@ -87,6 +87,9 @@ resque, and is as follows:
   `modelName`, `modelNamePlural`, `spawnListItemType`, and `title`.
   Extend ListItemView and define `modelName`, `spawnViewType`, `className`,
   and a `title` method. `className` should retain the `list-item` class.
+  Extend Collection with a pluralized name of your model while defining
+  `model` with the model klass and urlFragment with the relative
+  url where this app will be served.
   - Add to manage.js. If you created this in the manage directory,
   it'll automatically be picked up for you.
   - Insert a bootstrapper in bootDetector.js.coffee.

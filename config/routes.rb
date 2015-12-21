@@ -64,8 +64,8 @@ MikedllCrm::Application.routes.draw do
       end
     end
     resource :status_monitor, :controller => :status_monitor,  :only => [:show]
-
     resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
+    resources :letters, :only => [:index, :show, :create, :update, :destroy]
 
     resources :products do
       resources :product_images, :path => "images" do
@@ -174,8 +174,8 @@ MikedllCrm::Application.routes.draw do
         end
       end
       resource :status_monitor, :controller => :status_monitor,  :only => [:show]
-
       resources :monitored_computers, :only => [:index, :show, :create, :update, :destroy]
+      resources :letters, :only => [:index, :show, :create, :update, :destroy]
 
       resources :products do
         resources :product_images, :path => "images" do

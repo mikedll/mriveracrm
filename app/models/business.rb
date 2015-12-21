@@ -20,6 +20,7 @@ class Business < ActiveRecord::Base
   has_many :images, :dependent => :destroy
   has_many :lifecycle_notifications, :dependent => :destroy
   has_many :notifications, :dependent => :destroy, :inverse_of => :business
+  has_many :letters, :dependent => :destroy, :inverse_of => :business
 
   has_one :usage_subscription, :dependent => :destroy
   has_many :it_monitored_computers, :inverse_of => :business, :dependent => :destroy, :class_name => 'IT::MonitoredComputer'
