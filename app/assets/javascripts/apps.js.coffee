@@ -98,8 +98,9 @@ class window.ComparatorBuilder
     comparator
 
 class window.BaseModel extends Backbone.Model
-  initialize: () ->
+  initialize: (attributes, options) ->
     Backbone.Model.prototype.initialize.apply(this, arguments)
+    @parent = options['parent'] if _.has(options, 'parent')
     @_isDirty = false
     @_isInvalid = false
     @_isRequesting = false
@@ -662,7 +663,9 @@ class window.ListItemView extends ModelBaseView
 
 
 #
-# Define className, modelName, and probably events and render
+# Define className, modelName, and probably events and render.
+#
+# modelName is underscored.
 #
 # implement render
 #
@@ -905,6 +908,18 @@ class window.CrmModelView extends ModelBaseView
       updated[ nameAndValue[0] ] = nameAndValue[1] if nameAndValue?
     )
     updated
+
+  showNestedModelApp: (modelName, modelKlass, modelViewKlass, appViewKlass) ->
+    if !@[modelName]?
+      @[modelName] = new modelKlass([], parent: @model)
+      @[modelName + 'ModelView'] = new modelViewKlass(model: @[modelName])
+
+    @[modelName + 'AppView'] = new appViewKlass({parent: @})
+    @[modelName + 'AppView'].husband(@[modelName + 'ModelView'])
+    @[modelName + 'AppView'].render()
+
+    @parent.childViewPushed(@[modelName + 'AppView'])
+    @[modelName].fetch()
 
   showNestedCollectionApp: (collectionName, collectionKlass, collectionAppViewKlass) ->
     if !@[collectionName]?

@@ -1,7 +1,7 @@
 class Manage::LettersController < Manage::BaseController
 
   configure_apps :model => Letter do
-    include_templates :preview
+    include_templates :letter_preview
     belongs_to :business
     actions :index, :show, :update, :create, :destroy
     member_actions :preview
