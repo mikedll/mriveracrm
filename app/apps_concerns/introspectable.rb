@@ -47,8 +47,8 @@ module Introspectable
       self.last_attr = nil
     end
 
-    def nested_association(na)
-      self.nested_associations.push(na)
+    def nested_association(na, traits = {})
+      (current_view ? current_view.last[:nested_associations] : nested_associations).push({na => traits})
     end
 
     def attr(a, traits = nil)
@@ -95,7 +95,7 @@ module Introspectable
     end
 
     def view(name, opts = {}, &block)
-      self.current_view = [name, { :attr_decorations => {}, :attrs => [], :actions => [], :synthesized => [] }]
+      self.current_view = [name, { :attr_decorations => {}, :attrs => [], :actions => [], :synthesized => [], :nested_associations => [] }]
       instance_eval(&block)
       self.last_attr = nil
       views.push(current_view)
@@ -112,6 +112,14 @@ module Introspectable
       v = views.select { |v| v.first == view }.first
       raise ViewNotFoundError("View #{view} does not exist on #{model_name}.") if v.nil?
       v.last
+    end
+
+    def nested_associations_for_view(view = nil)
+      if view
+        find_view(view)[:nested_associations]
+      else
+        nested_associations
+      end
     end
 
     def attribute_stack_for_view(view = nil)

@@ -9,6 +9,8 @@ class Letter < ActiveRecord::Base
   attr_accessible :title, :body
 
   introspect do
+    nested_association :preview
+
     attr :title
     attr :body
     fmore :as => :text
