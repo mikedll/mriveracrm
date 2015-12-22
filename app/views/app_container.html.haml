@@ -14,3 +14,8 @@
         = apps_form_render(klass.new)
       - else
         = render klass.new
+  - apps_configuration[:additional_templates].each do |template_name|
+    %div{ :class => "#{template_name}_view_example"}
+      = render :partial => template_name.to_s
+
+

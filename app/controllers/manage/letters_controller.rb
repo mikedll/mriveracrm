@@ -1,8 +1,14 @@
 class Manage::LettersController < Manage::BaseController
 
   configure_apps :model => Letter do
+    include_templates :preview
     belongs_to :business
     actions :index, :show, :update, :create, :destroy
+    member_actions :preview
+  end
+
+  def preview
+    render :json => { :html => current_object.previewed }
   end
 
   def object_parameters

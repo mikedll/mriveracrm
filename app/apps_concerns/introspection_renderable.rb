@@ -40,32 +40,32 @@ module IntrospectionRenderable
       apps_configuration[:subject_klass_name] = (singular? ? klass_name : klass_name.pluralize).underscore
       apps_configuration.merge!({
           :app_top => (!plural_action? || singular?) ? false : true,
-          :app_class => ((!plural_action? || singular?) ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize,
-          :title => apps_title_override || (((!plural_action? || singular?) ? klass_name : klass_name.pluralize).titleize)
+          :app_class => ((!plural_action? || singular?) ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize
         })
+
+      apps_configuration[:title] = (((!plural_action? || singular?) ? klass_name : klass_name.pluralize).titleize) if apps_configuration[:title].nil?
 
       apps_configuration[:model_templates].push(klass)
       apps_configuration[:javascript_modules] += [controller_klass_container.underscore]
       apps_configuration[:view] = opts[:view] if opts[:view]
     end
 
-    def default_apps_configuration
-      {
+    def activate_default_apps
+      @apps_configuration = {
         :primary_model => nil,
         :subject_klass_name => '',
         :app_top => false,
         :app_class => '',
-        :title => "Application",
         :multiplicity => plural_action? ? 'plural' : 'single',
         :model_templates => [],
+        :additional_templates => [],
         :resource_multiplicity => 'multiple',
         :javascript_modules => [],
         :view => nil
       }
-    end
 
-    def activate_default_apps
-      @apps_configuration ||= default_apps_configuration
+      @apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
+      @apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates] if self.class.apps_klass_configuration[:additional_templates]
     end
 
     def _check_for_primary_model
@@ -120,7 +120,11 @@ module IntrospectionRenderable
       end
 
       def title(s)
-        self.controller.apps_title_override = s
+        self.controller.apps_klass_configuration[:title] = s
+      end
+
+      def include_templates(*t)
+        self.controller.apps_klass_configuration[:additional_templates] += t
       end
 
       def method_missing(method, *args, &block)
@@ -129,12 +133,13 @@ module IntrospectionRenderable
     end
 
     def configure_apps(opts, &block)
-      cattr_accessor :apps_primary_model, :apps_selected_view, :apps_title_override
+      cattr_accessor :apps_primary_model, :apps_selected_view, :apps_klass_configuration
 
       attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name, :namespaced_model_klass_name
 
       before_filter :_check_for_primary_model
 
+      self.apps_klass_configuration = { :additional_templates => []}
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 

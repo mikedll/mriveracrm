@@ -33,6 +33,7 @@ gem 'twitter-bootstrap-rails' # doesnt want to find twitter assets unless this i
 gem "nokogiri"
 gem "rest-client"
 gem "foreman"
+gem 'kramdown' # mit
 
 gem "safe_yaml", :group => [:default, :fine_grained_daemon, :scheduler]
 gem 'multi_json', :group => [:default, :fine_grained_daemon]

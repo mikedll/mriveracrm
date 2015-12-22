@@ -1,3 +1,5 @@
+require 'kramdown'
+
 class Letter < ActiveRecord::Base
 
   include Introspectable
@@ -15,4 +17,9 @@ class Letter < ActiveRecord::Base
     attr :body
     fmore :as => :text
   end
+
+  def previewed
+    Kramdown::Document.new(body).to_html
+  end
+
 end
