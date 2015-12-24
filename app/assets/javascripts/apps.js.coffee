@@ -1118,6 +1118,7 @@ class window.CrmModelView extends ModelBaseView
 # for which to search when constructing its dom node.
 #
 class window.SingleModelAppView extends WithChildrenView
+  className: 'app-gui single-model'
 
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
