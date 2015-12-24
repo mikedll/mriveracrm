@@ -917,7 +917,7 @@ class window.CrmModelView extends ModelBaseView
   #
   showNestedModelApp: (modelName, modelKlass, modelViewKlass, appViewKlass) ->
     if !@[modelName]?
-      @[modelName] = new modelKlass([], parent: @model)
+      @[modelName] = new modelKlass({}, parent: @model)
       @[modelName + 'ModelView'] = new modelViewKlass(model: @[modelName])
 
     @[modelName + 'AppView'] = new appViewKlass({parent: @, appName: "#{modelName}_app"})
@@ -950,7 +950,11 @@ class window.CrmModelView extends ModelBaseView
           v = @toHumanReadableDateFormat(v)
         else if el$.hasClass('currency')
           v = "$#{@textRenderer.toFixed(v, 2)}"
-        el$.text(v)
+
+        if el$.hasClass('html')
+          el$.html(v)
+        else
+          el$.text(v)
     )
 
   copyModelToForm: () ->
@@ -1094,7 +1098,7 @@ class window.CrmModelView extends ModelBaseView
     @parent.rebindGlobalHotKeys()
 
   buildDom: () ->
-    @$el.html($(".#{@modelName}_view_example form").clone()) if @$el.children().length == 0
+    @$el.html($(".#{@modelName}_view_example").children().clone()) if @$el.children().length == 0
 
   render: () ->
     @buildDom()
