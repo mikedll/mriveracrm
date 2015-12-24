@@ -909,12 +909,15 @@ class window.CrmModelView extends ModelBaseView
     )
     updated
 
+  #
+  # modelName is underscored.
+  #
   showNestedModelApp: (modelName, modelKlass, modelViewKlass, appViewKlass) ->
     if !@[modelName]?
       @[modelName] = new modelKlass([], parent: @model)
       @[modelName + 'ModelView'] = new modelViewKlass(model: @[modelName])
 
-    @[modelName + 'AppView'] = new appViewKlass({parent: @})
+    @[modelName + 'AppView'] = new appViewKlass({parent: @, appName: "#{modelName}_app"})
     @[modelName + 'AppView'].husband(@[modelName + 'ModelView'])
     @[modelName + 'AppView'].render()
 
@@ -1107,10 +1110,15 @@ class window.CrmModelView extends ModelBaseView
     @resetInputDevice()
     @
 
+#
+# Make accept appName configuration option as underscored app name
+# for which to search when constructing its dom node.
+#
 class window.SingleModelAppView extends WithChildrenView
 
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
+    @appName = if _.has(options, 'appName') then options['appName'] else null
     @modelView = null
     @modelShowContainer = null
 
@@ -1152,8 +1160,12 @@ class window.SingleModelAppView extends WithChildrenView
     @husband(view)
     @showModelView()
 
+  buildDom: () ->
+    @$el.html($(".templates .#{@appName}_view_example").children().clone()) if @$el.children().length == 0
+
   render: () ->
     WithChildrenView.prototype.render.apply(@, arguments)
+    @buildDom()
     @modelShowContainer = @$('.model-show-container').first()
     @showModelView()
     @

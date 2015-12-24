@@ -17,5 +17,6 @@
   - apps_configuration[:additional_templates].each do |template_name|
     %div{ :class => "#{template_name}_view_example"}
       = render :partial => template_name.to_s
-
-
+  - apps_configuration[:additional_apps].each do |app_config|
+    %div{:class => "#{app_config[:app_name]}_view_example"}
+      = render :partial => "shared/app", :locals => app_config

@@ -65,7 +65,8 @@ module IntrospectionRenderable
       }
 
       @apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
-      @apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates] if self.class.apps_klass_configuration[:additional_templates]
+      @apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
+      @apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
     end
 
     def _check_for_primary_model
@@ -127,6 +128,16 @@ module IntrospectionRenderable
         self.controller.apps_klass_configuration[:additional_templates] += t
       end
 
+      def include_app(name, app_config = {})
+        model_name = name.to_s
+        app_config.reverse_merge!(:multiplicity => "plural", :app_top => true, :disable_create => false, :back_button => true)
+        app_config[:app_class] = (app_config[:multiplicity] == "plural" ? model_name.pluralize : model_name).dasherize if app_config[:app_class].nil?
+        app_config[:model_name] = (app_config[:multiplicity] == "plural" ? model_name.pluralize : model_name) if app_config[:model_name].nil?
+        app_config[:title] = app_config[:model_name].titleize if app_config[:title].nil?
+        app_config[:app_name] = "#{app_config[:model_name].underscore}_app" if app_config[:app_name].nil?
+        self.controller.apps_klass_configuration[:additional_apps].push(app_config)
+      end
+
       def method_missing(method, *args, &block)
         @wrapped.send(method, *args, &block)
       end
@@ -139,7 +150,7 @@ module IntrospectionRenderable
 
       before_filter :_check_for_primary_model
 
-      self.apps_klass_configuration = { :additional_templates => []}
+      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => []}
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 
