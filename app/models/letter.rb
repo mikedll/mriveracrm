@@ -11,7 +11,7 @@ class Letter < ActiveRecord::Base
   attr_accessible :title, :body
 
   introspect do
-    nested_association :preview
+    nested_association :preview, :icon => 'icon-play'
 
     attr :title
     attr :body
