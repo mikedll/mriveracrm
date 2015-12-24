@@ -494,6 +494,9 @@ class window.BaseCollection extends Backbone.Collection
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
+    @events = $.extend(@events,
+      'click button.back': 'back'
+    )
 
     $(window).resize( () => @resizeView() )
     @resizeView()
@@ -1131,6 +1134,9 @@ class window.SingleModelAppView extends WithChildrenView
       'width': w + "px"
     )
 
+  back: () ->
+    @parent.childViewPulled(@)
+
   focusTopModelView: () ->
     @modelShowContainer.find('.model-view:visible :input:visible').not('.datetimepicker, .datepicker').first().focus()
 
@@ -1276,12 +1282,12 @@ class window.SearchAndListView extends BaseView
 class window.CollectionAppView extends WithChildrenView
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
-    @events =
+    @events = $.extend(@events,
       'click .add-model': 'create'
-      'click button.back': 'back'
       'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
       'keyup input.quickfilter': 'quickfilterAdjust'
+    )
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
