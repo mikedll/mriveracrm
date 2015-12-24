@@ -15,7 +15,7 @@ class Letter < ActiveRecord::Base
 
     attr :title
     attr :body
-    fmore :as => :text
+    fmore :as => :text, :hint => "This will be processed with Markdown formatting rules."
   end
 
   def previewed
