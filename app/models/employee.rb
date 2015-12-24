@@ -20,6 +20,10 @@ class Employee < ActiveRecord::Base
     role == Roles::OWNER
   end
 
+  def addressee
+    first_name.blank? ? (user.first_name.blank? ? business.name : user.first_name) : first_name
+  end
+
   protected
 
   def _defaults
