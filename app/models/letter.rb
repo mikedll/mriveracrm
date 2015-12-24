@@ -15,11 +15,13 @@ class Letter < ActiveRecord::Base
 
     attr :title
     attr :body
-    fmore :as => :text, :hint => "This will be processed with Markdown formatting rules."
+    fmore :as => :text, :hint => "This will be processed with Markdown formatting rules. You can use %{addressee} to capture a client's addressee information as this letter is sent to many recipients."
   end
 
   def previewed
-    Kramdown::Document.new(body).to_html
+    c = Client.new(:first_name => "John", :last_name => "Doe")
+    subbed = body.gsub('%{addressee}', c.addressee)
+    Kramdown::Document.new(subbed).to_html
   end
 
 end

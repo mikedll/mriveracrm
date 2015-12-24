@@ -57,6 +57,9 @@ class Client < ActiveRecord::Base
     invitation
   end
 
+  def addressee
+    first_name.blank? ? company : first_name
+  end
 
   def display_name
     "#{first_name} #{last_name}"
