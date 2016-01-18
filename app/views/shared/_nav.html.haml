@@ -6,3 +6,7 @@
       = link_to(t("main_nav.products"), products_path)
   %li
     = link_to(t('main_nav.contact'), contact_home_path)
+  - if true # bcan? Feature::Names::CMS
+    - current_business.pages.active.each do |p|
+      %li
+        = link_to p.title, page_path(:id => p.slug)

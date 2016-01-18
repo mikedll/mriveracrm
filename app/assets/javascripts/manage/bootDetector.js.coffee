@@ -28,6 +28,9 @@ $(() ->
     '.letters-gui':
       modelCollectionKlass: Letters
       rootAppViewKlass: LetterAppView
+    '.pages-gui':
+      modelCollectionKlass: Pages
+      rootAppViewKlass: PageCollectionAppView
 
   lazyGetBootstrap = (selector) ->
     # prevent undefined reference. can be removed if we make __XXX generic
@@ -44,6 +47,8 @@ $(() ->
       return __it_monitored_computers
     else if selector == '.letters-gui'
       return __letters
+    else if selector == '.pages-gui'
+      return __pages
     else
       # something went wrong here.
       return []

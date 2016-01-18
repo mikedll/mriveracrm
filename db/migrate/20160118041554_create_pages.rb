@@ -4,7 +4,7 @@ class CreatePages < ActiveRecord::Migration
       t.integer      :business_id,   :null => false
       t.string       :title,         :default => "", :null => false
       t.string       :slug,          :default => "", :null => false
-      t.boolean      :active,        :null => false
+      t.boolean      :active,        :default => false, :null => false
       t.text         :body,          :default => "", :null => false
       t.text         :compiled_body, :default => "", :null => false
       t.timestamps
