@@ -22,3 +22,5 @@ class window.PageCollectionAppView extends CollectionAppView
   spawnListItemType: PageListItemView
   title: ->
     "Pages"
+
+class window.StubbedPage extends BaseModel

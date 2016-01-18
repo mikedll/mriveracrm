@@ -12,7 +12,7 @@ class Page < ActiveRecord::Base
   validates :slug, :uniqueness => { :scope => :business_id }
   validates :link_priority, :numericality => { :only_integer => true }
 
-  attr_accessible :title, :slug, :body, :active, :link_priority
+  attr_accessible :title, :slug, :body, :active, :link_priority, :is_stub
 
   introspect do
     can :destroy
@@ -23,11 +23,16 @@ class Page < ActiveRecord::Base
       attr :active
     end
 
+    attr :link_priority
     attr :body, :text
     attr :compiled_body, :read_only
   end
 
   scope :active, -> { where('active = ?', true) }
+
+  def self.new_stub(name, priority)
+    new(:is_stub => true, :title => name, :link_priority => priority)
+  end
 
   def _compile
     self.compiled_body = Kramdown::Document.new(body).to_html
