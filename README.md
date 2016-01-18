@@ -166,6 +166,13 @@ Check backups capture:
 
     cknifeaws afew mikedllcrm-backups --count=150 
 
+# Specs
+
+Start a test copy of the FineGrained database in another
+process when running specs:
+
+    ./script/fine_grained_daemon.rb db/fineGrainedTest.db
+
 ## To restart without deploying:
 
     cap production unicorn:restart
