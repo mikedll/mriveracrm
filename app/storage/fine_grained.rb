@@ -920,8 +920,9 @@ class FineGrained < EventMachine::Connection
   # This could be in a constructor but the eventmachine constructor
   # documentation is weird. I don't understand it. M. Rivera 10/18/2015
   #
-  def self.ensure_opened
-    @@store = FineGrainedFile.new(DB) if @@store.nil?
+  def self.ensure_opened(db_path = nil)
+    db_path = DB if db_path.nil?
+    @@store = FineGrainedFile.new(db_path) if @@store.nil?
   end
 
   def post_init
