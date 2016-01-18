@@ -22,6 +22,16 @@ describe BusinessesController do
         get :show
         response.body.should_not match Regexp.escape(products_path)
       end
+
+      it "should respect ordering of CMS entries", :current => true do
+        get :show
+
+        assert_select ".nav.nav-tabs" do
+          links = css_select("a")
+          links[1].to_s.should match Regexp.escape(products_path)
+          links[2].to_s.should match Regexp.escape(contact_home_path)
+        end
+      end
     end
   end
 end

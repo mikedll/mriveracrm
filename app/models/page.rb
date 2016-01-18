@@ -7,12 +7,12 @@ class Page < ActiveRecord::Base
   before_validation :_clean
   before_validation :_defaults_on_create, :if => :new_record?
   before_validation :_compile
-  before_validation :_slugify
 
   validates :business_id, :presence => true
   validates :slug, :uniqueness => { :scope => :business_id }
+  validates :link_priority, :numericality => { :only_integer => true }
 
-  attr_accessible :title, :slug, :body, :active
+  attr_accessible :title, :slug, :body, :active, :link_priority
 
   introspect do
     can :destroy
@@ -37,12 +37,10 @@ class Page < ActiveRecord::Base
     self.title.strip!
   end
 
-  def _slugify
-    self.slug = title.downcase.gsub(/[^a-zA-Z0-9 _\t\n]/, '').gsub(/\s+/, '-').dasherize
-  end
-
   def _defaults_on_create
     self.active = true
+    self.link_priority = 4 if link_order.nil?
+    self.slug = title.downcase.gsub(/[^a-zA-Z0-9 _\t\n]/, '').gsub(/\s+/, '-').dasherize if slug.blank?
   end
 
 end

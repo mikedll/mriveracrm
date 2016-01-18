@@ -346,6 +346,5 @@ FactoryGirl.define do
 
   factory :page do
     business { Business.first || FactoryGirl.create(:business) }
-    
   end
 end
