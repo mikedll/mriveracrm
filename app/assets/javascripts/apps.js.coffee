@@ -680,9 +680,10 @@ class window.CrmModelView extends ModelBaseView
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
-      'keyup :input': 'onInputChange'
+      'keyup :input': 'onKeyUp'
       'change :input': 'onInputChange'
-      'ajax:beforeSend form': 'noSubmit'
+      'submit form': 'onSubmit'
+      'ajax:beforeSend form': 'onAjaxBeforeSend'
       'click .btn.save': 'save'
       'click button[type=button][data-confirm]': 'startConfirmation'
       'confirm:complete .btn.revert': 'revert'
@@ -817,25 +818,37 @@ class window.CrmModelView extends ModelBaseView
     else
       @clearErrors(@model.changedAttributes())
 
-  onInputChange: (e) ->
+  onKeyUp: (e) ->
     # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
-
     if e.keyCode == 13
-      if $(e.target).is('button')
-        return false # ignore 'enter' on a button key. it will be triggered elsewhere.
+      # ignore 'enter' on a button key. it will be triggered elsewhere.
+      return false if $(e.target).is('button')
 
       if(e.ctrlKey == false && !$(e.target).is('textarea'))
         e.stopPropagation()
         e.preventDefault()
         @save()
         return false
+      else if (e.ctrlKey and $(e.target).is('textarea'))
+        e.stopPropagation()
+        e.preventDefault()
+        @save()
+        return false
 
+    @onFormFieldChange(e)
+
+  onInputChange: (e) ->
+    # prevent inputs from a different contained model from modifying this one
+    return true if @inputsCache.filter(e.target).length == 0
+
+    @onFormFieldChange(e)
+
+  onFormFieldChange: (e) ->
     nameAndValue = @nameAndValueFromInput($(e.target))
     @model.deepSet([nameAndValue]) if nameAndValue?
-
-    return true
+    true
 
   nameFromInput: (elSelection, readOnly) ->
     attributeName = null
@@ -1079,6 +1092,12 @@ class window.CrmModelView extends ModelBaseView
     @clearErrors()
     @renderFullMessages(response)
     @renderErrors(response.errors)
+
+  onSubmit: (e) ->
+    @noSubmit()
+
+  onAjaxBeforeSend: (e) ->
+    @noSubmit()
 
   noSubmit: (e) ->
     false
