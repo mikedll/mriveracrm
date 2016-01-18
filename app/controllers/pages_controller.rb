@@ -3,6 +3,7 @@ class PagesController < ApplicationController
   skip_before_filter :authenticate_user!
   before_filter :require_active_plan_public
   before_filter :_require_business_support
+  before_filter :_require_page
 
   configure_apps :model => Page do
     actions :show
@@ -17,6 +18,10 @@ class PagesController < ApplicationController
   end
 
   protected
+
+  def _require_page
+    head :not_found if current_object.nil?
+  end
 
   def _require_business_support
     true # _bsupports?(Feature::Names::CMS)
