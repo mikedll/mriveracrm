@@ -12,6 +12,8 @@ FactoryGirl.define do
 
   sequence(:guest_email) { |n| "someone#{n}" + SecureRandom.base64(8) + "@example.com" }
 
+  sequence(:user_email) { |n| "user#{n}" + SecureRandom.base64(8) + "@example.com" }
+
   sequence(:employee_email) { |n| "employee#{n}" + SecureRandom.base64(8) + "@example.com" }
 
   sequence(:business_handle) { |n| "handle#{n}#{SecureRandom.hex(4)}yup" }
@@ -19,6 +21,9 @@ FactoryGirl.define do
   sequence(:customer_vendor_id) { |n| "cus_5TT8tt" + ("0" * ((8 - n.to_s.length)) + n.to_s) }
 
   factory :business do
+    ignore do
+      owner_email { FactoryGirl.generate(:employee_email) }
+    end
     default_mfe { FactoryGirl.create(:marketing_front_end) }
     name "my small business"
     handle { generate(:business_handle) }
@@ -30,7 +35,7 @@ FactoryGirl.define do
     stripe_secret_key AppConfiguration.get('stripe.secret_key')
     stripe_publishable_key AppConfiguration.get('stripe.publishable_key')
 
-    after(:create) do |business, eval|
+    after(:create) do |business, evaluator|
       if Business.current.nil? || RequestSettings.host.nil?
         Business.current = business
         RequestSettings.host = business.default_mfe.host
@@ -38,7 +43,7 @@ FactoryGirl.define do
 
       # Ensure owner exists.
       e = FactoryGirl.build(:employee, :business => business, :role => Employee::Roles::OWNER)
-      FactoryGirl.create(:employee_user, :employee => e)
+      FactoryGirl.create(:employee_user, :employee => e, :email => evaluator.owner_email)
     end
 
     factory :emerging_papacy do
@@ -79,7 +84,7 @@ FactoryGirl.define do
   factory :user_base, :class => User do
     first_name "Phil"
     last_name "Watson"
-    email { "user" + SecureRandom.base64(8) + "@example.com" }
+    email { FactoryGirl.generate(:user_email) }
     confirmed_at { Time.now }
     after(:create) do |user, evaluator|
       FactoryGirl.create(:google_oauth2_credential, :email => user.email, :user => user)
@@ -94,6 +99,7 @@ FactoryGirl.define do
     end
 
     factory :employee_user do
+      email { FactoryGirl.generate(:employee_email) }
       employee { FactoryGirl.create(:employee) }
       business { employee.business }
       client nil
