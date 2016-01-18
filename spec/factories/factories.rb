@@ -343,4 +343,9 @@ FactoryGirl.define do
   factory :notification do
     business
   end
+
+  factory :page do
+    business { Business.first || FactoryGirl.create(:business) }
+    
+  end
 end
