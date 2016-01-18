@@ -1299,7 +1299,8 @@ class window.SearchAndListView extends BaseView
     @$('.errors').text(s).show()
 
 #
-# Override modelName, modelNamePlural, spawnListItemType
+# Override modelName (underscored), modelNamePlural (underscored),
+# spawnListItemType (klass)
 #
 # Optional override render.
 #
@@ -1458,6 +1459,21 @@ class window.CollectionAppView extends WithChildrenView
       s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
     )
     @$('.errors').text(s).show()
+
+class window.HeterogeneousCollectionAppView extends CollectionAppView
+  initialize: (options) ->
+    CollectionAppView.prototype.initialize.apply(@, arguments)
+
+  addOneWithKlass: (model, klass) ->
+    listItemView = new klass({'model':model, 'parent': @})
+    @$listItems.append(listItemView.render().el)
+    listItemView.$('a').trigger('click') if @$('.model-show-container').children().length == 0
+
+  #
+  # This can be moved to the bootDetector later. M. Rivera 2016-01-22
+  #
+  customSetup: () ->
+    throw "Override in subclass."
 
 #
 # Stack of Views

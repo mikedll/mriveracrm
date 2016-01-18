@@ -34,16 +34,8 @@ class Manage::ProductsController < Manage::BaseController
     @current_objects ||= top_scope.order("updated_at DESC")
   end
 
-  def build_object
-    @current_object = current_business.products.build(object_parameters)
-  end
-
   def object_parameters
     params.slice(* Product.accessible_attributes.map { |k| k.underscore.to_sym } )
-  end
-
-  def parent_object
-    @parent_object ||= Business.current
   end
 
   protected

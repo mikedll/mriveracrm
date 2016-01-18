@@ -70,6 +70,7 @@ module IntrospectionRenderable
       @apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
 
       self.class.apps_klass_configuration[:additional_bootstraps].each do |ab|
+        # This is a critical security point of our multi-tenant respect.
         results = parent_object.send(ab).all
         @apps_configuration[:additional_bootstraps].push(:app_class => ab.to_s.dasherize, :bootstrap => results)
       end

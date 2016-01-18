@@ -29,6 +29,7 @@ $(() ->
       modelCollectionKlass: Letters
       rootAppViewKlass: LetterAppView
     '.pages-gui':
+      customSetup: true
       modelCollectionKlass: Pages
       rootAppViewKlass: PageCollectionAppView
 
@@ -85,6 +86,7 @@ $(() ->
       stack.childViewPushed(rootApp)
       if config.modelCollectionKlass?
         rootCollection.reset(rootCollectionBootstrap)
+        rootApp.customSetup() if config.customSetup # heterogeneous supplementary setup
       else if config.modelKlass?
         model.setAndAssumeSync(modelBootstrap) if modelBootstrap? && modelBootstrap != [] # some pages dont have one
       else

@@ -1,6 +1,6 @@
 class Manage::InvitationsController < Manage::BaseController
 
-  skip_before_filter :_install_parent_name
+  refine_top_query_scope
 
   make_resourceful do
     actions :index, :show, :update, :create, :destroy
@@ -32,6 +32,10 @@ class Manage::InvitationsController < Manage::BaseController
   end
 
   protected
+
+  def _refine_top_query_scope
+    @parent_object = @parent_object.clients.find params[:client_id]
+  end
 
   def _require_business_support
     _bsupports?(Feature::Names::CLIENTS)

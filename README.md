@@ -96,11 +96,13 @@ resque, and is as follows:
   and attach them to buttons as needed.
   
   - If you're making a collection, make the containing app. Extend
-  CollectionAppView with a singular camel case prefix `MyModelCollectionAppView`. 
-  Define properties `modelName` (underscored), `modelNamePlural` (underscored),
-  `spawnListItemType` (klass), and a `title` method.
-  Extend ListItemView and define `modelName`, `spawnViewType`, `className`,
-  and a `title` method. `className` should retain the `list-item` class.
+  CollectionAppView with a singular camel case prefix
+  `MyModelCollectionAppView`.  Define properties `modelName`
+  (underscored), `modelNamePlural` (underscored), `spawnListItemType`
+  (klass), and a `title` method.  Extend ListItemView and define
+  `modelName` (underscored), `spawnViewType` (klass), `className`
+  (dasherized), and a `title` method. `className` should include the
+  css class `list-item`.
   
   - Extend Collection with a pluralized name of your model while defining
   `model` with the model klass and urlFragment with the relative

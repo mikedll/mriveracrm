@@ -18,6 +18,9 @@ class LinkOrdering < ActiveRecord::Base
     DEFAULTS
   end
 
+  def self.retrieval(top_scope = self)
+  end
+
   def _defaults_on_create
     self.priority = (self.class.defaults[referenced_link] || 4) if priority.nil?
   end

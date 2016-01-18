@@ -1,7 +1,7 @@
 class Manage::BusinessesController < Manage::BaseController
 
   skip_before_filter :require_active_plan
-  skip_before_filter :_install_parent_name
+  skip_before_filter :_define_top_query_scope
 
   before_filter :_can_manage_current_object
 
