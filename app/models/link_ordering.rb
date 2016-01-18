@@ -6,7 +6,7 @@ class LinkOrdering < ActiveRecord::Base
 
   validates :business_id, :presence => true
   validates :priority, :numericality => { :only_integer => true }
-  validates :referenced_link, :unique => true
+  validates :referenced_link, :uniqueness => true
 
   DEFAULTS = {
     :home => 1,

@@ -2,6 +2,7 @@ class Manage::PagesController < Manage::BaseController
 
   configure_apps :model => Page do
     belongs_to :business
+    include_bootstrap :link_orderings
     actions :index, :create, :show, :destroy, :update
   end
 

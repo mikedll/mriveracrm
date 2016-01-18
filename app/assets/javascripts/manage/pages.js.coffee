@@ -24,3 +24,6 @@ class window.PageCollectionAppView extends CollectionAppView
     "Pages"
 
 class window.StubbedPage extends BaseModel
+
+class window.StubbedPageView extends CrmModelView
+

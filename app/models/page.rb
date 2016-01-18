@@ -36,6 +36,7 @@ class Page < ActiveRecord::Base
 
   def _compile
     self.compiled_body = Kramdown::Document.new(body).to_html
+    self.slug = title.downcase.gsub(/[^a-zA-Z0-9 _\t\n]/, '').gsub(/\s+/, '-').dasherize
   end
 
   def _clean
@@ -44,8 +45,7 @@ class Page < ActiveRecord::Base
 
   def _defaults_on_create
     self.active = true
-    self.link_priority = 4 if link_order.nil?
-    self.slug = title.downcase.gsub(/[^a-zA-Z0-9 _\t\n]/, '').gsub(/\s+/, '-').dasherize if slug.blank?
+    self.link_priority = 4 if link_priority.nil?
   end
 
 end

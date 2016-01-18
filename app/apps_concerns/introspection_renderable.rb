@@ -59,6 +59,7 @@ module IntrospectionRenderable
         :multiplicity => plural_action? ? 'plural' : 'single',
         :model_templates => [],
         :additional_templates => [],
+        :additional_bootstraps => [],
         :resource_multiplicity => 'multiple',
         :javascript_modules => [],
         :view => nil
@@ -67,6 +68,11 @@ module IntrospectionRenderable
       @apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
       @apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
       @apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
+
+      self.class.apps_klass_configuration[:additional_bootstraps].each do |ab|
+        results = parent_object.send(ab).all
+        @apps_configuration[:additional_bootstraps].push(:app_class => ab.to_s.dasherize, :bootstrap => results)
+      end
     end
 
     def _check_for_primary_model
@@ -128,6 +134,10 @@ module IntrospectionRenderable
         self.controller.apps_klass_configuration[:additional_templates] += t
       end
 
+      def include_bootstrap(model_name)
+        self.controller.apps_klass_configuration[:additional_bootstraps].push(model_name)
+      end
+
       def include_app(name, app_config = {})
         model_name = name.to_s
         app_config.reverse_merge!(:multiplicity => "plural", :app_top => true, :disable_create => false, :back_button => true)
@@ -150,7 +160,7 @@ module IntrospectionRenderable
 
       before_filter :_check_for_primary_model
 
-      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => []}
+      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => [], :additional_bootstraps => [] }
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 
