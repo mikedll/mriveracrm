@@ -80,10 +80,10 @@ class ApplicationController < ActionController::Base
 
     nav.push([:products, products_path]) if bcan?(Feature::Names::PRODUCTS)
 
-    los = LinkOrdering.with_defaults(current_business.link_orderings.all)
+    @link_orderings = LinkOrdering.with_defaults(current_business.link_orderings.all)
 
     nav_links = nav.map do |ne|
-      lo = los.select { |lo| lo.referenced_link.to_sym == ne.first }.first
+      lo = @link_orderings.select { |lo| lo.referenced_link.to_sym == ne.first }.first
       [lo.title, ne.last, lo.priority]
     end
 

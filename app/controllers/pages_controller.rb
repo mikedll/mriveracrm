@@ -4,6 +4,7 @@ class PagesController < ApplicationController
   before_filter :require_active_plan_public
   before_filter :_require_business_support
   before_filter :_require_page
+  before_filter :_calculate_title
   before_filter :calculate_public_navigation, :only => [:show]
 
   configure_apps :model => Page do
@@ -22,6 +23,10 @@ class PagesController < ApplicationController
 
   def _require_page
     head :not_found if current_object.nil?
+  end
+
+  def _calculate_title
+    @title = current_object.title
   end
 
   def _require_business_support
