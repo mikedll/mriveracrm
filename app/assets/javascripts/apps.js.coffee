@@ -98,8 +98,9 @@ class window.ComparatorBuilder
     comparator
 
 class window.BaseModel extends Backbone.Model
-  initialize: () ->
+  initialize: (attributes, options) ->
     Backbone.Model.prototype.initialize.apply(this, arguments)
+    @parent = options['parent'] if _.has(options, 'parent')
     @_isDirty = false
     @_isInvalid = false
     @_isRequesting = false
@@ -493,6 +494,9 @@ class window.BaseCollection extends Backbone.Collection
 class window.WithChildrenView extends BaseView
   initialize: (options) ->
     BaseView.prototype.initialize.apply(@, arguments)
+    @events = $.extend(@events,
+      'click button.back': 'back'
+    )
 
     $(window).resize( () => @resizeView() )
     @resizeView()
@@ -662,7 +666,9 @@ class window.ListItemView extends ModelBaseView
 
 
 #
-# Define className, modelName, and probably events and render
+# Define className, modelName, and probably events and render.
+#
+# modelName is underscored.
 #
 # implement render
 #
@@ -674,9 +680,11 @@ class window.CrmModelView extends ModelBaseView
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
-      'keyup :input': 'onInputChange'
+      'keydown input.numeric': @numericOnKeyDown
+      'keyup :input': 'onKeyUp'
       'change :input': 'onInputChange'
-      'ajax:beforeSend form': 'noSubmit'
+      'submit form': 'onSubmit'
+      'ajax:beforeSend form': 'onAjaxBeforeSend'
       'click .btn.save': 'save'
       'click button[type=button][data-confirm]': 'startConfirmation'
       'confirm:complete .btn.revert': 'revert'
@@ -811,25 +819,46 @@ class window.CrmModelView extends ModelBaseView
     else
       @clearErrors(@model.changedAttributes())
 
-  onInputChange: (e) ->
+  numericOnKeyDown: (e) ->
+    if e.ctrlKey
+      return false if (e.keyCode == 38)
+      return false if (e.keyCode == 40)
+
+  onKeyUp: (e) ->
+    if e.ctrlKey
+      return true if (e.keyCode == 38)
+      return true if (e.keyCode == 40)
+
     # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
-
     if e.keyCode == 13
-      if $(e.target).is('button')
-        return false # ignore 'enter' on a button key. it will be triggered elsewhere.
+      # ignore 'enter' on a button key. it will be triggered elsewhere.
+      return false if $(e.target).is('button')
 
       if(e.ctrlKey == false && !$(e.target).is('textarea'))
         e.stopPropagation()
         e.preventDefault()
         @save()
         return false
+      else if (e.ctrlKey and $(e.target).is('textarea'))
+        e.stopPropagation()
+        e.preventDefault()
+        @save()
+        return false
 
+    @onFormFieldChange(e)
+
+  onInputChange: (e) ->
+    # prevent inputs from a different contained model from modifying this one
+    return true if @inputsCache.filter(e.target).length == 0
+
+    @onFormFieldChange(e)
+
+  onFormFieldChange: (e) ->
     nameAndValue = @nameAndValueFromInput($(e.target))
     @model.deepSet([nameAndValue]) if nameAndValue?
-
-    return true
+    true
 
   nameFromInput: (elSelection, readOnly) ->
     attributeName = null
@@ -879,6 +908,11 @@ class window.CrmModelView extends ModelBaseView
           val = null
         else
           val = elSelection.val() # don't bother converting to number - may lose precision
+      else if elSelection.is('[type=number]')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = parseInt(elSelection.val())
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
@@ -906,6 +940,21 @@ class window.CrmModelView extends ModelBaseView
     )
     updated
 
+  #
+  # modelName is underscored.
+  #
+  showNestedModelApp: (modelName, modelKlass, modelViewKlass, appViewKlass) ->
+    if !@[modelName]?
+      @[modelName] = new modelKlass({}, parent: @model)
+      @[modelName + 'ModelView'] = new modelViewKlass(model: @[modelName])
+
+    @[modelName + 'AppView'] = new appViewKlass({parent: @, appName: "#{modelName}_app"})
+    @[modelName + 'AppView'].husband(@[modelName + 'ModelView'])
+    @[modelName + 'AppView'].render()
+
+    @parent.childViewPushed(@[modelName + 'AppView'])
+    @[modelName].fetch()
+
   showNestedCollectionApp: (collectionName, collectionKlass, collectionAppViewKlass) ->
     if !@[collectionName]?
       @[collectionName] = new collectionKlass([], parent: @model)
@@ -929,7 +978,11 @@ class window.CrmModelView extends ModelBaseView
           v = @toHumanReadableDateFormat(v)
         else if el$.hasClass('currency')
           v = "$#{@textRenderer.toFixed(v, 2)}"
-        el$.text(v)
+
+        if el$.hasClass('html')
+          el$.html(v)
+        else
+          el$.text(v)
     )
 
   copyModelToForm: () ->
@@ -1055,6 +1108,12 @@ class window.CrmModelView extends ModelBaseView
     @renderFullMessages(response)
     @renderErrors(response.errors)
 
+  onSubmit: (e) ->
+    @noSubmit()
+
+  onAjaxBeforeSend: (e) ->
+    @noSubmit()
+
   noSubmit: (e) ->
     false
 
@@ -1073,7 +1132,7 @@ class window.CrmModelView extends ModelBaseView
     @parent.rebindGlobalHotKeys()
 
   buildDom: () ->
-    @$el.html($(".#{@modelName}_view_example form").clone()) if @$el.children().length == 0
+    @$el.html($(".#{@modelName}_view_example").children().clone()) if @$el.children().length == 0
 
   render: () ->
     @buildDom()
@@ -1092,10 +1151,16 @@ class window.CrmModelView extends ModelBaseView
     @resetInputDevice()
     @
 
+#
+# Make accept appName configuration option as underscored app name
+# for which to search when constructing its dom node.
+#
 class window.SingleModelAppView extends WithChildrenView
+  className: 'app-gui single-model'
 
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
+    @appName = if _.has(options, 'appName') then options['appName'] else null
     @modelView = null
     @modelShowContainer = null
 
@@ -1107,6 +1172,9 @@ class window.SingleModelAppView extends WithChildrenView
       'height': h + "px"
       'width': w + "px"
     )
+
+  back: () ->
+    @parent.childViewPulled(@)
 
   focusTopModelView: () ->
     @modelShowContainer.find('.model-view:visible :input:visible').not('.datetimepicker, .datepicker').first().focus()
@@ -1137,8 +1205,12 @@ class window.SingleModelAppView extends WithChildrenView
     @husband(view)
     @showModelView()
 
+  buildDom: () ->
+    @$el.html($(".templates .#{@appName}_view_example").children().clone()) if @$el.children().length == 0
+
   render: () ->
     WithChildrenView.prototype.render.apply(@, arguments)
+    @buildDom()
     @modelShowContainer = @$('.model-show-container').first()
     @showModelView()
     @
@@ -1242,19 +1314,20 @@ class window.SearchAndListView extends BaseView
     @$('.errors').text(s).show()
 
 #
-# Override modelName, modelNamePlural, spawnListItemType
+# Override modelName (underscored), modelNamePlural (underscored),
+# spawnListItemType (klass)
 #
 # Optional override render.
 #
 class window.CollectionAppView extends WithChildrenView
   initialize: (options) ->
     WithChildrenView.prototype.initialize.apply(@, arguments)
-    @events =
+    @events = $.extend(@events,
       'click .add-model': 'create'
-      'click button.back': 'back'
       'click .collection-filter': 'filtersChanged'
       'click .collection-sorts': 'sortsChanged'
       'keyup input.quickfilter': 'quickfilterAdjust'
+    )
 
     @listenTo(@collection, 'reset', @addAll)
     @listenTo(@collection, 'add', @addOne)
@@ -1401,6 +1474,21 @@ class window.CollectionAppView extends WithChildrenView
       s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
     )
     @$('.errors').text(s).show()
+
+class window.HeterogeneousCollectionAppView extends CollectionAppView
+  initialize: (options) ->
+    CollectionAppView.prototype.initialize.apply(@, arguments)
+
+  addOneWithKlass: (model, klass) ->
+    listItemView = new klass({'model':model, 'parent': @})
+    @$listItems.append(listItemView.render().el)
+    listItemView.$('a').trigger('click') if @$('.model-show-container').children().length == 0
+
+  #
+  # This can be moved to the bootDetector later. M. Rivera 2016-01-22
+  #
+  customSetup: () ->
+    throw "Override in subclass."
 
 #
 # Stack of Views

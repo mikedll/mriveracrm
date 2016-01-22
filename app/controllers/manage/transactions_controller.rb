@@ -1,6 +1,6 @@
 class Manage::TransactionsController < Manage::BaseController
 
-  skip_before_filter :_install_parent_name
+  refine_top_query_scope
 
   # Makes outside transactions by default
 
@@ -38,16 +38,6 @@ class Manage::TransactionsController < Manage::BaseController
     params.slice(* Transaction.accessible_attributes.map { |k| k.underscore.to_sym } )
   end
 
-  def parent_object
-    @parent_object ||= begin
-                         client = current_business.clients.find_by_id params[:client_id]
-                         raise ActiveRecord::RecordNotFound if client.nil?
-                         invoice = client.invoices.find_by_id params[:invoice_id]
-                         raise ActiveRecord::RecordNotFound if invoice.nil?
-                         invoice
-                       end 
-  end
-
   def mark_successful
     if current_object.begin && current_object.succeed
       response_for :update
@@ -58,6 +48,14 @@ class Manage::TransactionsController < Manage::BaseController
   end
 
   protected
+
+  def _refine_top_query_scope
+    @parent_object = begin
+                       client = current_business.clients.find_by_id params[:client_id]
+                       raise ActiveRecord::RecordNotFound if client.nil?
+                       invoice = client.invoices.find params[:invoice_id]
+                     end
+  end
 
   def _require_business_support
     _bsupports?(Feature::Names::INVOICING)

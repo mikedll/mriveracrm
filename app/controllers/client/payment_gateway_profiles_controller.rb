@@ -1,6 +1,5 @@
 class Client::PaymentGatewayProfilesController < Client::BaseController
 
-  skip_before_filter :_install_parent_name
   before_filter :create_remote_if_doesnt_exist, :only => [:create, :update]
 
   make_resourceful do
@@ -34,7 +33,7 @@ class Client::PaymentGatewayProfilesController < Client::BaseController
   end
 
   def current_object
-    @current_object ||= current_user.client.payment_gateway_profile
+    @current_object ||= parent_object.payment_gateway_profile
   end
 
   protected

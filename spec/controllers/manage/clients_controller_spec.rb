@@ -45,7 +45,7 @@ describe Manage::ClientsController do
       response.status.should == 404
     end
 
-    it "should not accidently display a client from another business", :current => true do
+    it "should not accidently display a client from another business" do
       b2 = FactoryGirl.create(:business)
       c1 = FactoryGirl.create(:client, :business => @user.business)
       c2 = FactoryGirl.create(:client, :business => b2)

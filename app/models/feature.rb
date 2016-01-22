@@ -20,6 +20,7 @@ class Feature < ActiveRecord::Base
     INVOICING = 'invoicing'
     PRODUCTS = 'products'
     APPS_FRAMEWORK = 'apps_framework'
+    CMS = 'cms'
   end
 
   # This is the master list of features. This
@@ -29,7 +30,8 @@ class Feature < ActiveRecord::Base
     Names::EMPLOYEES,
     Names::INVOICING,
     Names::PRODUCTS,
-    Names::APPS_FRAMEWORK
+    Names::APPS_FRAMEWORK,
+    Names::CMS
   ]
 
   def self.first_generation_price(name)
@@ -38,7 +40,8 @@ class Feature < ActiveRecord::Base
       Names::EMPLOYEES => BigDecimal("0.0"),
       Names::INVOICING => BigDecimal("10.0"),
       Names::PRODUCTS => BigDecimal("5.0"),
-      Names::APPS_FRAMEWORK => BigDecimal("5.0")
+      Names::APPS_FRAMEWORK => BigDecimal("5.0"),
+      Names::CMS => BigDecimal("10.0")
     }[name]
 
     raise "No first generation price for #{name}." if p.nil?

@@ -1,6 +1,6 @@
 class Manage::InvoicesController < Manage::BaseController
 
-  skip_before_filter :_install_parent_name
+  refine_top_query_scope
 
   configure_apps :model => Invoice do
     actions :index, :show, :update, :create, :destroy
@@ -33,8 +33,8 @@ class Manage::InvoicesController < Manage::BaseController
     with_update_and_transition { current_object.mark_paid }
   end
 
-  def parent_object
-    @parent_object ||= Business.current.clients.find params[:client_id]
+  def _refine_top_query_scope
+    @parent_object = @parent_object.clients.find params[:client_id]
   end
 
   def object_parameters

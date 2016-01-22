@@ -12,6 +12,17 @@ class AppsFormBuilder < SimpleForm::FormBuilder
 
     config = object.class.introspectable_configuration
     output = ActiveSupport::SafeBuffer.new
+
+    config.nested_associations_for_view(options[:view]).each do |na|
+      button_html = ActiveSupport::SafeBuffer.new
+      button_html.safe_concat(content_tag('i', '', :class => na.values.first[:icon]))
+      button_html.safe_concat(" #{na.keys.first.to_s.titleize}")
+      inner_html = ActiveSupport::SafeBuffer.new
+      inner_html.safe_concat(content_tag('div', '', :class => 'control-label'))
+      inner_html.safe_concat(content_tag('div', content_tag('div', content_tag('a', button_html, :class => "#{na.keys.first.to_s.underscore} btn"), :class => 'btn-group'), :class => 'controls'))
+      output.safe_concat(content_tag('div', inner_html, :class => 'control-group'))
+    end
+
     config.attribute_stack_for_view(options[:view]).each do |row|
       if row.length == 1
         output.safe_concat(derived_input(row.first, config.attr_decoration(row.first.keys.first.to_sym, options[:view])))
@@ -125,7 +136,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
         when :datetime, :currency
           acc[:as] = :string if acc[:as].nil?
           css_class = trait
-        when :string
+        when :hidden, :string
           acc[:as] = trait if acc[:as].nil? # allow read_only to overwrite this
         else
           css_class = trait

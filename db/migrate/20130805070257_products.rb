@@ -23,8 +23,6 @@ class Products < ActiveRecord::Migration
     add_column :images, :data_original_filename, :string
     add_column :images, :data_unique_id, :string
 
-    execute "update images set business_id = (select id from businesses where domain = 'www.mikedll.com')"
-    
   end
 
   def down

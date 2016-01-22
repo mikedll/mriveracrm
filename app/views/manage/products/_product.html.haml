@@ -1,15 +1,15 @@
 
 = simple_form_for product, :remote => true, :url => manage_products_path(product), :html => { :class => 'form-horizontal'} do |f|
 
-  = f.input :name, :input_html => product.persisted? ? {} : { :id => nil }
+  = f.input :name
 
-  = f.input :price, :input_html => product.persisted? ? {} : { :id => nil, :class => ["currency"] }
+  = f.input :price, :input_html => { :class => ["currency"] }
 
-  = f.input :weight, :input_html => product.persisted? ? {} : { :id => nil }
+  = f.input :weight
 
-  = f.input :weight_units, :input_html => product.persisted? ? {} : { :id => nil }
+  = f.input :weight_units
 
-  = f.input :active, :input_html => product.persisted? ? {} : { :id => nil }
+  = f.input :active
 
   .control-group
     .control-label

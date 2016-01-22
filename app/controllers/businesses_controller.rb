@@ -2,6 +2,7 @@ class BusinessesController < ApplicationController
 
   skip_before_filter :authenticate_user!
   skip_before_filter :require_business_and_current_user_belongs_to_it, :only => [:show]
+  before_filter :calculate_public_navigation, :only => [:show]
 
   #
   # This is a marketing site, or something else?

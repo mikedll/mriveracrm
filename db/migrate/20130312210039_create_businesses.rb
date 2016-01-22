@@ -6,8 +6,6 @@ class CreateBusinesses < ActiveRecord::Migration
       t.timestamps
     end
 
-    execute "insert into businesses (name, domain) values ('The Mike De La Loza Company', 'www.mikedll.com')"
-
     create_table :clients do |t|
       t.integer :business_id
       t.string :first_name, :default => "", :null => false
@@ -65,8 +63,6 @@ class CreateBusinesses < ActiveRecord::Migration
     end
 
     add_column :projects, :business_id, :integer
-
-    execute "update projects set business_id = (select id from businesses where domain = 'www.mikedll.com')"
 
     create_table :invitations do |t|
       t.integer :business_id

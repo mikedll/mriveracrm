@@ -1,6 +1,8 @@
 - if defined?(bootstrap)
   - content_for :head do
     = render :partial => 'shared/app_bootstrap', :locals => { :app_class => app_class, :bootstrap => bootstrap }
+    - additional_bootstraps.each do |ab|
+      = render :partial => 'shared/app_bootstrap', :locals => { :app_class => ab[:app_class], :bootstrap => ab[:bootstrap] }
 
 .section-title
   = title

@@ -25,6 +25,13 @@ $(() ->
     '.it-monitored-computers-gui':
       modelCollectionKlass: ItMonitoredComputers
       rootAppViewKlass: ItMonitoredComputerAppView
+    '.letters-gui':
+      modelCollectionKlass: Letters
+      rootAppViewKlass: LetterAppView
+    '.pages-gui':
+      customSetup: true
+      modelCollectionKlass: Pages
+      rootAppViewKlass: PageCollectionAppView
 
   lazyGetBootstrap = (selector) ->
     # prevent undefined reference. can be removed if we make __XXX generic
@@ -39,6 +46,10 @@ $(() ->
       return __billing_settings
     else if selector == '.it-monitored-computers-gui'
       return __it_monitored_computers
+    else if selector == '.letters-gui'
+      return __letters
+    else if selector == '.pages-gui'
+      return __pages
     else
       # something went wrong here.
       return []
@@ -75,6 +86,7 @@ $(() ->
       stack.childViewPushed(rootApp)
       if config.modelCollectionKlass?
         rootCollection.reset(rootCollectionBootstrap)
+        rootApp.customSetup() if config.customSetup # heterogeneous supplementary setup
       else if config.modelKlass?
         model.setAndAssumeSync(modelBootstrap) if modelBootstrap? && modelBootstrap != [] # some pages dont have one
       else

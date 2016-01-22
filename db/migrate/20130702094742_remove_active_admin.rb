@@ -1,9 +1,5 @@
 class RemoveActiveAdmin < ActiveRecord::Migration
   def up
-    drop_table :admin_users
-
-
-
     remove_index  :active_admin_comments, :column => [:author_type, :author_id]
     remove_index  :active_admin_comments, :column => [:namespace]
     remove_column :active_admin_comments, :namespace
@@ -15,7 +11,6 @@ class RemoveActiveAdmin < ActiveRecord::Migration
 
 
     drop_table :admin_notes
-
   end
 
   def down
@@ -41,23 +36,5 @@ class RemoveActiveAdmin < ActiveRecord::Migration
     # Update all the existing comments to the default namespace
     say "Updating any existing comments to the beezlebub namespace."
     execute "UPDATE active_admin_comments SET namespace='beezlebub'"
-
-
-
-    # Not truely reversable, as the gem is gone.
-    create_table(:admin_users) do |t|
-      # t.database_authenticatable :null => false
-      # t.recoverable
-      # t.rememberable
-      # t.trackable
-      # t.encryptable
-      # t.confirmable
-      # t.lockable :lock_strategy => :failed_attempts, :unlock_strategy => :both
-      # t.token_authenticatable
-      t.timestamps
-    end
-
-    # add_index :admin_users, :email,                :unique => true
-    # add_index :admin_users, :reset_password_token, :unique => true
   end
 end

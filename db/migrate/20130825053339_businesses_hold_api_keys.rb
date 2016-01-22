@@ -1,4 +1,4 @@
-class BusinessesHoldApiKeys < ActiveRecord::Migration
+class BusinessesHoldAPIKeys < ActiveRecord::Migration
   def up
     add_column :businesses, :stripe_secret_key, :string, :null => false, :default => ""
     add_column :businesses, :stripe_publishable_key, :string, :null => false, :default => ""

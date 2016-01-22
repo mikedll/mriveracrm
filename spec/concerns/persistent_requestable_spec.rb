@@ -47,7 +47,7 @@ describe PersistentRequestable do
     end
   end
 
-  it "should clean redis on destroy", :current => true do
+  it "should clean redis on destroy" do
     FineGrainedClient.cli.keys.each do |k|
       FineGrainedClient.cli.del(k)
     end

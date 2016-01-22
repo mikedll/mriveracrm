@@ -1,6 +1,6 @@
 class Manage::ProductImagesController < Manage::BaseController
 
-  skip_before_filter :_install_parent_name
+  refine_top_query_scope
 
   make_resourceful do
     actions :all
@@ -75,15 +75,10 @@ class Manage::ProductImagesController < Manage::BaseController
   def toggle_primary
     current_object.update_attributes(:primary => !current_object.primary)
     if current_object.save
-      response_for :update        
+      response_for :update
     else
       response_for :update_fails
     end
-  end
-
-
-  def parent_object
-    @parent_object ||= Business.current.products.find params[:product_id]
   end
 
   def object_parameters
@@ -91,6 +86,10 @@ class Manage::ProductImagesController < Manage::BaseController
   end
 
   protected
+
+  def _refine_top_query_scope
+    @parent_object = @parent_object.products.find params[:product_id]
+  end
 
   def _require_business_support
     _bsupports?(Feature::Names::PRODUCTS)

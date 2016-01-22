@@ -1,8 +1,4 @@
 .nav.nav-tabs
-  %li
-    = link_to(t('main_nav.home'), business_path)
-  - if bcan? Feature::Names::PRODUCTS
+  - @navigation_links.each do |nl|
     %li
-      = link_to(t("main_nav.products"), products_path)
-  %li
-    = link_to(t('main_nav.contact'), contact_home_path)
+      = link_to(nl.first, nl.last)
