@@ -20,4 +20,4 @@
         %br
       - if !current_business.email.blank?
         = "E-Mail:"
-        = link_to(current_business.email, 'mailto:current_business.email')
+        = link_to(current_business.email, "mailto:#{current_business.email}")
