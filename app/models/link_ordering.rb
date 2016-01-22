@@ -8,6 +8,8 @@ class LinkOrdering < ActiveRecord::Base
   validates :priority, :numericality => { :only_integer => true }
   validates :referenced_link, :uniqueness => true
 
+  attr_accessible :referenced_link, :priority, :scope
+
   DEFAULTS = {
     :home => 1,
     :products => 2,
@@ -18,7 +20,15 @@ class LinkOrdering < ActiveRecord::Base
     DEFAULTS
   end
 
-  def self.retrieval(top_scope = self)
+  #
+  # This add defaults if a query does not come up
+  # with such results. Assumes LinkOrderings is a small-scale
+  # table for a given business.
+  #
+  def self.with_defaults(los)
+    missing = defaults.keys.select { |k| !los.any? { |r| r.referenced_link == k } }
+    los += missing.map { |m| LinkOrdering.new(:referenced_link => m.to_s, :priority => defaults[m] ) }
+    los
   end
 
   def _defaults_on_create

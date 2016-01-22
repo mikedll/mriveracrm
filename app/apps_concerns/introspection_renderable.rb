@@ -69,10 +69,14 @@ module IntrospectionRenderable
       @apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
       @apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
 
-      self.class.apps_klass_configuration[:additional_bootstraps].each do |ab|
+      self.class.apps_klass_configuration[:additional_bootstraps].each do |options|
         # This is a critical security point of our multi-tenant respect.
-        results = parent_object.send(ab).all
-        @apps_configuration[:additional_bootstraps].push(:app_class => ab.to_s.dasherize, :bootstrap => results)
+        results = if options[:has_defaults]
+                    options[:klass].with_defaults(parent_object.send(options[:relation_name]))
+                  else
+                    parent_object.send(options[:relation_name])
+                  end
+        @apps_configuration[:additional_bootstraps].push(:app_class => options[:app_class], :bootstrap => results)
       end
     end
 
@@ -135,8 +139,19 @@ module IntrospectionRenderable
         self.controller.apps_klass_configuration[:additional_templates] += t
       end
 
-      def include_bootstrap(model_name)
-        self.controller.apps_klass_configuration[:additional_bootstraps].push(model_name)
+      #
+      # Expects a symbol as the model name which is the name of an association
+      # on a parent object.
+      #
+      def include_bootstrap(model_name, options = {})
+        options.reverse_merge!(
+          :relation_name => model_name,
+          :klass => model_name.to_s.singularize.camelize.constantize,
+          :has_defaults => false,
+          :app_class => model_name.to_s.dasherize
+          )
+
+        self.controller.apps_klass_configuration[:additional_bootstraps].push(options)
       end
 
       def include_app(name, app_config = {})

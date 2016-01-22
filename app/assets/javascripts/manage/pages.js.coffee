@@ -23,6 +23,7 @@ class window.StubbedPages extends BaseCollection
   urlFragment: '/manage/link_orderings'
 
 class window.StubbedPageView extends CrmModelView
+  modelName: "stubbed_page"
 
 class window.StubbedPageListItemView extends ListItemView
   modelName: 'stubbed_page'
@@ -30,7 +31,7 @@ class window.StubbedPageListItemView extends ListItemView
   className: 'list-item stubbed-page'
 
   title: () ->
-    @model.get('title')
+    @model.get('referenced_link')
 
 class window.PageCollectionAppView extends HeterogeneousCollectionAppView
   modelName: "page"
@@ -49,10 +50,10 @@ class window.PageCollectionAppView extends HeterogeneousCollectionAppView
     @listenTo(@collection2, 'error', @onError)
 
   addOne: (model) ->
-    addOneWithKlass(model, @spawnListItemType)
+    @addOneWithKlass(model, @spawnListItemType)
 
   addOne2: (model) ->
-    addOneWithKlass(model, @spawnListItemType2)
+    @addOneWithKlass(model, @spawnListItemType2)
 
   addAll2: () ->
     @collection2.each(@addOne2, @)
