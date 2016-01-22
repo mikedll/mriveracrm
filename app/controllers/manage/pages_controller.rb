@@ -18,7 +18,7 @@ class Manage::PagesController < Manage::BaseController
   protected
 
   def _require_business_support
-    true # _bsupports?(Feature::Names::CMS)
+    _bsupports?(Feature::Names::CMS)
   end
 
 end

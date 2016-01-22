@@ -9,4 +9,5 @@ ActiveSupport::Inflector.inflections do |inflect|
   inflect.acronym "IT"
   inflect.acronym "PDF"
   inflect.acronym "API"
+  inflect.acronym "CMS"
 end
