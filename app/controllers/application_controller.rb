@@ -87,7 +87,7 @@ class ApplicationController < ActionController::Base
       [lo.title, ne.last, lo.priority]
     end
 
-    if true # bcan?(Feature::Names::CMS)
+    if bcan?(Feature::Names::CMS)
       nav_links += current_business.pages.active.map do |p|
         [p.title, page_path(:id => p.slug), p.link_priority]
       end

@@ -18,7 +18,7 @@ class Manage::MonitoredComputersController < Manage::BaseController
   protected
 
   def _require_business_support
-    true # _bsupports?(Feature::Names::IT_MONITOR)
+    _bsupports?(Feature::Names::IT_MONITORED_COMPUTERS)
   end
 
 end

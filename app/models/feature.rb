@@ -20,6 +20,7 @@ class Feature < ActiveRecord::Base
     INVOICING = 'invoicing'
     PRODUCTS = 'products'
     APPS_FRAMEWORK = 'apps_framework'
+    IT_MONITORED_COMPUTERS = 'it_monitored_computers'
     CMS = 'cms'
   end
 
@@ -31,6 +32,7 @@ class Feature < ActiveRecord::Base
     Names::INVOICING,
     Names::PRODUCTS,
     Names::APPS_FRAMEWORK,
+    Names::IT_MONITORED_COMPUTERS,
     Names::CMS
   ]
 
@@ -41,6 +43,7 @@ class Feature < ActiveRecord::Base
       Names::INVOICING => BigDecimal("10.0"),
       Names::PRODUCTS => BigDecimal("5.0"),
       Names::APPS_FRAMEWORK => BigDecimal("5.0"),
+      Names::IT_MONITORED_COMPUTERS => BigDecimal("10.0"),
       Names::CMS => BigDecimal("10.0")
     }[name]
 
