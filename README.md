@@ -163,6 +163,13 @@ That's it. If you're sure you don't have migrations:
 
     cap production deploy
 
+If you have to, create any incoming Features as long as you have one
+MFE:
+
+    RAILS_ENV=production bundle exec rake data_migrations:ensure_features_exist
+
+That command has to be run on production.
+
 # Backups
 
 Check backups capture:
