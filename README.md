@@ -132,7 +132,7 @@ resque, and is as follows:
 
 Cut a release.
 
-    g f release start v1.x
+    g frs v1.x
 
 Fix any bugs. Do assets compilation and deploy, if assets have changed. Ensure
 amazon keys are defined in the environment, then run the assets deploy command.
@@ -151,7 +151,7 @@ Don't mess up your dev machine.
 
 Fix any bugs....are you sure? Then finish release.
 
-    g f release finish v1.x
+    g frf v1.x
     g push
     g co develop # stay on develop branch
     
