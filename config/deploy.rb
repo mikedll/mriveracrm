@@ -66,5 +66,6 @@ task :production do
 end
 
 after 'deploy:update_code', 'deploy:configs'
+after 'deploy:restart', 'deploy:stop'
 after 'deploy:restart', 'deploy:prepare_foreman'
-after 'deploy:restart', 'deploy:upstart_restart'
+after 'deploy:restart', 'deploy:start'

@@ -132,7 +132,7 @@ resque, and is as follows:
 
 Cut a release.
 
-    g f release start v1.x
+    g frs v1.x
 
 Fix any bugs. Do assets compilation and deploy, if assets have changed. Ensure
 amazon keys are defined in the environment, then run the assets deploy command.
@@ -151,7 +151,7 @@ Don't mess up your dev machine.
 
 Fix any bugs....are you sure? Then finish release.
 
-    g f release finish v1.x
+    g frf v1.x
     g push
     g co develop # stay on develop branch
     
@@ -162,6 +162,13 @@ Both dev and master should go upstream.
 That's it. If you're sure you don't have migrations:
 
     cap production deploy
+
+If you have to, create any incoming Features as long as you have one
+MFE:
+
+    RAILS_ENV=production bundle exec rake data_migrations:ensure_features_exist
+
+That command has to be run on production.
 
 # Backups
 

@@ -27,21 +27,13 @@ class Manage::BusinessesController < Manage::BaseController
   def update
     before :update
     begin
-      current_object.name = params[:name] if params[:name]
-      current_object.stripe_secret_key = params[:stripe_secret_key] if params[:stripe_secret_key]
-      current_object.stripe_publishable_key = params[:stripe_publishable_key] if params[:stripe_publishable_key]
-      current_object.google_oauth2_client_id = params[:google_oauth2_client_id] if params[:google_oauth2_client_id]
+      current_object.attributes = object_parameters
+      current_object.stripe_secret_key =           params[:stripe_secret_key] if params[:stripe_secret_key]
+      current_object.stripe_publishable_key =      params[:stripe_publishable_key] if params[:stripe_publishable_key]
+      current_object.google_oauth2_client_id =     params[:google_oauth2_client_id] if params[:google_oauth2_client_id]
       current_object.google_oauth2_client_secret = params[:google_oauth2_client_secret] if params[:google_oauth2_client_secret]
-
-      current_object.google_analytics_id = params[:google_analytics_id] if params[:google_analytics_id]
-
-      current_object.google_public_api_key = params[:google_public_api_key] if params[:google_public_api_key]
-
-      current_object.splash_html = params[:splash_html] if params[:splash_html]
-      # current_object. = params[:] if params[:]
-      # current_object. = params[:] if params[:]
-      # current_object. = params[:] if params[:]
-      # current_object. = params[:] if params[:]
+      current_object.google_public_api_key =       params[:google_public_api_key] if params[:google_public_api_key]
+      current_object.splash_html =                 params[:splash_html] if params[:splash_html]
       result = current_object.save
     rescue ActiveRecord::StaleObjectError
       current_object.reload
@@ -57,10 +49,6 @@ class Manage::BusinessesController < Manage::BaseController
       after :update_fails
       response_for :update_fails
     end
-  end
-
-  def object_parameters
-    [] # too worried about mass assignment
   end
 
   protected
