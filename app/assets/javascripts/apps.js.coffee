@@ -680,6 +680,7 @@ class window.CrmModelView extends ModelBaseView
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
+      'keydown input.numeric': @numericOnKeyDown
       'keyup :input': 'onKeyUp'
       'change :input': 'onInputChange'
       'submit form': 'onSubmit'
@@ -818,7 +819,16 @@ class window.CrmModelView extends ModelBaseView
     else
       @clearErrors(@model.changedAttributes())
 
+  numericOnKeyDown: (e) ->
+    if e.ctrlKey
+      return false if (e.keyCode == 38)
+      return false if (e.keyCode == 40)
+
   onKeyUp: (e) ->
+    if e.ctrlKey
+      return true if (e.keyCode == 38)
+      return true if (e.keyCode == 40)
+
     # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
@@ -898,6 +908,11 @@ class window.CrmModelView extends ModelBaseView
           val = null
         else
           val = elSelection.val() # don't bother converting to number - may lose precision
+      else if elSelection.is('[type=number]')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = parseInt(elSelection.val())
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false

@@ -187,7 +187,7 @@ ActiveRecord::Schema.define(:version => 20160118041554) do
 
   create_table "link_orderings", :force => true do |t|
     t.integer  "business_id",                     :null => false
-    t.string   "scope",           :default => "", :null => false
+    t.string   "title",           :default => "", :null => false
     t.string   "referenced_link", :default => "", :null => false
     t.integer  "priority",                        :null => false
     t.datetime "created_at",                      :null => false

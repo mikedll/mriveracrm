@@ -23,15 +23,15 @@ class window.StubbedPages extends BaseCollection
   urlFragment: '/manage/link_orderings'
 
 class window.StubbedPageView extends CrmModelView
-  modelName: "stubbed_page"
+  modelName: "link_ordering"
 
 class window.StubbedPageListItemView extends ListItemView
-  modelName: 'stubbed_page'
+  modelName: 'link_ordering'
   spawnViewType: StubbedPageView
-  className: 'list-item stubbed-page'
+  className: 'list-item link-ordering'
 
   title: () ->
-    @model.get('referenced_link')
+    @model.get('title')
 
 class window.PageCollectionAppView extends HeterogeneousCollectionAppView
   modelName: "page"

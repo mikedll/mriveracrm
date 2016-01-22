@@ -136,7 +136,7 @@ class AppsFormBuilder < SimpleForm::FormBuilder
         when :datetime, :currency
           acc[:as] = :string if acc[:as].nil?
           css_class = trait
-        when :string
+        when :hidden, :string
           acc[:as] = trait if acc[:as].nil? # allow read_only to overwrite this
         else
           css_class = trait

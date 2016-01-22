@@ -13,7 +13,7 @@ class CreatePages < ActiveRecord::Migration
 
     create_table :link_orderings do |t|
       t.references :business,        :null => false
-      t.string     :scope,           :default => "", :null => false
+      t.string     :title,           :default => "", :null => false
       t.string     :referenced_link, :default => "", :null => false
       t.integer    :priority,        :null => false
       t.timestamps
