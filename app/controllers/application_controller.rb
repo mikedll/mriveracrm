@@ -73,6 +73,8 @@ class ApplicationController < ActionController::Base
   end
 
   def calculate_public_navigation
+    return if current_business.nil?
+
     nav = [
       [:home, business_path],
       [:contact_home, contact_home_path]

@@ -48,6 +48,8 @@ class Business < ActiveRecord::Base
 
   scope :with_features, lambda { joins(:usage_subscription => :features).includes(:usage_subscription => :features) }
 
+  attr_accessible :name, :phone, :address1, :address2, :city, :state, :zip, :email
+
   introspect do
     can :destroy, :confirm => t('business.confirm_delete')
 
@@ -65,6 +67,14 @@ class Business < ActiveRecord::Base
 
     attr :it_monitored_computers_key, :read_only
     fmore :label => "Monitored computers API key"
+
+    attr :phone
+    attr :address1
+    attr :address2
+    attr :city
+    attr :state
+    attr :zip
+    attr :email
 
     attr :splash_html
     fmore :label => "Homepage splash text", :as => :text
@@ -152,6 +162,14 @@ class Business < ActiveRecord::Base
 
   def default_url_host
     host.blank? ? default_mfe.host : host
+  end
+
+  def has_some_address?
+    !address1.blank? || !address2.blank? || !city.blank? || !state.blank? || !zip.blank? || !email.blank?
+  end
+
+  def has_tail_address?
+    !city.blank? || !state.blank? || !zip.blank?
   end
 
   def lifecycle_deliver!(identifier, mail)

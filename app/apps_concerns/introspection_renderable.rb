@@ -3,7 +3,7 @@ require 'active_support/concern'
 module IntrospectionRenderable
   extend ActiveSupport::Concern
 
-  included do
+  module SupplementaryMethods
     def instance_variable_name_with_model_namespace_awareness
       return model_variable_name if model_variable_name
       instance_variable_name_without_model_namespace_awareness
@@ -14,7 +14,9 @@ module IntrospectionRenderable
       current_model_name_without_model_namespace_awareness
     end
 
-    helper_method(:rendered_current_objects, :rendered_current_object)
+    def object_parameters
+      params.slice(* apps_configuration[:primary_model].accessible_attributes.map { |k| k.underscore.to_sym } )
+    end
 
     protected
 
@@ -83,10 +85,8 @@ module IntrospectionRenderable
       apps_configuration[:javascript_modules] += [controller_klass_container.underscore]
     end
 
-    def _check_for_primary_model
-      if self.class.apps_primary_model
-        configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
-      end
+    def _configure_render
+      configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
     end
 
     def with_update_and_transition(&block)
@@ -118,7 +118,6 @@ module IntrospectionRenderable
     def json_config
       @json_config ||= apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
     end
-
   end
 
   module ClassMethods
@@ -181,7 +180,7 @@ module IntrospectionRenderable
 
       attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name, :namespaced_model_klass_name
 
-      before_filter :_check_for_primary_model
+      before_filter :_configure_render
 
       self.apps_klass_configuration = { :additional_templates => [], :additional_apps => [], :additional_bootstraps => [], :model_templates => [] }
       self.apps_primary_model = opts[:model]
@@ -231,6 +230,10 @@ module IntrospectionRenderable
 
         MakeResourcefulDecorator.new(self).instance_eval(&block) if block
       end
+
+      include SupplementaryMethods
+
+      helper_method(:rendered_current_objects, :rendered_current_object)
 
       alias_method_chain :instance_variable_name, :model_namespace_awareness
       alias_method_chain :current_model_name, :model_namespace_awareness

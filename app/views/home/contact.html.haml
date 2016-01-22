@@ -3,4 +3,21 @@
   = render :partial => 'shared/nav'
 
   .main
-    Contact page still forthcoming.
+    - if !current_business.has_some_address?
+      Contact information is not yet available.
+    - else
+      - if !current_business.address1.blank?
+        = current_business.address1
+        %br
+      - if !current_business.address2.blank?
+        = current_business.address2
+        %br
+      - if current_business.has_tail_address?
+        = "#{current_business.city} #{current_business.state}#{!current_business.zip.blank? ? ',' : ''} #{current_business.zip}"
+        %br
+      - if !current_business.phone.blank?
+        = "Phone: #{current_business.phone}"
+        %br
+      - if !current_business.email.blank?
+        = "E-Mail:"
+        = link_to(current_business.email, 'mailto:current_business.email')
