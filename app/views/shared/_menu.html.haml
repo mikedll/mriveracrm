@@ -17,9 +17,12 @@
         - if true # bcan? Feature::Names::ODESK_LISTER
           %li
             = link_to 'Monitored Computers', manage_monitored_computers_path, :tabIndex => '-1'
-        - if true # bcan? Feature::Names::LETTERS
+        - if false # bcan? Feature::Names::LETTERS
           %li
             = link_to 'Letters', manage_letters_path, :tabIndex => '-1'
+        - if true # bcan? Feature::Names::CMS
+          %li
+            = link_to 'CMS', manage_pages_path, :tabIndex => '-1'
         - if can? :manage, current_business
           %li.dropdown
             %a.dropdown-toggle{:data => { :toggle => "dropdown" }, :href => "#", :tabIndex => "-1"}

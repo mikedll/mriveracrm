@@ -10,19 +10,19 @@ class Manage::ClientsController < Manage::BaseController
 
     response_for(:index) do |format|
       format.html
-      format.js { render :json => current_objects }
+      format.json { render :json => current_objects }
     end
 
     response_for(:show, :update) do |format|
-      format.js { render :json => current_object }
+      format.json { render :json => current_object }
     end
 
     response_for(:create) do |format|
-      format.js { render :status => :created, :json => current_object }
+      format.json { render :status => :created, :json => current_object }
     end
 
     response_for(:update_fails, :create_fails) do |format|
-      format.js { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
+      format.json { render :status => :unprocessable_entity, :json => { :object => current_object, :errors => current_object.errors, :full_messages => current_object.errors.full_messages} }
     end
   end
 

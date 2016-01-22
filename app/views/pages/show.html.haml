@@ -1,0 +1,6 @@
+
+.container.padded
+  = render :partial => 'shared/nav'
+
+  .main
+    = @page.compiled_body.html_safe

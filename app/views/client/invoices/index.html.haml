@@ -1,7 +1,7 @@
 
 - content_for :head do
   = javascript_include_tag 'client'
-  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'payment_gateway_profile', :bootstrap => current_user.client.payment_gateway_profile.try(:public) }
+  = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'payment_gateway_profile', :bootstrap => current_user.client.payment_gateway_profile.try(:public), :additional_bootstraps => [] }
 
 .container-fluid.gui-container
 
@@ -14,7 +14,7 @@
         .span12
           = render AuthorizeNetPaymentGatewayProfile.new
   .invoices_view_example
-    = render :partial => 'shared/app', :locals => { :app_top => false, :app_class => 'invoices', :title => "Invoices", :bootstrap => rendered_current_objects }
+    = render :partial => 'shared/app', :locals => { :app_top => false, :app_class => 'invoices', :title => "Invoices", :bootstrap => rendered_current_objects, :additional_bootstraps => [] }
   .container-app-example
     .payment-gateway-profile-view-container
     .invoices-app-view-container

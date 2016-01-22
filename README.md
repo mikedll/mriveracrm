@@ -73,29 +73,59 @@ resque, and is as follows:
 # Creating Features
 
   1. Add any gem dependencies, especially for API fetches.
-  - Create a controller with make_resourceful actions, member_actions, and belongs_to.
-  Setup `object_parameters`, `parent_name`, `parent_object`, `business_support`
-  by feature and any plan requirement. Configure the controller with a model.
+  
+  - Create a controller with the `configure_apps` call and specify the
+  model while doing so. Define member_actions, and belongs_to.  Define
+  the methods `object_parameters`, `parent_object`, and
+  `_required_business_support`.
+  
+  `_required_business_support` should respect the feature requirements.
+  
+  - In the model being managed as a feature, use attr_accessible
+  to whitelist attributes for mass-assignment as needed.
+  
   - Add routes.
+  
   - Create yourModel.js.coffee.
+  
   - Extend BaseModel with window.YourModel. Specify `urlSuffix`
   with something. Override isNew to be false if you have a singleton model.
+  
   - Extend and CrmModelView with window.YourModelView. Specific `modelName`
   in the YourModelView with a *snake case* form of your model. Add any events
   and attach them to buttons as needed.
-  - If you're making a collection, extend CollectionAppView and define
-  `modelName` (underscored), `modelNamePlural`, `spawnListItemType`, and `title`.
-  Extend ListItemView and define `modelName`, `spawnViewType`, `className`,
-  and a `title` method. `className` should retain the `list-item` class.
-  Extend Collection with a pluralized name of your model while defining
+  
+  - If you're making a collection, make the containing app. Extend
+  CollectionAppView with a singular camel case prefix
+  `MyModelCollectionAppView`.  Define properties `modelName`
+  (underscored), `modelNamePlural` (underscored), `spawnListItemType`
+  (klass), and a `title` method.  Extend ListItemView and define
+  `modelName` (underscored), `spawnViewType` (klass), `className`
+  (dasherized), and a `title` method. `className` should include the
+  css class `list-item`.
+  
+  - Extend Collection with a pluralized name of your model while defining
   `model` with the model klass and urlFragment with the relative
   url where this app will be served.
+  
   - Add to manage.js. If you created this in the manage directory,
   it'll automatically be picked up for you.
-  - Insert a bootstrapper in bootDetector.js.coffee.
+  
+  - Add to bootDetector.js.coffee. You must specify two things,
+  the initializing klasses, and the Javascript variable name where
+  the seed may be found when lazily bootstrapping the app.
+  Regardless of whether you are making a singular or plural
+  multiplicity app, you must specify `rootAppViewKlass`. Then,
+  you must also add either `modelKlass` and `modelViewKlass` in the
+  case of a singular multiplicity app, or, `modelCollectionKlass`
+  in the case of a plural multiplicity app.
+
   - Add to _menu.html.haml, a Feature, feature default generation 0 price.
+  
   - Add controller and model specs.
+  
   - Add background scheduling support.
+  
   - Deploy. Migrate in your feature. Add to default MFE if necessary.
     
 # Deploying to production
@@ -137,6 +167,13 @@ That's it. If you're sure you don't have migrations:
 Check backups capture:
 
     cknifeaws afew mikedllcrm-backups --count=150 
+
+# Specs
+
+Start a test copy of the FineGrained database in another
+process when running specs:
+
+    ./script/fine_grained_daemon.rb db/fineGrainedTest.db
 
 ## To restart without deploying:
 

@@ -72,6 +72,30 @@ class ApplicationController < ActionController::Base
     # @theme = "standard" if !@current_business.nil?
   end
 
+  def calculate_public_navigation
+    nav = [
+      [:home, business_path],
+      [:contact_home, contact_home_path]
+    ]
+
+    nav.push([:products, products_path]) if bcan?(Feature::Names::PRODUCTS)
+
+    @link_orderings = LinkOrdering.with_defaults(current_business.link_orderings.all)
+
+    nav_links = nav.map do |ne|
+      lo = @link_orderings.select { |lo| lo.referenced_link.to_sym == ne.first }.first
+      [lo.title, ne.last, lo.priority]
+    end
+
+    if true # bcan?(Feature::Names::CMS)
+      nav_links += current_business.pages.active.map do |p|
+        [p.title, page_path(:id => p.slug), p.link_priority]
+      end
+    end
+
+    @navigation_links = nav_links.sort { |a,b| a.last <=> b.last }.map { |ne| [ne.first, ne[1]] }
+  end
+
 
   # Supposed to be used for business key loading/unloading,
   # but we're doing that in the controllers now.
@@ -174,6 +198,10 @@ class ApplicationController < ActionController::Base
     end
 
     true
+  end
+
+  def bcan?(*names)
+    current_business && current_business.active_plan? && current_business.supports?(*names)
   end
 
   # Override in subclass as security precaution.

@@ -680,9 +680,11 @@ class window.CrmModelView extends ModelBaseView
   initialize: (options) ->
     ModelBaseView.prototype.initialize.apply(@, arguments)
     @events = $.extend(@events,
-      'keyup :input': 'onInputChange'
+      'keydown input.numeric': @numericOnKeyDown
+      'keyup :input': 'onKeyUp'
       'change :input': 'onInputChange'
-      'ajax:beforeSend form': 'noSubmit'
+      'submit form': 'onSubmit'
+      'ajax:beforeSend form': 'onAjaxBeforeSend'
       'click .btn.save': 'save'
       'click button[type=button][data-confirm]': 'startConfirmation'
       'confirm:complete .btn.revert': 'revert'
@@ -817,25 +819,46 @@ class window.CrmModelView extends ModelBaseView
     else
       @clearErrors(@model.changedAttributes())
 
-  onInputChange: (e) ->
+  numericOnKeyDown: (e) ->
+    if e.ctrlKey
+      return false if (e.keyCode == 38)
+      return false if (e.keyCode == 40)
+
+  onKeyUp: (e) ->
+    if e.ctrlKey
+      return true if (e.keyCode == 38)
+      return true if (e.keyCode == 40)
+
     # prevent inputs from a different contained model from modifying this one
     return true if @inputsCache.filter(e.target).length == 0
 
-
     if e.keyCode == 13
-      if $(e.target).is('button')
-        return false # ignore 'enter' on a button key. it will be triggered elsewhere.
+      # ignore 'enter' on a button key. it will be triggered elsewhere.
+      return false if $(e.target).is('button')
 
       if(e.ctrlKey == false && !$(e.target).is('textarea'))
         e.stopPropagation()
         e.preventDefault()
         @save()
         return false
+      else if (e.ctrlKey and $(e.target).is('textarea'))
+        e.stopPropagation()
+        e.preventDefault()
+        @save()
+        return false
 
+    @onFormFieldChange(e)
+
+  onInputChange: (e) ->
+    # prevent inputs from a different contained model from modifying this one
+    return true if @inputsCache.filter(e.target).length == 0
+
+    @onFormFieldChange(e)
+
+  onFormFieldChange: (e) ->
     nameAndValue = @nameAndValueFromInput($(e.target))
     @model.deepSet([nameAndValue]) if nameAndValue?
-
-    return true
+    true
 
   nameFromInput: (elSelection, readOnly) ->
     attributeName = null
@@ -885,6 +908,11 @@ class window.CrmModelView extends ModelBaseView
           val = null
         else
           val = elSelection.val() # don't bother converting to number - may lose precision
+      else if elSelection.is('[type=number]')
+        if elSelection.val().trim() == ""
+          val = null
+        else
+          val = parseInt(elSelection.val())
       else if elSelection.is('[type=checkbox]')
         if elSelection.hasClass('boolean')
           val = if elSelection.prop('checked') then true else false
@@ -1079,6 +1107,12 @@ class window.CrmModelView extends ModelBaseView
     @clearErrors()
     @renderFullMessages(response)
     @renderErrors(response.errors)
+
+  onSubmit: (e) ->
+    @noSubmit()
+
+  onAjaxBeforeSend: (e) ->
+    @noSubmit()
 
   noSubmit: (e) ->
     false
@@ -1280,7 +1314,8 @@ class window.SearchAndListView extends BaseView
     @$('.errors').text(s).show()
 
 #
-# Override modelName, modelNamePlural, spawnListItemType
+# Override modelName (underscored), modelNamePlural (underscored),
+# spawnListItemType (klass)
 #
 # Optional override render.
 #
@@ -1439,6 +1474,21 @@ class window.CollectionAppView extends WithChildrenView
       s += "." if (!_.contains(['.', '!', '?'], m[ m.length - 1]) )
     )
     @$('.errors').text(s).show()
+
+class window.HeterogeneousCollectionAppView extends CollectionAppView
+  initialize: (options) ->
+    CollectionAppView.prototype.initialize.apply(@, arguments)
+
+  addOneWithKlass: (model, klass) ->
+    listItemView = new klass({'model':model, 'parent': @})
+    @$listItems.append(listItemView.render().el)
+    listItemView.$('a').trigger('click') if @$('.model-show-container').children().length == 0
+
+  #
+  # This can be moved to the bootDetector later. M. Rivera 2016-01-22
+  #
+  customSetup: () ->
+    throw "Override in subclass."
 
 #
 # Stack of Views

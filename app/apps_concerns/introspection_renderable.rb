@@ -19,7 +19,41 @@ module IntrospectionRenderable
     protected
 
     def configure_render(klass, opts = {})
-      activate_default_apps
+      @apps_configuration = {
+        :primary_model => nil,
+        :subject_klass_name => '',
+        :app_top => false,
+        :app_class => '',
+        :multiplicity => plural_action? ? 'plural' : 'single',
+        :model_templates => [],
+        :additional_templates => [],
+        :additional_bootstraps => [],
+        :resource_multiplicity => 'multiple',
+        :javascript_modules => [],
+        :view => nil
+      }
+
+      apps_configuration[:view] = opts[:view] if opts[:view]
+
+      apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
+      apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
+      apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
+
+      self.class.apps_klass_configuration[:additional_bootstraps].each do |options|
+
+        json_config = options[:klass].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
+        # This is a critical security point of our multi-tenant respect.
+        results = if options[:has_defaults]
+                    options[:klass].with_defaults(parent_object.send(options[:relation_name]))
+                  else
+                    parent_object.send(options[:relation_name])
+                  end.as_json(json_config)
+
+        apps_configuration[:additional_bootstraps].push(:app_class => options[:app_class], :bootstrap => results)
+      end
+
+      apps_configuration[:model_templates] += self.class.apps_klass_configuration[:model_templates]
+
       apps_configuration[:primary_model] = klass if apps_configuration[:primary_model].nil?
 
       self.namespaced_model_klass_name = klass.to_s
@@ -47,26 +81,6 @@ module IntrospectionRenderable
 
       apps_configuration[:model_templates].push(klass)
       apps_configuration[:javascript_modules] += [controller_klass_container.underscore]
-      apps_configuration[:view] = opts[:view] if opts[:view]
-    end
-
-    def activate_default_apps
-      @apps_configuration = {
-        :primary_model => nil,
-        :subject_klass_name => '',
-        :app_top => false,
-        :app_class => '',
-        :multiplicity => plural_action? ? 'plural' : 'single',
-        :model_templates => [],
-        :additional_templates => [],
-        :resource_multiplicity => 'multiple',
-        :javascript_modules => [],
-        :view => nil
-      }
-
-      @apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
-      @apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
-      @apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
     end
 
     def _check_for_primary_model
@@ -124,8 +138,27 @@ module IntrospectionRenderable
         self.controller.apps_klass_configuration[:title] = s
       end
 
+      def include_model_template(*klasses)
+        self.controller.apps_klass_configuration[:model_templates] += klasses
+      end
+
       def include_templates(*t)
         self.controller.apps_klass_configuration[:additional_templates] += t
+      end
+
+      #
+      # Expects a symbol as the model name which is the name of an association
+      # on a parent object.
+      #
+      def include_bootstrap(model_name, options = {})
+        options.reverse_merge!(
+          :relation_name => model_name,
+          :klass => model_name.to_s.singularize.camelize.constantize,
+          :has_defaults => false,
+          :app_class => model_name.to_s.dasherize
+          )
+
+        self.controller.apps_klass_configuration[:additional_bootstraps].push(options)
       end
 
       def include_app(name, app_config = {})
@@ -150,7 +183,7 @@ module IntrospectionRenderable
 
       before_filter :_check_for_primary_model
 
-      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => []}
+      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => [], :additional_bootstraps => [], :model_templates => [] }
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 

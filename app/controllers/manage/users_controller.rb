@@ -1,6 +1,6 @@
 class Manage::UsersController < Manage::BaseController
 
-  skip_before_filter :_install_parent_name
+  refine_top_query_scope
 
   make_resourceful do
     actions :show, :index
@@ -17,6 +17,10 @@ class Manage::UsersController < Manage::BaseController
   end
 
   protected
+
+  def _refine_top_query_scope
+    @parent_object = @parent_object.clients.find params[:client_id]
+  end
 
   def _require_business_support
     true

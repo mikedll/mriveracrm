@@ -70,7 +70,6 @@ MikedllCrm::Application.routes.draw do
         get :preview
       end
     end
-
     resources :products do
       resources :product_images, :path => "images" do
         member do
@@ -78,7 +77,6 @@ MikedllCrm::Application.routes.draw do
         end
       end
     end
-
     resources :clients, :only => [:new, :index, :show, :update, :create] do
       put :archive
       put :unarchive
@@ -93,7 +91,6 @@ MikedllCrm::Application.routes.draw do
           put :charge
           put :mark_paid
         end
-
         resources :transactions do
           member do
             put :mark_successful
@@ -101,8 +98,9 @@ MikedllCrm::Application.routes.draw do
         end
       end
     end
-
     resources :invoices, :only => [:index, :create, :show]
+    resources :pages, :only => [:index, :show, :create, :update, :destroy]
+    resources :link_orderings, :only => [:index, :create, :update]
   end
 
   namespace "client" do
@@ -184,7 +182,6 @@ MikedllCrm::Application.routes.draw do
           get :preview
         end
       end
-
       resources :products do
         resources :product_images, :path => "images" do
           member do
@@ -192,7 +189,6 @@ MikedllCrm::Application.routes.draw do
           end
         end
       end
-
       resources :clients, :only => [:new, :index, :show, :update, :create] do
         put :archive
         put :unarchive
@@ -207,7 +203,6 @@ MikedllCrm::Application.routes.draw do
             put :charge
             put :mark_paid
           end
-
           resources :transactions do
             member do
               put :mark_successful
@@ -215,8 +210,9 @@ MikedllCrm::Application.routes.draw do
           end
         end
       end
-
       resources :invoices, :only => [:index, :create, :show]
+      resources :pages, :only => [:index, :show, :create, :update, :destroy]
+      resources :link_orderings, :only => [:index, :create, :update]
     end
 
     namespace "client" do
@@ -228,8 +224,11 @@ MikedllCrm::Application.routes.draw do
         end
       end
     end
+
+    resources :pages, :path => "", :only => :show
   end
 
+  resources :pages, :path => "", :only => :show
 
   root :to => "business#show"
 
