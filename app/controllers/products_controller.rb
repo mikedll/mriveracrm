@@ -3,6 +3,7 @@ class ProductsController < ApplicationController
   skip_before_filter :authenticate_user!
   before_filter :require_active_plan_public
   before_filter :_require_business_support
+  before_filter :calculate_public_navigation, :only => [:index]
 
   make_resourceful do
     actions :index, :show

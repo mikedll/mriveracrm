@@ -4,6 +4,7 @@ class PagesController < ApplicationController
   before_filter :require_active_plan_public
   before_filter :_require_business_support
   before_filter :_require_page
+  before_filter :calculate_public_navigation, :only => [:show]
 
   configure_apps :model => Page do
     actions :show
