@@ -12,15 +12,11 @@ class Manage::BaseController < ApplicationController
   # Use this to further restrict the top level query scope.
   #
   def self.refine_top_query_scope
-    before_filter :_release_parent_name
     before_filter :_refine_top_query_scope
+    before_filter :_redefine_parent_name
   end
 
   private
-
-  def _release_parent_name
-    @parent_name = nil
-  end
 
   #
   # This is debatably redundant with belongs_to in make_resourceful.
@@ -28,6 +24,10 @@ class Manage::BaseController < ApplicationController
   def _refine_top_query_scope
     # recommended before_filter for subclasses to restrict @parent_object further.
     raise "Override in subclass."
+  end
+
+  def _redefine_parent_name
+    @parent_name = @parent_object.class.to_s
   end
 
   def _define_top_query_scope
