@@ -153,6 +153,7 @@ Fix any bugs....are you sure? Then finish release.
 
     g f release finish v1.x
     g push
+    g co develop # stay on develop branch
     
 Both dev and master should go upstream.
 

@@ -6,12 +6,11 @@ namespace :assets do
   task :deploy => [:environment, 'assets:precompile'] do
 
     require 'aws/s3'
-
     environment = @environment_config || Rails.env
     s3_config = YAML.load( File.read( Rails.root.join("config", "cloudfront.yml") ) )[environment.to_s]
     AWS::S3::Base.establish_connection!(
-                                        :access_key_id     => ENV['AMAZON_ACCESS_KEY_ID'],
-                                        :secret_access_key => ENV['AMAZON_SECRET_ACCESS_KEY']
+                                        :access_key_id     => AppConfiguration.get('deploy.aws_key'),
+                                        :secret_access_key => AppConfiguration.get('deploy.aws_secret')
                                         )
 
     puts "Connected to S3..."      
