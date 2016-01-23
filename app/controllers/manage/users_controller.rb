@@ -2,7 +2,7 @@ class Manage::UsersController < Manage::BaseController
 
   refine_top_query_scope
 
-  make_resourceful do
+  configure_apps do
     actions :show, :index
     belongs_to :client
 

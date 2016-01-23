@@ -4,7 +4,7 @@ class Manage::TransactionsController < Manage::BaseController
 
   # Makes outside transactions by default
 
-  make_resourceful do
+  configure_apps do
     actions :index, :show, :update, :create, :destroy
     belongs_to :invoice
     response_for :new do

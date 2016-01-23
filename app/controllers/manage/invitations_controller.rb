@@ -2,7 +2,7 @@ class Manage::InvitationsController < Manage::BaseController
 
   refine_top_query_scope
 
-  make_resourceful do
+  configure_apps do
     actions :index, :show, :update, :create, :destroy
     belongs_to :client
     response_for :new do

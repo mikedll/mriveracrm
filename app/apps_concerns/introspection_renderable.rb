@@ -86,7 +86,9 @@ module IntrospectionRenderable
     end
 
     def _configure_render
-      configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
+      if self.class.apps_primary_model
+        configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
+      end
     end
 
     def with_update_and_transition(&block)
@@ -175,7 +177,7 @@ module IntrospectionRenderable
       end
     end
 
-    def configure_apps(opts, &block)
+    def configure_apps(opts = {}, &block)
       cattr_accessor :apps_primary_model, :apps_selected_view, :apps_klass_configuration
 
       attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name, :namespaced_model_klass_name
