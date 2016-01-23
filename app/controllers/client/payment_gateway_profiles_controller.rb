@@ -2,7 +2,7 @@ class Client::PaymentGatewayProfilesController < Client::BaseController
 
   before_filter :create_remote_if_doesnt_exist, :only => [:create, :update]
 
-  make_resourceful do
+  configure_apps do
     actions :create, :update, :show
 
     response_for(:show, :update) do |format|

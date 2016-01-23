@@ -1,6 +1,6 @@
 class Manage::ProductsController < Manage::BaseController
 
-  make_resourceful do
+  configure_apps do
     actions :all
     belongs_to :business
     response_for :new do

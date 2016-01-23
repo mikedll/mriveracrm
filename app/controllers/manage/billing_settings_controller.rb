@@ -3,7 +3,7 @@ class Manage::BillingSettingsController < Manage::BaseController
   skip_before_filter :require_active_plan
   before_filter :_can_manage_current_object
 
-  make_resourceful do
+  configure_apps do
     actions :show, :update, :destroy
 
     response_for :destroy do |format|

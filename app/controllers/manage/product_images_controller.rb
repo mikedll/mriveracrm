@@ -2,7 +2,7 @@ class Manage::ProductImagesController < Manage::BaseController
 
   refine_top_query_scope
 
-  make_resourceful do
+  configure_apps do
     actions :all
     belongs_to :product
     response_for :new do

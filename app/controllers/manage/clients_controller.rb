@@ -1,6 +1,6 @@
 class Manage::ClientsController < Manage::BaseController
 
-  make_resourceful do
+  configure_apps do
     actions :new, :index, :show, :update, :create
     member_actions :archive, :unarchive
     belongs_to :business
