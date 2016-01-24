@@ -1,5 +1,6 @@
 - if defined?(bootstrap)
   - content_for :head do
+    = render :partial => 'shared/app_starter_settings', :locals => { :app_class => app_class, :app_starter_params => app_starter_params, :primary_model_names => primary_model_names, :multiplicity => multiplicity, :expecting_primary_bootstrap => expecting_primary_bootstrap }
     = render :partial => 'shared/app_bootstrap', :locals => { :app_class => app_class, :bootstrap => bootstrap }
     - additional_bootstraps.each do |ab|
       = render :partial => 'shared/app_bootstrap', :locals => { :app_class => ab[:app_class], :bootstrap => ab[:bootstrap] }
@@ -15,7 +16,7 @@
   = render :partial => 'shared/app_top', :locals => { :filters => defined?(filters) ? filters : [], :sorts => defined?(sorts) ? sorts : [], :disable_create => defined?(disable_create) && disable_create } if app_top
 
 .row-fluid
-  - if defined?(multiplicity) && multiplicity == 'single'
+  - if defined?(multiplicity) && multiplicity == 'singular'
     .span12
       .errors.alert.alert-error.hide
       .model-show-container

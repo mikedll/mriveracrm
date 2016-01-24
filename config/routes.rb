@@ -101,6 +101,7 @@ MikedllCrm::Application.routes.draw do
     resources :invoices, :only => [:index, :create, :show]
     resources :pages, :only => [:index, :show, :create, :update, :destroy]
     resources :link_orderings, :only => [:index, :create, :update]
+    resources :reports, :only => [:index, :show]
   end
 
   namespace "client" do
@@ -213,6 +214,7 @@ MikedllCrm::Application.routes.draw do
       resources :invoices, :only => [:index, :create, :show]
       resources :pages, :only => [:index, :show, :create, :update, :destroy]
       resources :link_orderings, :only => [:index, :create, :update]
+      resources :reports, :only => [:index, :show]
     end
 
     namespace "client" do

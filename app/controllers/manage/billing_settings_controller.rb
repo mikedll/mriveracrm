@@ -4,6 +4,8 @@ class Manage::BillingSettingsController < Manage::BaseController
   before_filter :_can_manage_current_object
 
   configure_apps do
+    regard_singular_name_as_plural
+
     actions :show, :update, :destroy
 
     response_for :destroy do |format|

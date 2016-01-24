@@ -1,6 +1,7 @@
 
 - content_for :head do
   = javascript_include_tag 'manage'
+  = render :partial => 'shared/app_starter_settings', :locals => {:app_class => 'status-monitor', :primary_model_names => { :camelized_singular => 'StatusMonitor'}, :expecting_primary_bootstrap => false, :multiplicity => 'singular', :app_starter_params => {}}
 
 .gui-container.container-fluid
   .app-gui.status-monitor-gui.single-model

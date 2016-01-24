@@ -1,7 +1,7 @@
 
-class window.ItMonitoredComputer extends BaseModel
+class window.ITMonitoredComputer extends BaseModel
 
-class window.ItMonitoredComputerView extends CrmModelView
+class window.ITMonitoredComputerView extends CrmModelView
   modelName: 'it_monitored_computer'
 
   initialize: (options) ->
@@ -19,21 +19,21 @@ class window.ItMonitoredComputerView extends CrmModelView
     else
       lastError$.closest('.control-group').show()
 
-class window.ItMonitoredComputers extends BaseCollection
-  model: ItMonitoredComputer
+class window.ITMonitoredComputers extends BaseCollection
+  model: ITMonitoredComputer
   urlFragment: '/manage/monitored_computers'
 
-class window.ItMonitoredComputerListItemView extends ListItemView
+class window.ITMonitoredComputerListItemView extends ListItemView
   modelName: 'it_monitored_computer'
-  spawnViewType: ItMonitoredComputerView
+  spawnViewType: ITMonitoredComputerView
   className: 'it-monitored-computer-list-item list-item'
 
   title: () ->
     @model.get('name')
 
-class window.ItMonitoredComputerAppView extends CollectionAppView
+class window.ITMonitoredComputerAppView extends CollectionAppView
   modelNamePlural: 'it_monitored_computers'
   modelName: 'it_monitored_computer'
-  spawnListItemType: ItMonitoredComputerListItemView
+  spawnListItemType: ITMonitoredComputerListItemView
   title: () ->
     'Monitored Computer'

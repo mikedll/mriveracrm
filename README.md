@@ -11,20 +11,16 @@ See `doc/server_setup.md`.
 
 Run specs with Guard:
 
-    > ./script/fine_grained_daemon.rb # you may have to start the FineGrained daemon.
-    > guard
+    > ./script/fine_grained_daemon.rb db/fineGrainedTest.db & # start FineGrained daemon on a test database.
+    > bundle exec guard
     
 Start everyting:
 
-    > foreman start
+    > bundle exec foreman start
     
-Start server:
+Start server without scheduler, worker, or Fine Grained daemon:
 
-    > rails s
-
-Start resque worker
-
-    > bundle exec resque work
+    > bundle exec rails s
 
 # Modules
 
@@ -91,9 +87,9 @@ resque, and is as follows:
   - Extend BaseModel with window.YourModel. Specify `urlSuffix`
   with something. Override isNew to be false if you have a singleton model.
   
-  - Extend and CrmModelView with window.YourModelView. Specific `modelName`
-  in the YourModelView with a *snake case* form of your model. Add any events
-  and attach them to buttons as needed.
+  - Extend and CrmModelView with window.YourModelView. Specify
+  `modelName` (underscored) in it. Add any events and listen to any
+  dom elements as needed.
   
   - If you're making a collection, make the containing app. Extend
   CollectionAppView with a singular camel case prefix
@@ -102,10 +98,11 @@ resque, and is as follows:
   (klass), and a `title` method.  Extend ListItemView and define
   `modelName` (underscored), `spawnViewType` (klass), `className`
   (dasherized), and a `title` method. `className` should include the
-  css class `list-item`.
+  css class `list-item`, and use a suffix of `-list-item` after the
+  dasherized model name.
   
   - Extend Collection with a pluralized name of your model while defining
-  `model` with the model klass and urlFragment with the relative
+  `model` with the model klass and `urlFragment` with the relative
   url where this app will be served.
   
   - Add to manage.js. If you created this in the manage directory,
@@ -175,13 +172,6 @@ That command has to be run on production.
 Check backups capture:
 
     cknifeaws afew mikedllcrm-backups --count=150 
-
-# Specs
-
-Start a test copy of the FineGrained database in another
-process when running specs:
-
-    ./script/fine_grained_daemon.rb db/fineGrainedTest.db
 
 ## To restart without deploying:
 

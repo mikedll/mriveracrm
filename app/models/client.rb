@@ -20,6 +20,7 @@ class Client < ActiveRecord::Base
 
   after_create :require_payment_gateway_profile
 
+  scope :with_transactions, lambda { includes(:invoices => :transactions) }
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
   scope :unarchived, where('archived = ?', false)
   scope :archived, where('archived = ?', true)

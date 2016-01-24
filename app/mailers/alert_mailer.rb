@@ -1,6 +1,6 @@
 class AlertMailer < ActionMailer::Base
 
-  default from: "MRivera CRM Admin <#{AppConfiguration.get('DEFAULT_EMAIL_SENDER')}>"
+  default from: "M. Rivera CRM Admin <#{AppConfiguration.get('DEFAULT_EMAIL_SENDER')}>"
 
   def computer_down(business, monitored_computer)
     @business = business

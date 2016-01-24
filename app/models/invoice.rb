@@ -107,6 +107,9 @@ class Invoice < ActiveRecord::Base
   scope :viewable_to_client, lambda {
     where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
   }
+  scope :transactable, lambda {
+    where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
+  }
 
   default_scope { order('created_at asc') }
 

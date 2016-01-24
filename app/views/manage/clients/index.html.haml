@@ -4,7 +4,7 @@
 
 .container-fluid.gui-container  
   .clients-gui.app-gui
-    = render :partial => 'shared/app', :locals => { :app_top => true, :app_class => 'clients', :title => "Clients", :filters => [['recently_modified', 'Recently Modified'], ['archived', 'Archived']], :sorts => [['id', 'asc', 'int', 'Id'], ['next_contact_at', 'asc', 'date', 'Next Contact At'], ['updated_at', 'desc', 'date', 'Updated At'], ['last_name', 'asc', 'string', 'Last Name']], :bootstrap => current_objects, :additional_bootstraps => [] }
+    = render :partial => 'shared/app', :locals => apps_configuration.merge({ :app_top => true, :app_class => 'clients', :title => "Clients", :filters => [['recently_modified', 'Recently Modified'], ['archived', 'Archived']], :sorts => [['id', 'asc', 'int', 'Id'], ['next_contact_at', 'asc', 'date', 'Next Contact At'], ['updated_at', 'desc', 'date', 'Updated At'], ['last_name', 'asc', 'string', 'Last Name']], :bootstrap => current_objects })
 
 .templates.hide
   - [Client, Invoice, Note, Invitation, User, Transaction].each do |klass|
