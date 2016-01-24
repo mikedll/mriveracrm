@@ -4,7 +4,7 @@
     = javascript_include_tag mod.to_s
 
 .gui-container.container-fluid
-  .app-gui{:class => ["#{apps_configuration[:app_class]}-gui ", (apps_configuration[:multiplicity] == 'single' ? 'single-model' : nil)].compact}
+  .app-gui{:class => ["#{apps_configuration[:app_class]}-gui ", (apps_configuration[:multiplicity] == 'singular' ? 'single-model' : nil)].compact}
     = render :partial => 'shared/app', :locals => apps_configuration
 
 .templates.hide

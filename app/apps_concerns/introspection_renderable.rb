@@ -20,19 +20,20 @@ module IntrospectionRenderable
 
     protected
 
-    def configure_render(klass, opts = {})
+    def configure_render(klass = nil, opts = {})
       @apps_configuration = {
         :primary_model => nil,
         :subject_klass_name => '',
         :app_top => false,
         :app_class => '',
-        :multiplicity => plural_action? ? 'plural' : 'single',
+        :multiplicity => plural_action? ? 'plural' : 'singular',
         :model_templates => [],
         :additional_templates => [],
         :additional_bootstraps => [],
-        :resource_multiplicity => 'multiple',
+        :controller_multiplicity => 'plural',
         :javascript_modules => [],
-        :view => nil
+        :view => nil,
+        :app_starter_params => {}
       }
 
       apps_configuration[:view] = opts[:view] if opts[:view]
@@ -40,6 +41,10 @@ module IntrospectionRenderable
       apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
       apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
       apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
+      apps_configuration[:app_starter_params].merge!(self.class.apps_klass_configuration[:app_starter_params]) if !self.class.apps_klass_configuration[:app_starter_params].empty?
+      apps_configuration[:singular_name_is_plural] = self.class.apps_klass_configuration[:singular_name_is_plural]
+
+      apps_configuration[:disable_create] = self.class.apps_klass_configuration[:disable_create]
 
       self.class.apps_klass_configuration[:additional_bootstraps].each do |options|
 
@@ -56,39 +61,54 @@ module IntrospectionRenderable
 
       apps_configuration[:model_templates] += self.class.apps_klass_configuration[:model_templates]
 
-      apps_configuration[:primary_model] = klass if apps_configuration[:primary_model].nil?
-
-      self.namespaced_model_klass_name = klass.to_s
-      klass_name = namespaced_model_klass_name.demodulize
-      namespaced_model_klass_name_underscored = namespaced_model_klass_name.underscore.tr('/', '_')
       controller_klass = self.class.to_s
       controller_klass_name = controller_klass.demodulize
-      controller_name = controller_klass_name.gsub("Controller", '')
-      controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass.demodulize}$"), '')
+      primary_model_name = controller_klass_name.gsub("Controller", '')
+      controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass_name}$"), '')
+      apps_configuration[:controller_multiplicity] = 'singular' if (primary_model_name.singularize == primary_model_name)
+      primary_model_name = primary_model_name.singularize if apps_configuration[:controller_multiplicity] != 'singular' && !apps_configuration[:singular_name_is_plural]
+      is_singular = (apps_configuration[:controller_multiplicity] == 'singular' || apps_configuration[:multiplicity] == 'singular')
 
-      if klass_name != namespaced_model_klass_name
-        self.model_variable_name = namespaced_model_klass_name_underscored
-        self.model_variable_name = namespaced_model_klass_name_underscored.pluralize if (controller_name.singularize != controller_name)
+      if klass
+        apps_configuration[:primary_model] = klass
+        self.namespaced_model_klass_name = klass.to_s
+        namespaced_model_klass_name_underscored = namespaced_model_klass_name.underscore.tr('/', '_')
+        primary_model_name = namespaced_model_klass_name.demodulize
+        if namespaced_model_klass_name != primary_model_name
+          self.model_variable_name = namespaced_model_klass_name_underscored
+          self.model_variable_name = namespaced_model_klass_name_underscored.pluralize if apps_configuration[:controller_multiplicity] == 'plural'
+        end
+
+        apps_configuration[:model_templates].push(klass) if klass
+      elsif apps_configuration[:singular_name_is_plural]
+        self.model_variable_name = primary_model_name.underscore
       end
 
+      apps_configuration[:primary_model_names] = {
+        :instance_variable_name => instance_variable_name,
+        :camelized_singular => primary_model_name,
+        :camelized_plural => !apps_configuration[:singular_name_is_plural] ? primary_model_name.pluralize : primary_model_name,
+        :dasherized => instance_variable_name.dasherize
+      }
 
       apps_configuration[:controller_klass_container] = controller_klass_container.underscore
-      apps_configuration[:subject_klass_name] = (singular? ? klass_name : klass_name.pluralize).underscore
+      apps_configuration[:subject_klass_name] = (is_singular ? primary_model_name : apps_configuration[:primary_model_names][:camelized_plural]).underscore
       apps_configuration.merge!({
-          :app_top => (!plural_action? || singular?) ? false : true,
-          :app_class => ((!plural_action? || singular?) ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize
+          :app_top => is_singular ? false : true,
+          :app_class => apps_configuration[:primary_model_names][:dasherized]
         })
 
-      apps_configuration[:title] = (((!plural_action? || singular?) ? klass_name : klass_name.pluralize).titleize) if apps_configuration[:title].nil?
+      apps_configuration[:title] = ((is_singular ? primary_model_name : primary_model_name.pluralize).titleize) if apps_configuration[:title].nil?
 
-      apps_configuration[:model_templates].push(klass)
       apps_configuration[:javascript_modules] += [controller_klass_container.underscore]
     end
 
     def _configure_render
-      if self.class.apps_primary_model
-        configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
-      end
+      configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
+    end
+
+    def _indicate_primary_bootstrap_expected
+      apps_configuration[:expecting_primary_bootstrap] = true
     end
 
     def with_update_and_transition(&block)
@@ -118,7 +138,11 @@ module IntrospectionRenderable
     private
 
     def json_config
-      @json_config ||= apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
+      @json_config ||= if apps_configuration[:primary_model]
+                           apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
+                       else
+                         nil
+                       end
     end
   end
 
@@ -156,7 +180,8 @@ module IntrospectionRenderable
           :relation_name => model_name,
           :klass => model_name.to_s.singularize.camelize.constantize,
           :has_defaults => false,
-          :app_class => model_name.to_s.dasherize
+          :app_class => model_name.to_s.dasherize,
+          :disable_create => true
           )
 
         self.controller.apps_klass_configuration[:additional_bootstraps].push(options)
@@ -172,6 +197,19 @@ module IntrospectionRenderable
         self.controller.apps_klass_configuration[:additional_apps].push(app_config)
       end
 
+      def app_starter_params(options)
+        self.controller.apps_klass_configuration[:app_starter_params].merge!(options)
+      end
+
+      def actions(*available_actions)
+        @wrapped.send(:actions, *available_actions)
+        self.controller.apps_klass_configuration[:disable_create] = (available_actions.first != :all && !available_actions.include?(:create))
+      end
+
+      def regard_singular_name_as_plural
+        self.controller.apps_klass_configuration[:singular_name_is_plural] = true
+      end
+
       def method_missing(method, *args, &block)
         @wrapped.send(method, *args, &block)
       end
@@ -183,8 +221,16 @@ module IntrospectionRenderable
       attr_accessor :apps_configuration, :apps_model_inspector, :model_variable_name, :namespaced_model_klass_name
 
       before_filter :_configure_render
+      before_filter :_indicate_primary_bootstrap_expected
 
-      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => [], :additional_bootstraps => [], :model_templates => [] }
+      self.apps_klass_configuration = {
+        :additional_templates => [],
+        :additional_apps => [],
+        :additional_bootstraps => [],
+        :model_templates => [],
+        :app_starter_params => {},
+        :singular_name_is_plural => false
+      }
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 

@@ -1,0 +1,25 @@
+<script language="Javascript">
+  $(function() {
+    if(typeof(gAppStarter) !== "undefined") {
+      gAppStarter.start({
+          selector: '.<%= app_class %>-gui',
+          <%- if multiplicity != 'singular' %>
+            modelCollectionKlass: <%= primary_model_names[:camelized_plural] %>,
+            rootAppViewKlass: <%= primary_model_names[:camelized_singular] %>AppView
+          <%- else %>
+            modelKlass: <%= primary_model_names[:camelized_singular] %>,
+            modelViewKlass: <%= primary_model_names[:camelized_singular] %>View,
+            rootAppViewKlass: SingleModelAppView
+          <%- end %>
+          <%- if expecting_primary_bootstrap %>
+            ,lazyBootstrap: function() { return __<%= primary_model_names[:instance_variable_name] %>; }
+          <%- end %>
+          <%- if !app_starter_params.empty? %>
+            <%- app_starter_params.each do |k,v| %>
+              ,<%= j(k) %>: <%= j(v) %>
+            <%- end %>
+          <% end %>
+        })
+    }
+  });
+</script>

@@ -41,6 +41,11 @@ class Transaction < ActiveRecord::Base
   end
 
   scope :successful, where(:status => :successful)
+  scope :last_changed_in_year, lambda { |year|
+    reftime = Time.zone.local(year)
+    last_changed_in(reftime, reftime + 1.year)
+  }
+  scope :last_changed_in, lambda { |lb, ub| where('updated_at >= ? and updated_at < ?', lb, ub) }
 
   def editable_type?
     (self.is_a?(OutsideTransaction))
@@ -48,7 +53,7 @@ class Transaction < ActiveRecord::Base
 
 
   def to_editor
-    self.attributes.merge(:type => self.type, 
+    self.attributes.merge(:type => self.type,
                           :succeedable => (open? && editable_type?),
                           :destroyable => (open? && editable_type?))
   end
