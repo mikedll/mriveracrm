@@ -41,8 +41,8 @@ gallery.js: gallery-26972733e6a4579a925d1f7512f5da75.js
 gallery/index.js: gallery-26972733e6a4579a925d1f7512f5da75.js
 home.js: home-7435162ab9bbe08a3607152f5d13fa41.js
 home/index.js: home-7435162ab9bbe08a3607152f5d13fa41.js
-manage.js: manage-22abc29002efe0b9f6de8c84e84b66fd.js
-manage/index.js: manage-22abc29002efe0b9f6de8c84e84b66fd.js
+manage.js: manage-781c02ed9e90b3f3a6c4f9aa5ae93d8b.js
+manage/index.js: manage-781c02ed9e90b3f3a6c4f9aa5ae93d8b.js
 public.js: public-80da815e55a7c6d6f1b30f1fc9266bd2.js
 public/index.js: public-80da815e55a7c6d6f1b30f1fc9266bd2.js
 sh/clipboard.swf: sh/clipboard-cf4f24ef71b143377c2b604f881e8d14.swf
