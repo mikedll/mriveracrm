@@ -18,7 +18,7 @@ Start everyting:
 
     > bundle exec foreman start
     
-Start server without schedular, worker, or Fine Grained daemon:
+Start server without scheduler, worker, or Fine Grained daemon:
 
     > bundle exec rails s
 
