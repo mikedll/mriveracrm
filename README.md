@@ -11,20 +11,16 @@ See `doc/server_setup.md`.
 
 Run specs with Guard:
 
-    > ./script/fine_grained_daemon.rb # you may have to start the FineGrained daemon.
-    > guard
+    > ./script/fine_grained_daemon.rb db/fineGrainedTest.db & # start FineGrained daemon on a test database.
+    > bundle exec guard
     
 Start everyting:
 
-    > foreman start
+    > bundle exec foreman start
     
-Start server:
+Start server without schedular, worker, or Fine Grained daemon:
 
-    > rails s
-
-Start resque worker
-
-    > bundle exec resque work
+    > bundle exec rails s
 
 # Modules
 
@@ -176,13 +172,6 @@ That command has to be run on production.
 Check backups capture:
 
     cknifeaws afew mikedllcrm-backups --count=150 
-
-# Specs
-
-Start a test copy of the FineGrained database in another
-process when running specs:
-
-    ./script/fine_grained_daemon.rb db/fineGrainedTest.db
 
 ## To restart without deploying:
 
