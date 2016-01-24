@@ -6,6 +6,7 @@ class window.Reports extends BaseCollection
   urlFragment: '/manage/reports'
 
 class window.ReportView extends CrmModelView
+  modelName: 'report'
 
 class window.ReportListItemView extends ListItemView
   modelName: 'report'
