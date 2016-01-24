@@ -26,7 +26,7 @@ class window.Manage.AppStarter
       rootApp = new rootAppViewKlass(el: rootViewAnchor, collection: rootCollection, parent: @appStack)
     else if config.modelKlass?
       # resource
-      modelBootstrap = config.lazyBootstrap()
+      modelBootstrap = if config.lazyBootstrap then config.lazyBootstrap() else null
       model = new config.modelKlass()
       modelView = new config.modelViewKlass(model: model)
       rootApp = new rootAppViewKlass(el: rootViewAnchor, parent: @appStack)

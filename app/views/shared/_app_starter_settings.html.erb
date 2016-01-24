@@ -5,17 +5,18 @@
           selector: '.<%= app_class %>-gui',
           <%- if multiplicity == 'plural' %>
             modelCollectionKlass: <%= primary_model_names[:camelized_plural] %>,
-            rootAppViewKlass: <%= primary_model_names[:camelized_singular] %>AppView,
-            lazyBootstrap: function() { return __<%= primary_model_names[:bootstrap_name] %>; }
+            rootAppViewKlass: <%= primary_model_names[:camelized_singular] %>AppView
           <%- else %>
             modelKlass: <%= primary_model_names[:js_name_singular] %>,
             modelViewKlass: <%= primary_model_names[:js_name_singular] %>View,
-            rootAppViewKlass: SingleModelAppView,
-            lazyBootstrap: function() { return __<%= primary_model_names[:bootstrap_name] %>; }
+            rootAppViewKlass: SingleModelAppView
+          <%- end %>
+          <%- if primary_model_names[:bootstrap_name] %>
+            ,lazyBootstrap: function() { return __<%= primary_model_names[:bootstrap_name] %>; }
           <%- end %>
           <%- if !app_starter_params.empty? %>
             <%- app_starter_params.each do |k,v| %>
-              , <%= j(k) %>: <%= j(v) %>
+              ,<%= j(k) %>: <%= j(v) %>
             <%- end %>
           <% end %>
         })

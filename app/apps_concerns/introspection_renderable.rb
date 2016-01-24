@@ -43,6 +43,8 @@ module IntrospectionRenderable
       apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
       apps_configuration[:app_starter_params].merge!(self.class.apps_klass_configuration[:app_starter_params]) if !self.class.apps_klass_configuration[:app_starter_params].empty?
 
+      apps_configuration[:disable_create] = self.class.apps_klass_configuration[:disable_create]
+
       self.class.apps_klass_configuration[:additional_bootstraps].each do |options|
 
         json_config = options[:klass].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
@@ -182,7 +184,8 @@ module IntrospectionRenderable
           :relation_name => model_name,
           :klass => model_name.to_s.singularize.camelize.constantize,
           :has_defaults => false,
-          :app_class => model_name.to_s.dasherize
+          :app_class => model_name.to_s.dasherize,
+          :disable_create => true
           )
 
         self.controller.apps_klass_configuration[:additional_bootstraps].push(options)
@@ -200,6 +203,11 @@ module IntrospectionRenderable
 
       def app_starter_params(options)
         self.controller.apps_klass_configuration[:app_starter_params].merge!(options)
+      end
+
+      def actions(*available_actions)
+        @wrapped.send(:actions, *available_actions)
+        self.controller.apps_klass_configuration[:disable_create] = (available_actions.first != :all && !available_actions.include?(:create))
       end
 
       def method_missing(method, *args, &block)
