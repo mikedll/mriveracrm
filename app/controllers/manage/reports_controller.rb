@@ -5,7 +5,11 @@ class Manage::ReportsController < Manage::BaseController
   end
 
   def current_objects
-    [:name => "earnings"]
+    @current_objects ||= [{ :name => "earnings"}]
+  end
+
+  def _require_business_support
+    true # we may add advanced reporting later.
   end
 
 end

@@ -1,3 +1,3 @@
 
 %div{:class => "#{model_name.pluralize}_view_example"}
-  = render :partial => 'shared/app', :locals => { :title => model_name.pluralize.titleize, :disable_create => defined?(disable_create) && disable_create, :app_top => true, :back_button => true, :app_class => model_name.pluralize }
+  = render :partial => 'shared/app', :locals => apps_configuration.merge({ :title => model_name.pluralize.titleize, :disable_create => defined?(disable_create) && disable_create, :app_top => true, :back_button => true, :app_class => model_name.pluralize })

@@ -91,9 +91,9 @@ resque, and is as follows:
   - Extend BaseModel with window.YourModel. Specify `urlSuffix`
   with something. Override isNew to be false if you have a singleton model.
   
-  - Extend and CrmModelView with window.YourModelView. Specific `modelName`
-  in the YourModelView with a *snake case* form of your model. Add any events
-  and attach them to buttons as needed.
+  - Extend and CrmModelView with window.YourModelView. Specify
+  `modelName` (underscored) in it. Add any events and listen to any
+  dom elements as needed.
   
   - If you're making a collection, make the containing app. Extend
   CollectionAppView with a singular camel case prefix
@@ -102,10 +102,11 @@ resque, and is as follows:
   (klass), and a `title` method.  Extend ListItemView and define
   `modelName` (underscored), `spawnViewType` (klass), `className`
   (dasherized), and a `title` method. `className` should include the
-  css class `list-item`.
+  css class `list-item`, and use a suffix of `-list-item` after the
+  dasherized model name.
   
   - Extend Collection with a pluralized name of your model while defining
-  `model` with the model klass and urlFragment with the relative
+  `model` with the model klass and `urlFragment` with the relative
   url where this app will be served.
   
   - Add to manage.js. If you created this in the manage directory,

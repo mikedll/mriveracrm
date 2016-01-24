@@ -20,7 +20,7 @@ module IntrospectionRenderable
 
     protected
 
-    def configure_render(klass, opts = {})
+    def configure_render(klass = nil, opts = {})
       @apps_configuration = {
         :primary_model => nil,
         :subject_klass_name => '',
@@ -32,7 +32,8 @@ module IntrospectionRenderable
         :additional_bootstraps => [],
         :resource_multiplicity => 'multiple',
         :javascript_modules => [],
-        :view => nil
+        :view => nil,
+        :app_starter_params => {}
       }
 
       apps_configuration[:view] = opts[:view] if opts[:view]
@@ -40,6 +41,7 @@ module IntrospectionRenderable
       apps_configuration[:title] = self.class.apps_klass_configuration[:title] if self.class.apps_klass_configuration[:title]
       apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
       apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
+      apps_configuration[:app_starter_params].merge!(self.class.apps_klass_configuration[:app_starter_params]) if !self.class.apps_klass_configuration[:app_starter_params].empty?
 
       self.class.apps_klass_configuration[:additional_bootstraps].each do |options|
 
@@ -56,39 +58,60 @@ module IntrospectionRenderable
 
       apps_configuration[:model_templates] += self.class.apps_klass_configuration[:model_templates]
 
-      apps_configuration[:primary_model] = klass if apps_configuration[:primary_model].nil?
-
-      self.namespaced_model_klass_name = klass.to_s
-      klass_name = namespaced_model_klass_name.demodulize
-      namespaced_model_klass_name_underscored = namespaced_model_klass_name.underscore.tr('/', '_')
       controller_klass = self.class.to_s
       controller_klass_name = controller_klass.demodulize
-      controller_name = controller_klass_name.gsub("Controller", '')
-      controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass.demodulize}$"), '')
+      camelized_name_for_titles = controller_name_prefix = controller_klass_name.gsub("Controller", '')
+      controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass_name}$"), '')
+      apps_configuration[:resource_multiplicity] = 'single' if (controller_name_prefix.singularize == controller_name_prefix)
 
-      if klass_name != namespaced_model_klass_name
-        self.model_variable_name = namespaced_model_klass_name_underscored
-        self.model_variable_name = namespaced_model_klass_name_underscored.pluralize if (controller_name.singularize != controller_name)
+      namespaced_model_klass_name_underscored = nil
+      if klass
+        apps_configuration[:primary_model] = klass
+        self.namespaced_model_klass_name = klass.to_s
+        camelized_name_for_titles = klass_name = namespaced_model_klass_name.demodulize
+        namespaced_model_klass_name_underscored = namespaced_model_klass_name.underscore.tr('/', '_')
+        if klass_name != namespaced_model_klass_name
+          self.model_variable_name = namespaced_model_klass_name_underscored
+          self.model_variable_name = namespaced_model_klass_name_underscored.pluralize if apps_configuration[:resource_multiplicity] == 'multiple'
+        end
+
+        apps_configuration[:model_templates].push(klass) if klass
+      else
+        namespaced_model_klass_name_underscored = camelized_name_for_titles.underscore
       end
 
+      apps_configuration[:primary_model_names] = {
+        :instance_variable_name => instance_variable_name,
+        :bootstrap_name => ((!plural_action? || singular?) ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize)
+      }
 
+      apps_configuration[:primary_model_names][:js_name_singular] = apps_configuration[:primary_model_names][:bootstrap_name].camelize
+
+      if apps_configuration[:resource_multiplicity] == 'multiple'
+        apps_configuration[:primary_model_names].merge!({
+            :underscored_singular => instance_variable_name.singularize,
+            :camelized_plural => instance_variable_name.camelize,
+            :camelized_singular => instance_variable_name.singularize.camelize
+          })
+      else
+        apps_configuration[:primary_model_names].merge!({
+            :camelized_singular => instance_variable_name.camelize
+          })
+      end
       apps_configuration[:controller_klass_container] = controller_klass_container.underscore
-      apps_configuration[:subject_klass_name] = (singular? ? klass_name : klass_name.pluralize).underscore
+      apps_configuration[:subject_klass_name] = (singular? ? camelized_name_for_titles : camelized_name_for_titles.pluralize).underscore
       apps_configuration.merge!({
           :app_top => (!plural_action? || singular?) ? false : true,
-          :app_class => ((!plural_action? || singular?) ? namespaced_model_klass_name_underscored : namespaced_model_klass_name_underscored.pluralize).dasherize
+          :app_class => apps_configuration[:primary_model_names][:bootstrap_name].dasherize
         })
 
-      apps_configuration[:title] = (((!plural_action? || singular?) ? klass_name : klass_name.pluralize).titleize) if apps_configuration[:title].nil?
+      apps_configuration[:title] = (((!plural_action? || singular?) ? camelized_name_for_titles : camelized_name_for_titles.pluralize).titleize) if apps_configuration[:title].nil?
 
-      apps_configuration[:model_templates].push(klass)
       apps_configuration[:javascript_modules] += [controller_klass_container.underscore]
     end
 
     def _configure_render
-      if self.class.apps_primary_model
-        configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
-      end
+      configure_render(self.class.apps_primary_model, :view => self.class.apps_selected_view)
     end
 
     def with_update_and_transition(&block)
@@ -118,7 +141,11 @@ module IntrospectionRenderable
     private
 
     def json_config
-      @json_config ||= apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
+      @json_config ||= if apps_configuration[:primary_model]
+                           apps_configuration[:primary_model].introspectable_configuration.serializable_configuration_for_view(apps_configuration[:view])
+                       else
+                         nil
+                       end
     end
   end
 
@@ -172,6 +199,10 @@ module IntrospectionRenderable
         self.controller.apps_klass_configuration[:additional_apps].push(app_config)
       end
 
+      def app_starter_params(options)
+        self.controller.apps_klass_configuration[:app_starter_params].merge!(options)
+      end
+
       def method_missing(method, *args, &block)
         @wrapped.send(method, *args, &block)
       end
@@ -184,7 +215,13 @@ module IntrospectionRenderable
 
       before_filter :_configure_render
 
-      self.apps_klass_configuration = { :additional_templates => [], :additional_apps => [], :additional_bootstraps => [], :model_templates => [] }
+      self.apps_klass_configuration = {
+        :additional_templates => [],
+        :additional_apps => [],
+        :additional_bootstraps => [],
+        :model_templates => [],
+        :app_starter_params => {}
+      }
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
 

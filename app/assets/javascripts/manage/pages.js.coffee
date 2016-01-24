@@ -33,7 +33,7 @@ class window.StubbedPageListItemView extends ListItemView
   title: () ->
     @model.get('title')
 
-class window.PageCollectionAppView extends HeterogeneousCollectionAppView
+class window.PageAppView extends HeterogeneousCollectionAppView
   modelName: "page"
   modelNamePlural: "pages"
   spawnListItemType: PageListItemView

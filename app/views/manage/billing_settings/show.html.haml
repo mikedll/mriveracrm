@@ -1,5 +1,6 @@
 - content_for :head do
   = javascript_include_tag 'manage'
+  = render :partial => 'shared/app_starter_settings', :locals => apps_configuration
   = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'billing_settings', :bootstrap => current_object.renderable_json }
   = render :partial => 'shared/app_bootstrap', :locals => { :app_class => 'features', :bootstrap => Feature.all.map(&:as_json) }
 
