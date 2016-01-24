@@ -47,6 +47,21 @@ module Introspectable
       self.last_attr = nil
     end
 
+    def self.mock_configuration(records = [])
+      attrs = {}
+
+      records.each do |r|
+        r.keys.each do |k|
+          attrs[k] = true if attrs[k].nil?
+        end
+      end
+      c = new
+      attrs.keys each do |k|
+        c.attr(k, :read_only)
+      end
+      c
+    end
+
     def nested_association(na, traits = {})
       (current_view ? current_view.last[:nested_associations] : nested_associations).push({na => traits})
     end
