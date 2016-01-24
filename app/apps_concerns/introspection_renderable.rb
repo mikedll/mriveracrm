@@ -89,7 +89,6 @@ module IntrospectionRenderable
 
       if apps_configuration[:resource_multiplicity] == 'multiple'
         apps_configuration[:primary_model_names].merge!({
-            :underscored_singular => instance_variable_name.singularize,
             :camelized_plural => instance_variable_name.camelize,
             :camelized_singular => instance_variable_name.singularize.camelize
           })
