@@ -30,7 +30,7 @@ class Manage::ReportsController < Manage::BaseController
   end
 
   def _require_business_support
-    true # we may add advanced reporting later.
+    _bsupports?(Feature::Names::INVOICING)
   end
 
 end
