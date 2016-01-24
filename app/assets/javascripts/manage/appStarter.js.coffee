@@ -21,12 +21,10 @@ class window.Manage.AppStarter
     if config.modelCollectionKlass?
       # resources
       modelCollectionKlass = config.modelCollectionKlass
-      rootCollectionBootstrap = config.lazyBootstrap()
       rootCollection = new modelCollectionKlass()
       rootApp = new rootAppViewKlass(el: rootViewAnchor, collection: rootCollection, parent: @appStack)
     else if config.modelKlass?
       # resource
-      modelBootstrap = if config.lazyBootstrap then config.lazyBootstrap() else null
       model = new config.modelKlass()
       modelView = new config.modelViewKlass(model: model)
       rootApp = new rootAppViewKlass(el: rootViewAnchor, parent: @appStack)
@@ -35,14 +33,16 @@ class window.Manage.AppStarter
       AppsLogger.log("no model klass and no model collection class to load.")
       return
 
+    bootstrapData = if config.lazyBootstrap then config.lazyBootstrap() else null
+
     if rootApp?
       rootApp.render()
       @appStack.childViewPushed(rootApp)
       if config.modelCollectionKlass?
-        rootCollection.reset(rootCollectionBootstrap)
+        rootCollection.reset(if bootstrapData? then bootstrapData else [])
         rootApp.customSetup() if config.custom_setup # heterogeneous supplementary setup
       else if config.modelKlass?
-        model.setAndAssumeSync(modelBootstrap) if modelBootstrap? && modelBootstrap != [] # some pages dont have one
+        model.setAndAssumeSync(bootstrapData) if bootstrapData?
       else
         # exception. handled above.
 

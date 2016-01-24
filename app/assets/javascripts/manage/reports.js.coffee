@@ -12,6 +12,9 @@ class window.ReportListItemView extends ListItemView
   spawnViewType: ReportView
   className: 'report-list-item list-item'
 
+  title: () ->
+    @model.get('name')
+
 class window.ReportAppView extends CollectionAppView
   modelName: 'report'
   modelNamePlural: 'reports'

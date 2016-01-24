@@ -2,7 +2,7 @@ class Manage::LettersController < Manage::BaseController
 
   configure_apps :model => Letter do
     include_templates :letter_preview
-    include_app :letter_preview, :disable_create => true, :multiplicity => 'single'
+    include_app :letter_preview, :disable_create => true, :multiplicity => 'singular'
     belongs_to :business
     actions :index, :show, :update, :create, :destroy
     member_actions :preview

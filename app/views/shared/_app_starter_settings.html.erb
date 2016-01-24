@@ -3,16 +3,16 @@
     if(typeof(gAppStarter) !== "undefined") {
       gAppStarter.start({
           selector: '.<%= app_class %>-gui',
-          <%- if multiplicity == 'plural' %>
+          <%- if multiplicity != 'singular' %>
             modelCollectionKlass: <%= primary_model_names[:camelized_plural] %>,
             rootAppViewKlass: <%= primary_model_names[:camelized_singular] %>AppView
           <%- else %>
-            modelKlass: <%= primary_model_names[:js_name_singular] %>,
-            modelViewKlass: <%= primary_model_names[:js_name_singular] %>View,
+            modelKlass: <%= primary_model_names[:camelized_singular] %>,
+            modelViewKlass: <%= primary_model_names[:camelized_singular] %>View,
             rootAppViewKlass: SingleModelAppView
           <%- end %>
-          <%- if primary_model_names[:bootstrap_name] %>
-            ,lazyBootstrap: function() { return __<%= primary_model_names[:bootstrap_name] %>; }
+          <%- if expecting_primary_bootstrap %>
+            ,lazyBootstrap: function() { return __<%= primary_model_names[:instance_variable_name] %>; }
           <%- end %>
           <%- if !app_starter_params.empty? %>
             <%- app_starter_params.each do |k,v| %>
