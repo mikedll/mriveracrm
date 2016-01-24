@@ -23,8 +23,9 @@
         - if bcan?(Feature::Names::CMS)
           %li
             = link_to 'CMS', manage_pages_path, :tabIndex => '-1'
-        %li
-          = link_to "Reports", manage_reports_path
+        - if bcan? Feature::Names::INVOICING
+          %li
+            = link_to "Reports", manage_reports_path
         - if can? :manage, current_business
           %li.dropdown
             %a.dropdown-toggle{:data => { :toggle => "dropdown" }, :href => "#", :tabIndex => "-1"}
