@@ -16,6 +16,8 @@ class Manage::BaseController < ApplicationController
     before_filter :_redefine_parent_name
   end
 
+  def ssl_required?; Rails.env.production?; end
+
   private
 
   #
@@ -36,7 +38,5 @@ class Manage::BaseController < ApplicationController
 
     @parent_object = current_business
   end
-
-  def ssl_required?; Rails.env.production?; end
 
 end

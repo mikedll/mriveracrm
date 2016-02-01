@@ -7,4 +7,8 @@ class Users::ConfirmationsController < Devise::ConfirmationsController
     after_sign_in_path_for(current_user)
   end
 
+  protected
+
+  def ssl_required?; Rails.env.production?; end
+
 end

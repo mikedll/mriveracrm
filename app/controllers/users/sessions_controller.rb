@@ -84,4 +84,7 @@ class Users::SessionsController < Devise::SessionsController
                                              :approval_prompt => "auto"
     })
   end
+
+  def ssl_required?; Rails.env.production?; end
+
 end
