@@ -42,7 +42,7 @@ module IntrospectionRenderable
       apps_configuration[:additional_templates] = self.class.apps_klass_configuration[:additional_templates]
       apps_configuration[:additional_apps] = self.class.apps_klass_configuration[:additional_apps]
       apps_configuration[:app_starter_params].merge!(self.class.apps_klass_configuration[:app_starter_params]) if !self.class.apps_klass_configuration[:app_starter_params].empty?
-      apps_configuration[:singular_name_is_plural] = self.class.apps_klass_configuration[:singular_name_is_plural]
+      apps_configuration[:plural_name_is_singular] = self.class.apps_klass_configuration[:plural_name_is_singular]
 
       apps_configuration[:disable_create] = self.class.apps_klass_configuration[:disable_create]
 
@@ -66,28 +66,27 @@ module IntrospectionRenderable
       primary_model_name = controller_klass_name.gsub("Controller", '')
       controller_klass_container = controller_klass.gsub(Regexp.new("::#{controller_klass_name}$"), '')
       apps_configuration[:controller_multiplicity] = 'singular' if (primary_model_name.singularize == primary_model_name)
-      primary_model_name = primary_model_name.singularize if apps_configuration[:controller_multiplicity] != 'singular' && !apps_configuration[:singular_name_is_plural]
+      primary_model_name = primary_model_name.singularize if apps_configuration[:controller_multiplicity] != 'singular' && !apps_configuration[:plural_name_is_singular]
       is_singular = (apps_configuration[:controller_multiplicity] == 'singular' || apps_configuration[:multiplicity] == 'singular')
 
       if klass
         apps_configuration[:primary_model] = klass
         self.namespaced_model_klass_name = klass.to_s
         namespaced_model_klass_name_underscored = namespaced_model_klass_name.underscore.tr('/', '_')
-        primary_model_name = namespaced_model_klass_name.demodulize
-        if namespaced_model_klass_name != primary_model_name
-          self.model_variable_name = namespaced_model_klass_name_underscored
-          self.model_variable_name = namespaced_model_klass_name_underscored.pluralize if apps_configuration[:controller_multiplicity] == 'plural'
+        primary_model_name = namespaced_model_klass_name_underscored.camelize
+        if namespaced_model_klass_name != namespaced_model_klass_name.demodulize
+          self.model_variable_name = apps_configuration[:controller_multiplicity] == 'plural' ? namespaced_model_klass_name_underscored.pluralize : namespaced_model_klass_name_underscored
         end
 
         apps_configuration[:model_templates].push(klass) if klass
-      elsif apps_configuration[:singular_name_is_plural]
+      elsif apps_configuration[:plural_name_is_singular]
         self.model_variable_name = primary_model_name.underscore
       end
 
       apps_configuration[:primary_model_names] = {
         :instance_variable_name => instance_variable_name,
         :camelized_singular => primary_model_name,
-        :camelized_plural => !apps_configuration[:singular_name_is_plural] ? primary_model_name.pluralize : primary_model_name,
+        :camelized_plural => !apps_configuration[:plural_name_is_singular] ? primary_model_name.pluralize : primary_model_name,
         :dasherized => instance_variable_name.dasherize
       }
 
@@ -207,7 +206,7 @@ module IntrospectionRenderable
       end
 
       def regard_singular_name_as_plural
-        self.controller.apps_klass_configuration[:singular_name_is_plural] = true
+        self.controller.apps_klass_configuration[:plural_name_is_singular] = true
       end
 
       def method_missing(method, *args, &block)
@@ -229,7 +228,7 @@ module IntrospectionRenderable
         :additional_bootstraps => [],
         :model_templates => [],
         :app_starter_params => {},
-        :singular_name_is_plural => false
+        :plural_name_is_singular => false
       }
       self.apps_primary_model = opts[:model]
       self.apps_selected_view = opts[:view] if opts[:view]
