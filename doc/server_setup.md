@@ -48,6 +48,15 @@ Install configs.
 
 Go to the machine and edit the configs.
 
+# SSH Setup
+
+We disable ssh logins except for public key logins. Ensure
+public key logins work before you edit `/etc/ssh/sshd_config`.
+
+    PubkeyAuthentication yes
+    ChallengeResponseAuthentication no
+    PasswordAuthentication no
+
 # Production config
 
 Nginx is configured at `/etc/nginx/nginx.conf`:
