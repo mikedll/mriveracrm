@@ -64,5 +64,8 @@ class Users::RegistrationsController < Devise::RegistrationsController
     render "users/registrations/new"
   end
 
+  protected
+
+  def ssl_required?; Rails.env.production?; end
 
 end
