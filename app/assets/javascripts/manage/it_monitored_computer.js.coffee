@@ -36,4 +36,4 @@ class window.ITMonitoredComputerAppView extends CollectionAppView
   modelName: 'it_monitored_computer'
   spawnListItemType: ITMonitoredComputerListItemView
   title: () ->
-    'Monitored Computer'
+    'Monitored Computers'
