@@ -192,6 +192,11 @@ class Business < ActiveRecord::Base
     self.it_monitored_computers_key = SecureRandom.hex(16)
   end
 
+  def cycle_it_monitored_computers_key
+    generate_it_monitored_computers_key
+    save
+  end
+
   private
 
   def _format_fields
