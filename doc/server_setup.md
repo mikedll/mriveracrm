@@ -53,8 +53,8 @@ Go to the machine and edit the configs.
 We disable ssh logins except for public key logins. Ensure
 public key logins work before you edit `/etc/ssh/sshd_config`.
 
+    PubkeyAuthentication yes
     ChallengeResponseAuthentication no
-    UsePam no
     PasswordAuthentication no
 
 # Production config
