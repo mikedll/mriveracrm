@@ -171,11 +171,11 @@ That command has to be run on production.
 
 Check backups capture:
 
-    cknifeaws afew mikedllcrm-backups --count=150 
+    cknifeaws afew mikedllcrm-backups --count=150
 
 ## To restart without deploying:
 
-    cap production unicorn:restart
+    cap production deploy:upstart_restart
 
 # Production config
 
