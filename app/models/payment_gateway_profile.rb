@@ -64,6 +64,13 @@ class PaymentGatewayProfile < ActiveRecord::Base
   end
 
   #
+  # Used for expiring an inactive user's information.
+  #
+  def erase_sensitive_information!
+    raise "Implement in subclass."
+  end
+
+  #
   # returns nil or Datetime
   #
   def trial_ends_at

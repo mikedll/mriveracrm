@@ -218,6 +218,28 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     end
   end
 
+  ERASE_SENSITIVE_INFORMATION_REQUEST = 'erase_sensitive_information_request'
+  def erase_sensitive_information!
+    return true if self.vendor_id.blank?
+
+    _with_stop_persistence(ERASE_SENSITIVE_INFORMATION_REQUEST) do
+      _with_stripe_key do
+        customer = Stripe::Customer.retrieve(self.vendor_id)
+
+        puts "*************** #{__FILE__} #{__LINE__} *************"
+        puts "erasing."
+
+        ids = customer.sources.data.map { |d| d.id }
+
+        puts "*************** #{__FILE__} #{__LINE__} *************"
+        puts "#{ids}"
+        ids.each do |source_id|
+          resp = customer.source.retrieve(source_id).delete
+        end
+      end
+    end
+  end
+
   def reload_remote
     if self.vendor_id.blank?
       DetectedErrors.create(:message => "Reloading but no vendor id", :client_id => payment_gateway_profilable_id)

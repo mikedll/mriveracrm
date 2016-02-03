@@ -58,6 +58,13 @@ class Client < ActiveRecord::Base
     invitation
   end
 
+  def expire_user!
+    if payment_gateway_profile
+      payment_gateway_profile.erase_sensitive_information!
+    end
+    # user.destroy
+  end
+
   def addressee
     first_name.blank? ? company : first_name
   end

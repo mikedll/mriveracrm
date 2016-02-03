@@ -22,7 +22,7 @@ Spork.prefork do
 
     config.include Devise::TestHelpers, :type => :controller
 
-    # config.filter_run_including :current => true
+    config.filter_run_including :current => true
     config.filter_run_excluding :broken => true
     config.filter_run_excluding :ignore => true
 
@@ -37,7 +37,7 @@ Spork.prefork do
       # to remove the label from it in the spec and replace that label
       # with the :current label while you exercise it. If you do this,
       # set live_test_being_run to true.
-      config.filter_run_excluding filter => true
+      # config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end
 
