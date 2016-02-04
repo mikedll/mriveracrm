@@ -224,18 +224,15 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
     _with_stop_persistence(ERASE_SENSITIVE_INFORMATION_REQUEST) do
       _with_stripe_key do
-        customer = Stripe::Customer.retrieve(self.vendor_id)
-
-        puts "*************** #{__FILE__} #{__LINE__} *************"
-        puts "erasing."
-
+        customer = Stripe::Customer.retrieve(vendor_id)
         ids = customer.sources.data.map { |d| d.id }
-
-        puts "*************** #{__FILE__} #{__LINE__} *************"
-        puts "#{ids}"
         ids.each do |source_id|
-          resp = customer.source.retrieve(source_id).delete
+          resp = customer.sources.retrieve(source_id).delete
         end
+
+        customer = Stripe::Customer.retrieve(vendor_id)
+        _cache_customer(customer)
+        save
       end
     end
   end
@@ -272,6 +269,9 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     if customer[:active_card]
       self.card_last_4 = customer[:active_card][:last4]
       self.card_brand = customer[:active_card][:type]
+    else
+      self.card_last_4 = ""
+      self.card_brand = ""
     end
 
     if !customer.subscriptions.data.empty?

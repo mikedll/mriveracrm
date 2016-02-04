@@ -30,7 +30,6 @@ describe Client do
       @client.payment_gateway_profile.reload
       @client.payment_gateway_profile.card_last_4.blank?.should be_false
       @client.expire_user!
-      @client.payment_gateway_profile.reload
       @client.payment_gateway_profile.card_last_4.blank?.should be_true
     end
   end
