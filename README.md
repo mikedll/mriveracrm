@@ -36,13 +36,9 @@ not mirror model namespaces in controllers.
 
 # Backgrounded work
 
-We left redis due to the BSD-license, the meaning of which I don't
-know.
-
-For job queueing, we have the FineGrained database built
-on event machine. The interface for designing classes
-that will receive jobs from this queueing system is like
-resque, and is as follows:
+For background jobs, we use FineGrained. The interface
+for a class that will perform work in the background
+is like so:
 
     class MyClass
       def self.perform

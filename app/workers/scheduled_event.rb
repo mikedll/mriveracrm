@@ -3,7 +3,8 @@ class ScheduledEvent
   # we don't have inflections defined in railsless clockwork
   # environment, so use camelcase class name.
   Events = [
-    [1.minute, 'IT::MonitoredComputer.detect_missing!']
+    [1.minute, 'IT::MonitoredComputer.detect_missing!'],
+    [1.day, 'Business.expire_payment_information_when_dormant!']
   ]
 
   def self.perform(event)

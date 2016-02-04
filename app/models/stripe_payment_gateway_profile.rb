@@ -222,18 +222,16 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
   def erase_sensitive_information!
     return true if self.vendor_id.blank?
 
-    _with_stop_persistence(ERASE_SENSITIVE_INFORMATION_REQUEST) do
-      _with_stripe_key do
-        customer = Stripe::Customer.retrieve(vendor_id)
-        ids = customer.sources.data.map { |d| d.id }
-        ids.each do |source_id|
-          resp = customer.sources.retrieve(source_id).delete
-        end
-
-        customer = Stripe::Customer.retrieve(vendor_id)
-        _cache_customer(customer)
-        save
+    _with_stripe_key do
+      customer = Stripe::Customer.retrieve(vendor_id)
+      ids = customer.sources.data.map { |d| d.id }
+      ids.each do |source_id|
+        resp = customer.sources.retrieve(source_id).delete
       end
+
+      customer = Stripe::Customer.retrieve(vendor_id)
+      _cache_customer(customer)
+      save
     end
   end
 

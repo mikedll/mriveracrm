@@ -2,7 +2,7 @@
 require 'spec_helper'
 
 describe Page do
-  context "rendering", :current => true do
+  context "rendering" do
     before :each do
       @page = FactoryGirl.create(:page)
     end

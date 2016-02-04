@@ -23,7 +23,7 @@ describe BusinessesController do
         response.body.should_not match Regexp.escape(products_path)
       end
 
-      it "should respect ordering of CMS entries", :current => true do
+      it "should respect ordering of CMS entries" do
         get :show
 
         assert_select ".nav.nav-tabs" do
