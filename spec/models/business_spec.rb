@@ -68,7 +68,7 @@ describe Business do
   end
 
   context "expiring inactive clients" do
-    it "should eliminate users and payment information", :current => true do
+    it "should eliminate users and payment information" do
       reftime = Time.now
       @user = FactoryGirl.create(:client_user, :reftime => reftime - 25.hours)
       @user.client.payment_gateway_profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true

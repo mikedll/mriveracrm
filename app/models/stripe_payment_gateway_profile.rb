@@ -224,9 +224,13 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
     _with_stripe_key do
       customer = Stripe::Customer.retrieve(vendor_id)
+
       ids = customer.sources.data.map { |d| d.id }
       ids.each do |source_id|
-        resp = customer.sources.retrieve(source_id).delete
+        puts "*************** #{__FILE__} #{__LINE__} *************"
+        puts customer.sources
+
+        customer.sources.retrieve(source_id).delete.deleted
       end
 
       customer = Stripe::Customer.retrieve(vendor_id)

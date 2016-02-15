@@ -1,13 +1,16 @@
 class ApiStubs
 
   DEFAULT_VENDOR_ID = 'cus_5TT8ttHofQ6Ngt'
+  DEFAULT_CARD_ID = 'card_7uTptFDpuiJxcr'
 
   @@customer_db = {}
   @@plan_db = {}
+  @@source_db = {}
 
   def self.reset_bank!
     @customer_db = {}
     @plan_db = {}
+    @source_db = {}
   end
 
   def self.customer_db
@@ -16,6 +19,10 @@ class ApiStubs
 
   def self.plan_db
     @plan_db ||= {}
+  end
+
+  def self.source_db
+    @source_db ||= {}
   end
 
 
@@ -27,12 +34,8 @@ class ApiStubs
     Stripe::Customer.stub(:retrieve) do |cid|
       c = ApiStubs.stripe_retrieve_customer(cid)
       c.stub(:save) do
-        with_card = ApiStubs.stripe_retrieve_customer_with_card(cid)
-        if c.active_card.nil?
-          c.active_card = with_card.active_card
-        end
-
-        with_card
+        stripe_insert_card(c)
+        nil
       end
       c
     end
@@ -65,6 +68,9 @@ class ApiStubs
   def self.stripe_create_customer(customer_profile_id = DEFAULT_VENDOR_ID)
     created_at = Time.now
 
+    cus = YAML.load load('stripe_create_customer').result( binding )
+    c = Stripe::Customer.construct_from(cus['values'], cus['api_key'])
+
     subs = YAML.load load('subscriptions').result( binding )
     slo = Stripe::ListObject.construct_from(subs['values'], subs['api_key'])
     slo.stub(:create) do |opts|
@@ -84,14 +90,9 @@ class ApiStubs
       slo.data.push(s)
       nil
     end
-
-    cards = YAML.load load('cards').result( binding )
-    clo = Stripe::ListObject.construct_from(cards['values'], cards['api_key'])
-
-    cus = YAML.load load('stripe_create_customer').result( binding )
-    c = Stripe::Customer.construct_from(cus['values'], cus['api_key'])
     c.subscriptions = slo
-    c.cards = clo
+
+    stripe_customer_add_cards(c)
 
     customer_db[customer_profile_id] = c
     c
@@ -102,33 +103,20 @@ class ApiStubs
 
     created_at = Time.now
 
-    sub = YAML.load load('stripe_customer_retrieve_subscriptions').result( binding )
-    slo = Stripe::ListObject.construct_from(sub['values'], sub['api_key'])
-
-    cards = YAML.load load('stripe_customer_retrieve_cards').result( binding )
-    clo = Stripe::ListObject.construct_from(cards['values'], cards['api_key'])
-
-    cus = YAML.load load('stripe_retrieve_customer').result( binding )
-    c = Stripe::Customer.construct_from(cus['values'], cus['api_key'])
+    c = load_stripe_klass_with_binding('stripe_retrieve_customer', Stripe::Customer, binding)
+    slo = load_stripe_klass_with_binding('stripe_customer_retrieve_subscriptions', Stripe::ListObject, binding)
     c.subscriptions = slo
-    c.cards = clo
+
+    stripe_customer_add_cards(c)
 
     # not created...assume created awhile ago.
     customer_db[customer_profile_id] = c
-
     c
   end
 
   def self.stripe_retrieve_customer_with_card(customer_profile_id = DEFAULT_VENDOR_ID)
     c = stripe_retrieve_customer
-
-    card_id = "card_7BtWFfF7g1zlZA"
-    active_card_values = YAML.load load('stripe_customer_active_card').result( binding )
-    active_card = Stripe::Card.construct_from(active_card_values['values'], active_card_values['api_key'])
-
-    c.default_card = card_id
-    c.default_source = card_id
-    c.active_card = active_card
+    stripe_insert_card(c)
     customer_db[customer_profile_id] = c
   end
 
@@ -147,6 +135,46 @@ class ApiStubs
     charge
   end
 
+  def self.stripe_insert_card(c)
+    card_id = DEFAULT_CARD_ID
+    card = load_stripe_klass_with_binding('stripe_card', Stripe::Card, binding)
+
+    c.default_card = card_id
+    c.default_source = card_id
+    c.active_card = card
+
+    c.sources.data.push(card)
+    source_db[card.id] = source
+
+    puts "*************** #{__FILE__} #{__LINE__} *************"
+    puts "min"
+
+    c.sources.stub(:retrieve) do |source_id|
+
+      puts "*************** #{__FILE__} #{__LINE__} *************"
+      puts "max"
+
+      s = source_db[source_id]
+
+      s.stub(:delete) do
+        c.sources.data.delete { |el| el.id == source_id }
+        source_db.delete(source_id)
+      end
+
+      s
+    end
+  end
+
+  def self.stripe_customer_add_cards(c)
+    customer_profile_id = c.id
+    c.cards = load_stripe_klass_with_binding('cards', Stripe::ListObject, binding)
+    c.sources = load_stripe_klass_with_binding('cards', Stripe::ListObject, binding)
+  end
+
+  def self.load_stripe_klass_with_binding(name, klass, b)
+    yaml_values = YAML.load load(name).result( b )
+    klass.construct_from(yaml_values['values'], yaml_values['api_key'])
+  end
 
   def self.load(file)
     template = ERB.new( File.read( Rails.root.join('spec', 'api_stubs', "#{file}.yml.erb") ) )

@@ -44,18 +44,22 @@ describe Client do
     end
   end
 
-  context "inactive expiry", :live_stripe => true do
+  context "inactive expiry" do
     before do
       @client = FactoryGirl.create(:client)
     end
 
-    it "should erase card information and the user" do
+    it "should erase card information", :current => true do
       @client.payment_gateway_profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
+
 
       @client.payment_gateway_profile.reload
       @client.payment_gateway_profile.card_last_4.blank?.should be_false
       @client.handle_inactive!
       @client.payment_gateway_profile.card_last_4.blank?.should be_true
+    end
+
+    it "should erase the inactive user", :ignore => true do
     end
   end
 end
