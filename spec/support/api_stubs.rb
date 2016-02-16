@@ -34,7 +34,7 @@ class ApiStubs
     Stripe::Customer.stub(:retrieve) do |cid|
       c = ApiStubs.stripe_retrieve_customer(cid)
       c.stub(:save) do
-        stripe_insert_card(c)
+        stripe_insert_card(c) if !c.card.nil?
         nil
       end
       c
@@ -136,6 +136,7 @@ class ApiStubs
   end
 
   def self.stripe_insert_card(c)
+    customer_profile_id = c.id
     card_id = DEFAULT_CARD_ID
     card = load_stripe_klass_with_binding('stripe_card', Stripe::Card, binding)
 
@@ -144,21 +145,21 @@ class ApiStubs
     c.active_card = card
 
     c.sources.data.push(card)
-    source_db[card.id] = source
-
-    puts "*************** #{__FILE__} #{__LINE__} *************"
-    puts "min"
+    source_db[card.id] = card
 
     c.sources.stub(:retrieve) do |source_id|
-
-      puts "*************** #{__FILE__} #{__LINE__} *************"
-      puts "max"
-
       s = source_db[source_id]
 
       s.stub(:delete) do
-        c.sources.data.delete { |el| el.id == source_id }
+        c.sources.data.delete_if { |el| el.id == source_id }
         source_db.delete(source_id)
+        s.deleted = true
+        if c.active_card.id == source_id
+          c.default_card = nil
+          c.default_source = nil
+          c.active_card = nil
+        end
+        s
       end
 
       s

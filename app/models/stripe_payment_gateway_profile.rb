@@ -227,9 +227,6 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
 
       ids = customer.sources.data.map { |d| d.id }
       ids.each do |source_id|
-        puts "*************** #{__FILE__} #{__LINE__} *************"
-        puts customer.sources
-
         customer.sources.retrieve(source_id).delete.deleted
       end
 
