@@ -89,7 +89,7 @@ class Business < ActiveRecord::Base
     super
   end
 
-  def self.expire_payment_information_when_dormant!
+  def self.expire_client_information_when_dormant!
     find_each do |b|
       # potential future check for this option
       b.clients.without_active_users.each do |c|

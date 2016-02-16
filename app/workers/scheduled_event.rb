@@ -4,7 +4,7 @@ class ScheduledEvent
   # environment, so use camelcase class name.
   Events = [
     [1.minute, 'IT::MonitoredComputer.detect_missing!'],
-    [1.day, 'Business.expire_payment_information_when_dormant!']
+    [1.day, 'Business.expire_client_information_when_dormant!']
   ]
 
   def self.perform(event)
