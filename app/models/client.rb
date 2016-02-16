@@ -68,7 +68,10 @@ class Client < ActiveRecord::Base
     if payment_gateway_profile
       payment_gateway_profile.erase_sensitive_information!
     end
-    # user.destroy
+
+    users.each do |u|
+      u.destroy
+    end
   end
 
   def addressee

@@ -46,7 +46,7 @@ describe Client do
 
   context "inactive expiry" do
     before do
-      @client = FactoryGirl.create(:client)
+      @client = FactoryGirl.create(:client_user).client
     end
 
     context "with respect to payment gateway profile", :live_stripe => true do
@@ -61,7 +61,9 @@ describe Client do
     end
 
     it "should erase the inactive user", :current => true do
-      raise "help"
+      @client.handle_inactive!
+      @client.reload
+      @client.users.should be_empty
     end
   end
 end
