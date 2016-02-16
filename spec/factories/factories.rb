@@ -82,10 +82,15 @@ FactoryGirl.define do
   end
 
   factory :user_base, :class => User do
+    ignore do
+      reftime { Time.now - 10.minutes }
+    end
     first_name "Phil"
     last_name "Watson"
     email { FactoryGirl.generate(:user_email) }
-    confirmed_at { Time.now }
+    confirmed_at { reftime }
+    last_sign_in_at { reftime - 5.minutes }
+
     after(:create) do |user, evaluator|
       FactoryGirl.create(:google_oauth2_credential, :email => user.email, :user => user)
     end

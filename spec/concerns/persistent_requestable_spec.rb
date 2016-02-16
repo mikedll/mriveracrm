@@ -60,7 +60,7 @@ describe PersistentRequestable do
     FineGrainedClient.cli.keys.should == []
   end
 
-  it "should lock record to one request at a time with redis", :current => true do
+  it "should lock record to one request at a time with redis" do
     j = Jungle.new(2)
 
     j.start_persistent_request('grow!').should be_true
