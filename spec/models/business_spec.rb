@@ -79,7 +79,7 @@ describe Business do
       @client.payment_gateway_profile.reload
       @client.payment_gateway_profile.card_last_4.blank?.should be_false
       Timecop.freeze(reftime + 29.days) do
-        Business.expire_payment_information_when_dormant!
+        Business.expire_client_information_when_dormant!
 
         @client.payment_gateway_profile.reload
         @client.payment_gateway_profile.card_last_4.blank?.should be_true
