@@ -20,11 +20,17 @@ class Client < ActiveRecord::Base
 
   after_create :require_payment_gateway_profile
 
+  INACTIVE_THRESHOLD = 30.days
   scope :with_transactions, lambda { includes(:invoices => :transactions) }
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
   scope :unarchived, where('archived = ?', false)
   scope :archived, where('archived = ?', true)
   scope :recently_modified, where('updated_at > ?', Time.now - 1.week)
+  scope :with_users, lambda { includes(:users) }
+  scope :without_active_users, lambda {
+    with_users.where('NOT EXISTS(SELECT id FROM users WHERE users.client_id = clients.id AND users.last_sign_in_at > ?)', Time.now - INACTIVE_THRESHOLD)
+  }
+  scope :with_active_card_info, lambda { joins(:payment_gateway_profile).where("payment_gateway_profiles.card_last_4 <> ''") }
 
   def archive!
     if archived?
@@ -56,6 +62,11 @@ class Client < ActiveRecord::Base
     invitation.business = business
     invitation.save!
     invitation
+  end
+
+  def handle_inactive!
+    payment_gateway_profile.erase_sensitive_information! if payment_gateway_profile
+    users.each { |u| u.destroy }
   end
 
   def addressee

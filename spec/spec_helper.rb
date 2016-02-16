@@ -26,28 +26,28 @@ Spork.prefork do
     config.filter_run_excluding :broken => true
     config.filter_run_excluding :ignore => true
 
+    #
+    # Disable at least one of the following exclusion lines
+    # to disable mocking of remote resources.
+    #
+    # You may both disable one of these exclusion filters
+    # and add an inclusion of it to focus on the specs
+    # that exercise remote resources and to which the aforementioned
+    # filter applies.
+    #
     GENERIC_WEB_TESTS = [:generic_web_test]
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
     LIVE_WEB_TESTS.each do |filter|
-      # Invert these lines to focus on remote tests if you want, or
-      # disable it if you want to run the entire suite. It depends on
-      # what you're doing.
-      #
-      # If you want to run a single live test, it may be better
-      # to remove the label from it in the spec and replace that label
-      # with the :current label while you exercise it. If you do this,
-      # set live_test_being_run to true.
       config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end
 
-    # As above
     GENERIC_WEB_TESTS.each do |filter|
       config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end
 
-    live_test_being_run = !(LIVE_WEB_TESTS + GENERIC_WEB_TESTS).all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
+    might_be_running_live_test = !(LIVE_WEB_TESTS + GENERIC_WEB_TESTS).all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
 
     # config.backtrace_clean_patterns = [
     #   # /\/lib\d*\/ruby\//,
@@ -62,7 +62,7 @@ Spork.prefork do
       DatabaseCleaner.strategy = :transaction
 
       # Allow net connect if at least one live group is not excluded
-      WebMock.disable! if live_test_being_run
+      WebMock.disable! if might_be_running_live_test
 
       FineGrainedClient.flag_immediate_execution!
 
@@ -76,7 +76,7 @@ Spork.prefork do
       Business.current = nil
       RequestSettings.reset
 
-      ApiStubs.generic_stripe_stub! if !live_test_being_run
+      ApiStubs.generic_stripe_stub! if !might_be_running_live_test
       DatabaseCleaner.start
    end
 
