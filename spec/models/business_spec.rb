@@ -98,13 +98,13 @@ describe Business do
         reftime = Time.now
 
         # Will stay due to old card but recent transaction
-        c = FactoryGirl.create(:client)
+        c = FactoryGirl.create(:client_user).client
 
         # Will be deleted to to old card and no recent transaction
-        c2 = FactoryGirl.create(:client)
+        c2 = FactoryGirl.create(:client_user).client
 
         # Will stay due to recently updated card information
-        c3 = FactoryGirl.create(:client)
+        c3 = FactoryGirl.create(:client_user).client
 
         Timecop.freeze(reftime - 45.days) do
           c.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true

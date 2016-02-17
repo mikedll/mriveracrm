@@ -137,7 +137,7 @@ class ApiStubs
 
   def self.stripe_insert_card(c)
     customer_profile_id = c.id
-    card_id = DEFAULT_CARD_ID
+    card_id = "card_#{SecureRandom.hex(4)}"
     card = load_stripe_klass_with_binding('stripe_card', Stripe::Card, binding)
 
     c.default_card = card_id
