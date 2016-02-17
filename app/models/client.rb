@@ -34,16 +34,16 @@ class Client < ActiveRecord::Base
   scope :with_active_card_info, lambda { joins(:payment_gateway_profile).where("payment_gateway_profiles.card_last_4 <> ''") }
   scope :without_recent_transaction, lambda {
     where('NOT EXISTS(
-SELECT id
+SELECT invoices.id
 FROM invoices as invoices
-WHERE invoices.client_id = clients.id
-LEFT INNER JOIN transactions ON transactions.invoice_id = invoices.id
+INNER JOIN transactions ON transactions.invoice_id = invoices.id
 WHERE
-    transactions.status = "successful"
+    invoices.client_id = clients.id
+AND transactions.status = ?
 AND transactions.updated_at > ?
-)', Time.now - RECENT_TRANSACTION_THRESHOLD)
+)', 'successful', Time.now - RECENT_TRANSACTION_THRESHOLD)
   }
-  scope :without_recent_payment_info_write, lambda { joins(:payment_gateway_profile).where('payment_gateway_profiles.last_written is null or payment_gateway_profiles.last_written < ?', Time.now - INACTIVE_THRESHOLD) }
+  scope :without_recent_payment_info_write, lambda { joins(:payment_gateway_profile).where('payment_gateway_profiles.payment_info_last_written is null or payment_gateway_profiles.payment_info_last_written < ?', Time.now - INACTIVE_THRESHOLD) }
   scope :with_dormant_payment_info, lambda { without_recent_payment_info_write.without_recent_transaction }
 
   def archive!

@@ -91,13 +91,11 @@ class Business < ActiveRecord::Base
 
   def self.expire_client_information_when_dormant!
     find_each do |b|
-      # potential future check for this option
       b.clients.without_active_users.each do |c|
-        # check for aactive card info?
         c.handle_inactive!
       end
 
-      b.clients.with_dormant_payment_info do |c|
+      b.clients.with_dormant_payment_info.each do |c|
         c.handle_inactive_payment_info!
       end
     end
