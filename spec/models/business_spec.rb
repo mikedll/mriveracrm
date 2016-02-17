@@ -119,13 +119,13 @@ describe Business do
         end
 
         Timecop.freeze(reftime - 15.days) do
-          i1 = FactoryGirl.create(:invoice, :client => c)
-          FactoryGirl.create(:paid_stripe_transaction, :invoice => t1)
+          i1 = FactoryGirl.create(:pending_invoice, :client => c)
+          FactoryGirl.create(:paid_stripe_transaction, :invoice => i1)
         end
 
         Timecop.freeze(reftime - 45.days) do
-          i2 = FactoryGirl.create(:invoice, :client => c2)
-          FactoryGirl.create(:paid_stripe_transaction, :invoice => t2)
+          i2 = FactoryGirl.create(:pending_invoice, :client => c2)
+          FactoryGirl.create(:paid_stripe_transaction, :invoice => i2)
         end
 
         Business.expire_client_information_when_dormant!

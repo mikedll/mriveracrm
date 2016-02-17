@@ -50,6 +50,10 @@ module AttributesInFineGrained
       fgc.cread(key)
     end
 
+    def reset
+      fgc.reset(key)
+    end
+
     def ==(other)
       to_i == other
     end
@@ -88,6 +92,8 @@ module AttributesInFineGrained
     def reset
       fgc.sreset(key)
     end
+
+    alias_method :clear, :reset
   end
 
   included do
