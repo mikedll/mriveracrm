@@ -2,9 +2,7 @@ class Transaction < ActiveRecord::Base
   belongs_to :invoice
   belongs_to :payment_gateway_profile
 
-
   include ActionView::Helpers::TranslationHelper
-
 
   validates :type, :presence => true
 
@@ -79,14 +77,14 @@ class Transaction < ActiveRecord::Base
 
   def _verify_destroyable
     if !self.is_a?(OutsideTransaction)
-      errors.add(:base, I18n.t('.errors.cannot_destroy_this_type')) 
+      errors.add(:base, I18n.t('.errors.cannot_destroy_this_type'))
       return false
     end
 
     if !can_delete?
-      errors.add(:base, I18n.t('.errors.cannot_destroy_in_state')) 
+      errors.add(:base, I18n.t('.errors.cannot_destroy_in_state'))
       return false
-    end    
+    end
 
   end
 

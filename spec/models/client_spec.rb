@@ -60,7 +60,7 @@ describe Client do
       end
     end
 
-    it "should erase the inactive user", :current => true do
+    it "should erase the inactive user" do
       @client.handle_inactive!
       @client.reload
       @client.users.should be_empty
