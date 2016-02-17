@@ -97,7 +97,9 @@ class Business < ActiveRecord::Base
         c.handle_inactive!
       end
 
-      # check clients with active card info and no users
+      b.clients.with_dormant_payment_info do |c|
+        c.handle_inactive_payment_info!
+      end
     end
   end
 

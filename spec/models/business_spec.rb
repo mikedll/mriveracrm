@@ -118,15 +118,14 @@ describe Business do
           c3.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         end
 
-
         Timecop.freeze(reftime - 15.days) do
           i1 = FactoryGirl.create(:invoice, :client => c)
-          FactoryGirl.create(:transaction, :invoice => t1)
+          FactoryGirl.create(:paid_stripe_transaction, :invoice => t1)
         end
 
         Timecop.freeze(reftime - 45.days) do
           i2 = FactoryGirl.create(:invoice, :client => c2)
-          FactoryGirl.create(:transaction, :invoice => t2)
+          FactoryGirl.create(:paid_stripe_transaction, :invoice => t2)
         end
 
         Business.expire_client_information_when_dormant!

@@ -21,6 +21,7 @@ class Client < ActiveRecord::Base
   after_create :require_payment_gateway_profile
 
   INACTIVE_THRESHOLD = 30.days
+  RECENT_TRANSACTION_THRESHOLD = INACTIVE_THRESHOLD
   scope :with_transactions, lambda { includes(:invoices => :transactions) }
   scope :cb, lambda { where('clients.business_id = ?', Business.current.try(:id)) }
   scope :unarchived, where('archived = ?', false)
@@ -31,6 +32,19 @@ class Client < ActiveRecord::Base
     with_users.where('NOT EXISTS(SELECT id FROM users WHERE users.client_id = clients.id AND users.last_sign_in_at > ?)', Time.now - INACTIVE_THRESHOLD)
   }
   scope :with_active_card_info, lambda { joins(:payment_gateway_profile).where("payment_gateway_profiles.card_last_4 <> ''") }
+  scope :without_recent_transaction, lambda {
+    where('NOT EXISTS(
+SELECT id
+FROM invoices as invoices
+WHERE invoices.client_id = clients.id
+LEFT INNER JOIN transactions ON transactions.invoice_id = invoices.id
+WHERE
+    transactions.status = "successful"
+AND transactions.updated_at > ?
+)', Time.now - RECENT_TRANSACTION_THRESHOLD)
+  }
+  scope :without_recent_payment_info_write, lambda { joins(:payment_gateway_profile).where('payment_gateway_profiles.last_written is null or payment_gateway_profiles.last_written < ?', Time.now - INACTIVE_THRESHOLD) }
+  scope :with_dormant_payment_info, lambda { without_recent_payment_info_write.without_recent_transaction }
 
   def archive!
     if archived?
@@ -64,8 +78,12 @@ class Client < ActiveRecord::Base
     invitation
   end
 
-  def handle_inactive!
+  def handle_inactive_payment_info!
     payment_gateway_profile.erase_sensitive_information! if payment_gateway_profile
+  end
+
+  def handle_inactive!
+    handle_inactive_payment_info!
     users.each { |u| u.destroy }
   end
 
