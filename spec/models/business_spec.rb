@@ -71,10 +71,10 @@ describe Business do
     it "should eliminate users and payment information" do
       reftime = Time.now
       @client = FactoryGirl.create(:client_user, :reftime => reftime - 25.hours).client
-      @client.payment_gateway_profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '16', :cv_code => '111').should be_true
+      @client.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
 
       @client2 = FactoryGirl.create(:client_user).client
-      @client2.payment_gateway_profile.update_payment_info(:card_number => '30569309025904', :expiration_month => '05', :expiration_year => '16', :cv_code => '111').should be_true
+      @client2.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
 
       @client.payment_gateway_profile.reload
       @client.payment_gateway_profile.card_last_4.blank?.should be_false
@@ -90,6 +90,55 @@ describe Business do
         @client2.payment_gateway_profile.card_last_4.blank?.should be_false
         @client2.reload
         @client2.users.count.should == 1
+      end
+    end
+
+    context "dormant payment information", :current => true do
+      it "should be erased" do
+        reftime = Time.now
+
+        # Will stay due to old card but recent transaction
+        c = FactoryGirl.create(:client)
+
+        # Will be deleted to to old card and no recent transaction
+        c2 = FactoryGirl.create(:client)
+
+        # Will stay due to recently updated card information
+        c3 = FactoryGirl.create(:client)
+
+        Timecop.freeze(reftime - 45.days) do
+          c.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
+        end
+
+        Timecop.freeze(reftime - 45.days) do
+          c2.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
+        end
+
+        Timecop.freeze(reftime - 15.days) do
+          c3.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
+        end
+
+
+        Timecop.freeze(reftime - 15.days) do
+          i1 = FactoryGirl.create(:invoice, :client => c)
+          FactoryGirl.create(:transaction, :invoice => t1)
+        end
+
+        Timecop.freeze(reftime - 45.days) do
+          i2 = FactoryGirl.create(:invoice, :client => c2)
+          FactoryGirl.create(:transaction, :invoice => t2)
+        end
+
+        Business.expire_client_information_when_dormant!
+
+        c.reload
+        c.payment_gateway_profile.card_last_4.blank?.should be_false
+
+        c2.reload
+        c2.payment_gateway_profile.card_last_4.blank?.should be_true
+
+        c3.reload
+        c3.payment_gateway_profile.card_last_4.blank?.should be_false
       end
     end
   end

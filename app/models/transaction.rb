@@ -2,9 +2,7 @@ class Transaction < ActiveRecord::Base
   belongs_to :invoice
   belongs_to :payment_gateway_profile
 
-
   include ActionView::Helpers::TranslationHelper
-
 
   validates :type, :presence => true
 
