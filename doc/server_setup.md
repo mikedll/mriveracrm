@@ -170,3 +170,8 @@ SSL handshake and certificate authentication negotiation.
 # Backups
 
 Schedule `config/deploy/cron.sh` on the serer.
+
+To check on backups, run this command.
+
+    cknifeaws afew mikedllcrm-backups --count=150
+
