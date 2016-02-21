@@ -10,13 +10,13 @@ class Client < ActiveRecord::Base
 
   attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone_2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at
 
+
+  before_validation :_strip_fields
   validates :business_id, :presence => true
   validates :email, :format => { :with => Regexes::EMAIL }, :uniqueness => { :scope => :business_id }, :if => Proc.new { |c| !c.email.blank? }
   validates :zip, :format => { :with => Regexes::ZIP }, :if => Proc.new { |c| !c.zip.blank? }
 
   validate :_static_business
-
-  before_validation :_strip_fields
 
   after_create :require_payment_gateway_profile
 
@@ -133,14 +133,14 @@ AND transactions.updated_at > ?
 
 
   def _strip_fields
-    self.zip.strip!
-    self.address_line_1.strip!
-    self.address_line_2.strip!
-    self.phone.strip!
-    self.phone_2.strip!
-    self.state.strip!
-    self.city.strip!
-    self.website_url.strip!
+    self.zip.strip! if zip
+    self.address_line_1.strip! if address_line_1
+    self.address_line_2.strip! if address_line_2
+    self.phone.strip! if phone
+    self.phone_2.strip! if phone_2
+    self.state.strip! if state
+    self.city.strip! if city
+    self.website_url.strip! if website_url
   end
 
 end
