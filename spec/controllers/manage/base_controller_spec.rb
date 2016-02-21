@@ -16,7 +16,7 @@ describe Manage::BaseController do
     controller(Manage::BaseController) do
       skip_before_filter :_require_business_support
       def index
-        render "home/index", :layout => "application"
+        render :text => "Sample content.", :layout => "application"
       end
     end
 
@@ -72,7 +72,7 @@ describe Manage::BaseController do
       skip_before_filter :require_active_plan
       skip_before_filter :_require_business_support
       def index
-        render "home/index", :layout => "application"
+        render :text => "Sample content.", :layout => "application"
       end
     end
 
