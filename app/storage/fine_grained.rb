@@ -104,6 +104,8 @@ class FineGrainedFile
       raise ArgumentError.new("Unrecognized type index.")
     end
     @store_types[key] = WRITE_TYPE_INDEXES[type_index]
+    p = allocate_page(1)
+    @store_pages[key] = [p, 1]
   end
 
   def [](key)
@@ -436,6 +438,8 @@ class FineGrainedFile
 
   #
   # @pre new_pages >= 0
+  #
+  # Returns integer of new page index.
   #
   def allocate_page(new_pages)
 

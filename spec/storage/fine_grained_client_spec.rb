@@ -23,6 +23,7 @@ describe FineGrainedClient do
         @fgc.sread("account:5:requests").should == []
       end
     end
+
     context "counters" do
       it "should be incrementable and decrementable" do
         @fgc.del("account:5:ready")
