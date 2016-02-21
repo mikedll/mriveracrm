@@ -268,9 +268,11 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     if customer[:active_card]
       self.card_last_4 = customer[:active_card][:last4]
       self.card_brand = customer[:active_card][:type]
+      self.payment_info_last_written = Time.now
     else
       self.card_last_4 = ""
       self.card_brand = ""
+      self.payment_info_last_written = nil
     end
 
     if !customer.subscriptions.data.empty?
