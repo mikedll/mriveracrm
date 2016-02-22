@@ -85,7 +85,7 @@ Spork.prefork do
     end
 
 
-    # Cleanup carrierwave images
+    # Cleanup persistent storage systems
     config.after(:suite) do
       if Rails.env.test? || Rails.env.cucumber?
         if :asdf.respond_to?(:stub)

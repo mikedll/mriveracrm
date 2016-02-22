@@ -60,6 +60,11 @@ describe PersistentRequestable do
     FineGrainedClient.cli.keys.should == []
   end
 
+  it "should support JSON serialization" do
+    @invoice = FactoryGirl.create(:invoice)
+    @invoice.as_json(:methods => :last_error).slice(:last_error).should == { :last_error => "" }
+  end
+
   it "should lock record to one request at a time with redis" do
     j = Jungle.new(2)
 
