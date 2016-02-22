@@ -2,6 +2,8 @@
 
 require ::File.expand_path('../../config/environment',  __FILE__)
 
+require 'fine_grained_client'
+
 c = FineGrainedClient.new
 while 1
   s = c.shift(WorkerBase::Queues::DEFAULT)

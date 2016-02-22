@@ -1,3 +1,13 @@
+GIT
+  remote: git://github.com/mikedll/finegrained.git
+  revision: bd37b443ec161af33e7b43990fe667a2cddba1a4
+  specs:
+    finegrained (1.0.2)
+      activesupport
+      eventmachine
+      multi_json
+      safe_yaml
+
 GEM
   remote: http://rubygems.org/
   specs:
@@ -129,7 +139,7 @@ GEM
     diff-lcs (1.2.1)
     dotenv (0.7.0)
     erubis (2.7.0)
-    eventmachine (1.0.8)
+    eventmachine (1.0.9.1)
     excon (0.27.6)
     execjs (1.2.4)
       multi_json (~> 1.0)
@@ -400,10 +410,10 @@ DEPENDENCIES
   coffee-rails (~> 3.2.1)
   database_cleaner
   devise
-  eventmachine
   excon (>= 0.27.5)
   factory_girl_rails
   faker
+  finegrained!
   fog
   foreman
   guard-rspec

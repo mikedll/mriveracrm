@@ -93,7 +93,7 @@ describe Business do
       end
     end
 
-    context "dormant payment information", :current => true do
+    context "dormant payment information" do
       it "should be erased" do
         reftime = Time.now
 
