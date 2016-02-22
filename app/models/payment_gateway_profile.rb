@@ -2,7 +2,7 @@ class PaymentGatewayProfile < ActiveRecord::Base
 
   include PersistentRequestable
 
-  belongs_to :payment_gateway_profilable, polymorphic: true
+  belongs_to :payment_gateway_profilable, polymorphic: true, inverse_of: :payment_gateway_profile
   has_many :transactions
 
   after_create :_create_remote
