@@ -3,7 +3,7 @@ source 'http://rubygems.org'
 ruby '2.0.0'
 
 gem 'rails', '~> 3.2.0'
-gem 'activesupport', :group => [:default, :scheduler, :fine_grained_daemon]
+gem 'activesupport', :group => [:default, :scheduler]
 
 
 # vital
@@ -35,12 +35,11 @@ gem "rest-client"
 gem "foreman"
 gem 'kramdown' # mit
 
-gem "safe_yaml", :group => [:default, :fine_grained_daemon, :scheduler]
-gem 'multi_json', :group => [:default, :fine_grained_daemon]
+gem "safe_yaml", :group => [:default, :scheduler]
+gem 'multi_json'
 
-group :default, :fine_grained_daemon do
-  gem 'eventmachine'
-end
+gem 'finegrained', :github => 'mikedll/finegrained'
+# gem 'finegrained', :path => '../finegrained'
 
 group :default, :scheduler do
   gem 'activemodel'

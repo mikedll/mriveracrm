@@ -57,7 +57,7 @@ See `doc/server_setup.md`.
 
 Run specs with Guard:
 
-    > ./script/fine_grained_daemon.rb db/fineGrainedTest.db & # start FineGrained daemon on a test database.
+    > bundle exec fine_grained_daemon.rb db/fineGrainedTest.db & # start FineGrained daemon on a test database.
     > bundle exec guard
     
 Start everyting:

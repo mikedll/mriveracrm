@@ -23,8 +23,8 @@ $LOAD_PATH << Bundler.root
 require 'lib/app_configuration'
 require 'app/workers/worker_base'
 require 'app/workers/scheduled_event'
-require 'app/storage/fine_grained'
-require 'app/storage/fine_grained_client'
+require 'fine_grained'
+require 'fine_grained_client'
 
 
 module Clockwork
