@@ -35,7 +35,7 @@ describe Client::InvoicesController do
         response.should be_success
       end
 
-      it "should show the last transaction error if one occured", :current => true do
+      it "should show the last transaction error if one occured" do
         expect(@user.client.payment_gateway_profile.update_payment_info(SpecSupport.declined_card_stripe_cc_params)).to be true
         @invoice2.reload
         @invoice2.charge!

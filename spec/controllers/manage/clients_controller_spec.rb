@@ -97,7 +97,7 @@ describe Manage::ClientsController do
 
     it "should be able to create clients" do
       @user.employee.business.clients.count.should == 0
-      post :create, {:format => "js"}
+      post :create, {:format => "json"}
       @user.employee.business.clients.count.should == 1
       response.status.should == 201
     end
