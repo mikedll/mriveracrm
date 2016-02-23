@@ -44,7 +44,7 @@ en:
     unarchive_confirm: "Unarchive this client? It will be listed again in normal client listings."
 
   persistent_requestable:
-    not_pristine: 'This %{model} cannot have pending changes when starting this request.'
+    not_persisted: 'This %{model} must be persisted to start a background request.'
     already_requesting: 'This %{model} is already busy with a request. Please wait for the existing request to finish.'
 
   product_image:

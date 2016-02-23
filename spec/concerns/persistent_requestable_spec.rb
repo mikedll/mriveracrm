@@ -32,7 +32,6 @@ describe PersistentRequestable do
     end
 
     def new_record?; false; end
-    def changed?; false; end
 
     def grow!
       return false if !start_persistent_request('grow!')
@@ -65,7 +64,7 @@ describe PersistentRequestable do
     @invoice.as_json(:methods => :last_error).slice(:last_error).should == { :last_error => "" }
   end
 
-  it "should lock record to one request at a time with redis" do
+  it "should permit one background request at a time" do
     j = Jungle.new(2)
 
     j.start_persistent_request('grow!').should be_true
@@ -76,6 +75,7 @@ describe PersistentRequestable do
     j.grow!.should be_false
 
     j.stop_persistent_request('grow!')
+
     j.available_for_request?.should be_true
     j.grow!.should be_true
 

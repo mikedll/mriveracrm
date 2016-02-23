@@ -96,13 +96,13 @@ class Invoice < ActiveRecord::Base
   before_validation :_defaults_and_formatting
   before_validation :_verify_can_edit?
 
+  before_destroy :_verify_destroyable
+
   validates :client, :date, :total, :presence => true
   validates :description, :length => { :minimum => 3 }
   validate :_can_mark_paid
 
-  after_save :_enqueue_pdf_generation
-
-  before_destroy :_verify_destroyable
+  after_save :enqueue_pdf_generation
 
   scope :viewable_to_client, lambda {
     where('invoices.status in (?)', [:pending, :failed_payment, :paid, :closed])
@@ -208,6 +208,10 @@ class Invoice < ActiveRecord::Base
 
   private
 
+  def enqueue_pdf_generation
+    _capture_as_pdf if !pdf_file? && !can_edit?
+  end
+
   def _defaults_and_formatting
     if new_record?
       self.description = "..." if description.nil?
@@ -269,10 +273,6 @@ class Invoice < ActiveRecord::Base
     save!
     FileUtils.rm_rf(pdf_filename)
     stop_persistent_request(PDF_GENERATION)
-  end
-
-  def _enqueue_pdf_generation
-    _capture_as_pdf if !pdf_file? && !can_edit?
   end
 
 end
