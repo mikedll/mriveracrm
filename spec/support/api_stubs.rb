@@ -34,12 +34,19 @@ class ApiStubs
     Stripe::Customer.stub(:retrieve) do |cid|
       c = ApiStubs.stripe_retrieve_customer(cid)
       c.stub(:save) do
-        stripe_insert_card(c) if !c.card.nil?
+        stripe_insert_card(c, c.card) if !c.card.nil?
         nil
       end
       c
     end
-    Stripe::Charge.stub(:create) { |params| ApiStubs.stripe_charge(params[:amount]) }
+    Stripe::Charge.stub(:create) do |params|
+      c = customer_db[params[:customer]]
+      if c.active_card.last4 == "0341"
+        raise Stripe::CardError.new("Card was declined.", nil, nil)
+      else
+        ApiStubs.stripe_charge(c, params[:amount])
+      end
+    end
   end
 
   def self.release_stripe_stub!
@@ -120,24 +127,25 @@ class ApiStubs
     customer_db[customer_profile_id] = c
   end
 
-  def self.stripe_charge(amount = 7280)
-    customer_profile_id = DEFAULT_VENDOR_ID
+  def self.stripe_charge(customer, amount = 7280)
+    customer_profile_id = customer.id
+    card = customer.active_card
+    card_last_4 = card.last4
+    card_id = card.id
 
-    vs = YAML.load load('stripe_charge').result( binding )
-    charge = Stripe::Charge.construct_from(vs['values'], vs['api_key'])
-
-    vs = YAML.load load('stripe_card_for_charge').result( binding )
-    charge.card = Stripe::Card.construct_from(vs['values'], vs['api_key'])
-
-    vs = YAML.load load('stripe_fee_details').result(binding)
-    charge.fee_details = [Stripe::StripeObject.construct_from(vs['values'], vs['api_key'])]
-
+    charge = load_stripe_klass_with_binding('stripe_charge', Stripe::Charge, binding)
+    charge.card = load_stripe_klass_with_binding('stripe_card', Stripe::Card, binding)
+    charge.fee_details = [load_stripe_klass_with_binding('stripe_fee_details', Stripe::StripeObject, binding)]
     charge
   end
 
-  def self.stripe_insert_card(c)
+  def self.stripe_insert_card(c, card_params = nil)
     customer_profile_id = c.id
     card_id = "card_#{SecureRandom.hex(4)}"
+
+    plast4 = (card_params[:number].nil? || card_params[:number].length < 4) ? nil : card_params[:number][card_params[:number].length - 4, 4]
+    card_last_4 = plast4 || '4242'
+
     card = load_stripe_klass_with_binding('stripe_card', Stripe::Card, binding)
 
     c.default_card = card_id

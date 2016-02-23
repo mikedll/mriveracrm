@@ -1,5 +1,4 @@
 ---
-retrieve_options: {}
 api_key: sk_test_some_key
 values:
   :id: <%= card_id %>
@@ -18,10 +17,10 @@ values:
   :cvc_check: pass
   :dynamic_last4: 
   :exp_month: 3
-  :exp_year: 2017
+  :exp_year: 2019
   :fingerprint: kfpzNBSvKSFZtPV5
   :funding: credit
-  :last4: '4242'
+  :last4: "<%= card_last_4 %>"
   :name: 
   :tokenization_method: 
   :type: Visa

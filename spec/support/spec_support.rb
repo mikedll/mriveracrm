@@ -10,7 +10,16 @@ class SpecSupport
       {
         :card_number => '4242424242424242',
         :expiration_month => '03',
-        :expiration_year => '17',
+        :expiration_year => '19',
+        :cv_code => '111'
+      }
+    end
+
+    def declined_card_stripe_cc_params
+      {
+        :card_number => '4000000000000341',
+        :expiration_month => '03',
+        :expiration_year => '19',
         :cv_code => '111'
       }
     end
