@@ -171,11 +171,11 @@ FactoryGirl.define do
       FactoryGirl.create(:stubbed_profilable_usage_subscription)
     end
 
-    after :create do |profile|
-      profile.payment_gateway_profilable.unstub(:require_payment_gateway_profile)
-      profile.payment_gateway_profilable.unstub(:ensure_correct_plan!)
-      profile.payment_gateway_profilable.unstub(:notify_signup!)
-      profile.payment_gateway_profilable.send(:ensure_correct_plan!)
+    after :create do |r|
+      r.payment_gateway_profilable.unstub(:require_payment_gateway_profile)
+      r.payment_gateway_profilable.unstub(:ensure_correct_plan!)
+      r.payment_gateway_profilable.unstub(:notify_signup!)
+      r.payment_gateway_profilable.send(:ensure_correct_plan!)
     end
   end
 
