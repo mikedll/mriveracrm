@@ -32,6 +32,7 @@ describe PersistentRequestable do
     end
 
     def new_record?; false; end
+    def persisted?; !new_record?; end
 
     def grow!
       return false if !start_persistent_request('grow!')
