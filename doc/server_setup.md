@@ -167,6 +167,13 @@ SSL handshake and certificate authentication negotiation.
     > openssl dhparam -out dhparams.pem 2048 
     > sudo mv dhparams.pem /etc/ssl/private/
 
+# Port Blocking
+
+Restrict access to FineGrained's port:
+
+    sudo iptables -A INPUT -p tcp -s localhost --dport 7803 -j ACCEPT
+    sudo iptables -A INPUT -p tcp --dport 7083 -j DROP
+
 # Backups
 
 Schedule `config/deploy/cron.sh` on the serer.
