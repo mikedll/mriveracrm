@@ -264,6 +264,16 @@ class StripePaymentGatewayProfile < PaymentGatewayProfile
     save!
   end
 
+  def _destroy_remote
+    return if self.vendor_id.nil?
+
+    customer = nil
+    _with_stripe_key do
+      customer = Stripe::Customer.retrieve(vendor_id)
+      customer.delete
+    end
+  end
+
   def _cache_customer(customer)
     if customer[:active_card]
       self.card_last_4 = customer[:active_card][:last4]

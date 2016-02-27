@@ -1,7 +1,7 @@
 class UsageSubscription < ActiveRecord::Base
 
   belongs_to :business
-  has_one :payment_gateway_profile, as: :payment_gateway_profilable
+  has_one :payment_gateway_profile, as: :payment_gateway_profilable, :dependent => :destroy
   has_many :feature_selections
   has_many :features, :through => :feature_selections
 

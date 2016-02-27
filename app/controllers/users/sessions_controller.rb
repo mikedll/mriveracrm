@@ -12,7 +12,7 @@ class Users::SessionsController < Devise::SessionsController
   end
 
   def authorize
-    @supress_business_handle = true
+    @suppress_business_handle = true
     authorize_path_without_handle = omniauth_authorize_path
 
     if current_user
@@ -41,7 +41,7 @@ class Users::SessionsController < Devise::SessionsController
   end
 
 	def google_oauth2
-    @supress_business_handle = true
+    @suppress_business_handle = true
 
     begin
       status, headers, response = middleware.call(request.env)
@@ -55,12 +55,12 @@ class Users::SessionsController < Devise::SessionsController
     @user = User.find_for_google_oauth2(request.env["omniauth.auth"], current_user)
 
     if @user && @user.persisted? && @user.errors.empty?
-      @supress_business_handle = false
+      @suppress_business_handle = false
       flash[:notice] = I18n.t "devise.omniauth_callbacks.success", :kind => "Google"
       sign_in_and_redirect @user, :event => :authentication
     else
-      @supress_business_handle = false
-      if @user && !@user.errors.full_messages.empty?
+      @suppress_business_handle = false
+      if @user && !@user.errors.empty?
         flash[:error] = @user.errors.full_messages.join(". ")
       end
       session["devise.google_data"] = request.env["omniauth.auth"]

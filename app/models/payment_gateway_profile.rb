@@ -6,6 +6,7 @@ class PaymentGatewayProfile < ActiveRecord::Base
   has_many :transactions
 
   after_create :_create_remote
+  before_destroy :_destroy_remote
 
   attr_accessor :card_number, :expiration_month, :expiration_year, :cv_code
 
@@ -84,6 +85,10 @@ class PaymentGatewayProfile < ActiveRecord::Base
   protected
 
   def _create_remote
+    raise "Implement in subclass."
+  end
+
+  def _destroy_remote
     raise "Implement in subclass."
   end
 

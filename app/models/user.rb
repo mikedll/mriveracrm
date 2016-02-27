@@ -47,6 +47,13 @@ class User < ActiveRecord::Base
   scope :google_oauth2, lambda { |email| joins(:credentials).includes(:credentials).where('credentials.provider = ? and credentials.email = ?', :google_oauth2, email) }
   scope :cb, lambda { where('users.business_id = ?', Business.current.try(:id)) }
 
+  #
+  # Returns User object. Creates it if it has to.
+  #
+  # The user object may not be persisted. If it is not,
+  # there may be an error attached indicating why creation
+  # failed.
+  #
   def self.find_for_google_oauth2(auth, current_user)
     # user exists
     email = auth[:info][:email] || auth[:extra][:raw_info][:email]
@@ -64,30 +71,31 @@ class User < ActiveRecord::Base
                current_user
              end
       user.credentials.push(Credential.new_from_google_oauth2(auth, user))
-      return user if !invitation.accept_user!(user) # credential likely is already in use for this business
+      invitation.accept_user!(user)
     elsif current_user.nil? && cb.first.nil?
       invitation = Invitation.handled.open.find_by_email email.downcase
       if invitation
         user = User.new_from_auth(auth[:info])
         user.credentials.push(Credential.new_from_google_oauth2(auth, user))
-        return nil if !invitation.accept_user!(user)
+        invitation.accept_user!(user)
       else
-        u = User.new_from_auth(auth[:info])
-        u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => email))
-        return u
+        return user_with_no_invite_error(email)
       end
     elsif current_user
-      # this is pretty much a weird login....current_user is trying to relogin with no
-      # invitation or new business. why? log him out.
-      return nil
+      return user_with_no_invite_error(email)
     else
-      u = User.new_from_auth(auth[:info])
-      u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => email))
-      return u
+      return user_with_no_invite_error(email)
     end
 
     user
   end
+
+  def self.user_with_no_invite_error(email)
+    u = User.new
+    u.errors.add(:base, I18n.t('user.errors.no_invitation', :email => email))
+    u
+  end
+
 
   def self.new_from_auth(info)
     user = new
