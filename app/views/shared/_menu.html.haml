@@ -46,7 +46,7 @@
         %li
           = link_to 'Admin', abdiel_root_path, :tabIndex => "-1"
       %li
-        = link_to 'Logout', destroy_user_session_path, :tabIndex => '-1', :method => :delete
+        = link_to 'Logout', destroy_user_session_path, :tabIndex => '-1'
     - else
       %li
         = link_to 'Login', new_user_session_path
