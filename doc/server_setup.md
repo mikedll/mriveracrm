@@ -24,6 +24,25 @@ This may go in `~/.gemrc`:
 Pick a package directory like the packages directory described
 above for doing package building.
 
+# System Dependencies
+
+    # nginx
+    sudo apt-get install nginx
+
+    # xhtml2pdf
+    sudo apt-get install python-dev python-pip
+    sudo pip install Pillow xhtml2pdf
+
+    # iptables
+    sudo apt-get install iptables-persistent
+    
+See [this
+page](https://bugs.launchpad.net/ubuntu/+source/iptables-persistent/+bug/1002078)
+for notes on working around the `iptables-persistent` package
+installation problems.
+
+You probably need to install a version of PostgreSQL, too.
+
 # FineGrained
 
 FineGrained is as of this writing built into this
@@ -147,15 +166,6 @@ Nginx is configured at `/etc/nginx/nginx.conf`:
 
       # For SSL configuration, see nginx config in config/nginx.conf.
     }
-    
-Dependencies: 
-
-    # nginx
-    sudo apt-get install nginx
-
-    # xhtml2pdf
-    sudo apt-get install python-dev python-pip
-    sudo pip install Pillow xhtml2pdf
 
 Certificates are in: `/etc/ssl/private/mikedll.{crt,key}`  If you
 have intermediate certificates, append those after your
@@ -173,6 +183,10 @@ Restrict access to FineGrained's port:
 
     sudo iptables -A INPUT -p tcp -s localhost --dport 7803 -j ACCEPT
     sudo iptables -A INPUT -p tcp --dport 7083 -j DROP
+
+See `iptables-save` documentation to persist these changes. They
+should appear in `/etc/iptables/rules.v4` after properly using that
+command.
 
 # Backups
 
