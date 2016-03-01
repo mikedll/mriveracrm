@@ -1,8 +1,8 @@
 GIT
   remote: git://github.com/mikedll/finegrained.git
-  revision: bd37b443ec161af33e7b43990fe667a2cddba1a4
+  revision: 04fa2be085612489799a672993bed6fc9b5dd947
   specs:
-    finegrained (1.0.2)
+    finegrained (1.0.3)
       activesupport
       eventmachine
       multi_json
