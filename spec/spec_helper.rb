@@ -64,7 +64,7 @@ Spork.prefork do
       # Allow net connect if at least one live group is not excluded
       WebMock.disable! if might_be_running_live_test
 
-      FineGrainedClient.flag_immediate_execution!
+      WorkerBase.flag_immediate_execution!
 
       FactoryGirl.create(:marketing_front_end)
     end
@@ -99,7 +99,6 @@ Spork.prefork do
 
           ApiStubs.release_stripe_stub!
         end
-        DatabaseCleaner.clean_with(:truncation)
 
         FineGrainedClient.cli.keys.each do |k|
           FineGrainedClient.cli.del(k)

@@ -41,7 +41,7 @@ describe Client::InvoicesController do
         @invoice2.charge!
         get :index, :format => :json
         result = JSON.parse(response.body)
-        result[1]["last_error"].should == "Card was declined."
+        result[1]["last_error"].should == "Your card was declined."
       end
     end
   end

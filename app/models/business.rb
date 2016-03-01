@@ -8,23 +8,23 @@ class Business < ActiveRecord::Base
   #
   cattr_accessor :current
 
-  has_many :projects
-  has_many :users, :dependent => :destroy
-  has_many :credentials # used validations in credential. destroyed by users, not here.
+  has_many :projects, :inverse_of => :business
+  has_many :users, :inverse_of => :business, :dependent => :destroy
+  has_many :credentials, :inverse_of => :business # used validations in credential. destroyed by users, not here.
 
-  has_many :clients, :dependent => :destroy
-  has_many :products, :dependent => :destroy
-  has_many :employees, :dependent => :destroy
+  has_many :clients, :inverse_of => :business, :dependent => :destroy
+  has_many :products, :inverse_of => :business, :dependent => :destroy
+  has_many :employees, :inverse_of => :business, :dependent => :destroy
 
-  has_many :invitations, :dependent => :destroy
-  has_many :images, :dependent => :destroy
-  has_many :lifecycle_notifications, :dependent => :destroy
-  has_many :notifications, :dependent => :destroy, :inverse_of => :business
-  has_many :letters, :dependent => :destroy, :inverse_of => :business
-  has_many :pages, :dependent => :destroy, :inverse_of => :business
-  has_many :link_orderings, :dependent => :destroy, :inverse_of => :business
+  has_many :invitations, :inverse_of => :business, :dependent => :destroy
+  has_many :images, :inverse_of => :business, :dependent => :destroy
+  has_many :lifecycle_notifications, :inverse_of => :business, :dependent => :destroy
+  has_many :notifications, :inverse_of => :business, :dependent => :destroy
+  has_many :letters, :inverse_of => :business, :dependent => :destroy
+  has_many :pages, :inverse_of => :business, :dependent => :destroy
+  has_many :link_orderings, :inverse_of => :business, :dependent => :destroy
 
-  has_one :usage_subscription, :dependent => :destroy
+  has_one :usage_subscription, :inverse_of => :business, :dependent => :destroy
   has_many :it_monitored_computers, :inverse_of => :business, :dependent => :destroy, :class_name => 'IT::MonitoredComputer'
 
   belongs_to :default_mfe, :class_name => "MarketingFrontEnd"
@@ -235,8 +235,7 @@ class Business < ActiveRecord::Base
 
   def _have_usage_subscription
     self.usage_subscription = UsageSubscription.new
-    self.usage_subscription.features = default_mfe.features.all
-    self.usage_subscription.save!
+    acquire_default_features!
   end
 
 

@@ -35,15 +35,20 @@ FactoryGirl.define do
     stripe_secret_key AppConfiguration.get('stripe.secret_key')
     stripe_publishable_key AppConfiguration.get('stripe.publishable_key')
 
+    factory :business_without_usage_subscription do
+      after(:build) { |r| r.stub(:_have_usage_subscription) }
+      after(:create) { |r| r.unstub(:_have_usage_subscription) }
+    end
+
     after(:create) do |business, evaluator|
       if Business.current.nil? || RequestSettings.host.nil?
         Business.current = business
         RequestSettings.host = business.default_mfe.host
       end
 
-      # Ensure owner exists.
-      e = FactoryGirl.build(:employee, :business => business, :role => Employee::Roles::OWNER)
-      FactoryGirl.create(:employee_user, :employee => e, :email => evaluator.owner_email)
+      # Ensure owner exists, unless there appears to have been a stub
+      # that disabled the usage_subscriptions creation.
+      FactoryGirl.create(:business_owner_user, :seed_business => business, :email => evaluator.owner_email) if business.usage_subscription
     end
 
     factory :emerging_papacy do
@@ -65,6 +70,10 @@ FactoryGirl.define do
     first_name "Mike"
     last_name "Worker Bee"
     email { generate(:employee_email) }
+
+    factory :business_owner do
+      role Employee::Roles::OWNER
+    end
   end
 
   factory :credential do
@@ -96,7 +105,7 @@ FactoryGirl.define do
     end
 
     factory :user do
-      client { FactoryGirl.create(:stubbed_client) }
+      client { FactoryGirl.create(:client) }
 
       factory :client_user do
         business { client.business }
@@ -116,26 +125,33 @@ FactoryGirl.define do
         end
       end
 
+      factory :business_owner_user do
+        ignore do
+          seed_business nil
+        end
+
+        employee {
+          params = {}
+          params.merge!(:business => seed_business) if !seed_business.nil?
+          FactoryGirl.build(:business_owner, params)
+        }
+      end
     end
 
   end
 
   factory :client do
-    business { FactoryGirl.create(:business) }
-    email { "user" + SecureRandom.base64(8) + "@example.com" }
+    business
+    email { FactoryGirl.generate(:user_email) }
     first_name "Phil"
     last_name "Watson"
-
-    factory :stubbed_client do
-      # obsolete as of generic_stripe_stub! in ApiStubs in spec_helper
-    end
   end
 
   factory :invitation do
     email { generate(:guest_email) }
 
     factory :client_invitation, :parent => :invitation do
-      client { FactoryGirl.create(:stubbed_client) }
+      client { FactoryGirl.create(:client) }
     end
 
     factory :employee_invitation, :parent => :invitation do
@@ -168,7 +184,7 @@ FactoryGirl.define do
     # have to do this before even the create call.
     # before :build's effect is ambiguous.
     payment_gateway_profilable do
-      FactoryGirl.create(:stubbed_profilable_usage_subscription)
+      FactoryGirl.create(:usage_subscription_without_payment_profile)
     end
 
     after :create do |r|
@@ -176,12 +192,18 @@ FactoryGirl.define do
       r.payment_gateway_profilable.unstub(:ensure_correct_plan!)
       r.payment_gateway_profilable.unstub(:notify_signup!)
       r.payment_gateway_profilable.send(:ensure_correct_plan!)
+
+      FactoryGirl.create(:business_owner_user, :seed_business => r.payment_gateway_profilable.business)
     end
   end
 
   factory :invoice do
+    ignore do
+      seed_business { FactoryGirl.create(:business) }
+    end
+
     description "Test invoice."
-    client { FactoryGirl.create(:stubbed_client) }
+    client { FactoryGirl.create(:client, :business => seed_business) }
     date { Time.now }
     total { 2500.00 }
     status { "open" }
@@ -288,9 +310,11 @@ FactoryGirl.define do
     business
     generation { 0 }
 
-    # It is the responsibility of the caller to unstub
-    # the below stubs.
-    factory :stubbed_profilable_usage_subscription do
+    # The caller of this factory must unstub
+    # the stubs created here, and create a business owner
+    # for the business created here.
+    factory :usage_subscription_without_payment_profile do
+      business { FactoryGirl.create(:business_without_usage_subscription) }
       payment_gateway_profile nil
       after :build do |r|
         r.stub(:require_payment_gateway_profile)
@@ -298,6 +322,7 @@ FactoryGirl.define do
         r.stub(:notify_signup!)
       end
     end
+
     factory :usage_subscription
   end
 

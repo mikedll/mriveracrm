@@ -42,7 +42,7 @@ class ApiStubs
     Stripe::Charge.stub(:create) do |params|
       c = customer_db[params[:customer]]
       if c.active_card.last4 == "0341"
-        raise Stripe::CardError.new("Card was declined.", nil, nil)
+        raise Stripe::CardError.new("Your card was declined.", nil, nil)
       else
         ApiStubs.stripe_charge(c, params[:amount])
       end

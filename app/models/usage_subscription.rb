@@ -1,8 +1,8 @@
 class UsageSubscription < ActiveRecord::Base
 
-  belongs_to :business
+  belongs_to :business, :inverse_of => :usage_subscription
   has_one :payment_gateway_profile, as: :payment_gateway_profilable, :dependent => :destroy
-  has_many :feature_selections
+  has_many :feature_selections, :inverse_of => :usage_subscription
   has_many :features, :through => :feature_selections
 
   accepts_nested_attributes_for :feature_selections, :allow_destroy => true, :reject_if => :all_blank
@@ -85,7 +85,7 @@ class UsageSubscription < ActiveRecord::Base
   end
 
   def calculated_plan_id
-    return @calculated_plan_id if @calculated_pland_id
+    return @calculated_plan_id if @calculated_plan_id
     _calculate_price_and_plan
     @calculated_plan_id
   end

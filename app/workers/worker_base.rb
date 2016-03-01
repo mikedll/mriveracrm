@@ -1,6 +1,8 @@
 class WorkerBase
   extend ActiveModel::Naming
 
+  @@immediate_execution = false
+
   module Queues
     DEFAULT = :default
   end
@@ -8,12 +10,31 @@ class WorkerBase
   attr_accessor :id, :invoked_method, :invoked_method_arguments
 
   class << self
+    def flag_immediate_execution!
+      @@immediate_execution = true
+    end
+
     def obj_enqueue(obj, invoked_method, *invoked_method_arguments)
       h = {
         :id => obj.id,
         :invoked_method => invoked_method,
         :invoked_method_arguments => invoked_method_arguments
       }
+
+      if @@immediate_execution
+        result = self.send(:perform, h)
+
+        # this is a simulation of the application proceeding to work
+        # with this object at a later point in time, possibly in a
+        # different process. Any spec that exercises a backgrounded
+        # method as if it is executed inline is a simulation of
+        # a call to the method that creates the backgrounded
+        # task to be executed later.
+        obj.reload
+
+        return result
+      end
+
       FineGrainedClient.enqueue_to(Queues::DEFAULT, self, h)
     end
   end

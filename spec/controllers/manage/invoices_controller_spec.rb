@@ -6,7 +6,7 @@ describe Manage::InvoicesController do
   context "security" do
     before :each do
       @user = FactoryGirl.create(:employee_user)
-      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
+      @client = FactoryGirl.create(:client, :business => @user.business)
       sign_in @user
       request.host = @user.employee.business.host
     end
@@ -22,7 +22,7 @@ describe Manage::InvoicesController do
   context "typical usage" do
     before(:each) do
       @user = FactoryGirl.create(:employee_user)
-      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
+      @client = FactoryGirl.create(:client, :business => @user.business)
       sign_in @user
       request.host = @user.employee.business.host
     end
@@ -39,7 +39,7 @@ describe Manage::InvoicesController do
   context "filters" do
     it "should bounce a client if he tries to login to this view" do
       @user = FactoryGirl.create(:client_user)
-      @client = FactoryGirl.create(:stubbed_client, :business => @user.business)
+      @client = FactoryGirl.create(:client, :business => @user.business)
       sign_in @user
       request.host = @user.client.business.host
 

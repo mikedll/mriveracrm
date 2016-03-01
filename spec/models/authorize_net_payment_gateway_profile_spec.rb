@@ -3,7 +3,7 @@ require 'spec_helper'
 describe AuthorizeNetPaymentGatewayProfile do
 
   context "basics" do
-    before(:each) { @profile = FactoryGirl.create(:stubbed_client).payment_gateway_profile }
+    before(:each) { @profile = FactoryGirl.create(:client).payment_gateway_profile }
     it "should work with stubs"do
       @profile.should_not be_nil
     end

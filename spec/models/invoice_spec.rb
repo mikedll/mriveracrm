@@ -28,26 +28,27 @@ describe Invoice do
 
   context "scopes" do
     it "should not allow cancelled or open invoices to be shown to user" do
-      invoice = FactoryGirl.create(:invoice, :status => :open)
+      sb = FactoryGirl.create(:business)
+      invoice = FactoryGirl.create(:invoice, :seed_business => sb, :status => :open)
       Invoice.count.should == 1
       Invoice.viewable_to_client.count.should == 0
 
-      invoice = FactoryGirl.create(:invoice, :status => :cancelled)
+      invoice = FactoryGirl.create(:invoice, :seed_business => sb, :status => :cancelled)
       Invoice.count.should == 2
       Invoice.viewable_to_client.count.should == 0
 
 
-      invoice = FactoryGirl.create(:invoice, :status => :pending)
+      invoice = FactoryGirl.create(:invoice, :seed_business => sb, :status => :pending)
       Invoice.viewable_to_client.count.should == 1
 
       invoice.cancel!.should be_true
       Invoice.count.should == 3
       Invoice.viewable_to_client.count.should == 0
 
-      FactoryGirl.create(:invoice, :status => :pending)
-      FactoryGirl.create(:invoice, :status => :failed_payment)
-      FactoryGirl.create(:paid_invoice)
-      FactoryGirl.create(:invoice, :status => :closed)
+      FactoryGirl.create(:invoice, :seed_business => sb, :status => :pending)
+      FactoryGirl.create(:invoice, :seed_business => sb, :status => :failed_payment)
+      FactoryGirl.create(:paid_invoice, :seed_business => sb)
+      FactoryGirl.create(:invoice, :seed_business => sb, :status => :closed)
       Invoice.count.should == 7
       Invoice.viewable_to_client.count.should == 4
     end
