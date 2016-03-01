@@ -60,14 +60,14 @@ describe StripePaymentGatewayProfile do
         @profile.card_prompt.should == "Visa ending in 4242"
       end
 
-      it "should be able to update credit card info", :current => true do
+      it "should be able to update credit card info" do
         @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.card_last_4.should == "4242"
         @profile.update_payment_info(:card_number => '4012888888881881', :expiration_month => '08', :expiration_year => '17', :cv_code => '111').should be_true
         @profile.card_last_4.should == "1881"
       end
 
-      it "should leave record alone on update failure.", :current => true do
+      it "should leave record alone on update failure." do
         @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         @profile.card_last_4.should == "4242"
         @profile.update_payment_info({}).should be_false
@@ -101,24 +101,24 @@ describe StripePaymentGatewayProfile do
       @invoice = FactoryGirl.create(:pending_invoice, :client => @profile.payment_gateway_profilable)
     end
 
-    it "should fail unless payment info confgured", :current => true do
+    it "should fail unless payment info confgured" do
       @invoice.charge!.should be_false
-      @profile.last_error.to_s.should == I18n.t('payment_gateway_profile.not_ready_for_payments')
+      @invoice.errors[:base].should == [I18n.t('payment_gateway_profile.not_ready_for_payments')]
     end
 
-    it "should fail on open invoice", :current => true do
+    it "should fail on open invoice" do
       @invoice.charge!.should be_false
-      @profile.last_error.to_s.should == I18n.t('payment_gateway_profile.not_ready_for_payments')
+      @invoice.errors[:base].should == [I18n.t('payment_gateway_profile.not_ready_for_payments')]
     end
 
-    it "should be able to pay normal invoice", :current => true do
+    it "should be able to pay normal invoice" do
       @profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
       @profile.transactions.count.should == 0
       @invoice.transactions.count.should == 0
       @invoice.paid?.should be_false
       @invoice.charge!.should be_true
       @profile.reload
-      @profile.last_error.should be_nil
+      @profile.last_error.should == ""
       @invoice.paid?.should be_true
       @invoice.transactions.count.should == 1
       @profile.transactions.count.should == 1
