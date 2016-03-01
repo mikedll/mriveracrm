@@ -1,5 +1,5 @@
 class Invoice < ActiveRecord::Base
-  belongs_to :client
+  belongs_to :client, :inverse_of => :invoices
 
   has_many :transactions
   has_many :outside_transactions

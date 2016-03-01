@@ -145,6 +145,12 @@ FactoryGirl.define do
     email { FactoryGirl.generate(:user_email) }
     first_name "Phil"
     last_name "Watson"
+
+    factory :client_without_payment_gateway_profile do
+      payment_gateway_profile nil
+      after(:build) { |r| r.stub(:require_payment_gateway_profile) }
+      after(:create) { |r| r.unstub(:require_payment_gateway_profile) }
+    end
   end
 
   factory :invitation do
@@ -176,7 +182,7 @@ FactoryGirl.define do
   end
 
   factory :stripe_payment_gateway_profile do
-    payment_gateway_profilable { FactoryGirl.create(:client) }
+    payment_gateway_profilable { FactoryGirl.create(:client_without_payment_gateway_profile) }
   end
 
   factory :stripe_payment_gateway_profile_for_us, :class => StripePaymentGatewayProfile do
@@ -206,7 +212,7 @@ FactoryGirl.define do
     client { FactoryGirl.create(:client, :business => seed_business) }
     date { Time.now }
     total { 2500.00 }
-    status { "open" }
+    status "open"
 
     after :build do |r|
       r.stub(:_enqueue_pdf_generation)
@@ -222,7 +228,7 @@ FactoryGirl.define do
     end
 
     factory :pending_invoice do
-      status { "pending" }
+      status "pending"
 
       factory :paid_invoice do
         after (:create) do |invoice, evaluator|

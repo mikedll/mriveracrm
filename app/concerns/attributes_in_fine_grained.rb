@@ -28,28 +28,16 @@ module AttributesInFineGrained
   # String value attribute.
   #
   class ValueAttribute < Attribute
-    def _retrieve
-      s = fgc.read(key)
-
-      #
-      # This should probably be moved to FineGrained.
-      # We assume we can set the key later if it does
-      # not exist.
-      #
-
-      if s != "Error: Key not found."
-        @cached = s
-      else
-        @cached = ""
-      end
-    end
-
     def set(s)
       if fgc.set(key, s) == "OK"
         @cached = s
       end
 
       self
+    end
+
+    def clear_cache!
+      @cached = nil
     end
 
     def as_json
@@ -75,6 +63,24 @@ module AttributesInFineGrained
 
     def !=(other)
       to_s != other
+    end
+
+    protected
+
+    def _retrieve
+      s = fgc.read(key)
+
+      #
+      # This should probably be moved to FineGrained.
+      # We assume we can set the key later if it does
+      # not exist.
+      #
+
+      if s != "Error: Key not found."
+        @cached = s
+      else
+        @cached = ""
+      end
     end
   end
 

@@ -130,21 +130,21 @@ describe StripePaymentGatewayProfile do
 
       invoice2 = FactoryGirl.create(:pending_invoice, :client => @profile.payment_gateway_profilable, :total => 1823.34)
       invoice2.transactions.count.should == 0
-      @profile.pay_invoice!(invoice2)
+      invoice2.charge!
       invoice2.transactions.count.should == 1
       invoice2.transactions.first.amount.should == 1823.34
     end
 
-    it "should capture error when transaction fails due to declined card", :current => true do
-      @profile.update_payment_info(:card_number => '4000000000000341', :expiration_month => '03', :expiration_year => '17', :cv_code => '111').should be_true
+    it "should capture error when transaction fails due to declined card" do
+      @profile.update_payment_info(SpecSupport.declined_card_stripe_cc_params).should be_true
       @profile.transactions.count.should == 0
       @invoice.paid?.should be_false
-      @invoice.charge! be_false
+      @invoice.charge!.should be_false
       @profile.transactions.count.should == 1
       @profile.transactions.first.should == @invoice.transactions.first
       @invoice.transactions.first.failed?.should be_true
       @invoice.failed_payment?.should be_true
-      @profile.last_error.should == 'Your card was declined.'
+      @invoice.last_error.should == 'Your card was declined.'
     end
   end
 
@@ -166,7 +166,7 @@ describe StripePaymentGatewayProfile do
       @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true
     end
 
-    it "should be able to update a plan and have it update usage subscription", :current2 => true do
+    it "should be able to update a plan and have it update usage subscription" do
       before = @profile.stripe_plan
       expected_plan = @us.calculated_plan_id
       @profile.ensure_plan_created!(@us.calculated_plan_id, @us.calculated_price).should be_true

@@ -4,8 +4,8 @@ class Client < ActiveRecord::Base
   has_many :users, :dependent => :destroy
   has_many :invitations, :dependent => :destroy
   has_many :notes, :dependent => :destroy
-  has_many :invoices
-  has_one :payment_gateway_profile, as: :payment_gateway_profilable, :dependent => :destroy
+  has_many :invoices, :inverse_of => :client
+  has_one :payment_gateway_profile, as: :payment_gateway_profilable, :inverse_of => :payment_gateway_profilable, :dependent => :destroy
 
 
   attr_accessible :company, :first_name, :last_name, :email, :website_url, :skype_id, :last_contact_at, :next_contact_at, :phone, :phone_2, :address_line_1, :address_line_2, :city, :state, :zip, :archived, :updated_at

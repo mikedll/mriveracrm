@@ -2,9 +2,15 @@
 require 'active_support/concern'
 
 #
-# Including class should have defined
-# destroy callbacks compatible with ActiveModel::Callback's
-# implementation of them.
+# Including class should support after_destroy.
+#
+# Upon inclusion, defines:
+#
+#   - last_error: String
+#   - persistent_requests_count: Counter
+#   - persistent_requests: Set
+#
+# They are AttributesInFineGrained attributes.
 #
 module PersistentRequestable
   extend ActiveSupport::Concern
@@ -23,6 +29,11 @@ module PersistentRequestable
     after_destroy :_clean_persistent_requestable_fine_grained_store
 
     self.requests_allowed = PersistentRequestable::DEFAULT_CONCURRENT_REQUESTS
+
+    def reload
+      last_error.clear_cache!
+      super
+    end
 
     def available_for_request?
       persisted? && persistent_requests_count < requests_allowed
