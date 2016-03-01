@@ -35,19 +35,13 @@ Spork.prefork do
     # that exercise remote resources and to which the aforementioned
     # filter applies.
     #
-    GENERIC_WEB_TESTS = [:generic_web_test]
     LIVE_WEB_TESTS = [:live_stripe, :live_authorizenet]
     LIVE_WEB_TESTS.each do |filter|
       config.filter_run_excluding filter => true
       # config.filter_run_including filter => true
     end
 
-    GENERIC_WEB_TESTS.each do |filter|
-      config.filter_run_excluding filter => true
-      # config.filter_run_including filter => true
-    end
-
-    might_be_running_live_test = !(LIVE_WEB_TESTS + GENERIC_WEB_TESTS).all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
+    might_be_running_live_test = !LIVE_WEB_TESTS.all? { |live_filter| config.filter_run_excluding.any? { |k,v| k == live_filter } }
 
     # config.backtrace_clean_patterns = [
     #   # /\/lib\d*\/ruby\//,
