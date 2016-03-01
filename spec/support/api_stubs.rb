@@ -72,7 +72,7 @@ class ApiStubs
     plan_db[plan_id] = Stripe::Plan.construct_from(plan_values['values'], plan_values['api_key'])
   end
 
-  def self.stripe_create_customer(customer_profile_id = DEFAULT_VENDOR_ID)
+  def self.stripe_create_customer(customer_profile_id)
     created_at = Time.now
 
     cus = YAML.load load('stripe_create_customer').result( binding )
@@ -101,24 +101,18 @@ class ApiStubs
 
     stripe_customer_add_cards(c)
 
+    c.stub(:delete) do
+      customer_db.delete(c.id)
+      c.deleted = true
+      c
+    end
+
     customer_db[customer_profile_id] = c
     c
   end
 
-  def self.stripe_retrieve_customer(customer_profile_id = DEFAULT_VENDOR_ID)
-    return customer_db[customer_profile_id] if customer_db[customer_profile_id]
-
-    created_at = Time.now
-
-    c = load_stripe_klass_with_binding('stripe_retrieve_customer', Stripe::Customer, binding)
-    slo = load_stripe_klass_with_binding('stripe_customer_retrieve_subscriptions', Stripe::ListObject, binding)
-    c.subscriptions = slo
-
-    stripe_customer_add_cards(c)
-
-    # not created...assume created awhile ago.
-    customer_db[customer_profile_id] = c
-    c
+  def self.stripe_retrieve_customer(customer_profile_id)
+    customer_db[customer_profile_id]
   end
 
   def self.stripe_retrieve_customer_with_card(customer_profile_id = DEFAULT_VENDOR_ID)

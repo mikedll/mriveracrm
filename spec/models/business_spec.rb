@@ -78,7 +78,7 @@ describe Business do
 
       @client.payment_gateway_profile.reload
       @client.payment_gateway_profile.card_last_4.blank?.should be_false
-      Timecop.freeze(reftime + 29.days) do
+      Timecop.freeze(reftime + (Client::INACTIVE_THRESHOLD - 1.day)) do
         Business.expire_client_information_when_dormant!
 
         @client.payment_gateway_profile.reload
@@ -106,24 +106,24 @@ describe Business do
         # Will stay due to recently updated card information
         c3 = FactoryGirl.create(:client_user).client
 
-        Timecop.freeze(reftime - 45.days) do
+        Timecop.freeze(reftime - (Client::INACTIVE_THRESHOLD + 15.days)) do
           c.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         end
 
-        Timecop.freeze(reftime - 45.days) do
+        Timecop.freeze(reftime - (Client::INACTIVE_THRESHOLD + 15.days)) do
           c2.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         end
 
-        Timecop.freeze(reftime - 15.days) do
+        Timecop.freeze(reftime - (Client::INACTIVE_THRESHOLD - 15.days)) do
           c3.payment_gateway_profile.update_payment_info(SpecSupport.valid_stripe_cc_params).should be_true
         end
 
-        Timecop.freeze(reftime - 15.days) do
+        Timecop.freeze(reftime - (Client::INACTIVE_THRESHOLD - 15.days)) do
           i1 = FactoryGirl.create(:pending_invoice, :client => c)
           FactoryGirl.create(:paid_stripe_transaction, :invoice => i1)
         end
 
-        Timecop.freeze(reftime - 45.days) do
+        Timecop.freeze(reftime - Client::INACTIVE_THRESHOLD) do
           i2 = FactoryGirl.create(:pending_invoice, :client => c2)
           FactoryGirl.create(:paid_stripe_transaction, :invoice => i2)
         end

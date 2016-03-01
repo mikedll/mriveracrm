@@ -25,12 +25,12 @@ describe Client do
       @user.last_sign_in_at = Time.now - 5.minutes
       @user.save!
 
-      Timecop.freeze(Time.now + 30.days) do
+      Timecop.freeze(Time.now + Client::INACTIVE_THRESHOLD) do
         clients = Client.without_active_users
         clients.first.should == @user.client
       end
 
-      Timecop.freeze(Time.now + 29.days) do
+      Timecop.freeze(Time.now + (Client::INACTIVE_THRESHOLD - 1.day)) do
         clients = Client.without_active_users
         clients.first.should be_nil
       end
