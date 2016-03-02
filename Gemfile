@@ -2,7 +2,7 @@ source 'http://rubygems.org'
 
 ruby '2.0.0'
 
-gem 'rails', '~> 4.0'
+gem 'rails', '~> 4.0', '< 4.1'
 gem 'activesupport', :group => [:default, :scheduler]
 
 
@@ -12,7 +12,7 @@ gem "pg", '~> 0.11'
 gem 'activerecord-postgresql-adapter'
 gem "haml"
 gem "haml-rails"
-gem "aws-s3", '>= 0.6.3'
+# gem "aws-s3", '>= 0.6.3'
 gem "simple_form"
 gem 'state_machine'
 gem 'devise'
@@ -21,7 +21,7 @@ gem "omniauth-google-oauth2"
 gem 'make_resourceful'
 gem "activemerchant", '~> 1.31'
 gem 'carrierwave'
-# gem "fog"
+gem "fog-aws"
 gem 'rmagick'
 gem 'jquery-rails'
 gem 'stripe'
