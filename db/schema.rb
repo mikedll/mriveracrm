@@ -11,13 +11,13 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160216034958) do
+ActiveRecord::Schema.define(:version => 20160302090059) do
 
   create_table "businesses", :force => true do |t|
     t.string   "name",                            :default => "",    :null => false
     t.string   "host",                            :default => "",    :null => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                                         :null => false
+    t.datetime "updated_at",                                         :null => false
     t.string   "stripe_secret_key",               :default => "",    :null => false
     t.string   "stripe_publishable_key",          :default => "",    :null => false
     t.string   "google_oauth2_client_id",         :default => "",    :null => false
@@ -45,8 +45,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.string   "first_name",      :default => "",    :null => false
     t.string   "last_name",       :default => "",    :null => false
     t.string   "email",           :default => "",    :null => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                         :null => false
+    t.datetime "updated_at",                         :null => false
     t.string   "website_url",     :default => "",    :null => false
     t.string   "skype_id",        :default => "",    :null => false
     t.datetime "last_contact_at"
@@ -74,8 +74,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.string   "oauth2_access_token"
     t.datetime "oauth2_access_token_expires_at"
     t.string   "oauth2_refresh_token"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                                     :null => false
+    t.datetime "updated_at",                                     :null => false
   end
 
   add_index "credentials", ["business_id", "email"], :name => "index_credentials_on_business_id_and_email", :unique => true
@@ -85,8 +85,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.integer  "client_id"
     t.integer  "business_id"
     t.integer  "user_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
   end
 
   create_table "employees", :force => true do |t|
@@ -94,8 +94,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.string   "first_name",  :default => "", :null => false
     t.string   "last_name",   :default => "", :null => false
     t.string   "email",       :default => "", :null => false
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
     t.string   "role",        :default => "", :null => false
   end
 
@@ -132,8 +132,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
   create_table "images", :force => true do |t|
     t.string   "data"
     t.integer  "project_id"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",             :null => false
+    t.datetime "updated_at",             :null => false
     t.integer  "business_id"
     t.string   "data_original_filename"
     t.string   "data_unique_id"
@@ -145,15 +145,15 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.integer  "client_id"
     t.string   "email",       :default => "", :null => false
     t.string   "status"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                  :null => false
+    t.datetime "updated_at",                  :null => false
     t.string   "handle",      :default => ""
   end
 
   create_table "invoices", :force => true do |t|
     t.decimal  "total"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
     t.text     "description"
     t.string   "status"
     t.datetime "date"
@@ -213,8 +213,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.integer  "client_id"
     t.datetime "recorded_at"
     t.text     "body"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
   end
 
   create_table "notifications", :force => true do |t|
@@ -247,8 +247,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.string   "card_profile_id"
     t.string   "card_last_4"
     t.string   "card_brand"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                                      :null => false
+    t.datetime "updated_at",                                      :null => false
     t.string   "payment_gateway_profilable_type", :default => "", :null => false
     t.datetime "stripe_trial_ends_at"
     t.datetime "stripe_current_period_ends_at"
@@ -283,8 +283,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.string   "link"
     t.text     "description"
     t.string   "tech"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",  :null => false
+    t.datetime "updated_at",  :null => false
     t.integer  "business_id"
   end
 
@@ -305,8 +305,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.text     "error"
     t.integer  "authorizenet_gateway_response_code"
     t.integer  "authorizenet_gateway_response_reason_code"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                                                                                :null => false
+    t.datetime "updated_at",                                                                                :null => false
     t.string   "type",                                                                                      :null => false
     t.string   "outside_id"
     t.string   "outside_vendor"
@@ -329,8 +329,8 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at"
-    t.datetime "updated_at"
+    t.datetime "created_at",                                :null => false
+    t.datetime "updated_at",                                :null => false
     t.string   "timezone"
     t.integer  "employee_id"
     t.integer  "client_id"
@@ -347,5 +347,14 @@ ActiveRecord::Schema.define(:version => 20160216034958) do
   add_index "users", ["business_id", "confirmation_token"], :name => "index_users_on_business_id_and_confirmation_token", :unique => true
   add_index "users", ["business_id", "email"], :name => "index_users_on_business_id_and_email", :unique => true
   add_index "users", ["business_id", "reset_password_token"], :name => "index_users_on_business_id_and_reset_password_token", :unique => true
+
+  create_table "visit_logs", :force => true do |t|
+    t.string   "path",       :default => "", :null => false
+    t.string   "user_agent", :default => "", :null => false
+    t.string   "ip",         :default => "", :null => false
+    t.string   "referer",    :default => "", :null => false
+    t.datetime "created_at",                 :null => false
+    t.datetime "updated_at",                 :null => false
+  end
 
 end
