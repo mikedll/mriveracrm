@@ -2,81 +2,29 @@
 # Machines
 
 A typical machine, dev or server, should be setup with Ubuntu.
-A user should be created and have sudo access for administrative
-tasks, although that is not required. The applications
-are expected to be served from that user's home directory.
 
-# Directory Structure
+See cknife's `doc/ubuntu_web_machine.md`.
 
-The following directory structure is expected:
+# SSL DH Group
 
-    ~/backups
-    ~/packages
+    > openssl dhparam -out dhparams.pem 2048 
+    > sudo mv dhparams.pem /etc/ssl/private/
 
-These aliases may be setup in `.bash_aliases`:
+    # iptables
+    sudo apt-get install iptables-persistent
 
-    alias cdapp="cd $HOME/mikedllcrm/current && rvm use 2.0.0@mikedllcrm"
-
-This may go in `~/.gemrc`:
-
-    gem: --no-document
-
-Pick a package directory like the packages directory described
-above for doing package building.
-
-# System Dependencies
-
-    # nginx
-    sudo apt-get install nginx
+# Third Party Tool Dependencies
 
     # xhtml2pdf
     sudo apt-get install python-dev python-pip
     sudo pip install Pillow xhtml2pdf
 
-    # iptables
-    sudo apt-get install iptables-persistent
-    
-See [this
-page](https://bugs.launchpad.net/ubuntu/+source/iptables-persistent/+bug/1002078)
-for notes on working around the `iptables-persistent` package
-installation problems.
-
 You probably need to install a version of PostgreSQL, too.
 
-# FineGrained
-
-FineGrained is as of this writing built into this
-product and maintains its disk file in `db/`.
-
-# App setup
-
-Use RVM to install the rvm version as needed.
-Create the remote rvm gemset if you must.
-
-    rvm install rubyversion
-    rvm use rubyversion
-    rvm gemset use gemsetname --create
-
-Install app environment.
-
-    > cap envname deploy:setup
-
-Install configs.
-
-    > cap envname deploy:install_configs
-
-Go to the machine and edit the configs.
-
-# SSH Setup
-
-We disable ssh logins except for public key logins. Ensure
-public key logins work before you edit `/etc/ssh/sshd_config`.
-
-    PubkeyAuthentication yes
-    ChallengeResponseAuthentication no
-    PasswordAuthentication no
-
 # Production config
+
+    # nginx
+    sudo apt-get install nginx
 
 Nginx is configured at `/etc/nginx/nginx.conf`:
 
@@ -172,14 +120,17 @@ have intermediate certificates, append those after your
 certificates. They make a difference in efficiency computation for the
 SSL handshake and certificate authentication negotiation.
 
-# SSL DH Group
+# FineGrained
 
-    > openssl dhparam -out dhparams.pem 2048 
-    > sudo mv dhparams.pem /etc/ssl/private/
+FineGrained is as of this writing built into this
+product and maintains its disk file in `db/`.
 
-# Port Blocking
+Block its port from outside access.
 
-Restrict access to FineGrained's port:
+See [this
+page](https://bugs.launchpad.net/ubuntu/+source/iptables-persistent/+bug/1002078)
+for notes on working around the `iptables-persistent` package
+installation problems.
 
     sudo iptables -A INPUT -p tcp -s localhost --dport 7803 -j ACCEPT
     sudo iptables -A INPUT -p tcp --dport 7083 -j DROP
@@ -188,7 +139,41 @@ See `iptables-save` documentation to persist these changes. They
 should appear in `/etc/iptables/rules.v4` after properly using that
 command.
 
-# Backups
+# RVM
+
+    \curl -sSL https://get.rvm.io | bash -s stable 
+    
+    rvm install 2.0.0
+
+These aliases may be setup in `.bash_aliases`:
+
+    alias cdapp="cd $HOME/alexan/current && rvm use 2.0.0@alexan"
+
+This may go in `~/.gemrc`:
+
+    gem: --no-document
+
+
+# App setup
+
+Use RVM to install the rvm version as needed.
+Create the remote rvm gemset if you must.
+
+    rvm install rubyversion
+    rvm use rubyversion
+    rvm gemset use gemsetname --create
+
+Install app environment.
+
+    > cap envname deploy:setup
+
+Install configs.
+
+    > cap envname deploy:install_configs
+
+Go to the machine and edit the configs.
+
+# Configure Backups
 
 Schedule `config/deploy/cron.sh` on the serer.
 
