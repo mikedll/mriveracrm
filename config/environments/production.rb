@@ -21,6 +21,8 @@ MikedllCrm::Application.configure do
   config.assets.css_compressor = :yui
   config.assets.compress = true
 
+  config.eager_load = true
+
   HOST = 'www.mriveracrm.com'
 
 end

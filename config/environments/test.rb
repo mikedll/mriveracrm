@@ -31,6 +31,8 @@ MikedllCrm::Application.configure do
 
   config.active_support.deprecation = :stderr
 
+  config.eager_load = false
+
   HOST = 'test.mikedll.com'
 
 end
